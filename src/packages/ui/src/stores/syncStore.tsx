@@ -52,6 +52,7 @@ import {
   SyncTimeEntryRxDBDTO,
   timeEntriesSyncSchema,
 } from '@/local-db/schemas/time-entries-sync-schema'
+import { createTimeEntryStore } from '@/stores/timeEntryStore'
 
 // --- TYPES ---
 export type ReplicationCheckpoint = { updatedAt: string; id: string }
@@ -602,8 +603,8 @@ export const createSyncStore = (
         const db = await createRxDatabase<AppCollections>({
           name: `db-${workspaceId}`,
           storage: createAppStorage(),
-          ignoreDuplicate: true,
-          multiInstance: false,
+          // ignoreDuplicate: true,
+          multiInstance: true,
           eventReduce: true,
           allowSlowCount: true,
         })
@@ -647,74 +648,95 @@ export const SyncProvider: React.FC<{ children: ReactNode }> = ({
     Map<ConnectionInstanceId, { dataSourceId: string }>
   >(new Map())
 
-  // Workspace muda → recria o banco do zero
+  // Workspace muda → recria o banco do zero e recupera entradas ativas
   useEffect(() => {
-    const nextWorkspaceId = workspace?.id ?? null
+    const handleWorkspaceChange = async () => {
+      const nextWorkspaceId = workspace?.id ?? null
 
-    if (currentWorkspaceId.current === nextWorkspaceId) return
+      if (currentWorkspaceId.current === nextWorkspaceId) return
 
-    if (activeStoreRef.current) {
-      activeStoreRef.current.getState().destroy()
-      setActiveStore(null)
-      startedConnections.current.clear()
+      if (activeStoreRef.current) {
+        await activeStoreRef.current.getState().destroy()
+        setActiveStore(null)
+        startedConnections.current.clear()
+      }
+
+      currentWorkspaceId.current = nextWorkspaceId
+
+      if (!nextWorkspaceId) return
+
+      try {
+        const newStore = createSyncStore(nextWorkspaceId, client, isDevelopment)
+        await newStore.getState().init()
+        setActiveStore(newStore)
+
+        // 🚀 RECUPERAÇÃO APÓS INICIALIZAÇÃO
+        const db = newStore.getState().db
+        if (db) {
+          // Instancia a store local do TimeEntry usando a factory limpa
+          const tempTimeEntryStore = createTimeEntryStore(client)
+          await tempTimeEntryStore.getState().recoverRunningEntry(db)
+        }
+      } catch (err) {
+        console.error('[SYNC] Erro ao inicializar store:', err)
+      }
     }
 
-    currentWorkspaceId.current = nextWorkspaceId
-
-    if (!nextWorkspaceId) return
-
-    const newStore = createSyncStore(nextWorkspaceId, client, isDevelopment)
-    newStore
-      .getState()
-      .init()
-      .then(() => setActiveStore(newStore))
-      .catch((err) => console.error('[SYNC] Erro ao inicializar store:', err))
-  }, [workspace?.id])
+    handleWorkspaceChange()
+  }, [workspace?.id, client, isDevelopment])
 
   // Connections mudam → liga/desliga motores individualmente
   useEffect(() => {
-    const store = activeStoreRef.current
-    if (!store) return
+    const handleConnectionsChange = async () => {
+      const store = activeStoreRef.current
+      if (!store) return
 
-    const { isInitialized, connectDataSource, disconnectDataSource } =
-      store.getState()
-    if (!isInitialized) return
+      const { isInitialized, connectDataSource, disconnectDataSource } =
+        store.getState()
+      if (!isInitialized) return
 
-    connections.forEach((conn) => {
-      const connId = conn.connectionId
-      const isAlreadyStarted = startedConnections.current.has(connId)
+      for (const conn of connections) {
+        const connId = conn.connectionId
+        const isAlreadyStarted = startedConnections.current.has(connId)
 
-      if (conn.status === 'connected' && !isAlreadyStarted) {
-        if (!conn.dataSourceId) return
+        if (conn.status === 'connected' && !isAlreadyStarted) {
+          if (!conn.dataSourceId) continue
 
-        startedConnections.current.set(connId, {
-          dataSourceId: conn.dataSourceId,
-        })
+          startedConnections.current.set(connId, {
+            dataSourceId: conn.dataSourceId,
+          })
 
-        console.log('[SYNC] STARTING', connId)
+          console.log('[SYNC] STARTING', connId)
 
-        connectDataSource({
-          connectionInstanceId: connId,
-          dataSourceId: conn.dataSourceId,
-        }).catch((err) =>
-          console.error(`[SYNC] Erro ao conectar ${connId}:`, err),
-        )
+          try {
+            await connectDataSource({
+              connectionInstanceId: connId,
+              dataSourceId: conn.dataSourceId,
+            })
+          } catch (err) {
+            console.error(`[SYNC] Erro ao conectar ${connId}:`, err)
+          }
+        }
       }
-    })
 
-    for (const [connId] of startedConnections.current.entries()) {
-      const currentConn = connections.find((c) => c.connectionId === connId)
+      for (const [connId] of startedConnections.current.entries()) {
+        const currentConn = connections.find((c) => c.connectionId === connId)
 
-      if (!currentConn || currentConn.status !== 'connected') {
-        startedConnections.current.delete(connId)
+        if (!currentConn || currentConn.status !== 'connected') {
+          startedConnections.current.delete(connId)
 
-        console.log('[SYNC] STOPPING', connId)
+          console.log('[SYNC] STOPPING', connId)
 
-        disconnectDataSource(connId).catch((err) =>
-          console.error(`[SYNC] Erro ao desconectar ${connId}:`, err),
-        )
+          try {
+            await disconnectDataSource(connId)
+          } catch (err) {
+            console.error(`[SYNC] Erro ao desconectar ${connId}:`, err)
+          }
+        }
       }
     }
+
+    handleConnectionsChange()
   }, [connections, activeStore])
 
   if (!activeStore) return <>{children}</>

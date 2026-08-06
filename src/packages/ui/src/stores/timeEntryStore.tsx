@@ -1,15 +1,26 @@
+// stores/timeEntryStore.tsx
 'use client'
 
-import { differenceInSeconds, parseISO } from 'date-fns'
-import { createContext, ReactNode, useContext, useRef } from 'react'
+import { IApplicationAPI } from '@metric-org/sdk'
+import { differenceInSeconds, parseISO, subSeconds } from 'date-fns'
+import { createContext, ReactNode, useContext, useEffect, useRef } from 'react'
 import { createStore, StoreApi, useStore } from 'zustand'
 
+import { useClient } from '@/hooks'
 import { SyncTimeEntryRxDBDTO } from '@/local-db/schemas/time-entries-sync-schema'
-import { AppDatabase } from '@/stores/syncStore'
+import { AppDatabase, useSyncStore } from '@/stores/syncStore'
 
-/* ============================= */
-/* Types */
-/* ============================= */
+export interface JournalEntry {
+  event: 'started' | 'adjusted' | 'paused' | 'resumed' | 'stopped'
+  at: string
+  secondsAtEvent: number
+  note?: string
+}
+
+export interface TimerConfig {
+  mode: 'countup' | 'countdown'
+  manualInitialSeconds?: number
+}
 
 export interface CreateTimeEntryData {
   taskId: string
@@ -19,6 +30,8 @@ export interface CreateTimeEntryData {
   connectionInstanceId: string
   comments?: string
   userId?: string
+  mode?: 'countup' | 'countdown'
+  manualInitialSeconds?: number
 }
 
 export interface TimeEntryState {
@@ -28,24 +41,22 @@ export interface TimeEntryState {
 export interface TimeEntryActions {
   setActive: (entry: SyncTimeEntryRxDBDTO | null) => void
   clear: () => void
-
   createNewTimeEntry: (
     db: AppDatabase,
     data: CreateTimeEntryData,
   ) => Promise<void>
-
   pauseCurrentTimeEntry: (db: AppDatabase) => Promise<void>
   playCurrentTimeEntry: (db: AppDatabase) => Promise<void>
   stopCurrentTimeEntry: (db: AppDatabase) => Promise<void>
+  recoverRunningEntry: (db: AppDatabase) => Promise<void>
 }
 
 export type TimeEntryStore = TimeEntryState & TimeEntryActions
 
-/* ============================= */
-/* Store Factory */
-/* ============================= */
-
-export const createTimeEntryStore = (): StoreApi<TimeEntryStore> => {
+// Criação da store focada APENAS em transições de estado, sem interagir com ticks por segundo.
+export const createTimeEntryStore = (
+  client: IApplicationAPI,
+): StoreApi<TimeEntryStore> => {
   return createStore<TimeEntryStore>((set, get) => ({
     active: null,
 
@@ -54,14 +65,27 @@ export const createTimeEntryStore = (): StoreApi<TimeEntryStore> => {
     clear: () => set({ active: null }),
 
     async createNewTimeEntry(db, data) {
-      const { active } = get()
+      const { active, stopCurrentTimeEntry } = get()
 
       if (active) {
-        await get().stopCurrentTimeEntry(db)
+        await stopCurrentTimeEntry(db)
       }
 
       const id = crypto.randomUUID()
-      const now = new Date().toISOString()
+      const now = new Date()
+
+      const initialSeconds = data.manualInitialSeconds ?? 0
+      const startDate = subSeconds(now, initialSeconds).toISOString()
+      const eventType = initialSeconds > 0 ? 'adjusted' : 'started'
+
+      const initialJournal: JournalEntry = {
+        event: eventType,
+        at: now.toISOString(),
+        secondsAtEvent: initialSeconds,
+        ...(initialSeconds > 0 && {
+          note: `Ajuste manual para ${initialSeconds} segundos`,
+        }),
+      }
 
       const newEntry: SyncTimeEntryRxDBDTO = {
         _id: `${data.dataSourceId}::local-${id}`,
@@ -72,45 +96,64 @@ export const createTimeEntryStore = (): StoreApi<TimeEntryStore> => {
         task: { id: data.taskId },
         activity: { id: data.activityId },
         user: { id: data.userId ?? 'local-user' },
-        startDate: now,
+        startDate,
         timeSpent: 0,
         timeStatus: 'running',
         type: data.type,
         comments: data.comments,
-        createdAt: now,
-        updatedAt: now,
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+        journal: [initialJournal],
+        timerConfig: {
+          mode: data.mode ?? 'countup',
+          manualInitialSeconds: data.manualInitialSeconds,
+        },
       }
 
       await db.timeEntries.insert(newEntry)
+
+      // Comunica o backend via IPC para iniciar o processamento pesado do timer[cite: 7]
+      client.timer.start({
+        initialSeconds,
+        mode: newEntry.timerConfig?.mode ?? 'countup',
+      })
 
       set({ active: newEntry })
     },
 
     async pauseCurrentTimeEntry(db) {
       const { active } = get()
-      if (!active) return
+      if (!active || !active.startDate) return
 
       const doc = await db.timeEntries.findOne(active._id).exec()
       if (!doc) return
 
-      if (!active.startDate) return
+      const now = new Date()
+      const currentSeconds = differenceInSeconds(
+        now,
+        parseISO(active.startDate),
+      )
 
-      const start = parseISO(active.startDate)
-      const secondsSinceLastPlay = differenceInSeconds(new Date(), start)
-
-      const updatedTimeSpent = (active.timeSpent ?? 0) + secondsSinceLastPlay
+      const updatedJournal = [...(active.journal || [])]
+      updatedJournal.push({
+        event: 'paused',
+        at: now.toISOString(),
+        secondsAtEvent: currentSeconds,
+      })
 
       await doc.patch({
         timeStatus: 'paused',
-        timeSpent: updatedTimeSpent,
-        updatedAt: new Date().toISOString(),
+        updatedAt: now.toISOString(),
+        journal: updatedJournal,
       })
+
+      client.timer.pause()
 
       set({
         active: {
           ...active,
           timeStatus: 'paused',
-          timeSpent: updatedTimeSpent,
+          journal: updatedJournal,
         },
       })
     },
@@ -122,61 +165,122 @@ export const createTimeEntryStore = (): StoreApi<TimeEntryStore> => {
       const doc = await db.timeEntries.findOne(active._id).exec()
       if (!doc) return
 
-      const now = new Date().toISOString()
+      const now = new Date()
+      const lastPauseEvent = active.journal
+        ?.slice()
+        .reverse()
+        .find((j: JournalEntry) => j.event === 'paused')
+      const secondsAtLastPause = lastPauseEvent?.secondsAtEvent ?? 0
+
+      const newStartDate = subSeconds(now, secondsAtLastPause).toISOString()
+      const updatedJournal = [...(active.journal || [])]
+
+      updatedJournal.push({
+        event: 'resumed',
+        at: now.toISOString(),
+        secondsAtEvent: secondsAtLastPause,
+      })
 
       await doc.patch({
         timeStatus: 'running',
-        startDate: now,
-        updatedAt: now,
+        startDate: newStartDate,
+        updatedAt: now.toISOString(),
+        journal: updatedJournal,
+      })
+
+      client.timer.resume({
+        initialSeconds: secondsAtLastPause,
       })
 
       set({
         active: {
           ...active,
           timeStatus: 'running',
-          startDate: now,
+          startDate: newStartDate,
+          journal: updatedJournal,
         },
       })
     },
 
     async stopCurrentTimeEntry(db) {
       const { active } = get()
-      if (!active) return
+      if (!active || !active.startDate) return
 
       const doc = await db.timeEntries.findOne(active._id).exec()
       if (!doc) return
 
-      let finalSeconds = active.timeSpent ?? 0
+      const now = new Date()
+      const currentSeconds = differenceInSeconds(
+        now,
+        parseISO(active.startDate),
+      )
 
-      if (active.timeStatus === 'running' && active.startDate) {
-        const start = parseISO(active.startDate)
-        finalSeconds += differenceInSeconds(new Date(), start)
-      }
+      const updatedJournal = [...(active.journal || [])]
+      updatedJournal.push({
+        event: 'stopped',
+        at: now.toISOString(),
+        secondsAtEvent: currentSeconds,
+      })
+
+      const finalTimeSpentHours = Number((currentSeconds / 3600).toFixed(4))
 
       await doc.patch({
         timeStatus: 'finished',
-        endDate: new Date().toISOString(),
-        timeSpent: Number((finalSeconds / 3600).toFixed(4)),
-        updatedAt: new Date().toISOString(),
+        endDate: now.toISOString(),
+        timeSpent: finalTimeSpentHours,
+        updatedAt: now.toISOString(),
+        journal: updatedJournal,
       })
 
+      client.timer.stop()
+
       set({ active: null })
+    },
+
+    async recoverRunningEntry(db) {
+      const runningDoc = await db.timeEntries
+        .findOne({
+          selector: { timeStatus: 'running' },
+        })
+        .exec()
+
+      if (!runningDoc) return
+
+      const activeEntry = runningDoc.toMutableJSON()
+      const start = parseISO(activeEntry.startDate!)
+      const currentElapsed = differenceInSeconds(new Date(), start)
+
+      const mode = activeEntry.timerConfig?.mode ?? 'countup'
+
+      client.timer.start({
+        initialSeconds: currentElapsed,
+        mode,
+      })
+
+      set({ active: activeEntry })
     },
   }))
 }
 
-/* ============================= */
-/* Context + Provider */
-/* ============================= */
-
+// ---------------------------------------------------------
+// Contexto Absurdamente Simplificado
+// ---------------------------------------------------------
 const TimeEntryContext = createContext<StoreApi<TimeEntryStore> | null>(null)
 
 export function TimeEntryProvider({ children }: { children: ReactNode }) {
+  const client: IApplicationAPI = useClient()
+  const db = useSyncStore((s) => s.db)
   const storeRef = useRef<StoreApi<TimeEntryStore> | null>(null)
 
   if (!storeRef.current) {
-    storeRef.current = createTimeEntryStore()
+    storeRef.current = createTimeEntryStore(client)
   }
+
+  useEffect(() => {
+    if (db && storeRef.current) {
+      storeRef.current.getState().recoverRunningEntry(db)
+    }
+  }, [db])
 
   return (
     <TimeEntryContext.Provider value={storeRef.current}>
@@ -185,18 +289,15 @@ export function TimeEntryProvider({ children }: { children: ReactNode }) {
   )
 }
 
-/* ============================= */
-/* Hook */
-/* ============================= */
-
+// ---------------------------------------------------------
+// Hook para consumo seguro e performático
+// ---------------------------------------------------------
 export function useTimeEntryStore<T>(
   selector: (state: TimeEntryStore) => T,
 ): T {
   const store = useContext(TimeEntryContext)
-
   if (!store) {
     throw new Error('useTimeEntryStore must be used inside TimeEntryProvider')
   }
-
   return useStore(store, selector)
 }

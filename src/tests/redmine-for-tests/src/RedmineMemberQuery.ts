@@ -80,10 +80,9 @@ export class RedmineMemberQuery extends RedmineBase implements IMemberQuery {
       firstname: redmineUser.firstname,
       lastname: redmineUser.lastname,
       admin: redmineUser.admin,
-      created_on: redmineUser.created_on,
-      last_login_on: redmineUser.last_login_on,
-      api_key: redmineUser.api_key,
-      custom_fields: redmineUser.custom_fields,
+      createdOn: redmineUser.created_on,
+      lastLoginOn: redmineUser.last_login_on,
+      customFields: redmineUser.custom_fields,
     }
 
     return member

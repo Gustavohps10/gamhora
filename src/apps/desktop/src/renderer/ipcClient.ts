@@ -1,6 +1,7 @@
 import { IApplicationAPI } from '@metric-org/application'
 
 const ipcClient: IApplicationAPI = {
+  timer: window.api.timer,
   services: window.api.services,
   modules: window.api.modules,
   integrations: window.api.integrations,

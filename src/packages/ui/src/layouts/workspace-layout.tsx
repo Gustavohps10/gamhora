@@ -11,6 +11,7 @@ import {
 } from '@/components'
 import { AppSidebarDefaultHeader } from '@/components/app-sidebar/app-sidebar-default-header'
 import { Footer } from '@/components/footer'
+import { UltimateTimeTracker } from '@/components/time-bar/ultimate-entry-bar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { DataSourceConnectionsProvider } from '@/contexts/DataSourceConnectionsContext'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
@@ -51,6 +52,10 @@ export function WorkspaceLayout() {
 
                     <Footer />
                   </ScrollArea>
+                </div>
+
+                <div className="bg-background shrink-0 border-t px-2 py-1.5">
+                  <UltimateTimeTracker />
                 </div>
               </main>
             </>

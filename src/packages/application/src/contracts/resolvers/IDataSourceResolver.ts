@@ -1,6 +1,6 @@
-import type { FieldGroup } from '@/contracts/api/IApplicationAPI'
 import { MemberDTO } from '@/dtos'
 
+import type { FieldGroup } from '../../IApplicationAPI'
 import { IDataSourceAdapter } from './IDataSourceAdapter'
 
 export interface DataSourceContext {

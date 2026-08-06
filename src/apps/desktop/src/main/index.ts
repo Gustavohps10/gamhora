@@ -23,6 +23,7 @@ import { join } from 'path'
 import { pathToFileURL } from 'url'
 
 import { ElectronJobEventEmitter } from '@/main/adapters/ElectronJobEventEmitter'
+import { TimerRuntime } from '@/main/adapters/TimerRuntime'
 import {
   ConnectionHandler,
   SessionHandler,
@@ -191,6 +192,9 @@ function handleProtocol() {
 }
 
 app.whenReady().then(async () => {
+  const timerRuntime = new TimerRuntime()
+  timerRuntime.init()
+
   handleProtocol()
   const userDataPath = app.getPath('userData')
   const credentialsStorage = new KeytarTokenStorage()
@@ -236,7 +240,20 @@ app.whenReady().then(async () => {
 
   electronApp.setAppUserModelId('com.electron')
 
-  app.on('browser-window-created', (_, w) => optimizer.watchWindowShortcuts(w))
+  app.on('browser-window-created', (_, browserWindow) => {
+    optimizer.watchWindowShortcuts(browserWindow)
+
+    browserWindow.webContents.on('before-input-event', (_, input) => {
+      const f12 = input.key === 'F12'
+
+      const ctrlShiftI =
+        input.control && input.shift && input.key.toLowerCase() === 'i'
+
+      if (input.type === 'keyDown' && (f12 || ctrlShiftI)) {
+        browserWindow.webContents.toggleDevTools()
+      }
+    })
+  })
 
   if (is.dev) {
     try {
