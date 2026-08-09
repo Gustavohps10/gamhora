@@ -1,6 +1,6 @@
 import { IDataSourceResolver, IServiceProvider } from '@metric-org/application'
 import { IRequest } from '@metric-org/shared/transport'
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, screen } from 'electron'
 
 import { IpcHandler } from '@/main/adapters/IpcHandler'
 import {
@@ -142,4 +142,76 @@ export function openIpcRoutes(serviceProvider: IServiceProvider): void {
 
     return Promise.resolve({ success: true })
   })
+
+  IpcHandler.register('SYSTEM_GET_DISPLAYS', () => {
+    const primaryDisplay = screen.getPrimaryDisplay()
+
+    const displays = screen.getAllDisplays().map((display, index) => ({
+      id: display.id,
+      label: `Monitor ${index + 1}${
+        display.id === primaryDisplay.id ? ' (Principal)' : ''
+      }`,
+      isPrimary: display.id === primaryDisplay.id,
+    }))
+
+    return Promise.resolve(displays)
+  })
+
+  IpcHandler.register(
+    'SYSTEM_MOVE_TO_DISPLAY',
+    (event, req: IRequest<{ displayId: number; windowType?: string }>) => {
+      const displayId = req?.body?.displayId
+      const targetWindowType = req?.body?.windowType
+
+      if (!displayId) return Promise.resolve({ success: false })
+
+      let targetWindow: BrowserWindow | null = null
+
+      if (targetWindowType) {
+        targetWindow =
+          BrowserWindow.getAllWindows().find((win) => {
+            if (win.isDestroyed()) return false
+            const customWin = win as unknown as { windowType?: string }
+            return customWin.windowType === targetWindowType
+          }) ?? null
+      } else {
+        targetWindow = BrowserWindow.fromWebContents(event.sender)
+      }
+
+      if (!targetWindow || targetWindow.isDestroyed()) {
+        return Promise.resolve({ success: false })
+      }
+
+      const targetDisplay = screen
+        .getAllDisplays()
+        .find((d) => d.id === displayId)
+
+      if (targetDisplay) {
+        const { x, y, width, height } = targetDisplay.bounds
+
+        // Reposiciona a janela transparente
+        targetWindow.setBounds({ x, y, width, height })
+
+        // --- CORREÇÃO AQUI ---
+        // O SO reseta o click-through ao mudar de monitor, forçamos a re-aplicação.
+        const winType =
+          targetWindowType ||
+          (targetWindow as unknown as { windowType?: string }).windowType
+        if (winType === 'widget') {
+          targetWindow.setIgnoreMouseEvents(true, { forward: true })
+        }
+        // ---------------------
+
+        // Notifica o Renderer
+        targetWindow.webContents.send('window:bounds-changed', {
+          x,
+          y,
+          width,
+          height,
+        })
+      }
+
+      return Promise.resolve({ success: true })
+    },
+  )
 }

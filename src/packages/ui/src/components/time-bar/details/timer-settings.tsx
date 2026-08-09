@@ -1,6 +1,6 @@
-// components/time-bar/details/timer-settings.tsx
 'use client'
 
+import { DisplayInfo } from '@metric-org/application'
 import {
   ChevronDown,
   ChevronLeft,
@@ -12,12 +12,13 @@ import {
   Gamepad2,
   LayoutTemplate,
   LockIcon,
+  Monitor,
   MonitorPlay,
   Moon,
   Settings2Icon,
-  Sparkles,
+  X,
 } from 'lucide-react'
-import React, { memo } from 'react'
+import React, { memo, useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -26,8 +27,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import { useClient } from '@/hooks'
 import { useTimerSettings } from '@/hooks/use-timer-settings'
 import { cn } from '@/lib/utils'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
@@ -41,11 +50,6 @@ const POSITION_LABEL: Record<WidgetPosition, string> = {
   right: 'Direita',
 }
 
-// ---------------------------------------------------------------------------
-// Seletor de posição em formato "mira" (crosshair): um retículo central
-// representando o widget e 4 direções ao redor, no espírito do seletor de
-// âncora do Figma. Mais rápido de ler e de acertar com o mouse do que uma
-// grade 2x2 de botões com texto.
 function PositionCompass({
   value,
   onChange,
@@ -81,15 +85,12 @@ function PositionCompass({
   ]
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="relative flex h-24 w-24 shrink-0 items-center justify-center">
-        {/* Linhas do retículo */}
+    <div className="flex items-center gap-4">
+      <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
         <div className="bg-border absolute left-1/2 h-full w-px -translate-x-1/2" />
         <div className="bg-border absolute top-1/2 h-px w-full -translate-y-1/2" />
-
-        {/* Hub central: representa o widget/tela */}
-        <div className="bg-muted border-border relative z-10 flex h-8 w-8 items-center justify-center rounded-md border">
-          <div className="bg-primary/50 h-2 w-2 rounded-[2px]" />
+        <div className="bg-muted border-border relative z-10 flex h-6 w-6 items-center justify-center rounded-md border">
+          <div className="bg-primary/50 h-1.5 w-1.5 rounded-[1px]" />
         </div>
 
         {directions.map(({ key, icon: Icon, className }) => {
@@ -102,20 +103,18 @@ function PositionCompass({
               aria-pressed={selected}
               onClick={() => onChange(key)}
               className={cn(
-                'absolute z-10 flex h-7 w-7 items-center justify-center rounded-full border transition-all',
-                'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                'absolute z-10 flex h-5 w-5 items-center justify-center rounded-full border transition-all focus-visible:outline-none',
                 className,
                 selected
                   ? 'bg-primary text-primary-foreground border-primary scale-110 shadow-sm'
                   : 'bg-card text-muted-foreground border-border hover:border-primary/50 hover:text-foreground',
               )}
             >
-              <Icon className="h-3.5 w-3.5" />
+              <Icon className="h-2.5 w-2.5" />
             </button>
           )
         })}
       </div>
-
       <span className="text-muted-foreground text-[11px] font-medium">
         {POSITION_LABEL[value]}
       </span>
@@ -124,11 +123,14 @@ function PositionCompass({
 }
 
 export const TimerSettings = memo(() => {
+  const client = useClient()
   const {
     timerDirection,
     setTimerDirection,
     widgetPosition,
     setWidgetPosition,
+    selectedDisplayId,
+    setSelectedDisplayId,
     discordRpc,
     setDiscordRpc,
     antiBurnout,
@@ -137,10 +139,44 @@ export const TimerSettings = memo(() => {
     setActiveWindowTracking,
   } = useTimerSettings()
 
+  const [isOpen, setIsOpen] = useState(false)
   const isRunning = useTimeEntryStore((s) => s.active?.timeStatus === 'running')
+  const [displays, setDisplays] = useState<DisplayInfo[]>([])
+  const [initialLoad, setInitialLoad] = useState(true)
+
+  useEffect(() => {
+    client.modules.system.getDisplays().then((list) => {
+      setDisplays(list)
+
+      if (list.length > 0 && initialLoad) {
+        const savedDisplay = list.find((d) => d.id === selectedDisplayId)
+        const displayToUse =
+          savedDisplay || list.find((d) => d.isPrimary) || list[0]
+
+        if (displayToUse.id !== selectedDisplayId) {
+          setSelectedDisplayId(displayToUse.id)
+        }
+
+        // Move a janela imediatamente para o display salvo quando o React monta
+        client.modules.system.moveToDisplay({
+          body: { displayId: displayToUse.id, windowType: 'widget' },
+        })
+        setInitialLoad(false)
+      }
+    })
+  }, [client, selectedDisplayId, setSelectedDisplayId, initialLoad])
+
+  const handleDisplayChange = async (displayIdStr: string) => {
+    const displayId = Number(displayIdStr)
+    setSelectedDisplayId(displayId)
+
+    await client.modules.system.moveToDisplay({
+      body: { displayId, windowType: 'widget' },
+    })
+  }
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
@@ -153,72 +189,102 @@ export const TimerSettings = memo(() => {
       <PopoverContent
         align="start"
         sideOffset={10}
-        className="bg-card w-[360px] rounded-xl p-0 shadow-xl"
+        className="bg-card w-[260px] rounded-lg p-0 shadow-xl"
       >
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary/10 text-primary rounded-md p-1.5">
-              <Settings2Icon className="h-3.5 w-3.5" />
+        <div className="flex items-center justify-between px-3 py-2">
+          <div className="flex items-center gap-1.5">
+            <div className="bg-primary/10 text-primary rounded-md p-1">
+              <Settings2Icon className="h-3 w-3" />
             </div>
-            <div>
-              <p className="text-sm font-semibold">Preferências do Tracker</p>
-              <p className="text-muted-foreground text-[11px]">
-                Personalize seu fluxo de trabalho
-              </p>
-            </div>
+            <p className="text-[13px] font-semibold">Preferências</p>
           </div>
-          <Sparkles className="text-muted-foreground h-4 w-4" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5 rounded-md"
+            onClick={() => setIsOpen(false)}
+          >
+            <X className="text-muted-foreground hover:text-foreground h-3.5 w-3.5" />
+          </Button>
         </div>
         <Separator />
-        <div className="space-y-3 p-3">
-          <div className="bg-muted/30 border-border/50 rounded-xl border p-3">
-            <div className="mb-2 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Clock3 className="text-muted-foreground h-3.5 w-3.5" />
-                <span className="text-[11px] font-semibold tracking-wide uppercase">
+
+        <div className="space-y-2 p-2">
+          {displays.length > 1 && (
+            <div className="bg-muted/30 border-border/50 rounded-lg border p-2">
+              <div className="mb-1.5 flex items-center gap-1.5">
+                <Monitor className="text-muted-foreground h-3 w-3" />
+                <span className="text-[10px] font-semibold tracking-wide uppercase">
+                  Monitor
+                </span>
+              </div>
+              <Select
+                value={selectedDisplayId?.toString() ?? ''}
+                onValueChange={handleDisplayChange}
+              >
+                <SelectTrigger className="h-7 w-full text-[11px]">
+                  <SelectValue placeholder="Selecione o monitor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {displays.map((display) => (
+                    <SelectItem
+                      key={display.id}
+                      value={display.id.toString()}
+                      className="text-[11px]"
+                    >
+                      {display.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="bg-muted/30 border-border/50 rounded-lg border p-2">
+            <div className="mb-1.5 flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Clock3 className="text-muted-foreground h-3 w-3" />
+                <span className="text-[10px] font-semibold tracking-wide uppercase">
                   Modo do Timer
                 </span>
               </div>
               {isRunning && (
-                <span className="bg-muted text-muted-foreground border-border/60 inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-[9px] font-medium">
-                  <LockIcon className="h-2.5 w-2.5" />
-                  Em execução
+                <span className="bg-muted text-muted-foreground border-border/60 inline-flex items-center gap-1 rounded-[2px] border px-1 py-[1px] text-[8px] font-medium">
+                  <LockIcon className="h-2 w-2" /> Em execução
                 </span>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-1.5">
               <Button
                 disabled={isRunning}
                 variant={timerDirection === 'up' ? 'secondary' : 'ghost'}
                 className={cn(
-                  'h-8 justify-start gap-2 text-xs',
+                  'h-6 justify-start gap-1.5 px-2 text-[11px]',
                   isRunning && 'opacity-50',
                 )}
                 onClick={() => setTimerDirection('up')}
               >
-                <ClockArrowUp className="h-3.5 w-3.5" />
-                Normal
+                <ClockArrowUp className="h-3 w-3" /> Normal
               </Button>
               <Button
                 disabled={isRunning}
                 variant={timerDirection === 'down' ? 'secondary' : 'ghost'}
                 className={cn(
-                  'h-8 justify-start gap-2 text-xs',
+                  'h-6 justify-start gap-1.5 px-2 text-[11px]',
                   isRunning && 'opacity-50',
                 )}
                 onClick={() => setTimerDirection('down')}
               >
-                <ClockArrowDown className="h-3.5 w-3.5" />
-                Pomodoro
+                <ClockArrowDown className="h-3 w-3" /> Pomodoro
               </Button>
             </div>
           </div>
 
-          <div className="bg-muted/30 border-border/50 rounded-xl border p-3">
-            <div className="mb-3 flex items-center gap-2">
-              <LayoutTemplate className="text-muted-foreground h-3.5 w-3.5" />
-              <span className="text-[11px] font-semibold tracking-wide uppercase">
-                Posição do Widget
+          <div className="bg-muted/30 border-border/50 rounded-lg border p-2">
+            <div className="mb-2 flex items-center gap-1.5">
+              <LayoutTemplate className="text-muted-foreground h-3 w-3" />
+              <span className="text-[10px] font-semibold tracking-wide uppercase">
+                Ancoragem
               </span>
             </div>
             <PositionCompass
@@ -227,52 +293,54 @@ export const TimerSettings = memo(() => {
             />
           </div>
 
-          <div className="bg-muted/30 border-border/50 rounded-xl border p-3">
-            <div className="mb-3 flex items-center gap-2">
-              <Sparkles className="text-muted-foreground h-3.5 w-3.5" />
-              <span className="text-[11px] font-semibold tracking-wide uppercase">
+          <div className="bg-muted/30 border-border/50 rounded-lg border p-2">
+            <div className="mb-2 flex items-center gap-1.5">
+              <Gamepad2 className="text-muted-foreground h-3 w-3" />
+              <span className="text-[10px] font-semibold tracking-wide uppercase">
                 Automações
               </span>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <Label
-                  className="flex cursor-pointer items-center gap-2 text-xs font-medium"
+                  className="flex cursor-pointer items-center gap-1.5 text-[11px] font-medium"
                   htmlFor="discord-rpc"
                 >
-                  <Gamepad2 className="text-muted-foreground h-3.5 w-3.5" />
                   Discord RPC
                 </Label>
                 <Switch
                   id="discord-rpc"
+                  className="scale-75"
                   checked={discordRpc}
                   onCheckedChange={setDiscordRpc}
                 />
               </div>
               <div className="flex items-center justify-between">
                 <Label
-                  className="flex cursor-pointer items-center gap-2 text-xs font-medium"
+                  className="flex cursor-pointer items-center gap-1.5 text-[11px] font-medium"
                   htmlFor="anti-burnout"
                 >
-                  <Moon className="text-muted-foreground h-3.5 w-3.5" />
+                  <Moon className="text-muted-foreground h-3 w-3" />{' '}
                   Anti-Burnout (4h)
                 </Label>
                 <Switch
                   id="anti-burnout"
+                  className="scale-75"
                   checked={antiBurnout}
                   onCheckedChange={setAntiBurnout}
                 />
               </div>
               <div className="flex items-center justify-between">
                 <Label
-                  className="flex cursor-pointer items-center gap-2 text-xs font-medium"
+                  className="flex cursor-pointer items-center gap-1.5 text-[11px] font-medium"
                   htmlFor="active-window"
                 >
-                  <MonitorPlay className="text-muted-foreground h-3.5 w-3.5" />
-                  Rastrear janela ativa
+                  <MonitorPlay className="text-muted-foreground h-3 w-3" />{' '}
+                  Rastrear janela
                 </Label>
                 <Switch
                   id="active-window"
+                  className="scale-75"
                   checked={activeWindowTracking}
                   onCheckedChange={setActiveWindowTracking}
                 />

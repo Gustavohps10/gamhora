@@ -12,7 +12,6 @@ import {
   subSeconds,
 } from 'date-fns'
 import {
-  Calendar,
   Check,
   Clock,
   Database,
@@ -40,18 +39,11 @@ import { cn } from '@/lib/utils'
 import { useSyncStore } from '@/stores/syncStore'
 import { JournalEntry, useTimeEntryStore } from '@/stores/timeEntryStore'
 
-// ---------------------------------------------------------------------------
-// TIPAGEM DOS BLOCOS LÓGICOS DA LINHA DO TEMPO
-// ---------------------------------------------------------------------------
 type TimelineBlock =
   | { type: 'start'; entry: JournalEntry; index: number }
   | { type: 'adjustment'; entry: JournalEntry; index: number }
   | { type: 'stop'; entry: JournalEntry; index: number }
-  | {
-      type: 'pause-ongoing'
-      paused: JournalEntry
-      pauseIndex: number
-    }
+  | { type: 'pause-ongoing'; paused: JournalEntry; pauseIndex: number }
   | {
       type: 'pause-block'
       paused: JournalEntry
@@ -61,9 +53,6 @@ type TimelineBlock =
       durationSeconds: number
     }
 
-// ---------------------------------------------------------------------------
-// FUNÇÕES AUXILIARES
-// ---------------------------------------------------------------------------
 function formatDuration(totalSeconds: number) {
   const absSeconds = Math.abs(totalSeconds)
   const h = Math.floor(absSeconds / 3600)
@@ -90,31 +79,23 @@ export const TimerHistory = memo(() => {
   const activeEntry = useTimeEntryStore((s) => s.active)
   const setActive = useTimeEntryStore((s) => s.setActive)
 
-  // Estados de Edição Inline
+  const [isOpen, setIsOpen] = useState(false)
   const [isAddingInline, setIsAddingInline] = useState(false)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
-
-  // Estados de Validação
   const [inlineError, setInlineError] = useState<string | null>(null)
   const [addError, setAddError] = useState<string | null>(null)
 
-  // Estados dos Formulários Inline (Pausa)
   const [inlineStartTime, setInlineStartTime] = useState('')
   const [inlineEndTime, setInlineEndTime] = useState('')
 
-  // Estados dos Formulários Inline (Edição de Ajuste)
   const [inlineAdjType, setInlineAdjType] = useState<'add' | 'subtract'>('add')
   const [inlineAdjMinutes, setInlineAdjMinutes] = useState('')
   const [inlineAdjNote, setInlineAdjNote] = useState('')
 
-  // Estados dos Formulários Inline (Novo Ajuste)
   const [addType, setAddType] = useState<'add' | 'subtract'>('add')
   const [addMinutes, setAddMinutes] = useState<string>('')
   const [addNote, setAddNote] = useState('')
 
-  // ---------------------------------------------------------------------------
-  // PROCESSAMENTO: Transforma os eventos raw do banco em Blocos Lógicos
-  // ---------------------------------------------------------------------------
   const timeline = useMemo(() => {
     if (!activeEntry || !activeEntry.journal) return []
 
@@ -158,9 +139,6 @@ export const TimerHistory = memo(() => {
     return blocks.reverse()
   }, [activeEntry])
 
-  // ---------------------------------------------------------------------------
-  // VALIDAÇÕES
-  // ---------------------------------------------------------------------------
   const isDeleteSafe = (block: TimelineBlock): boolean => {
     if (!activeEntry || !activeEntry.startDate) return false
     const currentStartDate = parseISO(activeEntry.startDate)
@@ -182,9 +160,6 @@ export const TimerHistory = memo(() => {
     return true
   }
 
-  // ---------------------------------------------------------------------------
-  // AÇÕES: DELETAR, EDITAR (INLINE), ADICIONAR
-  // ---------------------------------------------------------------------------
   const syncStoreAndElectron = async (
     newJournal: JournalEntry[],
     newStartDate: string,
@@ -245,10 +220,7 @@ export const TimerHistory = memo(() => {
       ).toISOString()
     }
 
-    if (isAfter(parseISO(newStartDate), new Date())) {
-      return
-    }
-
+    if (isAfter(parseISO(newStartDate), new Date())) return
     await syncStoreAndElectron(newJournal, newStartDate, newStatus)
   }
 
@@ -268,17 +240,15 @@ export const TimerHistory = memo(() => {
 
     const newJournal = [...(activeEntry.journal || [])]
     const currentStartDate = parseISO(activeEntry.startDate!)
-
     const newPausedAt = applyTimeToDate(block.paused.at, inlineStartTime)
     const newResumedAt = applyTimeToDate(block.resumed.at, inlineEndTime)
-
     const newDurationSeconds = differenceInSeconds(
       parseISO(newResumedAt),
       parseISO(newPausedAt),
     )
 
     if (newDurationSeconds < 0) {
-      setInlineError('O horário de fim não pode ser anterior ao início.')
+      setInlineError('Fim não pode ser anterior ao início.')
       return
     }
 
@@ -289,10 +259,7 @@ export const TimerHistory = memo(() => {
     ).toISOString()
 
     if (isAfter(parseISO(newStartDate), new Date())) {
-      const totalRecorded = differenceInSeconds(new Date(), currentStartDate)
-      setInlineError(
-        `A nova pausa remove ${formatDuration(durationDelta)} adicionais, mas o tempo atual registrado é de apenas ${formatDuration(totalRecorded)}.`,
-      )
+      setInlineError(`Erro: remoção de tempo excede o tempo atual registrado.`)
       return
     }
 
@@ -300,7 +267,6 @@ export const TimerHistory = memo(() => {
       ...newJournal[block.pauseIndex],
       at: newPausedAt,
     }
-
     newJournal[block.resumeIndex] = {
       ...newJournal[block.resumeIndex],
       at: newResumedAt,
@@ -334,9 +300,9 @@ export const TimerHistory = memo(() => {
 
     const newJournal = [...(activeEntry.journal || [])]
     const currentStartDate = parseISO(activeEntry.startDate!)
-
     const oldSeconds = block.entry.secondsAtEvent
     const newMinutes = Number(inlineAdjMinutes)
+
     if (isNaN(newMinutes) || newMinutes <= 0) {
       setInlineError('Insira um tempo válido.')
       return
@@ -344,14 +310,10 @@ export const TimerHistory = memo(() => {
 
     const newSeconds = (inlineAdjType === 'add' ? 1 : -1) * newMinutes * 60
     const delta = newSeconds - oldSeconds
-
     const newStartDate = subSeconds(currentStartDate, delta).toISOString()
 
     if (isAfter(parseISO(newStartDate), new Date())) {
-      const totalRecorded = differenceInSeconds(new Date(), currentStartDate)
-      setInlineError(
-        `Este ajuste remove ${formatDuration(Math.abs(delta))} adicionais, mas o tempo atual registrado é de apenas ${formatDuration(totalRecorded)}.`,
-      )
+      setInlineError(`Erro: ajuste excede o tempo atual registrado.`)
       return
     }
 
@@ -386,10 +348,7 @@ export const TimerHistory = memo(() => {
     }
 
     if (isAfter(parseISO(newStartDate), new Date())) {
-      const totalRecorded = differenceInSeconds(new Date(), currentStartDate)
-      setAddError(
-        `Você tentou remover ${formatDuration(secondsDelta)}, mas o tempo total registrado é de apenas ${formatDuration(totalRecorded)}.`,
-      )
+      setAddError(`Erro: ajuste excede o tempo total registrado.`)
       return
     }
 
@@ -413,22 +372,19 @@ export const TimerHistory = memo(() => {
     setAddError(null)
   }
 
-  // ---------------------------------------------------------------------------
-  // RENDERIZAÇÃO
-  // ---------------------------------------------------------------------------
   const renderTimelineBlock = (block: TimelineBlock) => {
     switch (block.type) {
       case 'start':
         return (
-          <div className="flex items-start gap-3">
-            <div className="bg-primary/20 mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
-              <Play className="text-primary h-3 w-3 fill-current" />
+          <div className="flex items-center gap-2">
+            <div className="bg-primary/20 flex h-4 w-4 shrink-0 items-center justify-center rounded-full">
+              <Play className="text-primary h-2.5 w-2.5 fill-current" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-foreground text-xs font-medium">
-                Tarefa Iniciada
+            <div className="flex flex-col leading-tight">
+              <span className="text-foreground text-[11px] font-medium">
+                Iniciado
               </span>
-              <span className="text-muted-foreground text-[10px]">
+              <span className="text-muted-foreground text-[9px]">
                 {format(parseISO(block.entry.at), 'HH:mm:ss')}
               </span>
             </div>
@@ -437,15 +393,15 @@ export const TimerHistory = memo(() => {
 
       case 'stop':
         return (
-          <div className="flex items-start gap-3">
-            <div className="bg-destructive/20 mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
-              <div className="bg-destructive h-2 w-2 rounded-sm" />
+          <div className="flex items-center gap-2">
+            <div className="bg-destructive/20 flex h-4 w-4 shrink-0 items-center justify-center rounded-full">
+              <div className="bg-destructive h-1.5 w-1.5 rounded-[1px]" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-foreground text-xs font-medium">
-                Timer Parado
+            <div className="flex flex-col leading-tight">
+              <span className="text-foreground text-[11px] font-medium">
+                Parado
               </span>
-              <span className="text-muted-foreground text-[10px]">
+              <span className="text-muted-foreground text-[9px]">
                 {format(parseISO(block.entry.at), 'HH:mm:ss')}
               </span>
             </div>
@@ -457,19 +413,19 @@ export const TimerHistory = memo(() => {
 
         if (isEditingAdj) {
           return (
-            <div className="bg-muted/40 border-border/50 relative z-10 flex flex-col gap-2 rounded-md border p-2 shadow-sm">
-              <span className="text-foreground text-xs font-medium">
+            <div className="bg-muted/40 border-border/50 relative z-10 flex flex-col gap-1.5 rounded-md border p-2 shadow-sm">
+              <span className="text-foreground text-[11px] font-medium">
                 Editar Ajuste
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <Button
                   variant="outline"
                   size="icon"
                   className={cn(
-                    'h-7 w-7 shrink-0 transition-colors',
+                    'h-6 w-6 shrink-0 transition-colors',
                     inlineAdjType === 'add'
-                      ? 'border-green-500/20 bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-600'
-                      : 'border-destructive/20 bg-destructive/10 text-destructive hover:bg-destructive/20 hover:text-destructive',
+                      ? 'border-green-500/20 bg-green-500/10 text-green-500'
+                      : 'border-destructive/20 bg-destructive/10 text-destructive',
                   )}
                   onClick={() => {
                     setInlineAdjType((t) => (t === 'add' ? 'subtract' : 'add'))
@@ -477,24 +433,23 @@ export const TimerHistory = memo(() => {
                   }}
                 >
                   {inlineAdjType === 'add' ? (
-                    <Plus className="h-3.5 w-3.5" />
+                    <Plus className="h-3 w-3" />
                   ) : (
-                    <Minus className="h-3.5 w-3.5" />
+                    <Minus className="h-3 w-3" />
                   )}
                 </Button>
                 <Input
                   type="number"
                   min="1"
-                  placeholder="Minutos"
+                  placeholder="Min"
                   value={inlineAdjMinutes}
                   onChange={(e) => {
                     setInlineAdjMinutes(e.target.value)
                     setInlineError(null)
                   }}
                   className={cn(
-                    'h-7 w-20 px-2 text-xs',
-                    inlineError &&
-                      'border-destructive focus-visible:ring-destructive',
+                    'h-6 w-14 px-1.5 text-[11px]',
+                    inlineError && 'border-destructive',
                   )}
                 />
               </div>
@@ -502,30 +457,30 @@ export const TimerHistory = memo(() => {
                 placeholder="Motivo (opcional)"
                 value={inlineAdjNote}
                 onChange={(e) => setInlineAdjNote(e.target.value)}
-                className="h-7 px-2 text-xs"
+                className="h-6 px-1.5 text-[11px]"
               />
               {inlineError && (
-                <p className="text-destructive mt-1 text-xs leading-snug font-medium">
+                <p className="text-destructive text-[9px] leading-tight font-medium">
                   {inlineError}
                 </p>
               )}
-              <div className="mt-1 flex justify-end gap-1">
+              <div className="flex justify-end gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6"
+                  className="h-5 w-5"
                   onClick={() => setEditingIndex(null)}
                 >
-                  <X className="text-muted-foreground h-3.5 w-3.5" />
+                  <X className="text-muted-foreground h-3 w-3" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6"
+                  className="h-5 w-5"
                   disabled={!inlineAdjMinutes || Number(inlineAdjMinutes) <= 0}
                   onClick={() => handleInlineEditAdjSave(block)}
                 >
-                  <Check className="text-primary h-3.5 w-3.5" />
+                  <Check className="text-primary h-3 w-3" />
                 </Button>
               </div>
             </div>
@@ -538,34 +493,36 @@ export const TimerHistory = memo(() => {
         return (
           <div
             onDoubleClick={() => startInlineEditAdj(block)}
-            className="group hover:bg-muted/40 flex cursor-pointer items-start justify-between gap-3 rounded-md p-1 pr-2 transition-colors select-none"
+            className="group hover:bg-muted/40 flex cursor-pointer items-start justify-between gap-2 rounded-md p-1 pr-1.5 transition-colors select-none"
           >
-            <div className="flex items-start gap-3">
+            <div className="flex items-center gap-2">
               <div
                 className={cn(
-                  'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full',
+                  'flex h-4 w-4 shrink-0 items-center justify-center rounded-full',
                   isPositive
                     ? 'bg-green-500/20 text-green-500'
                     : 'bg-destructive/20 text-destructive',
                 )}
               >
                 {isPositive ? (
-                  <Plus className="h-3 w-3" />
+                  <Plus className="h-2.5 w-2.5" />
                 ) : (
-                  <Minus className="h-3 w-3" />
+                  <Minus className="h-2.5 w-2.5" />
                 )}
               </div>
-              <div className="flex flex-col">
-                <span className="text-foreground text-xs font-medium">
-                  {isPositive ? 'Tempo Adicionado' : 'Tempo Removido'}
+              <div className="flex flex-col leading-tight">
+                <span className="text-foreground text-[11px] font-medium">
+                  {isPositive ? 'Adicionado' : 'Removido'} (
+                  {formatDuration(Math.abs(block.entry.secondsAtEvent))})
                 </span>
-                <span className="text-muted-foreground text-[10px]">
-                  {formatDuration(Math.abs(block.entry.secondsAtEvent))} •{' '}
-                  {block.entry.note || 'Sem descrição'}
-                </span>
+                {block.entry.note && (
+                  <span className="text-muted-foreground w-[140px] truncate text-[9px]">
+                    {block.entry.note}
+                  </span>
+                )}
               </div>
             </div>
-            <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+            <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
               <Button
                 variant="ghost"
                 size="icon"
@@ -573,10 +530,9 @@ export const TimerHistory = memo(() => {
                   e.stopPropagation()
                   startInlineEditAdj(block)
                 }}
-                className="h-6 w-6 shrink-0"
-                title="Editar ajuste"
+                className="h-5 w-5 shrink-0"
               >
-                <Pencil className="text-muted-foreground h-3 w-3" />
+                <Pencil className="text-muted-foreground h-2.5 w-2.5" />
               </Button>
               <Button
                 variant="ghost"
@@ -587,18 +543,13 @@ export const TimerHistory = memo(() => {
                   if (canDelete) handleDelete(block)
                 }}
                 className={cn(
-                  'h-6 w-6 shrink-0',
+                  'h-5 w-5 shrink-0',
                   canDelete
                     ? 'hover:text-destructive'
                     : 'cursor-not-allowed opacity-50',
                 )}
-                title={
-                  canDelete
-                    ? 'Excluir ajuste'
-                    : 'A exclusão deixaria o tempo negativo'
-                }
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Trash2 className="h-2.5 w-2.5" />
               </Button>
             </div>
           </div>
@@ -607,16 +558,16 @@ export const TimerHistory = memo(() => {
 
       case 'pause-ongoing':
         return (
-          <div className="group hover:bg-muted/40 flex items-start justify-between gap-3 rounded-md p-1 pr-2 transition-colors">
-            <div className="flex items-start gap-3">
-              <div className="bg-muted-foreground/20 mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
-                <Pause className="text-muted-foreground h-3 w-3 fill-current" />
+          <div className="group hover:bg-muted/40 flex items-start justify-between gap-2 rounded-md p-1 pr-1.5 transition-colors">
+            <div className="flex items-center gap-2">
+              <div className="bg-muted-foreground/20 flex h-4 w-4 shrink-0 items-center justify-center rounded-full">
+                <Pause className="text-muted-foreground h-2.5 w-2.5 fill-current" />
               </div>
-              <div className="flex flex-col">
-                <span className="text-foreground text-xs font-medium">
-                  Pausado (Em andamento)
+              <div className="flex flex-col leading-tight">
+                <span className="text-foreground text-[11px] font-medium">
+                  Pausado (Andamento)
                 </span>
-                <span className="text-muted-foreground text-[10px]">
+                <span className="text-muted-foreground text-[9px]">
                   Desde {format(parseISO(block.paused.at), 'HH:mm:ss')}
                 </span>
               </div>
@@ -625,10 +576,9 @@ export const TimerHistory = memo(() => {
               variant="ghost"
               size="icon"
               onClick={() => handleDelete(block)}
-              className="hover:text-destructive h-6 w-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
-              title="Retomar e excluir pausa"
+              className="hover:text-destructive h-5 w-5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-2.5 w-2.5" />
             </Button>
           </div>
         )
@@ -638,11 +588,11 @@ export const TimerHistory = memo(() => {
 
         if (isEditingPause) {
           return (
-            <div className="bg-muted/40 border-border/50 relative z-10 flex flex-col gap-2 rounded-md border p-2 shadow-sm">
-              <span className="text-foreground text-xs font-medium">
+            <div className="bg-muted/40 border-border/50 relative z-10 flex flex-col gap-1.5 rounded-md border p-2 shadow-sm">
+              <span className="text-foreground text-[11px] font-medium">
                 Editar Pausa
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <Input
                   type="time"
                   value={inlineStartTime}
@@ -651,12 +601,11 @@ export const TimerHistory = memo(() => {
                     setInlineError(null)
                   }}
                   className={cn(
-                    'h-7 w-[85px] px-2 text-xs',
-                    inlineError &&
-                      'border-destructive focus-visible:ring-destructive',
+                    'h-6 w-[70px] px-1.5 text-[11px]',
+                    inlineError && 'border-destructive',
                   )}
                 />
-                <span className="text-muted-foreground text-xs">até</span>
+                <span className="text-muted-foreground text-[10px]">até</span>
                 <Input
                   type="time"
                   value={inlineEndTime}
@@ -665,33 +614,32 @@ export const TimerHistory = memo(() => {
                     setInlineError(null)
                   }}
                   className={cn(
-                    'h-7 w-[85px] px-2 text-xs',
-                    inlineError &&
-                      'border-destructive focus-visible:ring-destructive',
+                    'h-6 w-[70px] px-1.5 text-[11px]',
+                    inlineError && 'border-destructive',
                   )}
                 />
               </div>
               {inlineError && (
-                <p className="text-destructive mt-1 text-xs leading-snug font-medium">
+                <p className="text-destructive text-[9px] leading-tight font-medium">
                   {inlineError}
                 </p>
               )}
-              <div className="mt-1 flex justify-end gap-1">
+              <div className="flex justify-end gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6"
+                  className="h-5 w-5"
                   onClick={() => setEditingIndex(null)}
                 >
-                  <X className="text-muted-foreground h-3.5 w-3.5" />
+                  <X className="text-muted-foreground h-3 w-3" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6"
+                  className="h-5 w-5"
                   onClick={() => handleInlineEditPauseSave(block)}
                 >
-                  <Check className="text-primary h-3.5 w-3.5" />
+                  <Check className="text-primary h-3 w-3" />
                 </Button>
               </div>
             </div>
@@ -703,23 +651,23 @@ export const TimerHistory = memo(() => {
         return (
           <div
             onDoubleClick={() => startInlineEditPause(block)}
-            className="group hover:bg-muted/40 flex cursor-pointer items-start justify-between gap-3 rounded-md p-1 pr-2 transition-colors select-none"
+            className="group hover:bg-muted/40 flex cursor-pointer items-start justify-between gap-2 rounded-md p-1 pr-1.5 transition-colors select-none"
           >
-            <div className="flex items-start gap-3">
-              <div className="bg-muted-foreground/20 mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
-                <Clock className="text-muted-foreground h-3 w-3" />
+            <div className="flex items-center gap-2">
+              <div className="bg-muted-foreground/20 flex h-4 w-4 shrink-0 items-center justify-center rounded-full">
+                <Clock className="text-muted-foreground h-2.5 w-2.5" />
               </div>
-              <div className="flex flex-col">
-                <span className="text-foreground text-xs font-medium">
-                  Pausa de {formatDuration(block.durationSeconds)}
+              <div className="flex flex-col leading-tight">
+                <span className="text-foreground text-[11px] font-medium">
+                  Pausa ({formatDuration(block.durationSeconds)})
                 </span>
-                <span className="text-muted-foreground text-[10px]">
+                <span className="text-muted-foreground text-[9px]">
                   {format(parseISO(block.paused.at), 'HH:mm')} -{' '}
                   {format(parseISO(block.resumed.at), 'HH:mm')}
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+            <div className="flex items-center opacity-0 transition-opacity group-hover:opacity-100">
               <Button
                 variant="ghost"
                 size="icon"
@@ -727,10 +675,9 @@ export const TimerHistory = memo(() => {
                   e.stopPropagation()
                   startInlineEditPause(block)
                 }}
-                className="h-6 w-6 shrink-0"
-                title="Editar pausa"
+                className="h-5 w-5 shrink-0"
               >
-                <Pencil className="text-muted-foreground h-3 w-3" />
+                <Pencil className="text-muted-foreground h-2.5 w-2.5" />
               </Button>
               <Button
                 variant="ghost"
@@ -741,18 +688,13 @@ export const TimerHistory = memo(() => {
                   if (canDelete) handleDelete(block)
                 }}
                 className={cn(
-                  'h-6 w-6 shrink-0',
+                  'h-5 w-5 shrink-0',
                   canDelete
                     ? 'hover:text-destructive'
                     : 'cursor-not-allowed opacity-50',
                 )}
-                title={
-                  canDelete
-                    ? 'Excluir pausa'
-                    : 'A exclusão deixaria o tempo negativo'
-                }
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Trash2 className="h-2.5 w-2.5" />
               </Button>
             </div>
           </div>
@@ -762,7 +704,7 @@ export const TimerHistory = memo(() => {
   }
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
@@ -780,33 +722,36 @@ export const TimerHistory = memo(() => {
         align="start"
         sideOffset={10}
         onInteractOutside={(e) => {
-          if (isAddingInline || editingIndex !== null) {
-            e.preventDefault()
-          }
+          if (isAddingInline || editingIndex !== null) e.preventDefault()
         }}
-        className="bg-card w-[340px] overflow-hidden rounded-lg p-0 shadow-lg"
+        className="bg-card w-[260px] overflow-hidden rounded-lg p-0 shadow-lg"
       >
-        <div className="flex items-center justify-between p-3">
-          <div className="text-foreground flex items-center gap-2 text-sm font-semibold">
+        <div className="flex items-center justify-between p-2">
+          <div className="text-foreground flex items-center gap-1.5 text-[13px] font-semibold">
             <Database className="text-primary h-3.5 w-3.5" />
             Histórico da Sessão
           </div>
-          <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
-            Hoje <Calendar className="h-3.5 w-3.5" />
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5 rounded-md"
+            onClick={() => setIsOpen(false)}
+          >
+            <X className="text-muted-foreground hover:text-foreground h-3.5 w-3.5" />
+          </Button>
         </div>
 
         <Separator />
 
-        <div className="flex max-h-[300px] flex-col overflow-y-auto p-2">
+        <div className="flex max-h-[260px] flex-col overflow-y-auto p-1.5">
           {!activeEntry || timeline.length === 0 ? (
-            <div className="text-muted-foreground p-4 text-center text-xs">
+            <div className="text-muted-foreground p-3 text-center text-[10px]">
               Nenhum histórico para esta sessão ainda.
             </div>
           ) : (
             <div className="relative pl-1">
-              <div className="bg-border absolute top-2 bottom-2 left-3.5 w-[2px]" />
-              <div className="relative flex flex-col gap-4">
+              <div className="bg-border absolute top-2 bottom-2 left-2.5 w-[2px]" />
+              <div className="relative flex flex-col gap-2.5">
                 {timeline.map((block, i) => (
                   <React.Fragment key={i}>
                     {renderTimelineBlock(block)}
@@ -818,19 +763,19 @@ export const TimerHistory = memo(() => {
         </div>
 
         {isAddingInline && (
-          <div className="bg-muted/40 border-border/50 mx-2 mb-2 flex flex-col gap-2 rounded-md border p-2 shadow-sm">
-            <span className="text-foreground text-xs font-medium">
+          <div className="bg-muted/40 border-border/50 mx-1.5 mb-1.5 flex flex-col gap-1.5 rounded-md border p-2 shadow-sm">
+            <span className="text-foreground text-[11px] font-medium">
               Novo Ajuste
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <Button
                 variant="outline"
                 size="icon"
                 className={cn(
-                  'h-7 w-7 shrink-0 transition-colors',
+                  'h-6 w-6 shrink-0 transition-colors',
                   addType === 'add'
-                    ? 'border-green-500/20 bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-green-600'
-                    : 'border-destructive/20 bg-destructive/10 text-destructive hover:bg-destructive/20 hover:text-destructive',
+                    ? 'border-green-500/20 bg-green-500/10 text-green-500'
+                    : 'border-destructive/20 bg-destructive/10 text-destructive',
                 )}
                 onClick={() => {
                   setAddType((t) => (t === 'add' ? 'subtract' : 'add'))
@@ -838,9 +783,9 @@ export const TimerHistory = memo(() => {
                 }}
               >
                 {addType === 'add' ? (
-                  <Plus className="h-3.5 w-3.5" />
+                  <Plus className="h-3 w-3" />
                 ) : (
-                  <Minus className="h-3.5 w-3.5" />
+                  <Minus className="h-3 w-3" />
                 )}
               </Button>
               <Input
@@ -853,9 +798,8 @@ export const TimerHistory = memo(() => {
                   setAddError(null)
                 }}
                 className={cn(
-                  'h-7 text-xs',
-                  addError &&
-                    'border-destructive focus-visible:ring-destructive',
+                  'h-6 px-1.5 text-[11px]',
+                  addError && 'border-destructive',
                 )}
               />
             </div>
@@ -863,30 +807,30 @@ export const TimerHistory = memo(() => {
               placeholder="Motivo (opcional)"
               value={addNote}
               onChange={(e) => setAddNote(e.target.value)}
-              className="h-7 text-xs"
+              className="h-6 px-1.5 text-[11px]"
             />
             {addError && (
-              <p className="text-destructive mt-1 text-xs leading-snug font-medium">
+              <p className="text-destructive text-[9px] leading-tight font-medium">
                 {addError}
               </p>
             )}
-            <div className="mt-1 flex justify-end gap-1">
+            <div className="flex justify-end gap-1">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-5 w-5"
                 onClick={() => setIsAddingInline(false)}
               >
-                <X className="text-muted-foreground h-3.5 w-3.5" />
+                <X className="text-muted-foreground h-3 w-3" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-5 w-5"
                 disabled={!addMinutes || Number(addMinutes) <= 0}
                 onClick={handleAddSave}
               >
-                <Check className="text-primary h-3.5 w-3.5" />
+                <Check className="text-primary h-3 w-3" />
               </Button>
             </div>
           </div>
@@ -894,8 +838,8 @@ export const TimerHistory = memo(() => {
 
         {!isAddingInline && <Separator />}
 
-        <div className="bg-muted/10 flex items-center justify-between p-2 px-3">
-          <span className="text-muted-foreground text-[10px] font-medium">
+        <div className="bg-muted/10 flex items-center justify-between p-1.5 px-2.5">
+          <span className="text-muted-foreground text-[9px] font-medium">
             {timeline.length} {timeline.length === 1 ? 'bloco' : 'blocos'}
           </span>
           <Button
@@ -906,10 +850,9 @@ export const TimerHistory = memo(() => {
               setAddError(null)
               setIsAddingInline(true)
             }}
-            className="h-6 gap-1 px-2 text-[10px]"
+            className="h-5 gap-1 px-1.5 text-[9px]"
           >
-            <Plus className="h-3 w-3" />
-            Ajuste
+            <Plus className="h-2.5 w-2.5" /> Ajuste
           </Button>
         </div>
       </PopoverContent>

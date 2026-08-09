@@ -258,10 +258,23 @@ export interface EnvironmentInfo {
   isDevelopment: boolean
 }
 
+export interface DisplayInfo {
+  id: number
+  label: string
+  isPrimary: boolean
+}
+
+export interface MoveToDisplayInput {
+  displayId: number
+  windowType?: 'main' | 'widget' | string
+}
+
 export interface ISystemAPI {
   getAppVersion(): Promise<string>
   getEnvironment(): Promise<EnvironmentInfo>
   setIgnoreMouseEvents(ignore: boolean): Promise<void>
+  getDisplays(): Promise<DisplayInfo[]>
+  moveToDisplay(input: IRequest<MoveToDisplayInput>): Promise<void>
 }
 
 export interface TimerStartInput {

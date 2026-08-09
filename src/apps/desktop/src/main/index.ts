@@ -61,8 +61,35 @@ const createWindow = () => {
       backgroundThrottling: false,
     },
   })
-
+  ;(mainWindow as unknown as { windowType: string }).windowType = 'main'
   mainWindow.on('ready-to-show', () => mainWindow!.show())
+
+  // --- INÍCIO DA CORREÇÃO DE ARRASTE ---
+  let moveTimeout: NodeJS.Timeout | null = null
+
+  mainWindow.on('will-move', () => {
+    if (secondaryWindow && !secondaryWindow.isDestroyed()) {
+      // Desativa o hit-testing pesado do widget enquanto a principal se move
+      secondaryWindow.setIgnoreMouseEvents(true, { forward: false })
+
+      if (moveTimeout) clearTimeout(moveTimeout)
+
+      // Restaura o forward 150ms após a janela principal parar de se mover
+      moveTimeout = setTimeout(() => {
+        if (secondaryWindow && !secondaryWindow.isDestroyed()) {
+          secondaryWindow.setIgnoreMouseEvents(true, { forward: true })
+        }
+      }, 150)
+    }
+  })
+  // --- FIM DA CORREÇÃO DE ARRASTE ---
+
+  mainWindow.on('moved', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      const bounds = mainWindow.getBounds()
+      mainWindow.webContents.send('window:bounds-changed', bounds)
+    }
+  })
 
   mainWindow.webContents.setWindowOpenHandler((d) => {
     shell.openExternal(d.url)
@@ -81,39 +108,49 @@ const createWindow = () => {
   }
 }
 
-export type IHandlersScope = {
-  connectionHandler: typeof ConnectionHandler
-  sessionHandler: typeof SessionHandler
-  tasksHandler: typeof TasksHandler
-  timeEntriesHandler: typeof TimeEntriesHandler
-  tokenHandler: typeof TokenHandler
-  workspacesHandler: typeof WorkspacesHandler
-  addonsHandler: typeof AddonsHandler
-  metadataHandler: typeof MetadataHandler
-}
-
-const createSecondaryWindow = (activeWorkspaceId?: string) => {
+const createSecondaryWindow = (
+  activeWorkspaceId?: string,
+  targetDisplayId?: number,
+) => {
+  // Pega todos os monitores disponíveis
+  const allDisplays = screen.getAllDisplays()
   const primaryDisplay = screen.getPrimaryDisplay()
-  const { width, height } = primaryDisplay.workAreaSize
+
+  // Encontra o monitor de destino ou usa o primário como fallback
+  const targetDisplay =
+    allDisplays.find((d) => d.id === targetDisplayId) || primaryDisplay
+  const { x, y, width, height } = targetDisplay.bounds
 
   secondaryWindow = new BrowserWindow({
     width,
     height,
-    x: 0,
-    y: 0,
+    x, // Aplica o offset global real do monitor (ex: 1920 se for o Monitor 2 à direita)
+    y,
     show: false,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
     skipTaskbar: true,
-    resizable: true,
+    resizable: false, // Evita redimensionamento acidental
     hasShadow: false,
+    focusable: true, // Remove a janela da fila de foco do SO
     webPreferences: {
       preload: join(__dirname, '../preload/index.mjs'),
       contextIsolation: true,
       backgroundThrottling: false,
       sandbox: false,
     },
+  })
+  ;(secondaryWindow as unknown as { windowType: string }).windowType = 'widget'
+
+  secondaryWindow.on('moved', () => {
+    if (secondaryWindow && !secondaryWindow.isDestroyed()) {
+      const bounds = secondaryWindow.getBounds()
+      secondaryWindow.webContents.send('window:bounds-changed', bounds)
+
+      // Força a re-aplicação em qualquer movimento para evitar reset do SO
+      secondaryWindow.setIgnoreMouseEvents(true, { forward: true })
+    }
   })
 
   secondaryWindow.setIgnoreMouseEvents(true, { forward: true })
@@ -126,21 +163,29 @@ const createSecondaryWindow = (activeWorkspaceId?: string) => {
     secondaryWindow = null
   })
 
-  // Define o workspace padrão caso não venha informado
   const workspaceId = activeWorkspaceId ?? 'default'
   const widgetHashPath = `/workspaces/${workspaceId}/widgets/timer`
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    // No ambiente de desenvolvimento com HashRouter: URL + /#/workspaces/...
     secondaryWindow.loadURL(
       `${process.env['ELECTRON_RENDERER_URL']}/#${widgetHashPath}`,
     )
   } else {
-    // Em produção: index.html com a propriedade hash
     secondaryWindow.loadFile(join(__dirname, '../renderer/index.html'), {
       hash: widgetHashPath,
     })
   }
+}
+
+export type IHandlersScope = {
+  connectionHandler: typeof ConnectionHandler
+  sessionHandler: typeof SessionHandler
+  tasksHandler: typeof TasksHandler
+  timeEntriesHandler: typeof TimeEntriesHandler
+  tokenHandler: typeof TokenHandler
+  workspacesHandler: typeof WorkspacesHandler
+  addonsHandler: typeof AddonsHandler
+  metadataHandler: typeof MetadataHandler
 }
 
 function handleProtocol() {

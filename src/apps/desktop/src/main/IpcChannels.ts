@@ -1,6 +1,10 @@
 export const IpcChannels = {
+  WIDGET_SET_IGNORE_MOUSE: 'widget:set-ignore-mouse',
+  WIDGET_TOGGLE_FLOATING_WINDOW: 'widget:toggle-floating-window',
   SYSTEM_VERSION: 'system:version',
   SYSTEM_GET_ENVIRONMENT: 'system:get-environment',
+  SYSTEM_GET_DISPLAYS: 'system:get-displays',
+  SYSTEM_MOVE_TO_DISPLAY: 'system:move-to-display',
 
   METADATA_PULL: 'metadata:pull',
 
@@ -44,9 +48,6 @@ export const IpcChannels = {
   ADDONS_UPDATE_LOCAL: 'addons:update-local',
   ADDONS_IMPORT: 'addons:import',
   ADDONS_INSTALL: 'addons:install',
-
-  WIDGET_SET_IGNORE_MOUSE: 'widget:set-ignore-mouse',
-  WIDGET_TOGGLE_FLOATING_WINDOW: 'widget:toggle-floating-window',
 } as const
 
 export type IpcChannelType = keyof typeof IpcChannels
