@@ -44,6 +44,9 @@ export const IpcChannels = {
   ADDONS_UPDATE_LOCAL: 'addons:update-local',
   ADDONS_IMPORT: 'addons:import',
   ADDONS_INSTALL: 'addons:install',
+
+  WIDGET_SET_IGNORE_MOUSE: 'widget:set-ignore-mouse',
+  WIDGET_TOGGLE_FLOATING_WINDOW: 'widget:toggle-floating-window',
 } as const
 
 export type IpcChannelType = keyof typeof IpcChannels

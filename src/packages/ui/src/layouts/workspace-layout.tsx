@@ -48,7 +48,10 @@ export function WorkspaceLayout() {
               <main className="flex h-full flex-1 flex-col overflow-hidden">
                 {/* 1. TOPO */}
                 {widgetPosition === 'top' && (
-                  <div className="bg-background z-10 shrink-0 border-b px-2 py-2 shadow-sm">
+                  <div
+                    data-widget-drag-boundary
+                    className="bg-background z-10 shrink-0 border-b px-2 py-2 shadow-sm"
+                  >
                     <UltimateTimeTracker />
                   </div>
                 )}
@@ -56,7 +59,10 @@ export function WorkspaceLayout() {
                 <div className="flex min-h-0 flex-1 overflow-hidden">
                   {/* 2. ESQUERDA */}
                   {widgetPosition === 'left' && (
-                    <div className="bg-background z-10 flex h-full shrink-0 border-r shadow-sm">
+                    <div
+                      data-widget-drag-boundary
+                      className="bg-background z-10 flex h-full shrink-0 border-r shadow-sm"
+                    >
                       <UltimateTimeTracker />
                     </div>
                   )}
@@ -73,7 +79,10 @@ export function WorkspaceLayout() {
 
                   {/* 3. DIREITA */}
                   {widgetPosition === 'right' && (
-                    <div className="bg-background z-10 flex h-full shrink-0 border-l shadow-sm">
+                    <div
+                      data-widget-drag-boundary
+                      className="bg-background z-10 flex h-full shrink-0 border-l shadow-sm"
+                    >
                       <UltimateTimeTracker />
                     </div>
                   )}
@@ -81,7 +90,10 @@ export function WorkspaceLayout() {
 
                 {/* 4. RODAPÉ */}
                 {widgetPosition === 'bottom' && (
-                  <div className="bg-background z-10 shrink-0 border-t px-2 py-2 shadow-sm">
+                  <div
+                    data-widget-drag-boundary
+                    className="bg-background z-10 shrink-0 border-t px-2 py-2 shadow-sm"
+                  >
                     <UltimateTimeTracker />
                   </div>
                 )}

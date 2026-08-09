@@ -2,6 +2,7 @@ import {
   ActivitiesLayout,
   AppLayout,
   HomeLayout,
+  WidgetLayout,
   WorkspaceLayout,
 } from '@metric-org/ui/layouts'
 import {
@@ -19,6 +20,23 @@ import {
 import { createHashRouter, Navigate } from 'react-router-dom'
 
 export const router = createHashRouter([
+  // 1. ROTAS ISOLADAS DE WIDGETS (Fora do AppLayout)
+  {
+    path: 'workspaces/:workspaceId/widgets',
+    element: <WidgetLayout />,
+    errorElement: <Error />,
+    children: [
+      {
+        errorElement: <Error />,
+        children: [
+          { path: 'timer', element: <TimerWidget /> },
+          { path: '*', element: <NotFound /> },
+        ],
+      },
+    ],
+  },
+
+  // 2. APLICAÇÃO PRINCIPAL (Com AppRail, Sidebars e Layout Padrão)
   {
     path: '/',
     element: <AppLayout />,
@@ -72,10 +90,6 @@ export const router = createHashRouter([
                   },
                   { path: 'settings', element: <WorkspaceSettings /> },
                   { path: 'addons', element: <AddonsPage /> },
-                  {
-                    path: 'widgets',
-                    children: [{ path: 'timer', element: <TimerWidget /> }],
-                  },
                   { path: '*', element: <NotFound /> },
                 ],
               },

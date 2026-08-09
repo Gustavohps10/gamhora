@@ -261,6 +261,7 @@ export interface EnvironmentInfo {
 export interface ISystemAPI {
   getAppVersion(): Promise<string>
   getEnvironment(): Promise<EnvironmentInfo>
+  setIgnoreMouseEvents(ignore: boolean): Promise<void>
 }
 
 export interface TimerStartInput {

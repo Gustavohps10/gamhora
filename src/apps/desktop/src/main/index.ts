@@ -9,7 +9,6 @@ import { ContainerBuilder, PlatformDependencies } from '@metric-org/IoC'
 import {
   app,
   BrowserWindow,
-  Menu,
   net,
   protocol,
   screen,
@@ -36,6 +35,7 @@ import { MetadataHandler } from '@/main/handlers/MetadataHandler'
 import { WorkspacesHandler } from '@/main/handlers/WorkspacesHandler'
 import { DataSourceResolver } from '@/main/resolvers/data-source-resolver'
 import { openIpcRoutes } from '@/main/routes'
+import { createTray } from '@/main/tray'
 
 let mainWindow: BrowserWindow | null = null
 let tray: Tray | null = null
@@ -58,6 +58,7 @@ const createWindow = () => {
       preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false,
       contextIsolation: true,
+      backgroundThrottling: false,
     },
   })
 
@@ -91,29 +92,33 @@ export type IHandlersScope = {
   metadataHandler: typeof MetadataHandler
 }
 
-const createSecondaryWindow = () => {
+const createSecondaryWindow = (activeWorkspaceId?: string) => {
+  const primaryDisplay = screen.getPrimaryDisplay()
+  const { width, height } = primaryDisplay.workAreaSize
+
   secondaryWindow = new BrowserWindow({
-    width: 400,
-    height: 420,
+    width,
+    height,
+    x: 0,
+    y: 0,
     show: false,
-    frame: true,
+    frame: false,
     transparent: true,
-    skipTaskbar: true,
     alwaysOnTop: true,
-    resizable: false,
+    skipTaskbar: true,
+    resizable: true,
     hasShadow: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.mjs'),
       contextIsolation: true,
+      backgroundThrottling: false,
       sandbox: false,
     },
   })
 
+  secondaryWindow.setIgnoreMouseEvents(true, { forward: true })
+
   secondaryWindow.once('ready-to-show', () => {
-    const { width } = screen.getPrimaryDisplay().workAreaSize
-    const x = width - 280
-    const y = 160
-    secondaryWindow!.setBounds({ x, y, width: 220, height: 420 })
     secondaryWindow!.show()
   })
 
@@ -121,51 +126,21 @@ const createSecondaryWindow = () => {
     secondaryWindow = null
   })
 
+  // Define o workspace padrão caso não venha informado
+  const workspaceId = activeWorkspaceId ?? 'default'
+  const widgetHashPath = `/workspaces/${workspaceId}/widgets/timer`
+
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    // No ambiente de desenvolvimento com HashRouter: URL + /#/workspaces/...
     secondaryWindow.loadURL(
-      `${process.env['ELECTRON_RENDERER_URL']}/widgets/timer`,
+      `${process.env['ELECTRON_RENDERER_URL']}/#${widgetHashPath}`,
     )
-    // Opcional: abrir o DevTools para a janela secundária
-    // secondaryWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
-    secondaryWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    // Em produção: index.html com a propriedade hash
+    secondaryWindow.loadFile(join(__dirname, '../renderer/index.html'), {
+      hash: widgetHashPath,
+    })
   }
-}
-
-const createTray = () => {
-  tray = new Tray(join(__dirname, './assets/timer-icon.png'))
-
-  const buildContextMenu = () =>
-    Menu.buildFromTemplate([
-      {
-        label: secondaryWindow?.isVisible()
-          ? 'Ocultar Janela Flutuante'
-          : 'Habilitar Janela Flutuante',
-        click: () => {
-          if (!secondaryWindow || secondaryWindow.isDestroyed()) {
-            createSecondaryWindow()
-          } else {
-            secondaryWindow.isVisible()
-              ? secondaryWindow.hide()
-              : secondaryWindow.show()
-          }
-        },
-      },
-      { type: 'separator' },
-      { label: 'Sair', role: 'quit' },
-    ])
-
-  tray.setToolTip('Metric')
-
-  tray.on('click', () => {
-    const menu = buildContextMenu()
-    tray?.popUpContextMenu(menu)
-  })
-
-  tray.on('right-click', () => {
-    const menu = buildContextMenu()
-    tray?.popUpContextMenu(menu)
-  })
 }
 
 function handleProtocol() {
@@ -267,7 +242,12 @@ app.whenReady().then(async () => {
     }
   }
 
+  tray = createTray(
+    () => secondaryWindow,
+    () => createSecondaryWindow(),
+  )
   createWindow()
+  createSecondaryWindow() // Cria a janela flutuante para o workspace padrão
 
   //ANALISAR FUTURAMENTE o uso no main process
   // exposeIpcMainRxStorage({

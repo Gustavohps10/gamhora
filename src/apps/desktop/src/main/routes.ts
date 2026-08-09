@@ -1,6 +1,6 @@
 import { IDataSourceResolver, IServiceProvider } from '@metric-org/application'
 import { IRequest } from '@metric-org/shared/transport'
-import { app } from 'electron'
+import { app, BrowserWindow } from 'electron'
 
 import { IpcHandler } from '@/main/adapters/IpcHandler'
 import {
@@ -130,4 +130,16 @@ export function openIpcRoutes(serviceProvider: IServiceProvider): void {
   IpcHandler.register('ADDONS_INSTALL', (e, req) =>
     addonsHandler.install(e, req),
   )
+
+  // --- WIDGET / MOUSE EVENTS ---
+  IpcHandler.register('WIDGET_SET_IGNORE_MOUSE', (event, req) => {
+    const ignore = req?.body?.ignore ?? true
+    const win = BrowserWindow.fromWebContents(event.sender)
+
+    if (win && !win.isDestroyed()) {
+      win.setIgnoreMouseEvents(ignore, { forward: true })
+    }
+
+    return Promise.resolve({ success: true })
+  })
 }

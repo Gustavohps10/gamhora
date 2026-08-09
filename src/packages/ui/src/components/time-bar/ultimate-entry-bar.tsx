@@ -1,10 +1,6 @@
 // components/time-bar/ultimate-entry-bar.tsx
 'use client'
 
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine'
-import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter'
-import { disableNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/disable-native-drag-preview'
-import { preventUnhandled } from '@atlaskit/pragmatic-drag-and-drop/prevent-unhandled'
 import {
   closestCenter,
   DndContext,
@@ -45,10 +41,11 @@ import {
   X,
 } from 'lucide-react'
 import React, {
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -91,21 +88,6 @@ const mockActivities: Array<{
   { id: 'break', name: 'Break', icon: Coffee },
 ]
 
-type SortableBlockId =
-  | 'task'
-  | 'timer'
-  | 'today'
-  | 'actions'
-  | 'tools'
-  | 'details'
-const DEFAULT_ORDER: SortableBlockId[] = [
-  'task',
-  'timer',
-  'today',
-  'actions',
-  'tools',
-  'details',
-]
 const STORAGE_KEY = 'metric:widget:block-order'
 const FREE_DRAG_STORAGE_KEY = 'metric:widget:free-offset'
 
@@ -132,17 +114,561 @@ function loadFreeOffsets(): FreeOffsets {
   return DEFAULT_FREE_OFFSETS
 }
 
-function loadOrder(): SortableBlockId[] {
-  if (typeof window === 'undefined') return DEFAULT_ORDER
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    const parsed = raw ? JSON.parse(raw) : null
-    if (Array.isArray(parsed) && parsed.length === DEFAULT_ORDER.length) {
-      const hasAll = DEFAULT_ORDER.every((item) => parsed.includes(item))
-      if (hasAll) return parsed as SortableBlockId[]
+const getDragBoundaryElement = (element: HTMLElement): HTMLElement | null =>
+  element.closest<HTMLElement>('[data-widget-drag-boundary]') ??
+  element.parentElement
+
+const clamp = (val: number, min: number, max: number) => {
+  const actualMin = Math.min(min, max)
+  const actualMax = Math.max(min, max)
+  return Math.max(actualMin, Math.min(actualMax, val))
+}
+
+// ---------------------------------------------------------------------------
+// 1. CONTEXT API (Compartilhamento de Estado para os Componentes Compostos)
+// ---------------------------------------------------------------------------
+type UltimateTimeTrackerContextType = {
+  isVertical: boolean
+  widgetPosition: WidgetPosition
+  isMinimized: boolean
+  setIsMinimized: React.Dispatch<React.SetStateAction<boolean>>
+  widgetHandleRef: React.RefObject<HTMLDivElement | null>
+
+  taskId: string
+  setTaskId: React.Dispatch<React.SetStateAction<string>>
+  description: string
+  setDescription: React.Dispatch<React.SetStateAction<string>>
+  selectedActivity: string
+  setSelectedActivity: React.Dispatch<React.SetStateAction<string>>
+  manualInitialSeconds: number
+  setManualInitialSeconds: React.Dispatch<React.SetStateAction<number>>
+
+  isEditingVertical: boolean
+  setIsEditingVertical: React.Dispatch<React.SetStateAction<boolean>>
+  timerDirection: 'up' | 'down'
+  isRunning: boolean
+  isIdle: boolean
+
+  handleStart: () => void
+  handlePause: () => void
+  handleStop: () => void
+}
+
+const UltimateTimeTrackerContext =
+  createContext<UltimateTimeTrackerContextType | null>(null)
+
+export const useTrackerContext = () => {
+  const context = useContext(UltimateTimeTrackerContext)
+  if (!context) {
+    throw new Error(
+      'UltimateTimeTracker compound components must be used within <UltimateTimeTracker>',
+    )
+  }
+  return context
+}
+
+// ---------------------------------------------------------------------------
+// 2. ROOT COMPONENT (Mantém a lógica intacta de PointerEvents e Resize)
+// ---------------------------------------------------------------------------
+export const UltimateTimeTracker = ({
+  children,
+}: {
+  children?: React.ReactNode
+}) => {
+  const [taskId, setTaskId] = useState<string>('')
+  const [description, setDescription] = useState<string>('')
+  const [selectedActivity, setSelectedActivity] = useState<string>('dev')
+  const [manualInitialSeconds, setManualInitialSeconds] = useState<number>(0)
+
+  const [isEditingVertical, setIsEditingVertical] = useState(false)
+  const [isMinimized, setIsMinimized] = useState(false)
+
+  const [freeOffsets, setFreeOffsets] =
+    useState<FreeOffsets>(DEFAULT_FREE_OFFSETS)
+
+  const { timerDirection, setTimerDirection, widgetPosition } =
+    useTimerSettings()
+  const db = useSyncStore((s) => s.db)
+
+  const activeEntry = useTimeEntryStore((s) => s.active)
+  const playCurrentTimeEntry = useTimeEntryStore((s) => s.playCurrentTimeEntry)
+  const pauseCurrentTimeEntry = useTimeEntryStore(
+    (s) => s.pauseCurrentTimeEntry,
+  )
+  const stopCurrentTimeEntry = useTimeEntryStore((s) => s.stopCurrentTimeEntry)
+  const createNewTimeEntry = useTimeEntryStore((s) => s.createNewTimeEntry)
+
+  useEffect(() => {
+    setFreeOffsets(loadFreeOffsets())
+  }, [])
+
+  useEffect(() => {
+    if (activeEntry) {
+      if (activeEntry.task?.id) setTaskId(activeEntry.task.id)
+      if (activeEntry.comments !== undefined)
+        setDescription(activeEntry.comments)
+      if (activeEntry.activity?.id) setSelectedActivity(activeEntry.activity.id)
+      if (activeEntry.timerConfig?.mode) {
+        setTimerDirection(
+          activeEntry.timerConfig.mode === 'countup' ? 'up' : 'down',
+        )
+      }
     }
-  } catch {}
-  return DEFAULT_ORDER
+  }, [activeEntry, setTimerDirection])
+
+  const isRunning = activeEntry?.timeStatus === 'running'
+  const isIdle = !activeEntry
+  const isVertical = widgetPosition === 'left' || widgetPosition === 'right'
+
+  const cardRef = useRef<HTMLDivElement | null>(null)
+  const widgetHandleRef = useRef<HTMLDivElement | null>(null)
+
+  const currentOffsetRef = useRef<FreeOffset>({ x: 0, y: 0 })
+  const freeOffsetsRef = useRef<FreeOffsets>(DEFAULT_FREE_OFFSETS)
+  const isDraggingWidgetRef = useRef(false)
+
+  const dragStateRef = useRef<{
+    initialRect: DOMRect
+    parentRect: DOMRect
+    initialClientX: number
+    initialClientY: number
+    animationFrameId: number | null
+  } | null>(null)
+
+  useEffect(() => {
+    freeOffsetsRef.current = freeOffsets
+    currentOffsetRef.current = freeOffsets[
+      widgetPosition as WidgetPosition
+    ] ?? { x: 0, y: 0 }
+  }, [freeOffsets, widgetPosition])
+
+  useLayoutEffect(() => {
+    const element = cardRef.current
+    if (!element || isDraggingWidgetRef.current) return
+
+    const offset = freeOffsets[widgetPosition as WidgetPosition] ?? {
+      x: 0,
+      y: 0,
+    }
+    const newX = isVertical ? 0 : offset.x
+    const newY = isVertical ? offset.y : 0
+
+    element.style.transform = `translate3d(${newX}px, ${newY}px, 0)`
+  }, [freeOffsets, widgetPosition, isVertical])
+
+  useEffect(() => {
+    const element = cardRef.current
+    const dragHandle = widgetHandleRef.current
+    if (!element || !dragHandle) return
+
+    const getClampedDelta = (
+      initialRect: DOMRect,
+      parentRect: DOMRect,
+      rawDx: number,
+      rawDy: number,
+    ) => {
+      const padding = 8
+
+      const minDx = parentRect.left - initialRect.left + padding
+      const maxDx = parentRect.right - initialRect.right - padding
+      const minDy = parentRect.top - initialRect.top + padding
+      const maxDy = parentRect.bottom - initialRect.bottom - padding
+
+      return {
+        dx: clamp(rawDx, minDx, maxDx),
+        dy: clamp(rawDy, minDy, maxDy),
+      }
+    }
+
+    const scheduleTransform = (offset: FreeOffset) => {
+      const dragState = dragStateRef.current
+      if (!dragState) return
+
+      if (dragState.animationFrameId !== null) {
+        cancelAnimationFrame(dragState.animationFrameId)
+      }
+
+      dragState.animationFrameId = requestAnimationFrame(() => {
+        element.style.transform = `translate3d(${offset.x}px, ${offset.y}px, 0)`
+
+        if (dragStateRef.current) {
+          dragStateRef.current.animationFrameId = null
+        }
+      })
+    }
+
+    let activePointerId: number | null = null
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerId !== activePointerId) return
+      const dragState = dragStateRef.current
+      if (!dragState) return
+
+      const rawDx = event.clientX - dragState.initialClientX
+      const rawDy = event.clientY - dragState.initialClientY
+
+      const { dx, dy } = getClampedDelta(
+        dragState.initialRect,
+        dragState.parentRect,
+        rawDx,
+        rawDy,
+      )
+
+      const currentOffset = currentOffsetRef.current
+      const nextOffset: FreeOffset = isVertical
+        ? { x: 0, y: currentOffset.y + dy }
+        : { x: currentOffset.x + dx, y: 0 }
+
+      scheduleTransform(nextOffset)
+    }
+
+    const finishDrag = (event: PointerEvent) => {
+      if (event.pointerId !== activePointerId) return
+
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', finishDrag)
+      window.removeEventListener('pointercancel', finishDrag)
+
+      if (
+        activePointerId !== null &&
+        dragHandle.hasPointerCapture(activePointerId)
+      ) {
+        dragHandle.releasePointerCapture(activePointerId)
+      }
+      activePointerId = null
+
+      const dragState = dragStateRef.current
+      if (!dragState) {
+        isDraggingWidgetRef.current = false
+        return
+      }
+
+      if (dragState.animationFrameId !== null) {
+        cancelAnimationFrame(dragState.animationFrameId)
+      }
+
+      const rawDx = event.clientX - dragState.initialClientX
+      const rawDy = event.clientY - dragState.initialClientY
+
+      const { dx, dy } = getClampedDelta(
+        dragState.initialRect,
+        dragState.parentRect,
+        rawDx,
+        rawDy,
+      )
+
+      const previousOffset = currentOffsetRef.current
+      const nextOffset: FreeOffset = isVertical
+        ? { x: 0, y: previousOffset.y + dy }
+        : { x: previousOffset.x + dx, y: 0 }
+
+      const nextOffsets: FreeOffsets = {
+        ...freeOffsetsRef.current,
+        [widgetPosition as WidgetPosition]: nextOffset,
+      }
+
+      currentOffsetRef.current = nextOffset
+      freeOffsetsRef.current = nextOffsets
+
+      element.style.transform = `translate3d(${nextOffset.x}px, ${nextOffset.y}px, 0)`
+      element.style.transition = ''
+      element.classList.remove('z-30', 'shadow-xl')
+
+      dragStateRef.current = null
+      isDraggingWidgetRef.current = false
+
+      setFreeOffsets(nextOffsets)
+
+      window.localStorage.setItem(
+        FREE_DRAG_STORAGE_KEY,
+        JSON.stringify(nextOffsets),
+      )
+    }
+
+    const onPointerDown = (event: PointerEvent) => {
+      // Só botão esquerdo do mouse (ou toque/caneta, que não reportam "button")
+      if (event.button !== 0 && event.pointerType === 'mouse') return
+
+      activePointerId = event.pointerId
+      dragHandle.setPointerCapture(activePointerId)
+
+      const initialRect = element.getBoundingClientRect()
+      const boundary = getDragBoundaryElement(element)
+      const parentRect = boundary
+        ? boundary.getBoundingClientRect()
+        : ({
+            left: 0,
+            top: 0,
+            right: window.innerWidth,
+            bottom: window.innerHeight,
+          } as DOMRect)
+
+      dragStateRef.current = {
+        initialRect,
+        parentRect,
+        initialClientX: event.clientX,
+        initialClientY: event.clientY,
+        animationFrameId: null,
+      }
+
+      isDraggingWidgetRef.current = true
+      element.style.transition = 'none'
+      element.classList.add('z-30', 'shadow-xl')
+
+      window.addEventListener('pointermove', onPointerMove)
+      window.addEventListener('pointerup', finishDrag)
+      window.addEventListener('pointercancel', finishDrag)
+
+      event.preventDefault()
+    }
+
+    dragHandle.addEventListener('pointerdown', onPointerDown)
+
+    return () => {
+      dragHandle.removeEventListener('pointerdown', onPointerDown)
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', finishDrag)
+      window.removeEventListener('pointercancel', finishDrag)
+
+      if (dragStateRef.current?.animationFrameId !== null) {
+        cancelAnimationFrame(dragStateRef.current?.animationFrameId ?? -1)
+      }
+      dragStateRef.current = null
+      isDraggingWidgetRef.current = false
+    }
+  }, [isVertical, widgetPosition])
+
+  useEffect(() => {
+    const element = cardRef.current
+    if (!element) return
+
+    let animationFrameId: number | null = null
+
+    const clampCurrentOffsetToViewport = () => {
+      animationFrameId = null
+
+      if (isDraggingWidgetRef.current) return
+
+      const rect = element.getBoundingClientRect()
+      const boundary = getDragBoundaryElement(element)
+      if (!boundary) return
+
+      const pRect = boundary.getBoundingClientRect()
+      const current = currentOffsetRef.current
+
+      const baseLeft = rect.left - current.x
+      const baseTop = rect.top - current.y
+
+      const minX = pRect.left - baseLeft
+      const maxX = pRect.right - (baseLeft + rect.width)
+      const minY = pRect.top - baseTop
+      const maxY = pRect.bottom - (baseTop + rect.height)
+
+      const nextOffset: FreeOffset = {
+        x: isVertical ? 0 : clamp(current.x, minX, maxX),
+        y: isVertical ? clamp(current.y, minY, maxY) : 0,
+      }
+
+      if (nextOffset.x === current.x && nextOffset.y === current.y) {
+        return
+      }
+
+      const nextOffsets: FreeOffsets = {
+        ...freeOffsetsRef.current,
+        [widgetPosition as WidgetPosition]: nextOffset,
+      }
+
+      currentOffsetRef.current = nextOffset
+      freeOffsetsRef.current = nextOffsets
+
+      setFreeOffsets(nextOffsets)
+
+      window.localStorage.setItem(
+        FREE_DRAG_STORAGE_KEY,
+        JSON.stringify(nextOffsets),
+      )
+    }
+
+    let timeoutId: ReturnType<typeof setTimeout>
+    const scheduleClamp = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        if (animationFrameId !== null) return
+        animationFrameId = requestAnimationFrame(clampCurrentOffsetToViewport)
+      }, 150)
+    }
+
+    window.addEventListener('resize', scheduleClamp)
+    const observer = new ResizeObserver(scheduleClamp)
+    observer.observe(element)
+
+    scheduleClamp()
+
+    return () => {
+      clearTimeout(timeoutId)
+      window.removeEventListener('resize', scheduleClamp)
+      observer.disconnect()
+
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId)
+      }
+    }
+  }, [isVertical, widgetPosition])
+
+  const handleStart = useCallback(async () => {
+    if (!db) return
+    if (activeEntry && activeEntry.timeStatus === 'paused') {
+      await playCurrentTimeEntry(db)
+      return
+    }
+
+    const mode = timerDirection === 'up' ? 'countup' : 'countdown'
+    await createNewTimeEntry(db, {
+      taskId,
+      activityId: selectedActivity,
+      dataSourceId: 'default',
+      type: timerDirection === 'up' ? 'increasing' : 'decreasing',
+      connectionInstanceId: 'default-conn',
+      comments: description,
+      mode,
+      manualInitialSeconds,
+    })
+  }, [
+    db,
+    activeEntry,
+    timerDirection,
+    taskId,
+    selectedActivity,
+    description,
+    manualInitialSeconds,
+    playCurrentTimeEntry,
+    createNewTimeEntry,
+  ])
+
+  const handlePause = useCallback(async () => {
+    if (!db) return
+    await pauseCurrentTimeEntry(db)
+  }, [db, pauseCurrentTimeEntry])
+
+  const handleStop = useCallback(async () => {
+    if (!db) return
+    await stopCurrentTimeEntry(db)
+    setManualInitialSeconds(0)
+    setTaskId('')
+    setDescription('')
+    setIsEditingVertical(false)
+  }, [db, stopCurrentTimeEntry])
+
+  // Se o consumidor não passar children customizados, monta a composição padrão (Backward Compatibility)
+  const content = children || (
+    <>
+      <UltimateTimeTracker.Handle />
+      <UltimateTimeTracker.Blocks>
+        <UltimateTimeTracker.Block id="task" isHidden={isVertical}>
+          <UltimateTimeTracker.TaskBlock />
+        </UltimateTimeTracker.Block>
+
+        <UltimateTimeTracker.Block id="timer">
+          <UltimateTimeTracker.TimerBlock />
+        </UltimateTimeTracker.Block>
+
+        <UltimateTimeTracker.Block id="today">
+          <UltimateTimeTracker.TodayBlock />
+        </UltimateTimeTracker.Block>
+
+        <UltimateTimeTracker.Block id="actions">
+          <UltimateTimeTracker.ActionsBlock />
+        </UltimateTimeTracker.Block>
+
+        <UltimateTimeTracker.Block id="tools">
+          <UltimateTimeTracker.ToolsBlock />
+        </UltimateTimeTracker.Block>
+
+        <UltimateTimeTracker.Block id="details" isHidden={!isVertical}>
+          <UltimateTimeTracker.DetailsBlock />
+        </UltimateTimeTracker.Block>
+      </UltimateTimeTracker.Blocks>
+      <UltimateTimeTracker.InlineInput />
+    </>
+  )
+
+  const contextValue: UltimateTimeTrackerContextType = {
+    isVertical,
+    widgetPosition,
+    isMinimized,
+    setIsMinimized,
+    widgetHandleRef,
+    taskId,
+    setTaskId,
+    description,
+    setDescription,
+    selectedActivity,
+    setSelectedActivity,
+    manualInitialSeconds,
+    setManualInitialSeconds,
+    isEditingVertical,
+    setIsEditingVertical,
+    timerDirection,
+    isRunning,
+    isIdle,
+    handleStart,
+    handlePause,
+    handleStop,
+  }
+
+  return (
+    <UltimateTimeTrackerContext.Provider value={contextValue}>
+      <Card
+        ref={cardRef}
+        data-orientation={isVertical ? 'vertical' : 'horizontal'}
+        className={cn(
+          'group border-border/60 bg-card relative inline-flex w-fit items-center rounded-lg border px-1 py-1 shadow-md transition-transform duration-150 ease-out',
+          isVertical && 'h-fit w-16 flex-col items-center gap-1 px-1 py-2',
+        )}
+      >
+        <CardContent
+          className={cn(
+            'flex w-full p-0 transition-all',
+            isVertical
+              ? 'h-full min-h-0 flex-col items-center justify-start gap-3 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+              : 'flex-row items-center gap-2',
+          )}
+        >
+          {content}
+        </CardContent>
+      </Card>
+    </UltimateTimeTrackerContext.Provider>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// 3. COMPOUND COMPONENTS (Módulos que compõem o Tracker)
+// ---------------------------------------------------------------------------
+
+UltimateTimeTracker.Handle = function TrackerHandle() {
+  const { isVertical, widgetHandleRef } = useTrackerContext()
+
+  return (
+    <div
+      ref={widgetHandleRef}
+      className={cn(
+        'text-muted-foreground/30 hover:text-muted-foreground global-drag-handle flex shrink-0 cursor-grab touch-none items-center justify-center transition-colors select-none active:cursor-grabbing',
+        isVertical ? 'w-full py-3' : 'h-full px-3',
+      )}
+      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+      title={
+        isVertical
+          ? 'Arraste para mover para cima/baixo'
+          : 'Arraste para mover para esquerda/direita'
+      }
+    >
+      {isVertical ? (
+        <GripHorizontal className="h-4 w-4" />
+      ) : (
+        <GripVertical className="h-4 w-4" />
+      )}
+    </div>
+  )
 }
 
 function DragHandle({ isVertical, listeners, attributes }: any) {
@@ -208,77 +734,59 @@ function SortableItem({
   )
 }
 
-// Clamp seguro matemático (impede min > max)
-const clamp = (val: number, min: number, max: number) => {
-  const actualMin = Math.min(min, max)
-  const actualMax = Math.max(min, max)
-  return Math.max(actualMin, Math.min(actualMax, val))
+interface TrackerBlockProps {
+  id: string
+  isHidden?: boolean
+  children?: React.ReactNode
 }
 
-export const UltimateTimeTracker = () => {
-  const [taskId, setTaskId] = useState<string>('')
-  const [description, setDescription] = useState<string>('')
-  const [selectedActivity, setSelectedActivity] = useState<string>('dev')
-  const [manualInitialSeconds, setManualInitialSeconds] = useState<number>(0)
+UltimateTimeTracker.Blocks = function TrackerBlocks({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const { isVertical } = useTrackerContext()
 
-  const [isEditingVertical, setIsEditingVertical] = useState(false)
-  const [isMinimized, setIsMinimized] = useState(false)
+  const childrenArray = React.Children.toArray(children)
 
-  const [blocksOrder, setBlocksOrder] =
-    useState<SortableBlockId[]>(DEFAULT_ORDER)
-  const [freeOffsets, setFreeOffsets] =
-    useState<FreeOffsets>(DEFAULT_FREE_OFFSETS)
+  // Type Guard: Garante ao TypeScript que o child é um ReactElement com as props corretas
+  const isTrackerBlock = (
+    child: React.ReactNode,
+  ): child is React.ReactElement<TrackerBlockProps> => {
+    return (
+      React.isValidElement<TrackerBlockProps>(child) &&
+      child.props !== null &&
+      typeof child.props === 'object' &&
+      'id' in child.props
+    )
+  }
 
-  const { timerDirection, setTimerDirection, widgetPosition } =
-    useTimerSettings()
-  const db = useSyncStore((s) => s.db)
+  // Filtramos a array usando o Type Guard. O TS agora sabe que 'blockChildren' tem props tipadas.
+  const blockChildren = childrenArray.filter(isTrackerBlock)
+  const childIds = blockChildren.map((c) => c.props.id)
 
-  const activeEntry = useTimeEntryStore((s) => s.active)
-  const playCurrentTimeEntry = useTimeEntryStore((s) => s.playCurrentTimeEntry)
-  const pauseCurrentTimeEntry = useTimeEntryStore(
-    (s) => s.pauseCurrentTimeEntry,
-  )
-  const stopCurrentTimeEntry = useTimeEntryStore((s) => s.stopCurrentTimeEntry)
-  const createNewTimeEntry = useTimeEntryStore((s) => s.createNewTimeEntry)
+  const [blocksOrder, setBlocksOrder] = useState<string[]>(() => {
+    let saved: string[] = []
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      if (raw) saved = JSON.parse(raw)
+    } catch {}
 
+    const savedValid = saved.filter((id) => childIds.includes(id))
+    const missing = childIds.filter((id) => !savedValid.includes(id))
+    return [...savedValid, ...missing]
+  })
+
+  // Sincroniza blocos caso o DOM injete/remova blocos por fora
   useEffect(() => {
-    setBlocksOrder(loadOrder())
-    setFreeOffsets(loadFreeOffsets())
-  }, [])
-
-  useEffect(() => {
-    if (activeEntry) {
-      if (activeEntry.task?.id) setTaskId(activeEntry.task.id)
-      if (activeEntry.comments !== undefined)
-        setDescription(activeEntry.comments)
-      if (activeEntry.activity?.id) setSelectedActivity(activeEntry.activity.id)
-      if (activeEntry.timerConfig?.mode) {
-        setTimerDirection(
-          activeEntry.timerConfig.mode === 'countup' ? 'up' : 'down',
-        )
-      }
-    }
-  }, [activeEntry, setTimerDirection])
-
-  const isRunning = activeEntry?.timeStatus === 'running'
-  const isIdle = !activeEntry
-  const isVertical = widgetPosition === 'left' || widgetPosition === 'right'
-
-  const visibleBlocks = useMemo(() => {
-    return blocksOrder.filter((id) => {
-      // 'task' some na vertical (pois vai pro Popover)
-      if (isVertical && id === 'task') return false
-      // 'details' some na horizontal (pois a Input é embutida na barra)
-      if (!isVertical && id === 'details') return false
-      return true
+    setBlocksOrder((prev) => {
+      const valid = prev.filter((id) => childIds.includes(id))
+      const missing = childIds.filter((id) => !valid.includes(id))
+      if (missing.length === 0 && valid.length === prev.length) return prev
+      return [...valid, ...missing]
     })
-  }, [blocksOrder, isVertical])
+  }, [childIds.join(',')])
 
-  const selectedAct =
-    mockActivities.find((a) => a.id === selectedActivity) || mockActivities[0]
-  const ActivityIcon = selectedAct.icon
-
-  // --- DND-KIT para Subgrupos ---
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 3 } }),
     useSensor(KeyboardSensor, {
@@ -301,330 +809,116 @@ export const UltimateTimeTracker = () => {
     }
   }
 
-  // --- ARRASTE GLOBAL DA BARRA (100% DOM Manipulado) ---
-  const cardRef = useRef<HTMLDivElement | null>(null)
-  const widgetHandleRef = useRef<HTMLDivElement | null>(null)
+  // Filtra apenas os IDs que não estão explicitamente marcados como 'isHidden'
+  const visibleChildIds = blockChildren
+    .filter((c) => !c.props.isHidden)
+    .map((c) => c.props.id)
 
-  const currentOffsetRef = useRef<FreeOffset>({ x: 0, y: 0 })
-  const freeOffsetsRef = useRef<FreeOffsets>(DEFAULT_FREE_OFFSETS)
-  const isDraggingWidgetRef = useRef(false)
+  const visibleBlocks = blocksOrder.filter((id) => visibleChildIds.includes(id))
 
-  const dragStateRef = useRef<{
-    initialRect: DOMRect
-    parentRect: DOMRect
-    animationFrameId: number | null
-  } | null>(null)
-
-  useEffect(() => {
-    freeOffsetsRef.current = freeOffsets
-    currentOffsetRef.current = freeOffsets[
-      widgetPosition as WidgetPosition
-    ] ?? { x: 0, y: 0 }
-  }, [freeOffsets, widgetPosition])
-
-  // Aplica o transform com a posição validada sem acionar a re-renderização durante o arraste
-  useLayoutEffect(() => {
-    const element = cardRef.current
-    if (!element || isDraggingWidgetRef.current) return
-
-    const offset = freeOffsets[widgetPosition as WidgetPosition] ?? {
-      x: 0,
-      y: 0,
-    }
-    const newX = isVertical ? 0 : offset.x
-    const newY = isVertical ? offset.y : 0
-
-    element.style.transform = `translate3d(${newX}px, ${newY}px, 0)`
-  }, [freeOffsets, widgetPosition, isVertical])
-
-  useEffect(() => {
-    const element = cardRef.current
-    const dragHandle = widgetHandleRef.current
-    if (!element || !dragHandle) return
-
-    const getClampedDelta = (
-      initialRect: DOMRect,
-      parentRect: DOMRect,
-      rawDx: number,
-      rawDy: number,
-    ) => {
-      const padding = 8
-
-      const minDx = parentRect.left - initialRect.left + padding
-      const maxDx = parentRect.right - initialRect.right - padding
-      const minDy = parentRect.top - initialRect.top + padding
-      const maxDy = parentRect.bottom - initialRect.bottom - padding
-
-      return {
-        dx: clamp(rawDx, minDx, maxDx),
-        dy: clamp(rawDy, minDy, maxDy),
-      }
-    }
-
-    const scheduleTransform = (offset: FreeOffset) => {
-      const dragState = dragStateRef.current
-      if (!dragState) return
-
-      if (dragState.animationFrameId !== null) {
-        cancelAnimationFrame(dragState.animationFrameId)
-      }
-
-      dragState.animationFrameId = requestAnimationFrame(() => {
-        element.style.transform = `translate3d(${offset.x}px, ${offset.y}px, 0)`
-
-        if (dragStateRef.current) {
-          dragStateRef.current.animationFrameId = null
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+      modifiers={[
+        restrictToParentElement,
+        isVertical ? restrictToVerticalAxis : restrictToHorizontalAxis,
+      ]}
+    >
+      <SortableContext
+        items={visibleBlocks}
+        strategy={
+          isVertical
+            ? verticalListSortingStrategy
+            : horizontalListSortingStrategy
         }
-      })
-    }
+      >
+        {visibleBlocks.map((id) => {
+          // Usamos a mesma array garantidamente tipada
+          const child = blockChildren.find((c) => c.props.id === id)
+          return child || null
+        })}
+      </SortableContext>
+    </DndContext>
+  )
+}
 
-    const cleanup = combine(
-      draggable({
-        element,
-        dragHandle,
-        onGenerateDragPreview: ({ nativeSetDragImage }) => {
-          disableNativeDragPreview({ nativeSetDragImage })
-        },
-        onDragStart: () => {
-          preventUnhandled.start()
+UltimateTimeTracker.Block = function TrackerBlock({
+  id,
+  isHidden,
+  children,
+}: TrackerBlockProps) {
+  const { isVertical } = useTrackerContext()
+  if (isHidden) return null
 
-          const initialRect = element.getBoundingClientRect()
-          const parent = element.parentElement
-          const parentRect = parent
-            ? parent.getBoundingClientRect()
-            : ({
-                left: 0,
-                top: 0,
-                right: window.innerWidth,
-                bottom: window.innerHeight,
-              } as DOMRect)
+  return (
+    <SortableItem id={id} isVertical={isVertical}>
+      {children}
+    </SortableItem>
+  )
+}
 
-          dragStateRef.current = {
-            initialRect,
-            parentRect,
-            animationFrameId: null,
-          }
-
-          isDraggingWidgetRef.current = true
-          element.style.transition = 'none'
-          element.classList.add('z-30', 'shadow-xl')
-        },
-        onDrag: ({ location }) => {
-          const dragState = dragStateRef.current
-          if (!dragState) return
-
-          const rawDx =
-            location.current.input.clientX - location.initial.input.clientX
-          const rawDy =
-            location.current.input.clientY - location.initial.input.clientY
-
-          const { dx, dy } = getClampedDelta(
-            dragState.initialRect,
-            dragState.parentRect,
-            rawDx,
-            rawDy,
-          )
-
-          const currentOffset = currentOffsetRef.current
-          const nextOffset: FreeOffset = isVertical
-            ? { x: 0, y: currentOffset.y + dy }
-            : { x: currentOffset.x + dx, y: 0 }
-
-          scheduleTransform(nextOffset)
-        },
-        onDrop: ({ location }) => {
-          preventUnhandled.stop()
-
-          const dragState = dragStateRef.current
-          if (!dragState) {
-            isDraggingWidgetRef.current = false
-            return
-          }
-
-          if (dragState.animationFrameId !== null) {
-            cancelAnimationFrame(dragState.animationFrameId)
-          }
-
-          const rawDx =
-            location.current.input.clientX - location.initial.input.clientX
-          const rawDy =
-            location.current.input.clientY - location.initial.input.clientY
-
-          const { dx, dy } = getClampedDelta(
-            dragState.initialRect,
-            dragState.parentRect,
-            rawDx,
-            rawDy,
-          )
-
-          const previousOffset = currentOffsetRef.current
-          const nextOffset: FreeOffset = isVertical
-            ? { x: 0, y: previousOffset.y + dy }
-            : { x: previousOffset.x + dx, y: 0 }
-
-          const nextOffsets: FreeOffsets = {
-            ...freeOffsetsRef.current,
-            [widgetPosition as WidgetPosition]: nextOffset,
-          }
-
-          currentOffsetRef.current = nextOffset
-          freeOffsetsRef.current = nextOffsets
-
-          element.style.transform = `translate3d(${nextOffset.x}px, ${nextOffset.y}px, 0)`
-          element.style.transition = ''
-          element.classList.remove('z-30', 'shadow-xl')
-
-          dragStateRef.current = null
-          isDraggingWidgetRef.current = false
-
-          setFreeOffsets(nextOffsets)
-
-          window.localStorage.setItem(
-            FREE_DRAG_STORAGE_KEY,
-            JSON.stringify(nextOffsets),
-          )
-        },
-      }),
-    )
-
-    return () => {
-      if (dragStateRef.current?.animationFrameId !== null) {
-        cancelAnimationFrame(dragStateRef.current?.animationFrameId ?? -1)
-      }
-      dragStateRef.current = null
-      isDraggingWidgetRef.current = false
-      cleanup()
-    }
-  }, [isVertical, widgetPosition])
-
-  // --- Recálculo de limites no resize c/ Debounce ---
-  useEffect(() => {
-    const element = cardRef.current
-    if (!element) return
-
-    let animationFrameId: number | null = null
-
-    const clampCurrentOffsetToViewport = () => {
-      animationFrameId = null
-
-      if (isDraggingWidgetRef.current) return
-
-      const rect = element.getBoundingClientRect()
-      const parent = element.parentElement
-      if (!parent) return
-
-      const pRect = parent.getBoundingClientRect()
-      const current = currentOffsetRef.current
-
-      // Usando math base position pra não forçar synchronous layout calc
-      const baseLeft = rect.left - current.x
-      const baseTop = rect.top - current.y
-
-      const minX = pRect.left - baseLeft
-      const maxX = pRect.right - (baseLeft + rect.width)
-      const minY = pRect.top - baseTop
-      const maxY = pRect.bottom - (baseTop + rect.height)
-
-      const nextOffset: FreeOffset = {
-        x: isVertical ? 0 : clamp(current.x, minX, maxX),
-        y: isVertical ? clamp(current.y, minY, maxY) : 0,
-      }
-
-      if (nextOffset.x === current.x && nextOffset.y === current.y) {
-        return
-      }
-
-      const nextOffsets: FreeOffsets = {
-        ...freeOffsetsRef.current,
-        [widgetPosition as WidgetPosition]: nextOffset,
-      }
-
-      currentOffsetRef.current = nextOffset
-      freeOffsetsRef.current = nextOffsets
-
-      setFreeOffsets(nextOffsets)
-
-      window.localStorage.setItem(
-        FREE_DRAG_STORAGE_KEY,
-        JSON.stringify(nextOffsets),
-      )
-    }
-
-    let timeoutId: ReturnType<typeof setTimeout>
-    const scheduleClamp = () => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => {
-        if (animationFrameId !== null) return
-        animationFrameId = requestAnimationFrame(clampCurrentOffsetToViewport)
-      }, 150)
-    }
-
-    window.addEventListener('resize', scheduleClamp)
-
-    const observer = new ResizeObserver(scheduleClamp)
-    observer.observe(element)
-
-    // Avaliação inicial
-    scheduleClamp()
-
-    return () => {
-      clearTimeout(timeoutId)
-      window.removeEventListener('resize', scheduleClamp)
-      observer.disconnect()
-
-      if (animationFrameId !== null) {
-        cancelAnimationFrame(animationFrameId)
-      }
-    }
-  }, [isVertical, widgetPosition])
-
-  const handleStart = useCallback(async () => {
-    if (!db) return
-    if (activeEntry && activeEntry.timeStatus === 'paused') {
-      await playCurrentTimeEntry(db)
-      return
-    }
-
-    const mode = timerDirection === 'up' ? 'countup' : 'countdown'
-    await createNewTimeEntry(db, {
-      taskId,
-      activityId: selectedActivity,
-      dataSourceId: 'default',
-      type: timerDirection === 'up' ? 'increasing' : 'decreasing',
-      connectionInstanceId: 'default-conn',
-      comments: description,
-      mode,
-      manualInitialSeconds,
-    })
-  }, [
-    db,
-    activeEntry,
-    timerDirection,
-    taskId,
-    selectedActivity,
+UltimateTimeTracker.InlineInput = function TrackerInlineInput() {
+  const {
+    isVertical,
+    isMinimized,
+    setIsMinimized,
     description,
-    manualInitialSeconds,
-    playCurrentTimeEntry,
-    createNewTimeEntry,
-  ])
+    setDescription,
+  } = useTrackerContext()
 
-  const handlePause = useCallback(async () => {
-    if (!db) return
-    await pauseCurrentTimeEntry(db)
-  }, [db, pauseCurrentTimeEntry])
+  if (isVertical) return null
 
-  const handleStop = useCallback(async () => {
-    if (!db) return
-    await stopCurrentTimeEntry(db)
-    setManualInitialSeconds(0)
-    setTaskId('')
-    setDescription('')
-    setIsEditingVertical(false)
-  }, [db, stopCurrentTimeEntry])
+  return (
+    <>
+      {!isMinimized && (
+        <div className="w-48 shrink-0 pl-1">
+          <div className="hover:bg-muted/40 focus-within:bg-muted/40 flex h-10 items-center gap-1.5 rounded-lg bg-transparent px-2 transition-colors">
+            <Minus className="text-muted-foreground/40 h-4 w-4 shrink-0" />
+            <Input
+              value={description}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setDescription(e.target.value)
+              }
+              placeholder="What are you working on?"
+              className="text-foreground h-full border-none bg-transparent px-1 text-[13px] shadow-none focus-visible:ring-0"
+            />
+          </div>
+        </div>
+      )}
+      <Button
+        variant="ghost"
+        size="icon"
+        className={cn(
+          'text-muted-foreground hover:text-foreground h-8 w-8 shrink-0 transition-transform',
+          !isMinimized && 'ml-auto',
+        )}
+        onClick={() => setIsMinimized(!isMinimized)}
+      >
+        {isMinimized ? (
+          <Maximize2 className="h-4 w-4" />
+        ) : (
+          <Minimize2 className="h-4 w-4" />
+        )}
+      </Button>
+    </>
+  )
+}
 
-  // --- RENDERS DE BLOCOS INDIVIDUAIS ---
+// ---------------------------------------------------------------------------
+// 4. BLOCOS DE UI INTERNOS (Consumindo Context)
+// ---------------------------------------------------------------------------
 
-  const renderTaskBlock = () => (
+UltimateTimeTracker.TaskBlock = function TaskBlock() {
+  const { taskId, setTaskId, selectedActivity, setSelectedActivity } =
+    useTrackerContext()
+
+  const selectedAct =
+    mockActivities.find((a) => a.id === selectedActivity) || mockActivities[0]
+  const ActivityIcon = selectedAct.icon
+
+  return (
     <div className="flex h-10 w-32 shrink-0 flex-col justify-between gap-[4px]">
       <LookupInput
         value={taskId}
@@ -680,8 +974,13 @@ export const UltimateTimeTracker = () => {
       </Select>
     </div>
   )
+}
 
-  const renderTimerBlock = () => (
+UltimateTimeTracker.TimerBlock = function TimerBlock() {
+  const { isVertical, timerDirection, setManualInitialSeconds } =
+    useTrackerContext()
+
+  return (
     <div
       className={cn(
         'flex shrink-0 items-center justify-center',
@@ -704,8 +1003,11 @@ export const UltimateTimeTracker = () => {
       </div>
     </div>
   )
+}
 
-  const renderTodayBlock = () => (
+UltimateTimeTracker.TodayBlock = function TodayBlock() {
+  const { isVertical } = useTrackerContext()
+  return (
     <div
       className={cn(
         'flex shrink-0 items-center justify-center',
@@ -725,8 +1027,19 @@ export const UltimateTimeTracker = () => {
       </span>
     </div>
   )
+}
 
-  const renderActionsBlock = () => (
+UltimateTimeTracker.ActionsBlock = function ActionsBlock() {
+  const {
+    isVertical,
+    isIdle,
+    isRunning,
+    handleStart,
+    handlePause,
+    handleStop,
+  } = useTrackerContext()
+
+  return (
     <div
       className={cn(
         'flex shrink-0 items-center justify-center',
@@ -782,8 +1095,11 @@ export const UltimateTimeTracker = () => {
       )}
     </div>
   )
+}
 
-  const renderToolsBlock = () => (
+UltimateTimeTracker.ToolsBlock = function ToolsBlock() {
+  const { isVertical } = useTrackerContext()
+  return (
     <div
       className={cn(
         'flex shrink-0 items-center',
@@ -805,201 +1121,97 @@ export const UltimateTimeTracker = () => {
       </div>
     </div>
   )
+}
 
-  const renderDetailsBlock = () => {
-    if (!isVertical) return null
-    return (
-      <div className="flex shrink-0 items-center justify-center">
-        <Popover open={isEditingVertical} onOpenChange={setIsEditingVertical}>
-          <PopoverTrigger asChild>
-            <Button
-              variant={isEditingVertical ? 'secondary' : 'ghost'}
-              size="icon"
-              className="text-muted-foreground hover:text-foreground h-7 w-7 shrink-0 rounded-full transition-colors"
-              title="Adicionar comentário / detalhes da tarefa"
-            >
-              {isEditingVertical ? (
-                <X className="h-3.5 w-3.5" />
-              ) : (
-                <MessageSquareDiff className="h-3.5 w-3.5" />
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            side={widgetPosition === 'left' ? 'right' : 'left'}
-            sideOffset={16}
-            className="border-border/50 bg-card flex w-[240px] flex-col gap-2.5 rounded-lg border p-2.5 shadow-lg"
-          >
-            <div className="mb-0.5 flex items-center justify-between">
-              <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-                Detalhes da Tarefa
-              </span>
-              <ActivityIcon className="text-primary h-3.5 w-3.5 opacity-80" />
-            </div>
+UltimateTimeTracker.DetailsBlock = function DetailsBlock() {
+  const {
+    isVertical,
+    widgetPosition,
+    isEditingVertical,
+    setIsEditingVertical,
+    taskId,
+    setTaskId,
+    selectedActivity,
+    setSelectedActivity,
+    description,
+    setDescription,
+  } = useTrackerContext()
 
-            <LookupInput
-              value={taskId}
-              onChange={setTaskId}
-              onOpenLookup={() => {}}
-              size="sm"
-              placeholder="Vincular Task ID"
-              className="w-full"
-            />
+  if (!isVertical) return null
 
-            <Select
-              value={selectedActivity}
-              onValueChange={setSelectedActivity}
-            >
-              <SelectTrigger className="h-8 w-full text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {mockActivities.map(({ id, name, icon: Icon }) => (
-                  <SelectItem key={id} value={id} className="text-xs">
-                    <span className="flex items-center gap-2">
-                      <Icon
-                        className={cn(
-                          'h-3 w-3',
-                          id === selectedActivity
-                            ? 'text-primary'
-                            : 'text-muted-foreground',
-                        )}
-                      />
-                      {name}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="No que está trabalhando?"
-              className="h-8 text-xs focus-visible:ring-1"
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-    )
-  }
-
-  const renderContentForId = (id: SortableBlockId) => {
-    switch (id) {
-      case 'task':
-        return renderTaskBlock()
-      case 'timer':
-        return renderTimerBlock()
-      case 'today':
-        return renderTodayBlock()
-      case 'actions':
-        return renderActionsBlock()
-      case 'tools':
-        return renderToolsBlock()
-      case 'details':
-        return renderDetailsBlock()
-      default:
-        return null
-    }
-  }
+  const selectedAct =
+    mockActivities.find((a) => a.id === selectedActivity) || mockActivities[0]
+  const ActivityIcon = selectedAct.icon
 
   return (
-    <Card
-      ref={cardRef}
-      data-orientation={isVertical ? 'vertical' : 'horizontal'}
-      className={cn(
-        'group border-border/60 bg-card relative inline-flex w-fit items-center rounded-lg border px-1 py-1 shadow-md transition-transform duration-150 ease-out',
-        isVertical && 'h-fit w-16 flex-col items-center gap-1 px-1 py-2',
-      )}
-    >
-      <CardContent
-        className={cn(
-          'flex w-full p-0 transition-all',
-          isVertical
-            ? 'h-full min-h-0 flex-col items-center justify-start gap-3 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
-            : 'flex-row items-center gap-2',
-        )}
-      >
-        <div
-          ref={widgetHandleRef}
-          className={cn(
-            'text-muted-foreground/30 hover:text-muted-foreground global-drag-handle flex shrink-0 cursor-grab touch-none items-center justify-center transition-colors active:cursor-grabbing',
-            isVertical ? 'w-full py-3' : 'h-full px-3',
-          )}
-          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-          title={
-            isVertical
-              ? 'Arraste para mover para cima/baixo'
-              : 'Arraste para mover para esquerda/direita'
-          }
-        >
-          {isVertical ? (
-            <GripHorizontal className="h-4 w-4" />
-          ) : (
-            <GripVertical className="h-4 w-4" />
-          )}
-        </div>
-
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-          modifiers={[
-            restrictToParentElement,
-            isVertical ? restrictToVerticalAxis : restrictToHorizontalAxis,
-          ]}
-        >
-          <SortableContext
-            items={visibleBlocks}
-            strategy={
-              isVertical
-                ? verticalListSortingStrategy
-                : horizontalListSortingStrategy
-            }
+    <div className="flex shrink-0 items-center justify-center">
+      <Popover open={isEditingVertical} onOpenChange={setIsEditingVertical}>
+        <PopoverTrigger asChild>
+          <Button
+            variant={isEditingVertical ? 'secondary' : 'ghost'}
+            size="icon"
+            className="text-muted-foreground hover:text-foreground h-7 w-7 shrink-0 rounded-full transition-colors"
+            title="Adicionar comentário / detalhes da tarefa"
           >
-            {visibleBlocks.map((id) => (
-              <SortableItem key={id} id={id} isVertical={isVertical}>
-                {renderContentForId(id)}
-              </SortableItem>
-            ))}
-          </SortableContext>
-        </DndContext>
-
-        {!isVertical && (
-          <>
-            {!isMinimized && (
-              <div className="w-48 shrink-0 pl-1">
-                <div className="hover:bg-muted/40 focus-within:bg-muted/40 flex h-10 items-center gap-1.5 rounded-lg bg-transparent px-2 transition-colors">
-                  <Minus className="text-muted-foreground/40 h-4 w-4 shrink-0" />
-                  <Input
-                    value={description}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setDescription(e.target.value)
-                    }
-                    placeholder="What are you working on?"
-                    className="text-foreground h-full border-none bg-transparent px-1 text-[13px] shadow-none focus-visible:ring-0"
-                  />
-                </div>
-              </div>
+            {isEditingVertical ? (
+              <X className="h-3.5 w-3.5" />
+            ) : (
+              <MessageSquareDiff className="h-3.5 w-3.5" />
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                'text-muted-foreground hover:text-foreground h-8 w-8 shrink-0 transition-transform',
-                !isMinimized && 'ml-auto',
-              )}
-              onClick={() => setIsMinimized(!isMinimized)}
-            >
-              {isMinimized ? (
-                <Maximize2 className="h-4 w-4" />
-              ) : (
-                <Minimize2 className="h-4 w-4" />
-              )}
-            </Button>
-          </>
-        )}
-      </CardContent>
-    </Card>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          side={widgetPosition === 'left' ? 'right' : 'left'}
+          sideOffset={16}
+          className="border-border/50 bg-card flex w-[240px] flex-col gap-2.5 rounded-lg border p-2.5 shadow-lg"
+        >
+          <div className="mb-0.5 flex items-center justify-between">
+            <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
+              Detalhes da Tarefa
+            </span>
+            <ActivityIcon className="text-primary h-3.5 w-3.5 opacity-80" />
+          </div>
+
+          <LookupInput
+            value={taskId}
+            onChange={setTaskId}
+            onOpenLookup={() => {}}
+            size="sm"
+            placeholder="Vincular Task ID"
+            className="w-full"
+          />
+
+          <Select value={selectedActivity} onValueChange={setSelectedActivity}>
+            <SelectTrigger className="h-8 w-full text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {mockActivities.map(({ id, name, icon: Icon }) => (
+                <SelectItem key={id} value={id} className="text-xs">
+                  <span className="flex items-center gap-2">
+                    <Icon
+                      className={cn(
+                        'h-3 w-3',
+                        id === selectedActivity
+                          ? 'text-primary'
+                          : 'text-muted-foreground',
+                      )}
+                    />
+                    {name}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Input
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="No que está trabalhando?"
+            className="h-8 text-xs focus-visible:ring-1"
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
   )
 }
