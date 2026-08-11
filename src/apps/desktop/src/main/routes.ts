@@ -137,7 +137,10 @@ export function openIpcRoutes(serviceProvider: IServiceProvider): void {
     const win = BrowserWindow.fromWebContents(event.sender)
 
     if (win && !win.isDestroyed()) {
-      win.setIgnoreMouseEvents(ignore, { forward: true })
+      const winType = (win as unknown as { windowType?: string }).windowType
+      if (winType === 'widget') {
+        win.setIgnoreMouseEvents(ignore, { forward: true })
+      }
     }
 
     return Promise.resolve({ success: true })

@@ -152,9 +152,6 @@ type UltimateTimeTrackerContextType = {
   handleStart: () => void
   handlePause: () => void
   handleStop: () => void
-
-  onWidgetEnter: () => void
-  onWidgetLeave: () => void
 }
 
 const UltimateTimeTrackerContext =
@@ -231,29 +228,58 @@ export const UltimateTimeTracker = ({
   const isDraggingWidgetRef = useRef(false)
 
   // -- INÍCIO DA LÓGICA DE BLINDAGEM DE HOVER / IPC --
-  const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !(window as any).electron) return
+    const isWidgetWindow = window.location.hash.includes('/widgets/')
+    if (!isWidgetWindow) return
 
-  const onWidgetEnter = useCallback(() => {
-    if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current)
-    if (typeof window !== 'undefined' && (window as any).electron) {
-      ;(window as any).electron.ipcRenderer
-        .invoke('WIDGET_SET_IGNORE_MOUSE', { body: { ignore: false } })
-        .catch(() => {})
+    let timeoutId: NodeJS.Timeout | null = null
+    let isCurrentlyIgnored = true
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDraggingWidgetRef.current) return
+
+      const target = e.target as HTMLElement
+
+      // Heurística inclusiva: só não ignoramos se o mouse estiver sobre o widget ou sobre um popover/portal (Radix)
+      const isUI = target.closest(
+        '[data-widget-card], [data-radix-popper-content-wrapper], [role="dialog"], [role="menu"], [role="tooltip"]',
+      )
+
+      const shouldIgnore = !isUI
+
+      if (shouldIgnore !== isCurrentlyIgnored) {
+        if (timeoutId) clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => {
+          isCurrentlyIgnored = shouldIgnore
+          ;(window as any).electron.ipcRenderer
+            .invoke('WIDGET_SET_IGNORE_MOUSE', {
+              body: { ignore: shouldIgnore },
+            })
+            .catch(() => {})
+        }, 50)
+      }
     }
-  }, [])
 
-  const onWidgetLeave = useCallback(() => {
-    if (isDraggingWidgetRef.current) return
-    if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current)
-
-    // Pequeno debounce (100ms) para evitar que popovers/tooltips fechem acidentalmente ao transitar o mouse
-    leaveTimeoutRef.current = setTimeout(() => {
-      if (typeof window !== 'undefined' && (window as any).electron) {
+    const handleMouseLeave = () => {
+      if (isDraggingWidgetRef.current) return
+      if (timeoutId) clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        isCurrentlyIgnored = true
         ;(window as any).electron.ipcRenderer
           .invoke('WIDGET_SET_IGNORE_MOUSE', { body: { ignore: true } })
           .catch(() => {})
-      }
-    }, 100)
+      }, 50)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseleave', handleMouseLeave)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseleave', handleMouseLeave)
+      if (timeoutId) clearTimeout(timeoutId)
+    }
   }, [])
   // -- FIM DA LÓGICA DE BLINDAGEM DE HOVER / IPC --
 
@@ -408,7 +434,11 @@ export const UltimateTimeTracker = ({
 
       // Safely ensure we revert back to transparent if mouse left while dropping
       if (!element.matches(':hover')) {
-        onWidgetLeave()
+        if (typeof window !== 'undefined' && (window as any).electron) {
+          ;(window as any).electron.ipcRenderer
+            .invoke('WIDGET_SET_IGNORE_MOUSE', { body: { ignore: true } })
+            .catch(() => {})
+        }
       }
 
       setFreeOffsets(nextOffsets)
@@ -478,7 +508,7 @@ export const UltimateTimeTracker = ({
       dragStateRef.current = null
       isDraggingWidgetRef.current = false
     }
-  }, [isVertical, widgetPosition, onWidgetLeave])
+  }, [isVertical, widgetPosition])
 
   useEffect(() => {
     const element = cardRef.current
@@ -652,18 +682,15 @@ export const UltimateTimeTracker = ({
     handleStart,
     handlePause,
     handleStop,
-    onWidgetEnter,
-    onWidgetLeave,
   }
 
   return (
     <UltimateTimeTrackerContext.Provider value={contextValue}>
       <Card
         ref={cardRef}
+        data-widget-card="true"
         data-orientation={isVertical ? 'vertical' : 'horizontal'}
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-        onMouseEnter={onWidgetEnter}
-        onMouseLeave={onWidgetLeave}
         className={cn(
           'group border-border/60 bg-card pointer-events-auto relative inline-flex w-fit items-center rounded-lg border shadow-md transition-transform duration-150 ease-out select-none',
           isVertical ? 'h-fit w-16 flex-col items-center gap-1 pb-8' : 'pr-8',
@@ -967,8 +994,6 @@ UltimateTimeTracker.TaskBlock = function TaskBlock() {
     description,
     setDescription,
     widgetPosition,
-    onWidgetEnter,
-    onWidgetLeave,
   } = useTrackerContext()
 
   const selectedAct =
@@ -997,8 +1022,6 @@ UltimateTimeTracker.TaskBlock = function TaskBlock() {
             side={widgetPosition === 'left' ? 'right' : 'left'}
             sideOffset={16}
             style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-            onMouseEnter={onWidgetEnter}
-            onMouseLeave={onWidgetLeave}
             className="border-border/50 bg-card flex w-[240px] flex-col gap-2.5 rounded-lg border p-2.5 shadow-lg"
           >
             <div className="mb-0.5 flex items-center justify-between">
@@ -1024,10 +1047,7 @@ UltimateTimeTracker.TaskBlock = function TaskBlock() {
               <SelectTrigger className="h-8 w-full text-xs">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent
-                onMouseEnter={onWidgetEnter}
-                onMouseLeave={onWidgetLeave}
-              >
+              <SelectContent>
                 {mockActivities.map(({ id, name, icon: Icon }) => (
                   <SelectItem key={id} value={id} className="text-xs">
                     <span className="flex items-center gap-2">
@@ -1097,12 +1117,7 @@ UltimateTimeTracker.TaskBlock = function TaskBlock() {
             </span>
           </SelectValue>
         </SelectTrigger>
-        <SelectContent
-          align="start"
-          className="rounded-lg"
-          onMouseEnter={onWidgetEnter}
-          onMouseLeave={onWidgetLeave}
-        >
+        <SelectContent align="start" className="rounded-lg">
           {mockActivities.map(({ id, name, icon: Icon }) => (
             <SelectItem key={id} value={id} className="h-8 text-[11px]">
               <span className="flex items-center gap-2">
