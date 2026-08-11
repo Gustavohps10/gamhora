@@ -1,4 +1,3 @@
-// components/time-bar/ultimate-entry-bar.tsx
 'use client'
 
 import {
@@ -24,15 +23,16 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
   Code2Icon,
   Coffee,
   FlaskConical,
   GripHorizontal,
   GripVertical,
-  Maximize2,
   MessageSquareDiff,
-  Minimize2,
-  Minus,
   Pause,
   PenTool,
   Play,
@@ -125,13 +125,13 @@ const clamp = (val: number, min: number, max: number) => {
 }
 
 // ---------------------------------------------------------------------------
-// 1. CONTEXT API (Compartilhamento de Estado para os Componentes Compostos)
+// 1. CONTEXT API
 // ---------------------------------------------------------------------------
 type UltimateTimeTrackerContextType = {
   isVertical: boolean
   widgetPosition: WidgetPosition
-  isMinimized: boolean
-  setIsMinimized: React.Dispatch<React.SetStateAction<boolean>>
+  isExpanded: boolean
+  setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>
   widgetHandleRef: React.RefObject<HTMLDivElement | null>
 
   taskId: string
@@ -152,6 +152,9 @@ type UltimateTimeTrackerContextType = {
   handleStart: () => void
   handlePause: () => void
   handleStop: () => void
+
+  onWidgetEnter: () => void
+  onWidgetLeave: () => void
 }
 
 const UltimateTimeTrackerContext =
@@ -168,7 +171,7 @@ export const useTrackerContext = () => {
 }
 
 // ---------------------------------------------------------------------------
-// 2. ROOT COMPONENT (Mantém a lógica intacta de PointerEvents e Resize)
+// 2. ROOT COMPONENT
 // ---------------------------------------------------------------------------
 export const UltimateTimeTracker = ({
   children,
@@ -181,7 +184,7 @@ export const UltimateTimeTracker = ({
   const [manualInitialSeconds, setManualInitialSeconds] = useState<number>(0)
 
   const [isEditingVertical, setIsEditingVertical] = useState(false)
-  const [isMinimized, setIsMinimized] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const [freeOffsets, setFreeOffsets] =
     useState<FreeOffsets>(DEFAULT_FREE_OFFSETS)
@@ -227,6 +230,33 @@ export const UltimateTimeTracker = ({
   const freeOffsetsRef = useRef<FreeOffsets>(DEFAULT_FREE_OFFSETS)
   const isDraggingWidgetRef = useRef(false)
 
+  // -- INÍCIO DA LÓGICA DE BLINDAGEM DE HOVER / IPC --
+  const leaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const onWidgetEnter = useCallback(() => {
+    if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current)
+    if (typeof window !== 'undefined' && (window as any).electron) {
+      ;(window as any).electron.ipcRenderer
+        .invoke('WIDGET_SET_IGNORE_MOUSE', { body: { ignore: false } })
+        .catch(() => {})
+    }
+  }, [])
+
+  const onWidgetLeave = useCallback(() => {
+    if (isDraggingWidgetRef.current) return
+    if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current)
+
+    // Pequeno debounce (100ms) para evitar que popovers/tooltips fechem acidentalmente ao transitar o mouse
+    leaveTimeoutRef.current = setTimeout(() => {
+      if (typeof window !== 'undefined' && (window as any).electron) {
+        ;(window as any).electron.ipcRenderer
+          .invoke('WIDGET_SET_IGNORE_MOUSE', { body: { ignore: true } })
+          .catch(() => {})
+      }
+    }, 100)
+  }, [])
+  // -- FIM DA LÓGICA DE BLINDAGEM DE HOVER / IPC --
+
   const dragStateRef = useRef<{
     initialRect: DOMRect
     parentRect: DOMRect
@@ -268,7 +298,6 @@ export const UltimateTimeTracker = ({
       rawDy: number,
     ) => {
       const padding = 8
-
       const minDx = parentRect.left - initialRect.left + padding
       const maxDx = parentRect.right - initialRect.right - padding
       const minDy = parentRect.top - initialRect.top + padding
@@ -377,6 +406,11 @@ export const UltimateTimeTracker = ({
       dragStateRef.current = null
       isDraggingWidgetRef.current = false
 
+      // Safely ensure we revert back to transparent if mouse left while dropping
+      if (!element.matches(':hover')) {
+        onWidgetLeave()
+      }
+
       setFreeOffsets(nextOffsets)
 
       window.localStorage.setItem(
@@ -386,8 +420,16 @@ export const UltimateTimeTracker = ({
     }
 
     const onPointerDown = (event: PointerEvent) => {
-      // Só botão esquerdo do mouse (ou toque/caneta, que não reportam "button")
       if (event.button !== 0 && event.pointerType === 'mouse') return
+
+      const target = event.target as HTMLElement
+      if (
+        target.closest(
+          'button, input, select, [role="button"], [data-no-drag], a, textarea',
+        )
+      ) {
+        return
+      }
 
       activePointerId = event.pointerId
       dragHandle.setPointerCapture(activePointerId)
@@ -436,7 +478,7 @@ export const UltimateTimeTracker = ({
       dragStateRef.current = null
       isDraggingWidgetRef.current = false
     }
-  }, [isVertical, widgetPosition])
+  }, [isVertical, widgetPosition, onWidgetLeave])
 
   useEffect(() => {
     const element = cardRef.current
@@ -559,12 +601,11 @@ export const UltimateTimeTracker = ({
     setIsEditingVertical(false)
   }, [db, stopCurrentTimeEntry])
 
-  // Se o consumidor não passar children customizados, monta a composição padrão (Backward Compatibility)
   const content = children || (
     <>
       <UltimateTimeTracker.Handle />
       <UltimateTimeTracker.Blocks>
-        <UltimateTimeTracker.Block id="task" isHidden={isVertical}>
+        <UltimateTimeTracker.Block id="task">
           <UltimateTimeTracker.TaskBlock />
         </UltimateTimeTracker.Block>
 
@@ -583,20 +624,17 @@ export const UltimateTimeTracker = ({
         <UltimateTimeTracker.Block id="tools">
           <UltimateTimeTracker.ToolsBlock />
         </UltimateTimeTracker.Block>
-
-        <UltimateTimeTracker.Block id="details" isHidden={!isVertical}>
-          <UltimateTimeTracker.DetailsBlock />
-        </UltimateTimeTracker.Block>
       </UltimateTimeTracker.Blocks>
       <UltimateTimeTracker.InlineInput />
+      <UltimateTimeTracker.Expander />
     </>
   )
 
   const contextValue: UltimateTimeTrackerContextType = {
     isVertical,
     widgetPosition,
-    isMinimized,
-    setIsMinimized,
+    isExpanded,
+    setIsExpanded,
     widgetHandleRef,
     taskId,
     setTaskId,
@@ -614,6 +652,8 @@ export const UltimateTimeTracker = ({
     handleStart,
     handlePause,
     handleStop,
+    onWidgetEnter,
+    onWidgetLeave,
   }
 
   return (
@@ -621,17 +661,20 @@ export const UltimateTimeTracker = ({
       <Card
         ref={cardRef}
         data-orientation={isVertical ? 'vertical' : 'horizontal'}
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        onMouseEnter={onWidgetEnter}
+        onMouseLeave={onWidgetLeave}
         className={cn(
-          'group border-border/60 bg-card relative inline-flex w-fit items-center rounded-lg border px-1 py-1 shadow-md transition-transform duration-150 ease-out',
-          isVertical && 'h-fit w-16 flex-col items-center gap-1 px-1 py-2',
+          'group border-border/60 bg-card pointer-events-auto relative inline-flex w-fit items-center rounded-lg border shadow-md transition-transform duration-150 ease-out select-none',
+          isVertical ? 'h-fit w-16 flex-col items-center gap-1 pb-8' : 'pr-8',
         )}
       >
         <CardContent
           className={cn(
-            'flex w-full p-0 transition-all',
+            'flex w-full transition-all',
             isVertical
-              ? 'h-full min-h-0 flex-col items-center justify-start gap-3 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
-              : 'flex-row items-center gap-2',
+              ? 'h-full min-h-0 flex-col items-center justify-start gap-3 overflow-x-hidden overflow-y-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+              : 'flex-row items-center gap-2 py-1 pl-1',
           )}
         >
           {content}
@@ -653,14 +696,10 @@ UltimateTimeTracker.Handle = function TrackerHandle() {
       ref={widgetHandleRef}
       className={cn(
         'text-muted-foreground/30 hover:text-muted-foreground global-drag-handle flex shrink-0 cursor-grab touch-none items-center justify-center transition-colors select-none active:cursor-grabbing',
-        isVertical ? 'w-full py-3' : 'h-full px-3',
+        isVertical ? 'w-full py-1.5' : 'h-full px-2',
       )}
       style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-      title={
-        isVertical
-          ? 'Arraste para mover para cima/baixo'
-          : 'Arraste para mover para esquerda/direita'
-      }
+      title="Arraste para mover"
     >
       {isVertical ? (
         <GripHorizontal className="h-4 w-4" />
@@ -676,15 +715,16 @@ function DragHandle({ isVertical, listeners, attributes }: any) {
     <div
       {...listeners}
       {...attributes}
+      data-no-drag
       className={cn(
         'group/handle hover:text-primary flex cursor-grab items-center justify-center transition-colors active:cursor-grabbing',
-        isVertical ? 'w-full py-1.5' : 'h-full px-1',
+        isVertical ? 'w-full py-1' : 'h-full px-0.5',
       )}
     >
       <div
         className={cn(
           'bg-border/80 group-hover/handle:bg-primary rounded-full transition-colors',
-          isVertical ? 'h-[2px] w-5' : 'h-5 w-[2px]',
+          isVertical ? 'h-[2px] w-4' : 'h-4 w-[2px]',
         )}
       />
     </div>
@@ -745,11 +785,11 @@ UltimateTimeTracker.Blocks = function TrackerBlocks({
 }: {
   children: React.ReactNode
 }) {
-  const { isVertical } = useTrackerContext()
+  const { isVertical, isExpanded } = useTrackerContext()
+  const { hiddenBlocks } = useTimerSettings()
 
   const childrenArray = React.Children.toArray(children)
 
-  // Type Guard: Garante ao TypeScript que o child é um ReactElement com as props corretas
   const isTrackerBlock = (
     child: React.ReactNode,
   ): child is React.ReactElement<TrackerBlockProps> => {
@@ -761,7 +801,6 @@ UltimateTimeTracker.Blocks = function TrackerBlocks({
     )
   }
 
-  // Filtramos a array usando o Type Guard. O TS agora sabe que 'blockChildren' tem props tipadas.
   const blockChildren = childrenArray.filter(isTrackerBlock)
   const childIds = blockChildren.map((c) => c.props.id)
 
@@ -777,7 +816,6 @@ UltimateTimeTracker.Blocks = function TrackerBlocks({
     return [...savedValid, ...missing]
   })
 
-  // Sincroniza blocos caso o DOM injete/remova blocos por fora
   useEffect(() => {
     setBlocksOrder((prev) => {
       const valid = prev.filter((id) => childIds.includes(id))
@@ -809,12 +847,14 @@ UltimateTimeTracker.Blocks = function TrackerBlocks({
     }
   }
 
-  // Filtra apenas os IDs que não estão explicitamente marcados como 'isHidden'
   const visibleChildIds = blockChildren
     .filter((c) => !c.props.isHidden)
     .map((c) => c.props.id)
 
-  const visibleBlocks = blocksOrder.filter((id) => visibleChildIds.includes(id))
+  let visibleBlocks = blocksOrder.filter((id) => visibleChildIds.includes(id))
+  if (!isExpanded) {
+    visibleBlocks = visibleBlocks.filter((id) => !hiddenBlocks.includes(id))
+  }
 
   return (
     <DndContext
@@ -835,7 +875,6 @@ UltimateTimeTracker.Blocks = function TrackerBlocks({
         }
       >
         {visibleBlocks.map((id) => {
-          // Usamos a mesma array garantidamente tipada
           const child = blockChildren.find((c) => c.props.id === id)
           return child || null
         })}
@@ -859,50 +898,56 @@ UltimateTimeTracker.Block = function TrackerBlock({
   )
 }
 
+UltimateTimeTracker.Expander = function Expander() {
+  const { isVertical, isExpanded, setIsExpanded } = useTrackerContext()
+  const { hiddenBlocks } = useTimerSettings()
+
+  if (hiddenBlocks.length === 0) return null
+
+  return (
+    <div
+      data-no-drag
+      onClick={() => setIsExpanded(!isExpanded)}
+      className={cn(
+        'bg-muted/40 hover:bg-muted/80 text-muted-foreground hover:text-foreground z-10 flex shrink-0 cursor-pointer items-center justify-center transition-all active:scale-95',
+        isVertical
+          ? 'absolute bottom-0 left-0 h-5 w-full rounded-b-md'
+          : 'absolute top-0 right-0 h-full w-5 rounded-r-md',
+      )}
+      title={isExpanded ? 'Recolher itens' : 'Expandir itens'}
+    >
+      {isVertical ? (
+        isExpanded ? (
+          <ChevronUp className="h-3.5 w-3.5" />
+        ) : (
+          <ChevronDown className="h-3.5 w-3.5" />
+        )
+      ) : isExpanded ? (
+        <ChevronLeft className="h-3.5 w-3.5" />
+      ) : (
+        <ChevronRight className="h-3.5 w-3.5" />
+      )}
+    </div>
+  )
+}
 UltimateTimeTracker.InlineInput = function TrackerInlineInput() {
-  const {
-    isVertical,
-    isMinimized,
-    setIsMinimized,
-    description,
-    setDescription,
-  } = useTrackerContext()
+  const { isVertical, description, setDescription } = useTrackerContext()
 
   if (isVertical) return null
 
   return (
-    <>
-      {!isMinimized && (
-        <div className="w-48 shrink-0 pl-1">
-          <div className="hover:bg-muted/40 focus-within:bg-muted/40 flex h-10 items-center gap-1.5 rounded-lg bg-transparent px-2 transition-colors">
-            <Minus className="text-muted-foreground/40 h-4 w-4 shrink-0" />
-            <Input
-              value={description}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setDescription(e.target.value)
-              }
-              placeholder="What are you working on?"
-              className="text-foreground h-full border-none bg-transparent px-1 text-[13px] shadow-none focus-visible:ring-0"
-            />
-          </div>
-        </div>
-      )}
-      <Button
-        variant="ghost"
-        size="icon"
-        className={cn(
-          'text-muted-foreground hover:text-foreground h-8 w-8 shrink-0 transition-transform',
-          !isMinimized && 'ml-auto',
-        )}
-        onClick={() => setIsMinimized(!isMinimized)}
-      >
-        {isMinimized ? (
-          <Maximize2 className="h-4 w-4" />
-        ) : (
-          <Minimize2 className="h-4 w-4" />
-        )}
-      </Button>
-    </>
+    <div className="w-44 shrink-0 pl-1" data-no-drag>
+      <div className="hover:bg-muted/40 focus-within:bg-muted/40 flex h-9 items-center gap-1.5 rounded-lg bg-transparent px-2 transition-colors">
+        <Input
+          value={description}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setDescription(e.target.value)
+          }
+          placeholder="O que está fazendo?"
+          className="text-foreground h-full border-none bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
+        />
+      </div>
+    </div>
   )
 }
 
@@ -911,15 +956,113 @@ UltimateTimeTracker.InlineInput = function TrackerInlineInput() {
 // ---------------------------------------------------------------------------
 
 UltimateTimeTracker.TaskBlock = function TaskBlock() {
-  const { taskId, setTaskId, selectedActivity, setSelectedActivity } =
-    useTrackerContext()
+  const {
+    isVertical,
+    taskId,
+    setTaskId,
+    selectedActivity,
+    setSelectedActivity,
+    isEditingVertical,
+    setIsEditingVertical,
+    description,
+    setDescription,
+    widgetPosition,
+    onWidgetEnter,
+    onWidgetLeave,
+  } = useTrackerContext()
 
   const selectedAct =
     mockActivities.find((a) => a.id === selectedActivity) || mockActivities[0]
   const ActivityIcon = selectedAct.icon
 
+  if (isVertical) {
+    return (
+      <div className="flex shrink-0 items-center justify-center" data-no-drag>
+        <Popover open={isEditingVertical} onOpenChange={setIsEditingVertical}>
+          <PopoverTrigger asChild>
+            <Button
+              variant={isEditingVertical ? 'secondary' : 'ghost'}
+              size="icon"
+              className="text-muted-foreground hover:text-foreground h-7 w-7 shrink-0 rounded-full transition-colors"
+              title="Detalhes da Tarefa"
+            >
+              {isEditingVertical ? (
+                <X className="h-3.5 w-3.5" />
+              ) : (
+                <MessageSquareDiff className="h-3.5 w-3.5" />
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            side={widgetPosition === 'left' ? 'right' : 'left'}
+            sideOffset={16}
+            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+            onMouseEnter={onWidgetEnter}
+            onMouseLeave={onWidgetLeave}
+            className="border-border/50 bg-card flex w-[240px] flex-col gap-2.5 rounded-lg border p-2.5 shadow-lg"
+          >
+            <div className="mb-0.5 flex items-center justify-between">
+              <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
+                Detalhes da Tarefa
+              </span>
+              <ActivityIcon className="text-primary h-3.5 w-3.5 opacity-80" />
+            </div>
+
+            <LookupInput
+              value={taskId}
+              onChange={setTaskId}
+              onOpenLookup={() => {}}
+              size="sm"
+              placeholder="Vincular Task ID"
+              className="w-full"
+            />
+
+            <Select
+              value={selectedActivity}
+              onValueChange={setSelectedActivity}
+            >
+              <SelectTrigger className="h-8 w-full text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent
+                onMouseEnter={onWidgetEnter}
+                onMouseLeave={onWidgetLeave}
+              >
+                {mockActivities.map(({ id, name, icon: Icon }) => (
+                  <SelectItem key={id} value={id} className="text-xs">
+                    <span className="flex items-center gap-2">
+                      <Icon
+                        className={cn(
+                          'h-3 w-3',
+                          id === selectedActivity
+                            ? 'text-primary'
+                            : 'text-muted-foreground',
+                        )}
+                      />
+                      {name}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Input
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="No que está trabalhando?"
+              className="h-8 text-xs focus-visible:ring-1"
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex h-10 w-32 shrink-0 flex-col justify-between gap-[4px]">
+    <div
+      className="flex h-10 w-32 shrink-0 flex-col justify-between gap-[4px]"
+      data-no-drag
+    >
       <LookupInput
         value={taskId}
         onChange={setTaskId}
@@ -954,7 +1097,12 @@ UltimateTimeTracker.TaskBlock = function TaskBlock() {
             </span>
           </SelectValue>
         </SelectTrigger>
-        <SelectContent align="start" className="rounded-lg">
+        <SelectContent
+          align="start"
+          className="rounded-lg"
+          onMouseEnter={onWidgetEnter}
+          onMouseLeave={onWidgetLeave}
+        >
           {mockActivities.map(({ id, name, icon: Icon }) => (
             <SelectItem key={id} value={id} className="h-8 text-[11px]">
               <span className="flex items-center gap-2">
@@ -982,6 +1130,7 @@ UltimateTimeTracker.TimerBlock = function TimerBlock() {
 
   return (
     <div
+      data-no-drag
       className={cn(
         'flex shrink-0 items-center justify-center',
         isVertical ? 'flex-col' : '',
@@ -1009,6 +1158,7 @@ UltimateTimeTracker.TodayBlock = function TodayBlock() {
   const { isVertical } = useTrackerContext()
   return (
     <div
+      data-no-drag
       className={cn(
         'flex shrink-0 items-center justify-center',
         isVertical ? 'flex-col gap-0.5' : 'gap-1',
@@ -1041,6 +1191,7 @@ UltimateTimeTracker.ActionsBlock = function ActionsBlock() {
 
   return (
     <div
+      data-no-drag
       className={cn(
         'flex shrink-0 items-center justify-center',
         isVertical ? 'flex-col gap-1.5' : 'gap-1.5',
@@ -1101,6 +1252,7 @@ UltimateTimeTracker.ToolsBlock = function ToolsBlock() {
   const { isVertical } = useTrackerContext()
   return (
     <div
+      data-no-drag
       className={cn(
         'flex shrink-0 items-center',
         isVertical ? 'flex-col gap-2.5' : 'gap-2.5',
@@ -1119,99 +1271,6 @@ UltimateTimeTracker.ToolsBlock = function ToolsBlock() {
         <TimerHistory />
         <TimerSettings />
       </div>
-    </div>
-  )
-}
-
-UltimateTimeTracker.DetailsBlock = function DetailsBlock() {
-  const {
-    isVertical,
-    widgetPosition,
-    isEditingVertical,
-    setIsEditingVertical,
-    taskId,
-    setTaskId,
-    selectedActivity,
-    setSelectedActivity,
-    description,
-    setDescription,
-  } = useTrackerContext()
-
-  if (!isVertical) return null
-
-  const selectedAct =
-    mockActivities.find((a) => a.id === selectedActivity) || mockActivities[0]
-  const ActivityIcon = selectedAct.icon
-
-  return (
-    <div className="flex shrink-0 items-center justify-center">
-      <Popover open={isEditingVertical} onOpenChange={setIsEditingVertical}>
-        <PopoverTrigger asChild>
-          <Button
-            variant={isEditingVertical ? 'secondary' : 'ghost'}
-            size="icon"
-            className="text-muted-foreground hover:text-foreground h-7 w-7 shrink-0 rounded-full transition-colors"
-            title="Adicionar comentário / detalhes da tarefa"
-          >
-            {isEditingVertical ? (
-              <X className="h-3.5 w-3.5" />
-            ) : (
-              <MessageSquareDiff className="h-3.5 w-3.5" />
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          side={widgetPosition === 'left' ? 'right' : 'left'}
-          sideOffset={16}
-          className="border-border/50 bg-card flex w-[240px] flex-col gap-2.5 rounded-lg border p-2.5 shadow-lg"
-        >
-          <div className="mb-0.5 flex items-center justify-between">
-            <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-              Detalhes da Tarefa
-            </span>
-            <ActivityIcon className="text-primary h-3.5 w-3.5 opacity-80" />
-          </div>
-
-          <LookupInput
-            value={taskId}
-            onChange={setTaskId}
-            onOpenLookup={() => {}}
-            size="sm"
-            placeholder="Vincular Task ID"
-            className="w-full"
-          />
-
-          <Select value={selectedActivity} onValueChange={setSelectedActivity}>
-            <SelectTrigger className="h-8 w-full text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {mockActivities.map(({ id, name, icon: Icon }) => (
-                <SelectItem key={id} value={id} className="text-xs">
-                  <span className="flex items-center gap-2">
-                    <Icon
-                      className={cn(
-                        'h-3 w-3',
-                        id === selectedActivity
-                          ? 'text-primary'
-                          : 'text-muted-foreground',
-                      )}
-                    />
-                    {name}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Input
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="No que está trabalhando?"
-            className="h-8 text-xs focus-visible:ring-1"
-          />
-        </PopoverContent>
-      </Popover>
     </div>
   )
 }

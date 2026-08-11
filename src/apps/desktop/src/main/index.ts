@@ -119,7 +119,7 @@ const createSecondaryWindow = (
   // Encontra o monitor de destino ou usa o primário como fallback
   const targetDisplay =
     allDisplays.find((d) => d.id === targetDisplayId) || primaryDisplay
-  const { x, y, width, height } = targetDisplay.bounds
+  const { x, y, width, height } = targetDisplay.workArea
 
   secondaryWindow = new BrowserWindow({
     width,

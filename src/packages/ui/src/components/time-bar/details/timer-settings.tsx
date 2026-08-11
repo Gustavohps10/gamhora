@@ -2,16 +2,15 @@
 
 import { DisplayInfo } from '@metric-org/application'
 import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
   Clock3,
   ClockArrowDown,
   ClockArrowUp,
+  Eye,
+  EyeOff,
   Gamepad2,
   LayoutTemplate,
   LockIcon,
+  Minus,
   Monitor,
   MonitorPlay,
   Moon,
@@ -27,14 +26,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { useClient } from '@/hooks'
 import { useTimerSettings } from '@/hooks/use-timer-settings'
@@ -57,63 +48,65 @@ function PositionCompass({
   value: WidgetPosition
   onChange: (value: WidgetPosition) => void
 }) {
-  const directions: Array<{
-    key: WidgetPosition
-    icon: React.ElementType
-    className: string
-  }> = [
-    {
-      key: 'top',
-      icon: ChevronUp,
-      className: 'top-0 left-1/2 -translate-x-1/2',
-    },
-    {
-      key: 'right',
-      icon: ChevronRight,
-      className: 'right-0 top-1/2 -translate-y-1/2',
-    },
-    {
-      key: 'bottom',
-      icon: ChevronDown,
-      className: 'bottom-0 left-1/2 -translate-x-1/2',
-    },
-    {
-      key: 'left',
-      icon: ChevronLeft,
-      className: 'left-0 top-1/2 -translate-y-1/2',
-    },
-  ]
-
   return (
     <div className="flex items-center gap-4">
-      <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
-        <div className="bg-border absolute left-1/2 h-full w-px -translate-x-1/2" />
-        <div className="bg-border absolute top-1/2 h-px w-full -translate-y-1/2" />
-        <div className="bg-muted border-border relative z-10 flex h-6 w-6 items-center justify-center rounded-md border">
-          <div className="bg-primary/50 h-1.5 w-1.5 rounded-[1px]" />
+      <div className="bg-muted/30 border-border relative flex h-14 w-14 shrink-0 flex-col items-center justify-between rounded-md border p-1">
+        <button
+          type="button"
+          onClick={() => onChange('top')}
+          className={cn(
+            'flex h-3.5 w-6 items-center justify-center rounded-[3px] transition-colors',
+            value === 'top'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'bg-border/50 text-muted-foreground hover:bg-border/80 hover:text-foreground',
+          )}
+        >
+          <Minus className="h-3 w-3" />
+        </button>
+
+        <div className="flex w-full items-center justify-between">
+          <button
+            type="button"
+            onClick={() => onChange('left')}
+            className={cn(
+              'flex h-6 w-3.5 items-center justify-center rounded-[3px] transition-colors',
+              value === 'left'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-border/50 text-muted-foreground hover:bg-border/80 hover:text-foreground',
+            )}
+          >
+            <Minus className="h-3 w-3 rotate-90" />
+          </button>
+
+          {/* Central Dot */}
+          <div className="bg-border/50 h-2 w-2 rounded-full" />
+
+          <button
+            type="button"
+            onClick={() => onChange('right')}
+            className={cn(
+              'flex h-6 w-3.5 items-center justify-center rounded-[3px] transition-colors',
+              value === 'right'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-border/50 text-muted-foreground hover:bg-border/80 hover:text-foreground',
+            )}
+          >
+            <Minus className="h-3 w-3 rotate-90" />
+          </button>
         </div>
 
-        {directions.map(({ key, icon: Icon, className }) => {
-          const selected = value === key
-          return (
-            <button
-              key={key}
-              type="button"
-              aria-label={`Posicionar no ${POSITION_LABEL[key].toLowerCase()}`}
-              aria-pressed={selected}
-              onClick={() => onChange(key)}
-              className={cn(
-                'absolute z-10 flex h-5 w-5 items-center justify-center rounded-full border transition-all focus-visible:outline-none',
-                className,
-                selected
-                  ? 'bg-primary text-primary-foreground border-primary scale-110 shadow-sm'
-                  : 'bg-card text-muted-foreground border-border hover:border-primary/50 hover:text-foreground',
-              )}
-            >
-              <Icon className="h-2.5 w-2.5" />
-            </button>
-          )
-        })}
+        <button
+          type="button"
+          onClick={() => onChange('bottom')}
+          className={cn(
+            'flex h-3.5 w-6 items-center justify-center rounded-[3px] transition-colors',
+            value === 'bottom'
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'bg-border/50 text-muted-foreground hover:bg-border/80 hover:text-foreground',
+          )}
+        >
+          <Minus className="h-3 w-3" />
+        </button>
       </div>
       <span className="text-muted-foreground text-[11px] font-medium">
         {POSITION_LABEL[value]}
@@ -137,6 +130,8 @@ export const TimerSettings = memo(() => {
     setAntiBurnout,
     activeWindowTracking,
     setActiveWindowTracking,
+    hiddenBlocks,
+    toggleHiddenBlock,
   } = useTimerSettings()
 
   const [isOpen, setIsOpen] = useState(false)
@@ -157,7 +152,6 @@ export const TimerSettings = memo(() => {
           setSelectedDisplayId(displayToUse.id)
         }
 
-        // Move a janela imediatamente para o display salvo quando o React monta
         client.modules.system.moveToDisplay({
           body: { displayId: displayToUse.id, windowType: 'widget' },
         })
@@ -189,9 +183,9 @@ export const TimerSettings = memo(() => {
       <PopoverContent
         align="start"
         sideOffset={10}
-        className="bg-card w-[260px] rounded-lg p-0 shadow-xl"
+        className="bg-card h-[400px] w-[270px] overflow-y-auto rounded-lg p-0 shadow-xl"
       >
-        <div className="flex items-center justify-between px-3 py-2">
+        <div className="bg-card border-border/50 sticky top-0 z-10 flex items-center justify-between border-b px-3 py-2">
           <div className="flex items-center gap-1.5">
             <div className="bg-primary/10 text-primary rounded-md p-1">
               <Settings2Icon className="h-3 w-3" />
@@ -207,45 +201,52 @@ export const TimerSettings = memo(() => {
             <X className="text-muted-foreground hover:text-foreground h-3.5 w-3.5" />
           </Button>
         </div>
-        <Separator />
 
         <div className="space-y-2 p-2">
           {displays.length > 1 && (
             <div className="bg-muted/30 border-border/50 rounded-lg border p-2">
-              <div className="mb-1.5 flex items-center gap-1.5">
-                <Monitor className="text-muted-foreground h-3 w-3" />
-                <span className="text-[10px] font-semibold tracking-wide uppercase">
+              <div className="mb-2 flex items-center gap-1.5">
+                <Monitor className="text-muted-foreground h-3.5 w-3.5" />
+                <span className="text-foreground/90 text-xs font-semibold">
                   Monitor
                 </span>
               </div>
-              <Select
-                value={selectedDisplayId?.toString() ?? ''}
-                onValueChange={handleDisplayChange}
-              >
-                <SelectTrigger className="h-7 w-full text-[11px]">
-                  <SelectValue placeholder="Selecione o monitor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {displays.map((display) => (
-                    <SelectItem
+              <div className="grid grid-cols-2 gap-1.5">
+                {displays.map((display, index) => {
+                  const isSelected = selectedDisplayId === display.id
+                  return (
+                    <button
                       key={display.id}
-                      value={display.id.toString()}
-                      className="text-[11px]"
+                      onClick={() => handleDisplayChange(display.id.toString())}
+                      className={cn(
+                        'flex flex-col items-center justify-center gap-1 rounded-md border p-2 transition-all',
+                        isSelected
+                          ? 'border-primary bg-primary/10 text-primary shadow-sm'
+                          : 'border-border/50 bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground',
+                      )}
                     >
-                      {display.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                      <Monitor className="mb-0.5 h-4 w-4" />
+                      <span className="text-foreground text-[11px] leading-none font-medium">
+                        Tela {index + 1}
+                      </span>
+                      <span className="mt-0.5 w-full truncate text-center text-[9px] leading-none opacity-60">
+                        {display.isPrimary
+                          ? '(Principal)'
+                          : `(${display.label || 'Secundário'})`}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           )}
 
           <div className="bg-muted/30 border-border/50 rounded-lg border p-2">
             <div className="mb-1.5 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <Clock3 className="text-muted-foreground h-3 w-3" />
-                <span className="text-[10px] font-semibold tracking-wide uppercase">
-                  Modo do Timer
+                <Clock3 className="text-muted-foreground h-3.5 w-3.5" />
+                <span className="text-foreground/90 text-xs font-semibold">
+                  Modo do timer
                 </span>
               </div>
               {isRunning && (
@@ -282,8 +283,8 @@ export const TimerSettings = memo(() => {
 
           <div className="bg-muted/30 border-border/50 rounded-lg border p-2">
             <div className="mb-2 flex items-center gap-1.5">
-              <LayoutTemplate className="text-muted-foreground h-3 w-3" />
-              <span className="text-[10px] font-semibold tracking-wide uppercase">
+              <LayoutTemplate className="text-muted-foreground h-3.5 w-3.5" />
+              <span className="text-foreground/90 text-xs font-semibold">
                 Ancoragem
               </span>
             </div>
@@ -295,8 +296,61 @@ export const TimerSettings = memo(() => {
 
           <div className="bg-muted/30 border-border/50 rounded-lg border p-2">
             <div className="mb-2 flex items-center gap-1.5">
-              <Gamepad2 className="text-muted-foreground h-3 w-3" />
-              <span className="text-[10px] font-semibold tracking-wide uppercase">
+              <Eye className="text-muted-foreground h-3.5 w-3.5" />
+              <span className="text-foreground/90 text-xs font-semibold">
+                Visualização
+              </span>
+            </div>
+            <div className="space-y-1">
+              {[
+                { id: 'task', label: 'Tarefa / Lookup' },
+                { id: 'today', label: 'Tempo Hoje' },
+                { id: 'actions', label: 'Controles (Play/Stop)' },
+                { id: 'tools', label: 'Ferramentas' },
+              ].map((block) => {
+                const isHidden = hiddenBlocks.includes(block.id)
+                return (
+                  <div
+                    key={block.id}
+                    className="hover:bg-muted/30 flex items-center justify-between rounded-md px-1.5 py-1 transition-colors"
+                  >
+                    <Label
+                      className={cn(
+                        'flex cursor-pointer items-center gap-1.5 text-[11px] font-medium transition-opacity',
+                        isHidden && 'opacity-60',
+                      )}
+                      htmlFor={`hide-${block.id}`}
+                    >
+                      {block.label}
+                    </Label>
+                    <Button
+                      id={`hide-${block.id}`}
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        'h-6 w-6 rounded-md transition-colors',
+                        isHidden
+                          ? 'text-muted-foreground/60 hover:bg-muted hover:text-foreground'
+                          : 'bg-primary/10 text-primary hover:bg-primary/20',
+                      )}
+                      onClick={() => toggleHiddenBlock(block.id)}
+                    >
+                      {isHidden ? (
+                        <EyeOff className="h-3.5 w-3.5" />
+                      ) : (
+                        <Eye className="h-3.5 w-3.5" />
+                      )}
+                    </Button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="bg-muted/30 border-border/50 rounded-lg border p-2">
+            <div className="mb-2 flex items-center gap-1.5">
+              <Gamepad2 className="text-muted-foreground h-3.5 w-3.5" />
+              <span className="text-foreground/90 text-xs font-semibold">
                 Automações
               </span>
             </div>

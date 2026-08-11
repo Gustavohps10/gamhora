@@ -187,9 +187,7 @@ export function openIpcRoutes(serviceProvider: IServiceProvider): void {
         .find((d) => d.id === displayId)
 
       if (targetDisplay) {
-        const { x, y, width, height } = targetDisplay.bounds
-
-        // Reposiciona a janela transparente
+        const { x, y, width, height } = targetDisplay.workArea
         targetWindow.setBounds({ x, y, width, height })
 
         // --- CORREÇÃO AQUI ---

@@ -13,16 +13,17 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useTimerSettings } from '@/hooks/use-timer-settings'
 import { cn } from '@/lib/utils'
 
-// 1. Criamos o nosso Bloco Customizado que consome o Contexto da Barra
 function WorkspaceSelectorBlock() {
   const { workspaces } = useWorkspace()
   const { workspaceId } = useParams()
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
 
-  // Pegamos a orientação da barra de forma reativa do contexto
+  // Consome a função de setar o cache
+  const { setSelectedWorkspaceId } = useTimerSettings()
   const { isVertical, widgetPosition } = useTrackerContext()
 
   const currentWorkspace = workspaces?.find((w) => w.id === workspaceId)
@@ -44,7 +45,6 @@ function WorkspaceSelectorBlock() {
       </PopoverTrigger>
 
       <PopoverContent
-        // Abre para o lado oposto da borda onde o widget está fixado
         side={
           isVertical
             ? widgetPosition === 'left'
@@ -57,7 +57,6 @@ function WorkspaceSelectorBlock() {
         sideOffset={12}
         className={cn(
           'bg-card/90 border-border/50 flex w-fit gap-2 rounded-xl p-2 shadow-xl backdrop-blur-sm',
-          // Se a barra for vertical, a lista expande na horizontal. Se a barra for horizontal, expande na vertical.
           isVertical ? 'flex-row' : 'flex-col',
         )}
       >
@@ -67,7 +66,9 @@ function WorkspaceSelectorBlock() {
             <button
               key={ws.id}
               onClick={() => {
-                // Navega para a mesma rota de widget, mas com o novo Workspace ID
+                // Atualiza o Store para salvar a preferência
+                setSelectedWorkspaceId(ws.id)
+                // Navega atualizando a UI
                 navigate(`/workspaces/${ws.id}/widgets/timer`)
                 setIsOpen(false)
               }}
@@ -90,8 +91,12 @@ function WorkspaceSelectorBlock() {
   )
 }
 
-// 2. Montamos a composição do Widget final
 export function TimerWidget() {
+  const { workspaces } = useWorkspace()
+  const { workspaceId } = useParams()
+  const navigate = useNavigate()
+  const { selectedWorkspaceId, setSelectedWorkspaceId } = useTimerSettings()
+
   useEffect(() => {
     document.body.style.background = 'transparent'
     return () => {
@@ -99,21 +104,52 @@ export function TimerWidget() {
     }
   }, [])
 
+  // Lógica de fallback e auto-seleção de Workspace
+  useEffect(() => {
+    if (!workspaces || workspaces.length === 0) return
+
+    const configuredWorkspaces = workspaces.filter(
+      (w) => w.status === 'configured',
+    )
+    if (configuredWorkspaces.length === 0) return
+
+    let targetId = selectedWorkspaceId
+
+    // Verifica se o workspace em cache ainda existe e está configurado
+    const isTargetValid = configuredWorkspaces.some((w) => w.id === targetId)
+
+    if (!isTargetValid) {
+      // Se não tem em cache, avalia se o atual na URL serve. Se não servir (ex: "default"), pega o primeiro da lista.
+      const isUrlValid = configuredWorkspaces.some((w) => w.id === workspaceId)
+      targetId = isUrlValid ? workspaceId! : configuredWorkspaces[0].id
+
+      // Salva o novo workspace selecionado no cache
+      setSelectedWorkspaceId(targetId)
+    }
+
+    // Se o target for diferente do workspace atual da URL (por exemplo, app abriu na rota root), fazemos o redirect invisível
+    if (targetId && workspaceId !== targetId) {
+      navigate(`/workspaces/${targetId}/widgets/timer`, { replace: true })
+    }
+  }, [
+    workspaces,
+    workspaceId,
+    selectedWorkspaceId,
+    navigate,
+    setSelectedWorkspaceId,
+  ])
+
   return (
     <UltimateTimeTracker>
       <UltimateTimeTracker.Handle />
 
       <UltimateTimeTracker.Blocks>
-        {/* INJETAMOS O NOSSO BLOCO NOVO AQUI! O ID 'workspace' será salvo no cache de ordem */}
         <UltimateTimeTracker.Block id="workspace">
           <WorkspaceSelectorBlock />
         </UltimateTimeTracker.Block>
 
         <UltimateTimeTracker.Block id="task">
-          {/* Escondemos a task na vertical (pois usamos o botão 'details') mantendo a regra padrão */}
-          <div className="hidden md:flex">
-            <UltimateTimeTracker.TaskBlock />
-          </div>
+          <UltimateTimeTracker.TaskBlock />
         </UltimateTimeTracker.Block>
 
         <UltimateTimeTracker.Block id="timer">
@@ -131,13 +167,10 @@ export function TimerWidget() {
         <UltimateTimeTracker.Block id="tools">
           <UltimateTimeTracker.ToolsBlock />
         </UltimateTimeTracker.Block>
-
-        <UltimateTimeTracker.Block id="details">
-          <UltimateTimeTracker.DetailsBlock />
-        </UltimateTimeTracker.Block>
       </UltimateTimeTracker.Blocks>
 
       <UltimateTimeTracker.InlineInput />
+      <UltimateTimeTracker.Expander />
     </UltimateTimeTracker>
   )
 }
