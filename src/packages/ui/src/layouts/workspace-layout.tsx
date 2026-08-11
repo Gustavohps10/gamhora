@@ -15,13 +15,13 @@ import { UltimateTimeTracker } from '@/components/time-bar/ultimate-entry-bar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { DataSourceConnectionsProvider } from '@/contexts/DataSourceConnectionsContext'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
-import { useTimerSettings } from '@/hooks/use-timer-settings'
+import { useCurrentWidgetPosition } from '@/hooks/use-timer-settings'
 import { SyncProvider } from '@/stores/syncStore'
 import { TimeEntryProvider } from '@/stores/timeEntryStore'
 
 export function WorkspaceLayout() {
   const { workspaceId } = useParams<{ workspaceId: string }>()
-  const { widgetPosition } = useTimerSettings()
+  const [widgetPosition] = useCurrentWidgetPosition()
 
   return (
     <WorkspaceProvider workspaceId={workspaceId}>

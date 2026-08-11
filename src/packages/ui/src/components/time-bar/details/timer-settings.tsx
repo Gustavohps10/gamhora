@@ -28,7 +28,10 @@ import {
 } from '@/components/ui/popover'
 import { Switch } from '@/components/ui/switch'
 import { useClient } from '@/hooks'
-import { useTimerSettings } from '@/hooks/use-timer-settings'
+import {
+  useCurrentWidgetPosition,
+  useTimerSettings,
+} from '@/hooks/use-timer-settings'
 import { cn } from '@/lib/utils'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 
@@ -117,11 +120,11 @@ function PositionCompass({
 
 export const TimerSettings = memo(() => {
   const client = useClient()
+  const isWidgetWindow =
+    typeof window !== 'undefined' && window.location.hash.includes('/widgets/')
   const {
     timerDirection,
     setTimerDirection,
-    widgetPosition,
-    setWidgetPosition,
     selectedDisplayId,
     setSelectedDisplayId,
     discordRpc,
@@ -132,12 +135,24 @@ export const TimerSettings = memo(() => {
     setActiveWindowTracking,
     hiddenBlocks,
     toggleHiddenBlock,
+    startMinimized,
+    setStartMinimized,
   } = useTimerSettings()
+  const [widgetPosition, setWidgetPosition] = useCurrentWidgetPosition()
 
   const [isOpen, setIsOpen] = useState(false)
   const isRunning = useTimeEntryStore((s) => s.active?.timeStatus === 'running')
   const [displays, setDisplays] = useState<DisplayInfo[]>([])
   const [initialLoad, setInitialLoad] = useState(true)
+
+  // Sync initial settings from OS on startup
+  useEffect(() => {
+    client.modules.system.getSettings().then((settings) => {
+      if (settings && typeof settings.startMinimized === 'boolean') {
+        setStartMinimized(settings.startMinimized)
+      }
+    })
+  }, [client, setStartMinimized])
 
   useEffect(() => {
     client.modules.system.getDisplays().then((list) => {
@@ -167,6 +182,15 @@ export const TimerSettings = memo(() => {
     await client.modules.system.moveToDisplay({
       body: { displayId, windowType: 'widget' },
     })
+  }
+
+  const handleStartMinimizedChange = async (checked: boolean) => {
+    setStartMinimized(checked)
+    await client.modules.system.saveSettings({ startMinimized: checked })
+  }
+
+  const handleHideWidget = async () => {
+    await client.modules.system.hideWindow('widget')
   }
 
   return (
@@ -203,44 +227,6 @@ export const TimerSettings = memo(() => {
         </div>
 
         <div className="space-y-2 p-2">
-          {displays.length > 1 && (
-            <div className="bg-muted/30 border-border/50 rounded-lg border p-2">
-              <div className="mb-2 flex items-center gap-1.5">
-                <Monitor className="text-muted-foreground h-3.5 w-3.5" />
-                <span className="text-foreground/90 text-xs font-semibold">
-                  Monitor
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-1.5">
-                {displays.map((display, index) => {
-                  const isSelected = selectedDisplayId === display.id
-                  return (
-                    <button
-                      key={display.id}
-                      onClick={() => handleDisplayChange(display.id.toString())}
-                      className={cn(
-                        'flex flex-col items-center justify-center gap-1 rounded-md border p-2 transition-all',
-                        isSelected
-                          ? 'border-primary bg-primary/10 text-primary shadow-sm'
-                          : 'border-border/50 bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground',
-                      )}
-                    >
-                      <Monitor className="mb-0.5 h-4 w-4" />
-                      <span className="text-foreground text-[11px] leading-none font-medium">
-                        Tela {index + 1}
-                      </span>
-                      <span className="mt-0.5 w-full truncate text-center text-[9px] leading-none opacity-60">
-                        {display.isPrimary
-                          ? '(Principal)'
-                          : `(${display.label || 'Secundário'})`}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
           <div className="bg-muted/30 border-border/50 rounded-lg border p-2">
             <div className="mb-1.5 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
@@ -401,6 +387,88 @@ export const TimerSettings = memo(() => {
               </div>
             </div>
           </div>
+
+          {isWidgetWindow && (
+            <div className="bg-muted/30 border-border/50 space-y-3 rounded-lg border p-2">
+              <div>
+                <div className="mb-2 flex items-center gap-1.5">
+                  <Monitor className="text-muted-foreground h-3.5 w-3.5" />
+                  <span className="text-foreground/90 text-xs font-semibold">
+                    Sistema
+                  </span>
+                </div>
+
+                {displays.length > 1 && (
+                  <div className="mb-3">
+                    <div className="mb-1.5 flex items-center gap-1.5">
+                      <span className="text-muted-foreground text-[9px] font-semibold tracking-wider uppercase">
+                        Selecionar Monitor
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {displays.map((display, index) => {
+                        const isSelected = selectedDisplayId === display.id
+                        return (
+                          <button
+                            key={display.id}
+                            onClick={() =>
+                              handleDisplayChange(display.id.toString())
+                            }
+                            className={cn(
+                              'flex flex-col items-center justify-center gap-1 rounded-md border p-2 transition-all',
+                              isSelected
+                                ? 'border-primary bg-primary/10 text-primary shadow-sm'
+                                : 'border-border/50 bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground',
+                            )}
+                          >
+                            <Monitor className="mb-0.5 h-4 w-4" />
+                            <span className="text-foreground text-[11px] leading-none font-medium">
+                              Tela {index + 1}
+                            </span>
+                            <span className="mt-0.5 w-full truncate text-center text-[9px] leading-none opacity-60">
+                              {display.isPrimary
+                                ? '(Principal)'
+                                : `(${display.label || 'Secundário'})`}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div
+                  className={cn(
+                    'space-y-2.5',
+                    displays.length > 1 && 'border-border/50 border-t pt-2.5',
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <Label
+                      className="flex cursor-pointer items-center gap-1.5 text-[11px] font-medium"
+                      htmlFor="start-minimized"
+                    >
+                      Iniciar minimizado
+                    </Label>
+                    <Switch
+                      id="start-minimized"
+                      className="scale-75"
+                      checked={startMinimized}
+                      onCheckedChange={handleStartMinimizedChange}
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 w-full text-[11px]"
+                    onClick={handleHideWidget}
+                  >
+                    Esconder Widget
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </PopoverContent>
     </Popover>

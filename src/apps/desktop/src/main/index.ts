@@ -35,6 +35,7 @@ import { MetadataHandler } from '@/main/handlers/MetadataHandler'
 import { WorkspacesHandler } from '@/main/handlers/WorkspacesHandler'
 import { DataSourceResolver } from '@/main/resolvers/data-source-resolver'
 import { openIpcRoutes } from '@/main/routes'
+import { getSettings } from '@/main/settings'
 import { createTray } from '@/main/tray'
 
 let mainWindow: BrowserWindow | null = null
@@ -62,7 +63,14 @@ const createWindow = () => {
     },
   })
   ;(mainWindow as unknown as { windowType: string }).windowType = 'main'
-  mainWindow.on('ready-to-show', () => mainWindow!.show())
+  mainWindow.on('ready-to-show', () => {
+    const settings = getSettings()
+    if (settings.startMinimized) {
+      mainWindow!.minimize()
+    } else {
+      mainWindow!.show()
+    }
+  })
 
   // --- INÍCIO DA CORREÇÃO DE ARRASTE ---
   let moveTimeout: NodeJS.Timeout | null = null

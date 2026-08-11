@@ -68,7 +68,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { useTimerSettings } from '@/hooks/use-timer-settings'
+import {
+  useCurrentWidgetPosition,
+  useTimerSettings,
+} from '@/hooks/use-timer-settings'
 import { cn } from '@/lib/utils'
 import { useSyncStore } from '@/stores/syncStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
@@ -186,8 +189,8 @@ export const UltimateTimeTracker = ({
   const [freeOffsets, setFreeOffsets] =
     useState<FreeOffsets>(DEFAULT_FREE_OFFSETS)
 
-  const { timerDirection, setTimerDirection, widgetPosition } =
-    useTimerSettings()
+  const { timerDirection, setTimerDirection } = useTimerSettings()
+  const [widgetPosition] = useCurrentWidgetPosition()
   const db = useSyncStore((s) => s.db)
 
   const activeEntry = useTimeEntryStore((s) => s.active)

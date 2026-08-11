@@ -269,12 +269,25 @@ export interface MoveToDisplayInput {
   windowType?: 'main' | 'widget' | string
 }
 
+export interface AppSettings {
+  startMinimized?: boolean
+}
+
 export interface ISystemAPI {
   getAppVersion(): Promise<string>
   getEnvironment(): Promise<EnvironmentInfo>
   setIgnoreMouseEvents(ignore: boolean): Promise<void>
   getDisplays(): Promise<DisplayInfo[]>
   moveToDisplay(input: IRequest<MoveToDisplayInput>): Promise<void>
+  minimizeWindow(windowType?: string): Promise<void>
+  maximizeWindow(windowType?: string): Promise<void>
+  unmaximizeWindow(windowType?: string): Promise<void>
+  closeWindow(windowType?: string): Promise<void>
+  hideWindow(windowType?: string): Promise<void>
+  showWindow(windowType?: string): Promise<void>
+  isMaximized(windowType?: string): Promise<boolean>
+  getSettings(): Promise<AppSettings>
+  saveSettings(settings: AppSettings): Promise<void>
 }
 
 export interface TimerStartInput {

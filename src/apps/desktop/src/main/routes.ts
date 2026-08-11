@@ -1,4 +1,8 @@
-import { IDataSourceResolver, IServiceProvider } from '@metric-org/application'
+import {
+  AppSettings,
+  IDataSourceResolver,
+  IServiceProvider,
+} from '@metric-org/application'
 import { IRequest } from '@metric-org/shared/transport'
 import { app, BrowserWindow, screen } from 'electron'
 
@@ -13,6 +17,23 @@ import { AddonsHandler } from '@/main/handlers/AddonsHandler'
 import { handleDiscordLogin } from '@/main/handlers/discord-handler'
 import { MetadataHandler } from '@/main/handlers/MetadataHandler'
 import { WorkspacesHandler } from '@/main/handlers/WorkspacesHandler'
+import { getSettings, saveSettings } from '@/main/settings'
+
+function getWindowByType(
+  event: Electron.IpcMainInvokeEvent,
+  windowType?: string,
+): BrowserWindow | null {
+  if (!windowType) {
+    return BrowserWindow.fromWebContents(event.sender)
+  }
+  return (
+    BrowserWindow.getAllWindows().find((win) => {
+      if (win.isDestroyed()) return false
+      const customWin = win as unknown as { windowType?: string }
+      return customWin.windowType === windowType
+    }) ?? null
+  )
+}
 
 export function openIpcRoutes(serviceProvider: IServiceProvider): void {
   const tokenHandler = serviceProvider.resolve<TokenHandler>('tokenHandler')
@@ -145,6 +166,95 @@ export function openIpcRoutes(serviceProvider: IServiceProvider): void {
 
     return Promise.resolve({ success: true })
   })
+
+  IpcHandler.register(
+    'SYSTEM_MINIMIZE_WINDOW',
+    (event, req: IRequest<{ windowType?: string }>) => {
+      const win = getWindowByType(event, req?.body?.windowType)
+      if (win && !win.isDestroyed()) {
+        win.minimize()
+      }
+      return Promise.resolve()
+    },
+  )
+
+  IpcHandler.register(
+    'SYSTEM_MAXIMIZE_WINDOW',
+    (event, req: IRequest<{ windowType?: string }>) => {
+      const win = getWindowByType(event, req?.body?.windowType)
+      if (win && !win.isDestroyed()) {
+        win.maximize()
+      }
+      return Promise.resolve()
+    },
+  )
+
+  IpcHandler.register(
+    'SYSTEM_UNMAXIMIZE_WINDOW',
+    (event, req: IRequest<{ windowType?: string }>) => {
+      const win = getWindowByType(event, req?.body?.windowType)
+      if (win && !win.isDestroyed()) {
+        win.unmaximize()
+      }
+      return Promise.resolve()
+    },
+  )
+
+  IpcHandler.register(
+    'SYSTEM_CLOSE_WINDOW',
+    (event, req: IRequest<{ windowType?: string }>) => {
+      const win = getWindowByType(event, req?.body?.windowType)
+      if (win && !win.isDestroyed()) {
+        win.close()
+      }
+      return Promise.resolve()
+    },
+  )
+
+  IpcHandler.register(
+    'SYSTEM_HIDE_WINDOW',
+    (event, req: IRequest<{ windowType?: string }>) => {
+      const win = getWindowByType(event, req?.body?.windowType)
+      if (win && !win.isDestroyed()) {
+        win.hide()
+      }
+      return Promise.resolve()
+    },
+  )
+
+  IpcHandler.register(
+    'SYSTEM_SHOW_WINDOW',
+    (event, req: IRequest<{ windowType?: string }>) => {
+      const win = getWindowByType(event, req?.body?.windowType)
+      if (win && !win.isDestroyed()) {
+        win.show()
+      }
+      return Promise.resolve()
+    },
+  )
+
+  IpcHandler.register(
+    'SYSTEM_IS_MAXIMIZED',
+    (event, req: IRequest<{ windowType?: string }>) => {
+      const win = getWindowByType(event, req?.body?.windowType)
+      if (win && !win.isDestroyed()) {
+        return Promise.resolve(win.isMaximized())
+      }
+      return Promise.resolve(false)
+    },
+  )
+
+  IpcHandler.register('SYSTEM_GET_SETTINGS', () => {
+    return Promise.resolve(getSettings())
+  })
+
+  IpcHandler.register(
+    'SYSTEM_SAVE_SETTINGS',
+    (_e, req: IRequest<AppSettings>) => {
+      saveSettings(req?.body ?? {})
+      return Promise.resolve({ success: true })
+    },
+  )
 
   IpcHandler.register('SYSTEM_GET_DISPLAYS', () => {
     const primaryDisplay = screen.getPrimaryDisplay()

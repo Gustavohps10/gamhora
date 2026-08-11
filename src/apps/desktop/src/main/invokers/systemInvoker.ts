@@ -1,4 +1,4 @@
-import { ISystemAPI } from '@metric-org/application'
+import { AppSettings, ISystemAPI } from '@metric-org/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 
@@ -9,4 +9,21 @@ export const systemInvoker: ISystemAPI = {
     IpcInvoker.invoke('WIDGET_SET_IGNORE_MOUSE', { body: { ignore } }),
   getDisplays: () => IpcInvoker.invoke('SYSTEM_GET_DISPLAYS'),
   moveToDisplay: (input) => IpcInvoker.invoke('SYSTEM_MOVE_TO_DISPLAY', input),
+  minimizeWindow: (windowType?: string) =>
+    IpcInvoker.invoke('SYSTEM_MINIMIZE_WINDOW', { body: { windowType } }),
+  maximizeWindow: (windowType?: string) =>
+    IpcInvoker.invoke('SYSTEM_MAXIMIZE_WINDOW', { body: { windowType } }),
+  unmaximizeWindow: (windowType?: string) =>
+    IpcInvoker.invoke('SYSTEM_UNMAXIMIZE_WINDOW', { body: { windowType } }),
+  closeWindow: (windowType?: string) =>
+    IpcInvoker.invoke('SYSTEM_CLOSE_WINDOW', { body: { windowType } }),
+  hideWindow: (windowType?: string) =>
+    IpcInvoker.invoke('SYSTEM_HIDE_WINDOW', { body: { windowType } }),
+  showWindow: (windowType?: string) =>
+    IpcInvoker.invoke('SYSTEM_SHOW_WINDOW', { body: { windowType } }),
+  isMaximized: (windowType?: string) =>
+    IpcInvoker.invoke('SYSTEM_IS_MAXIMIZED', { body: { windowType } }),
+  getSettings: () => IpcInvoker.invoke('SYSTEM_GET_SETTINGS'),
+  saveSettings: (settings: AppSettings) =>
+    IpcInvoker.invoke('SYSTEM_SAVE_SETTINGS', { body: settings }),
 }
