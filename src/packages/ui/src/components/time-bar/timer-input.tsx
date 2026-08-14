@@ -14,18 +14,28 @@ export interface TimerInputProps {
   /** Current value in seconds */
   value: number
   onChange: (seconds: number) => void
+  onError?: (errorMsg: string | null) => void
+  hasError?: boolean
+  orientation?: 'horizontal' | 'vertical'
   className?: string
   disabled?: boolean
   /** Placeholder shown when value is 0 and not focused */
   placeholder?: string
+  min?: number
+  max?: number
 }
 
 export function TimerInput({
   value,
   onChange,
+  onError,
+  hasError = false,
+  orientation = 'horizontal',
   className,
   disabled = false,
   placeholder = '0:00:00',
+  min = 0,
+  max = Infinity,
 }: TimerInputProps) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
@@ -38,36 +48,58 @@ export function TimerInput({
     // Show current formatted value as starting draft
     setDraft(value > 0 ? formatTime(value) : '')
     setInvalid(false)
-  }, [disabled, value])
+    onError?.(null)
+  }, [disabled, value, onError])
 
   const commit = useCallback(() => {
     setEditing(false)
     const parsed = parseTimeInput(draft)
     if (parsed === null) {
-      if (draft.trim() !== '') setInvalid(true)
-      // Revert — don't call onChange
-      setTimeout(() => setInvalid(false), 1500)
+      if (draft.trim() !== '') {
+        setInvalid(true)
+        onError?.('Formato de tempo inválido.')
+        setTimeout(() => setInvalid(false), 2000)
+      }
+      return
+    }
+    if (parsed < min) {
+      setInvalid(true)
+      onError?.('Não é permitido apontamento zerado.')
+      setTimeout(() => setInvalid(false), 2000)
+      return
+    }
+    if (parsed > max) {
+      setInvalid(true)
+      onError?.('O total de horas no dia não pode exceder 24h.')
+      setTimeout(() => setInvalid(false), 2000)
       return
     }
     setInvalid(false)
+    onError?.(null)
     onChange(parsed)
-  }, [draft, onChange])
+  }, [draft, onChange, min, max, onError])
 
   const handleBlur = useCallback(() => {
     commit()
   }, [commit])
 
-  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      inputRef.current?.blur()
-    }
-    if (e.key === 'Escape') {
-      setDraft('')
-      setEditing(false)
-      setInvalid(false)
-      inputRef.current?.blur()
-    }
-  }, [])
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        inputRef.current?.blur()
+      }
+      if (e.key === 'Escape') {
+        setDraft('')
+        setEditing(false)
+        setInvalid(false)
+        onError?.(null)
+        inputRef.current?.blur()
+      }
+    },
+    [onError],
+  )
+
+  const isError = hasError || invalid
 
   return (
     <input
@@ -79,9 +111,12 @@ export function TimerInput({
       disabled={disabled}
       onFocus={handleFocus}
       onBlur={handleBlur}
-      onChange={(e) => setDraft(e.target.value)}
+      onChange={(e) => {
+        setDraft(e.target.value)
+        onError?.(null)
+      }}
       onKeyDown={handleKeyDown}
-      style={{ width: '8ch' }}
+      style={{ width: orientation === 'vertical' ? '6.5ch' : '8ch' }}
       className={cn(
         // Base — fixed width, never expands
         'bg-transparent text-center font-mono tabular-nums outline-none',
@@ -95,8 +130,9 @@ export function TimerInput({
         ],
         // Disabled
         disabled && 'cursor-default select-none',
-        // Invalid flash
-        invalid && 'animate-shake text-destructive',
+        // Invalid or error state
+        isError &&
+          'animate-shake text-destructive ring-destructive bg-destructive/10 px-1 font-bold ring-1 ring-inset',
         className,
       )}
       aria-label="Timer value — type in formats like 1h, 90m, 1:30:00"

@@ -67,7 +67,9 @@ export const createTimeEntryStore = (
     async createNewTimeEntry(db, data) {
       const { active, stopCurrentTimeEntry } = get()
 
-      if (active) {
+      // If it's a manual entry, we probably don't want to touch the currently running timer
+      // since it's just logging past time. If they start a real timer, we stop the current one.
+      if (active && data.type !== 'manual') {
         await stopCurrentTimeEntry(db)
       }
 
@@ -75,15 +77,47 @@ export const createTimeEntryStore = (
       const now = new Date()
 
       const initialSeconds = data.manualInitialSeconds ?? 0
-      const startDate = subSeconds(now, initialSeconds).toISOString()
-      const eventType = initialSeconds > 0 ? 'adjusted' : 'started'
+
+      if (data.type === 'manual') {
+        const startDate = subSeconds(now, initialSeconds).toISOString()
+        const finalTimeSpentHours = Number((initialSeconds / 3600).toFixed(4))
+
+        const newEntry: SyncTimeEntryRxDBDTO = {
+          _id: `${data.dataSourceId}::local-${id}`,
+          id,
+          _deleted: false,
+          connectionInstanceId: data.connectionInstanceId,
+          dataSourceId: data.dataSourceId,
+          task: { id: data.taskId },
+          activity: { id: data.activityId },
+          user: { id: data.userId ?? 'local-user' },
+          startDate,
+          endDate: now.toISOString(),
+          timeSpent: finalTimeSpentHours,
+          timeStatus: 'finished',
+          type: data.type,
+          comments: data.comments,
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString(),
+          journal: [],
+        }
+
+        await db.timeEntries.insert(newEntry)
+        return // Do NOT call client.timer.start() or set active
+      }
+
+      const mode = data.mode ?? 'countup'
+      const baseSeconds = data.manualInitialSeconds ?? 0
+      const initialElapsed = 0
+      const startDate = now.toISOString()
+      const eventType = 'started'
 
       const initialJournal: JournalEntry = {
         event: eventType,
         at: now.toISOString(),
-        secondsAtEvent: initialSeconds,
-        ...(initialSeconds > 0 && {
-          note: `Ajuste manual para ${initialSeconds} segundos`,
+        secondsAtEvent: initialElapsed,
+        ...(initialElapsed > 0 && {
+          note: `Ajuste manual para ${initialElapsed} segundos`,
         }),
       }
 
@@ -105,17 +139,18 @@ export const createTimeEntryStore = (
         updatedAt: now.toISOString(),
         journal: [initialJournal],
         timerConfig: {
-          mode: data.mode ?? 'countup',
-          manualInitialSeconds: data.manualInitialSeconds,
+          mode,
+          manualInitialSeconds: baseSeconds,
         },
       }
 
       await db.timeEntries.insert(newEntry)
 
-      // Comunica o backend via IPC para iniciar o processamento pesado do timer[cite: 7]
+      // Comunica o backend via IPC para iniciar o processamento pesado do timer
       client.timer.start({
-        initialSeconds,
-        mode: newEntry.timerConfig?.mode ?? 'countup',
+        baseSeconds,
+        elapsedSeconds: initialElapsed,
+        mode,
       })
 
       set({ active: newEntry })
@@ -189,7 +224,8 @@ export const createTimeEntryStore = (
       })
 
       client.timer.resume({
-        initialSeconds: secondsAtLastPause,
+        baseSeconds: active.timerConfig?.manualInitialSeconds ?? 0,
+        elapsedSeconds: secondsAtLastPause,
       })
 
       set({
@@ -210,19 +246,32 @@ export const createTimeEntryStore = (
       if (!doc) return
 
       const now = new Date()
-      const currentSeconds = differenceInSeconds(
-        now,
-        parseISO(active.startDate),
-      )
+      let currentSeconds = differenceInSeconds(now, parseISO(active.startDate))
 
       const updatedJournal = [...(active.journal || [])]
-      updatedJournal.push({
-        event: 'stopped',
-        at: now.toISOString(),
-        secondsAtEvent: currentSeconds,
-      })
 
-      const finalTimeSpentHours = Number((currentSeconds / 3600).toFixed(4))
+      if (active.timeStatus === 'paused') {
+        const lastPause = updatedJournal
+          .slice()
+          .reverse()
+          .find((j: JournalEntry) => j.event === 'paused')
+        if (lastPause) {
+          currentSeconds = lastPause.secondsAtEvent
+        }
+      } else {
+        updatedJournal.push({
+          event: 'stopped',
+          at: now.toISOString(),
+          secondsAtEvent: currentSeconds,
+        })
+      }
+
+      const base =
+        active.timerConfig?.mode === 'countup'
+          ? (active.timerConfig?.manualInitialSeconds ?? 0)
+          : 0
+      const totalSecondsToLog = currentSeconds + base
+      const finalTimeSpentHours = Number((totalSecondsToLog / 3600).toFixed(4))
 
       await doc.patch({
         timeStatus: 'finished',
@@ -253,7 +302,8 @@ export const createTimeEntryStore = (
       const mode = activeEntry.timerConfig?.mode ?? 'countup'
 
       client.timer.start({
-        initialSeconds: currentElapsed,
+        baseSeconds: activeEntry.timerConfig?.manualInitialSeconds ?? 0,
+        elapsedSeconds: currentElapsed,
         mode,
       })
 

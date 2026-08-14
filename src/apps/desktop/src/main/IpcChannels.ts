@@ -5,6 +5,15 @@ export const IpcChannels = {
   SYSTEM_GET_ENVIRONMENT: 'system:get-environment',
   SYSTEM_GET_DISPLAYS: 'system:get-displays',
   SYSTEM_MOVE_TO_DISPLAY: 'system:move-to-display',
+  SYSTEM_MINIMIZE_WINDOW: 'system:minimize-window',
+  SYSTEM_MAXIMIZE_WINDOW: 'system:maximize-window',
+  SYSTEM_UNMAXIMIZE_WINDOW: 'system:unmaximize-window',
+  SYSTEM_CLOSE_WINDOW: 'system:close-window',
+  SYSTEM_HIDE_WINDOW: 'system:hide-window',
+  SYSTEM_SHOW_WINDOW: 'system:show-window',
+  SYSTEM_IS_MAXIMIZED: 'system:is-maximized',
+  SYSTEM_GET_SETTINGS: 'system:get-settings',
+  SYSTEM_SAVE_SETTINGS: 'system:save-settings',
 
   METADATA_PULL: 'metadata:pull',
 

@@ -277,8 +277,21 @@ app.whenReady().then(async () => {
       const ctrlShiftI =
         input.control && input.shift && input.key.toLowerCase() === 'i'
 
-      if (input.type === 'keyDown' && (f12 || ctrlShiftI)) {
-        browserWindow.webContents.toggleDevTools()
+      const ctrlShiftR =
+        input.control && input.shift && input.key.toLowerCase() === 'r'
+
+      const ctrlR =
+        input.control && !input.shift && input.key.toLowerCase() === 'r'
+
+      const f5 = input.key === 'F5'
+
+      if (input.type === 'keyDown') {
+        if (f12 || ctrlShiftI) {
+          browserWindow.webContents.toggleDevTools()
+        }
+        if (ctrlShiftR || ctrlR || f5) {
+          browserWindow.webContents.reloadIgnoringCache()
+        }
       }
     })
   })

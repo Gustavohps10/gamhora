@@ -125,6 +125,8 @@ export const TimerSettings = memo(() => {
   const {
     timerDirection,
     setTimerDirection,
+    logOption,
+    setLogOption,
     selectedDisplayId,
     setSelectedDisplayId,
     discordRpc,
@@ -227,43 +229,95 @@ export const TimerSettings = memo(() => {
         </div>
 
         <div className="space-y-2 p-2">
-          <div className="bg-muted/30 border-border/50 rounded-lg border p-2">
-            <div className="mb-1.5 flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <Clock3 className="text-muted-foreground h-3.5 w-3.5" />
-                <span className="text-foreground/90 text-xs font-semibold">
+          <div className="bg-muted/30 border-border/50 space-y-2.5 rounded-lg border p-2">
+            <div className="border-border/40 flex items-center gap-1.5 border-b pb-1.5">
+              <Clock3 className="text-muted-foreground h-3.5 w-3.5" />
+              <span className="text-foreground/90 text-xs font-semibold">
+                Timer
+              </span>
+            </div>
+
+            {/* Subgrupo 1: Modo do Timer */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-[11px] font-medium">
                   Modo do timer
                 </span>
+                {isRunning && (
+                  <span className="bg-muted text-muted-foreground border-border/60 inline-flex items-center gap-1 rounded-[2px] border px-1 py-[1px] text-[8px] font-medium">
+                    <LockIcon className="h-2 w-2" /> Em execução
+                  </span>
+                )}
               </div>
-              {isRunning && (
-                <span className="bg-muted text-muted-foreground border-border/60 inline-flex items-center gap-1 rounded-[2px] border px-1 py-[1px] text-[8px] font-medium">
-                  <LockIcon className="h-2 w-2" /> Em execução
-                </span>
-              )}
+              <div className="grid grid-cols-2 gap-1.5">
+                <Button
+                  disabled={isRunning}
+                  variant={timerDirection === 'up' ? 'secondary' : 'ghost'}
+                  className={cn(
+                    'h-6 justify-start gap-1.5 px-2 text-[11px]',
+                    isRunning && 'opacity-50',
+                  )}
+                  onClick={() => setTimerDirection('up')}
+                >
+                  <ClockArrowUp className="h-3 w-3" /> Normal
+                </Button>
+                <Button
+                  disabled={isRunning}
+                  variant={timerDirection === 'down' ? 'secondary' : 'ghost'}
+                  className={cn(
+                    'h-6 justify-start gap-1.5 px-2 text-[11px]',
+                    isRunning && 'opacity-50',
+                  )}
+                  onClick={() => setTimerDirection('down')}
+                >
+                  <ClockArrowDown className="h-3 w-3" /> Pomodoro
+                </Button>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              <Button
-                disabled={isRunning}
-                variant={timerDirection === 'up' ? 'secondary' : 'ghost'}
-                className={cn(
-                  'h-6 justify-start gap-1.5 px-2 text-[11px]',
-                  isRunning && 'opacity-50',
-                )}
-                onClick={() => setTimerDirection('up')}
-              >
-                <ClockArrowUp className="h-3 w-3" /> Normal
-              </Button>
-              <Button
-                disabled={isRunning}
-                variant={timerDirection === 'down' ? 'secondary' : 'ghost'}
-                className={cn(
-                  'h-6 justify-start gap-1.5 px-2 text-[11px]',
-                  isRunning && 'opacity-50',
-                )}
-                onClick={() => setTimerDirection('down')}
-              >
-                <ClockArrowDown className="h-3 w-3" /> Pomodoro
-              </Button>
+
+            {/* Subgrupo 2: Opções de Apontamento */}
+            <div className="border-border/40 space-y-1.5 border-t pt-2">
+              <span className="text-muted-foreground block text-[11px] font-medium">
+                Botão extra do timer
+              </span>
+              <div className="space-y-1">
+                {[
+                  { id: 'none', label: 'Não exibir' },
+                  { id: 'manual', label: 'Apontar direto' },
+                  { id: 'ask', label: 'Escolher ação' },
+                ].map((option) => {
+                  const isSelected = logOption === option.id
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() =>
+                        setLogOption(option.id as 'none' | 'manual' | 'ask')
+                      }
+                      className={cn(
+                        'flex w-full items-center justify-between rounded-md px-2 py-1 text-[11px] transition-colors',
+                        isSelected
+                          ? 'bg-primary/10 text-primary font-medium'
+                          : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
+                      )}
+                    >
+                      <span>{option.label}</span>
+                      <div
+                        className={cn(
+                          'flex h-3.5 w-3.5 items-center justify-center rounded-full border transition-all',
+                          isSelected
+                            ? 'border-primary bg-primary'
+                            : 'border-muted-foreground/40 bg-transparent',
+                        )}
+                      >
+                        {isSelected && (
+                          <div className="bg-primary-foreground h-1.5 w-1.5 rounded-full" />
+                        )}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
 

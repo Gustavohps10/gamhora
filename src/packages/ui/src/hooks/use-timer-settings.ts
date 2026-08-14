@@ -2,9 +2,11 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export type WidgetPosition = 'top' | 'bottom' | 'left' | 'right'
+export type LogOption = 'none' | 'manual' | 'ask'
 
 interface TimerSettingsState {
   timerDirection: 'up' | 'down'
+  logOption: LogOption
   widgetPosition: WidgetPosition
   selectedDisplayId: number | null
   selectedWorkspaceId: string | null // <-- NOVO: Guarda o último workspace utilizado
@@ -16,6 +18,7 @@ interface TimerSettingsState {
   mainWindowWidgetPosition: WidgetPosition
 
   setTimerDirection: (val: 'up' | 'down') => void
+  setLogOption: (val: LogOption) => void
   setWidgetPosition: (val: WidgetPosition) => void
   setMainWindowWidgetPosition: (val: WidgetPosition) => void
   setSelectedDisplayId: (val: number | null) => void
@@ -31,6 +34,7 @@ export const useTimerSettings = create<TimerSettingsState>()(
   persist(
     (set) => ({
       timerDirection: 'up',
+      logOption: 'ask',
       widgetPosition: 'bottom',
       selectedDisplayId: null,
       selectedWorkspaceId: null,
@@ -42,6 +46,7 @@ export const useTimerSettings = create<TimerSettingsState>()(
       mainWindowWidgetPosition: 'bottom',
 
       setTimerDirection: (val) => set({ timerDirection: val }),
+      setLogOption: (val) => set({ logOption: val }),
       setWidgetPosition: (val) => set({ widgetPosition: val }),
       setMainWindowWidgetPosition: (val) =>
         set({ mainWindowWidgetPosition: val }),

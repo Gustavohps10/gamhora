@@ -187,7 +187,8 @@ export const TimerHistory = memo(() => {
     if (newStatus === 'running') {
       const elapsed = differenceInSeconds(new Date(), parseISO(newStartDate))
       client.timer.start({
-        initialSeconds: Math.max(0, elapsed),
+        baseSeconds: activeEntry.timerConfig?.manualInitialSeconds ?? 0,
+        elapsedSeconds: Math.max(0, elapsed),
         mode: activeEntry.timerConfig?.mode ?? 'countup',
       })
     }
@@ -201,6 +202,7 @@ export const TimerHistory = memo(() => {
     let newStartDate = currentStartDate.toISOString()
     let newStatus: 'running' | 'paused' | 'finished' =
       (activeEntry.timeStatus as 'running' | 'paused' | 'finished') || 'paused'
+    let delta = 0
 
     if (block.type === 'pause-block') {
       newJournal.splice(block.resumeIndex, 1)
@@ -214,13 +216,29 @@ export const TimerHistory = memo(() => {
       newStatus = 'running'
     } else if (block.type === 'adjustment') {
       newJournal.splice(block.index, 1)
-      newStartDate = addSeconds(
-        currentStartDate,
-        block.entry.secondsAtEvent,
-      ).toISOString()
+      delta = -block.entry.secondsAtEvent
+      newStartDate = subSeconds(currentStartDate, delta).toISOString()
     }
 
     if (isAfter(parseISO(newStartDate), new Date())) return
+
+    if (activeEntry.timeStatus === 'paused' && block.type === 'adjustment') {
+      const lastPauseIdx = newJournal
+        .slice()
+        .reverse()
+        .findIndex((j: JournalEntry) => j.event === 'paused')
+      if (lastPauseIdx !== -1) {
+        const realIdx = newJournal.length - 1 - lastPauseIdx
+        newJournal[realIdx] = {
+          ...newJournal[realIdx],
+          secondsAtEvent: Math.max(
+            0,
+            (newJournal[realIdx].secondsAtEvent || 0) + delta,
+          ),
+        }
+      }
+    }
+
     await syncStoreAndElectron(newJournal, newStartDate, newStatus)
   }
 
@@ -323,6 +341,23 @@ export const TimerHistory = memo(() => {
       note: inlineAdjNote,
     }
 
+    if (activeEntry.timeStatus === 'paused') {
+      const lastPauseIdx = newJournal
+        .slice()
+        .reverse()
+        .findIndex((j: JournalEntry) => j.event === 'paused')
+      if (lastPauseIdx !== -1) {
+        const realIdx = newJournal.length - 1 - lastPauseIdx
+        newJournal[realIdx] = {
+          ...newJournal[realIdx],
+          secondsAtEvent: Math.max(
+            0,
+            (newJournal[realIdx].secondsAtEvent || 0) + delta,
+          ),
+        }
+      }
+    }
+
     await syncStoreAndElectron(
       newJournal,
       newStartDate,
@@ -341,7 +376,10 @@ export const TimerHistory = memo(() => {
     const currentStartDate = parseISO(activeEntry.startDate!)
     let newStartDate = currentStartDate.toISOString()
 
-    if (addType === 'add') {
+    const isAdd = addType === 'add'
+    const adjDelta = isAdd ? secondsDelta : -secondsDelta
+
+    if (isAdd) {
       newStartDate = subSeconds(currentStartDate, secondsDelta).toISOString()
     } else {
       newStartDate = addSeconds(currentStartDate, secondsDelta).toISOString()
@@ -352,12 +390,28 @@ export const TimerHistory = memo(() => {
       return
     }
 
+    if (activeEntry.timeStatus === 'paused') {
+      const lastPauseIdx = newJournal
+        .slice()
+        .reverse()
+        .findIndex((j: JournalEntry) => j.event === 'paused')
+      if (lastPauseIdx !== -1) {
+        const realIdx = newJournal.length - 1 - lastPauseIdx
+        newJournal[realIdx] = {
+          ...newJournal[realIdx],
+          secondsAtEvent: Math.max(
+            0,
+            (newJournal[realIdx].secondsAtEvent || 0) + adjDelta,
+          ),
+        }
+      }
+    }
+
     newJournal.push({
       event: 'adjusted',
       at: new Date().toISOString(),
-      secondsAtEvent: addType === 'add' ? secondsDelta : -secondsDelta,
-      note:
-        addNote || (addType === 'add' ? 'Tempo adicionado' : 'Tempo removido'),
+      secondsAtEvent: adjDelta,
+      note: addNote || (isAdd ? 'Tempo adicionado' : 'Tempo removido'),
     })
 
     await syncStoreAndElectron(

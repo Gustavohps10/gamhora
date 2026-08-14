@@ -4,6 +4,8 @@ import { formatTrayTime, updateTrayTimer } from '@/main/tray'
 
 export class TimerRuntime {
   private intervalId: NodeJS.Timeout | null = null
+  private baseSeconds: number = 0
+  private elapsedSeconds: number = 0
   private currentSeconds: number = 0
   private mode: 'countup' | 'countdown' = 'countup'
   private status: 'running' | 'paused' | 'idle' = 'idle'
@@ -11,28 +13,36 @@ export class TimerRuntime {
   public init(): void {
     console.log('[TimerRuntime] init() called')
 
-    ipcMain.on('timer:start', (event, { initialSeconds, mode }) => {
-      console.log('[TimerRuntime] timer:start received', {
-        initialSeconds,
-        mode,
-      })
+    ipcMain.on(
+      'timer:start',
+      (event, { baseSeconds = 0, elapsedSeconds = 0, mode }) => {
+        console.log('[TimerRuntime] timer:start received', {
+          baseSeconds,
+          elapsedSeconds,
+          mode,
+        })
 
-      this.start(initialSeconds, mode)
-    })
+        this.start(baseSeconds, elapsedSeconds, mode)
+      },
+    )
 
     ipcMain.on('timer:pause', () => {
       console.log('[TimerRuntime] timer:pause received')
       this.pause()
     })
 
-    ipcMain.on('timer:resume', (event, { initialSeconds }) => {
-      console.log('[TimerRuntime] timer:resume received', {
-        initialSeconds,
-        mode: this.mode,
-      })
+    ipcMain.on(
+      'timer:resume',
+      (event, { baseSeconds = 0, elapsedSeconds = 0 }) => {
+        console.log('[TimerRuntime] timer:resume received', {
+          baseSeconds,
+          elapsedSeconds,
+          mode: this.mode,
+        })
 
-      this.start(initialSeconds, this.mode)
-    })
+        this.start(baseSeconds, elapsedSeconds, this.mode)
+      },
+    )
 
     ipcMain.on('timer:stop', () => {
       console.log('[TimerRuntime] timer:stop received')
@@ -49,19 +59,25 @@ export class TimerRuntime {
     return `${m}m`
   }
 
-  private start(initialSeconds: number, mode: 'countup' | 'countdown'): void {
+  private start(
+    baseSeconds: number,
+    elapsedSeconds: number,
+    mode: 'countup' | 'countdown',
+  ): void {
     this.stopExisting()
 
-    this.currentSeconds = initialSeconds
+    this.baseSeconds = baseSeconds
+    this.elapsedSeconds = elapsedSeconds
     this.mode = mode
     this.status = 'running'
 
     this.intervalId = setInterval(() => {
-      if (this.mode === 'countup') {
-        this.currentSeconds++
-      } else {
-        this.currentSeconds--
-      }
+      this.elapsedSeconds++
+
+      this.currentSeconds =
+        this.mode === 'countup'
+          ? this.baseSeconds + this.elapsedSeconds
+          : this.baseSeconds - this.elapsedSeconds
 
       // Atualiza o Tray com o formato correto de horas/minutos/segundos
       updateTrayTimer({
@@ -75,15 +91,7 @@ export class TimerRuntime {
         }
       }
 
-      if (this.mode === 'countdown' && this.currentSeconds <= 0) {
-        this.stopExisting()
-
-        for (const win of BrowserWindow.getAllWindows()) {
-          if (!win.isDestroyed()) {
-            win.webContents.send('timer:finished')
-          }
-        }
-      }
+      // Removed auto-stop for countdown so it can go negative
     }, 1000)
   }
 

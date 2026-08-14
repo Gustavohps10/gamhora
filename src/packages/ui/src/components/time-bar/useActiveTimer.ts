@@ -39,7 +39,18 @@ export function useActiveTimer(): number {
 
   const saved = active.timeSpent ?? 0
 
-  if (active.timeStatus === 'paused') return saved
+  if (active.timeStatus === 'paused') {
+    const lastPause = active.journal
+      ?.slice()
+      .reverse()
+      .find((j: any) => j.event === 'paused')
+    const actual = lastPause?.secondsAtEvent ?? 0
+    const base =
+      active.timerConfig?.mode === 'countup'
+        ? (active.timerConfig?.manualInitialSeconds ?? 0)
+        : 0
+    return saved + base + actual
+  }
 
   if (active.timeStatus === 'running') {
     if (!active.startDate) return saved
@@ -47,7 +58,12 @@ export function useActiveTimer(): number {
       Date.now(),
       parseISO(active.startDate).getTime(),
     )
-    return saved + Math.max(0, Math.floor(diffMs / 1000))
+    const actual = Math.max(0, Math.floor(diffMs / 1000))
+    const base =
+      active.timerConfig?.mode === 'countup'
+        ? (active.timerConfig?.manualInitialSeconds ?? 0)
+        : 0
+    return saved + base + actual
   }
 
   return saved

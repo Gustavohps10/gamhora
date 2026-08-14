@@ -19,43 +19,72 @@
  *   ""            → null  (empty / invalid)
  */
 export function parseTimeInput(raw: string): number | null {
-  const s = raw.trim()
+  const s = raw.trim().replace(',', '.')
   if (!s) return null
 
+  const isNeg = s.startsWith('-')
+  const absS = isNeg ? s.substring(1).trim() : s
+
   // HH:MM:SS or H:MM:SS
-  const hms = s.match(/^(\d+):(\d{1,2}):(\d{2})$/)
+  const hms = absS.match(/^(\d+):(\d{1,2}):(\d{2})$/)
   if (hms) {
-    return parseInt(hms[1]) * 3600 + parseInt(hms[2]) * 60 + parseInt(hms[3])
+    const val =
+      parseInt(hms[1]) * 3600 + parseInt(hms[2]) * 60 + parseInt(hms[3])
+    return isNeg ? -val : val
   }
 
   // HH:MM or H:MM  → treat as hours:minutes
-  const hm = s.match(/^(\d+):(\d{2})$/)
+  const hm = absS.match(/^(\d+):(\d{2})$/)
   if (hm) {
-    return parseInt(hm[1]) * 3600 + parseInt(hm[2]) * 60
+    const val = parseInt(hm[1]) * 3600 + parseInt(hm[2]) * 60
+    return isNeg ? -val : val
   }
 
   // Compound: 1h30m, 1h30, 1h 30m, 1h 30
-  const compound = s.match(/^(\d+)\s*h\s*(\d+)\s*m?$/i)
+  const compound = absS.match(/^(\d+)\s*h\s*(\d+)\s*m?$/i)
   if (compound) {
-    return parseInt(compound[1]) * 3600 + parseInt(compound[2]) * 60
+    const val = parseInt(compound[1]) * 3600 + parseInt(compound[2]) * 60
+    return isNeg ? -val : val
   }
 
   // Pure hours: 1h, 2.5h
-  const hoursOnly = s.match(/^(\d+(?:\.\d+)?)\s*h$/i)
+  const hoursOnly = absS.match(/^(\d+(?:\.\d+)?)\s*h$/i)
   if (hoursOnly) {
-    return Math.round(parseFloat(hoursOnly[1]) * 3600)
+    const val = Math.round(parseFloat(hoursOnly[1]) * 3600)
+    return isNeg ? -val : val
   }
 
   // Pure minutes: 90m
-  const minsOnly = s.match(/^(\d+(?:\.\d+)?)\s*m$/i)
+  const minsOnly = absS.match(/^(\d+(?:\.\d+)?)\s*m$/i)
   if (minsOnly) {
-    return Math.round(parseFloat(minsOnly[1]) * 60)
+    const val = Math.round(parseFloat(minsOnly[1]) * 60)
+    return isNeg ? -val : val
   }
 
-  // Pure seconds: 5400s or bare number
-  const secsOnly = s.match(/^(\d+(?:\.\d+)?)\s*s?$/i)
-  if (secsOnly) {
-    return Math.round(parseFloat(secsOnly[1]))
+  // Pure seconds with explicit 's': 5400s, 5s
+  const explicitSecs = absS.match(/^(\d+(?:\.\d+)?)\s*s$/i)
+  if (explicitSecs) {
+    const val = Math.round(parseFloat(explicitSecs[1]))
+    return isNeg ? -val : val
+  }
+
+  // Bare number (no unit): 1-24 treated as hours (24 = 23:59:59 = 86399s), > 24 as raw seconds
+  const bareNumber = absS.match(/^(\d+(?:\.\d+)?)$/)
+  if (bareNumber) {
+    const num = parseFloat(bareNumber[1])
+    let val: number
+    if (num >= 1 && num <= 24) {
+      if (num === 24) {
+        val = 86399 // 23:59:59
+      } else {
+        val = Math.round(num * 3600)
+      }
+    } else if (num === 0) {
+      val = 0
+    } else {
+      val = Math.round(num)
+    }
+    return isNeg ? -val : val
   }
 
   return null
@@ -67,11 +96,13 @@ export function parseTimeInput(raw: string): number | null {
  * Handles negative (countdown past zero) by clamping to 0.
  */
 export function formatTime(totalSeconds: number): string {
-  const s = Math.max(0, Math.floor(totalSeconds))
+  const isNeg = totalSeconds < 0
+  const s = Math.floor(Math.abs(totalSeconds))
   const h = Math.floor(s / 3600)
   const m = Math.floor((s % 3600) / 60)
   const sec = s % 60
-  return [h, m, sec].map((n) => String(n).padStart(2, '0')).join(':')
+  const formatted = [h, m, sec].map((n) => String(n).padStart(2, '0')).join(':')
+  return isNeg ? `-${formatted}` : formatted
 }
 
 // ── 3. useTimerEngine ──────────────────────────
@@ -139,8 +170,8 @@ export function useTimerEngine({
       if (mode === 'countup') {
         state.seconds += delta
       } else {
-        state.seconds = Math.max(0, state.seconds - delta)
-        if (state.seconds === 0 && !state.finished) {
+        state.seconds = state.seconds - delta
+        if (state.seconds <= 0 && !state.finished) {
           state.finished = true
           onFinishRef.current?.()
           return // stop loop

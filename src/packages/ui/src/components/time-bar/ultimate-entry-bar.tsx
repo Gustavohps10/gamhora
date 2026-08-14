@@ -22,7 +22,9 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { differenceInSeconds, isSameDay, isValid, parseISO } from 'date-fns'
 import {
+  AlertCircle,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -32,6 +34,7 @@ import {
   FlaskConical,
   GripHorizontal,
   GripVertical,
+  Info,
   MessageSquareDiff,
   Pause,
   PenTool,
@@ -40,6 +43,7 @@ import {
   Users,
   X,
 } from 'lucide-react'
+import * as LucideIcons from 'lucide-react'
 import React, {
   createContext,
   useCallback,
@@ -49,35 +53,40 @@ import React, {
   useRef,
   useState,
 } from 'react'
+import { RxDocument } from 'rxdb'
+import { toast } from 'sonner'
 
-import { LookupInput } from '@/components/lookup-input'
+import { TaskLookup } from '@/components/task-lookup'
+import { TaskPopover } from '@/components/task-popover'
 import { TimerDisplay } from '@/components/time-bar/timer-display'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { useClient } from '@/hooks'
 import {
   useCurrentWidgetPosition,
   useTimerSettings,
 } from '@/hooks/use-timer-settings'
 import { cn } from '@/lib/utils'
-import { useSyncStore } from '@/stores/syncStore'
+import { SyncMetadataRxDBDTO } from '@/local-db/schemas/metadata-sync-schema'
+import { SyncTaskRxDBDTO } from '@/local-db/schemas/tasks-sync-schema'
+import { useConnectionsWithSync, useSyncStore } from '@/stores/syncStore'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 
 import { TimerHistory } from './details/timer-history'
 import { TimerSettings } from './details/timer-settings'
+import { useActiveTimer } from './useActiveTimer'
 
 const mockActivities: Array<{
   id: string
@@ -139,6 +148,12 @@ type UltimateTimeTrackerContextType = {
 
   taskId: string
   setTaskId: React.Dispatch<React.SetStateAction<string>>
+  selectedTask: SyncTaskRxDBDTO | null
+  setSelectedTask: React.Dispatch<React.SetStateAction<SyncTaskRxDBDTO | null>>
+  isTaskLookupOpen: boolean
+  setIsTaskLookupOpen: React.Dispatch<React.SetStateAction<boolean>>
+  activities: Array<{ id: string; name: string; icon: React.ElementType }>
+  handleSelectTask: (task: SyncTaskRxDBDTO) => void
   description: string
   setDescription: React.Dispatch<React.SetStateAction<string>>
   selectedActivity: string
@@ -155,6 +170,15 @@ type UltimateTimeTrackerContextType = {
   handleStart: () => void
   handlePause: () => void
   handleStop: () => void
+  handleDirectLog: () => void
+
+  selectedConnectionId: string
+  setSelectedConnectionId: React.Dispatch<React.SetStateAction<string>>
+  syncConnections: any[]
+  dbTodaySeconds: number
+
+  timerError: string | null
+  setTimerError: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 const UltimateTimeTrackerContext =
@@ -179,9 +203,24 @@ export const UltimateTimeTracker = ({
   children?: React.ReactNode
 }) => {
   const [taskId, setTaskId] = useState<string>('')
+  const [selectedTask, setSelectedTask] = useState<SyncTaskRxDBDTO | null>(null)
+  const [isTaskLookupOpen, setIsTaskLookupOpen] = useState(false)
   const [description, setDescription] = useState<string>('')
   const [selectedActivity, setSelectedActivity] = useState<string>('dev')
   const [manualInitialSeconds, setManualInitialSeconds] = useState<number>(0)
+  const [timerError, setTimerError] = useState<string | null>(null)
+  const [activities, setActivities] =
+    useState<Array<{ id: string; name: string; icon: React.ElementType }>>(
+      mockActivities,
+    )
+  const [selectedConnectionId, setSelectedConnectionId] = useState<string>('')
+  const syncConnections = useConnectionsWithSync()
+
+  useEffect(() => {
+    if (!selectedConnectionId && syncConnections.length > 0) {
+      setSelectedConnectionId(syncConnections[0].connectionId)
+    }
+  }, [syncConnections, selectedConnectionId])
 
   const [isEditingVertical, setIsEditingVertical] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -192,8 +231,130 @@ export const UltimateTimeTracker = ({
   const { timerDirection, setTimerDirection } = useTimerSettings()
   const [widgetPosition] = useCurrentWidgetPosition()
   const db = useSyncStore((s) => s.db)
+  const client = useClient()
+
+  // Carrega dinamicamente as atividades do metadata baseado na Task / Conexões ativas
+  useEffect(() => {
+    if (!db) return
+
+    let isMounted = true
+
+    const loadMetadataActivities = async () => {
+      try {
+        let docs: RxDocument<SyncMetadataRxDBDTO>[] = []
+
+        const connId =
+          selectedTask?.connectionInstanceId || selectedConnectionId
+        if (connId) {
+          docs = await db.metadata
+            .find({
+              selector: {
+                connectionInstanceId: {
+                  $eq: connId,
+                },
+              },
+            })
+            .exec()
+        }
+
+        if (docs.length === 0) {
+          docs = await db.metadata.find().exec()
+        }
+
+        const loaded: Array<{
+          id: string
+          name: string
+          icon: React.ElementType
+        }> = []
+
+        docs.forEach((doc) => {
+          const json = doc.toMutableJSON ? doc.toMutableJSON() : doc
+          json.activities?.forEach((act: any) => {
+            if (!loaded.some((a) => a.id === act.id)) {
+              const IconComp = (LucideIcons as any)[act.icon] || Code2Icon
+              loaded.push({
+                id: act.id,
+                name: act.name,
+                icon: IconComp,
+              })
+            }
+          })
+        })
+
+        if (isMounted && loaded.length > 0) {
+          setActivities(loaded)
+          if (!loaded.some((a) => a.id === selectedActivity)) {
+            setSelectedActivity(loaded[0].id)
+          }
+        }
+      } catch (err) {
+        console.error('[METADATA] Erro ao carregar atividades:', err)
+      }
+    }
+
+    loadMetadataActivities()
+
+    return () => {
+      isMounted = false
+    }
+  }, [db, selectedTask, selectedConnectionId])
 
   const activeEntry = useTimeEntryStore((s) => s.active)
+
+  const [dbTodaySeconds, setDbTodaySeconds] = useState(0)
+
+  useEffect(() => {
+    if (!db?.timeEntries) return
+
+    const now = new Date()
+
+    const sub = db.timeEntries.find().$.subscribe((docs) => {
+      let totalSecs = 0
+      docs.forEach((doc) => {
+        const item = doc.toMutableJSON ? doc.toMutableJSON() : doc
+        if (item._deleted) return
+
+        const entryDate = item.startDate
+          ? parseISO(item.startDate)
+          : item.createdAt
+            ? parseISO(item.createdAt)
+            : null
+
+        if (!entryDate || !isValid(entryDate) || !isSameDay(entryDate, now)) {
+          return
+        }
+
+        const isActive =
+          activeEntry &&
+          (item._id === activeEntry._id ||
+            item.id === activeEntry.id ||
+            item._id === activeEntry.id ||
+            item.id === activeEntry._id)
+
+        if (isActive) return
+
+        let secs = 0
+        if (typeof item.timeSpent === 'number' && item.timeSpent > 0) {
+          secs =
+            item.timeSpent < 100
+              ? Math.round(item.timeSpent * 3600)
+              : Math.round(item.timeSpent)
+        } else if (item.startDate && item.endDate) {
+          secs = Math.max(
+            0,
+            differenceInSeconds(
+              parseISO(item.endDate),
+              parseISO(item.startDate),
+            ),
+          )
+        }
+        totalSecs += secs
+      })
+      setDbTodaySeconds(totalSecs)
+    })
+
+    return () => sub.unsubscribe()
+  }, [db, activeEntry?._id, activeEntry?.id])
   const playCurrentTimeEntry = useTimeEntryStore((s) => s.playCurrentTimeEntry)
   const pauseCurrentTimeEntry = useTimeEntryStore(
     (s) => s.pauseCurrentTimeEntry,
@@ -216,6 +377,9 @@ export const UltimateTimeTracker = ({
           activeEntry.timerConfig.mode === 'countup' ? 'up' : 'down',
         )
       }
+      if (activeEntry.timerConfig?.manualInitialSeconds !== undefined) {
+        setManualInitialSeconds(activeEntry.timerConfig.manualInitialSeconds)
+      }
     }
   }, [activeEntry, setTimerDirection])
 
@@ -232,47 +396,33 @@ export const UltimateTimeTracker = ({
 
   // -- INÍCIO DA LÓGICA DE BLINDAGEM DE HOVER / IPC --
   useEffect(() => {
-    if (typeof window === 'undefined' || !(window as any).electron) return
     const isWidgetWindow = window.location.hash.includes('/widgets/')
     if (!isWidgetWindow) return
 
-    let timeoutId: NodeJS.Timeout | null = null
     let isCurrentlyIgnored = true
+
+    const updateIgnore = (shouldIgnore: boolean) => {
+      if (shouldIgnore !== isCurrentlyIgnored) {
+        isCurrentlyIgnored = shouldIgnore
+
+        client.modules.system.setIgnoreMouseEvents(shouldIgnore)
+      }
+    }
 
     const handleMouseMove = (e: MouseEvent) => {
       if (isDraggingWidgetRef.current) return
 
       const target = e.target as HTMLElement
-
-      // Heurística inclusiva: só não ignoramos se o mouse estiver sobre o widget ou sobre um popover/portal (Radix)
       const isUI = target.closest(
         '[data-widget-card], [data-radix-popper-content-wrapper], [role="dialog"], [role="menu"], [role="tooltip"]',
       )
 
-      const shouldIgnore = !isUI
-
-      if (shouldIgnore !== isCurrentlyIgnored) {
-        if (timeoutId) clearTimeout(timeoutId)
-        timeoutId = setTimeout(() => {
-          isCurrentlyIgnored = shouldIgnore
-          ;(window as any).electron.ipcRenderer
-            .invoke('WIDGET_SET_IGNORE_MOUSE', {
-              body: { ignore: shouldIgnore },
-            })
-            .catch(() => {})
-        }, 50)
-      }
+      updateIgnore(!isUI)
     }
 
     const handleMouseLeave = () => {
       if (isDraggingWidgetRef.current) return
-      if (timeoutId) clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => {
-        isCurrentlyIgnored = true
-        ;(window as any).electron.ipcRenderer
-          .invoke('WIDGET_SET_IGNORE_MOUSE', { body: { ignore: true } })
-          .catch(() => {})
-      }, 50)
+      updateIgnore(true)
     }
 
     window.addEventListener('mousemove', handleMouseMove)
@@ -281,7 +431,6 @@ export const UltimateTimeTracker = ({
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseleave', handleMouseLeave)
-      if (timeoutId) clearTimeout(timeoutId)
     }
   }, [])
   // -- FIM DA LÓGICA DE BLINDAGEM DE HOVER / IPC --
@@ -436,13 +585,8 @@ export const UltimateTimeTracker = ({
       isDraggingWidgetRef.current = false
 
       // Safely ensure we revert back to transparent if mouse left while dropping
-      if (!element.matches(':hover')) {
-        if (typeof window !== 'undefined' && (window as any).electron) {
-          ;(window as any).electron.ipcRenderer
-            .invoke('WIDGET_SET_IGNORE_MOUSE', { body: { ignore: true } })
-            .catch(() => {})
-        }
-      }
+      if (!element.matches(':hover'))
+        client.modules.system.setIgnoreMouseEvents(true)
 
       setFreeOffsets(nextOffsets)
 
@@ -590,20 +734,42 @@ export const UltimateTimeTracker = ({
     }
   }, [isVertical, widgetPosition])
 
+  const handleSelectTask = useCallback(
+    (task: SyncTaskRxDBDTO) => {
+      setSelectedTask(task)
+      setTaskId(task.id)
+      if (task.connectionInstanceId) {
+        setSelectedConnectionId(task.connectionInstanceId)
+      }
+    },
+    [description],
+  )
+
   const handleStart = useCallback(async () => {
     if (!db) return
+    setTimerError(null)
     if (activeEntry && activeEntry.timeStatus === 'paused') {
       await playCurrentTimeEntry(db)
       return
     }
 
     const mode = timerDirection === 'up' ? 'countup' : 'countdown'
+    const connectionInstanceId =
+      selectedTask?.connectionInstanceId ||
+      selectedConnectionId ||
+      'default-conn'
+    const dataSourceId =
+      selectedTask?.dataSourceId ||
+      syncConnections.find((c) => c.connectionId === connectionInstanceId)
+        ?.dataSourceId ||
+      'default'
+
     await createNewTimeEntry(db, {
       taskId,
       activityId: selectedActivity,
-      dataSourceId: 'default',
+      dataSourceId,
+      connectionInstanceId,
       type: timerDirection === 'up' ? 'increasing' : 'decreasing',
-      connectionInstanceId: 'default-conn',
       comments: description,
       mode,
       manualInitialSeconds,
@@ -613,11 +779,14 @@ export const UltimateTimeTracker = ({
     activeEntry,
     timerDirection,
     taskId,
+    selectedTask,
     selectedActivity,
     description,
     manualInitialSeconds,
     playCurrentTimeEntry,
     createNewTimeEntry,
+    selectedConnectionId,
+    syncConnections,
   ])
 
   const handlePause = useCallback(async () => {
@@ -630,9 +799,62 @@ export const UltimateTimeTracker = ({
     await stopCurrentTimeEntry(db)
     setManualInitialSeconds(0)
     setTaskId('')
+    setSelectedTask(null)
     setDescription('')
     setIsEditingVertical(false)
   }, [db, stopCurrentTimeEntry])
+
+  const handleDirectLog = useCallback(async () => {
+    if (!db) return
+    if (manualInitialSeconds <= 0) {
+      setTimerError('Não é permitido apontamento zerado.')
+      return
+    }
+    if (manualInitialSeconds + dbTodaySeconds > 86400) {
+      setTimerError('O total de horas no dia não pode exceder 24h.')
+      return
+    }
+    setTimerError(null)
+
+    const connectionInstanceId =
+      selectedTask?.connectionInstanceId ||
+      selectedConnectionId ||
+      'default-conn'
+    const dataSourceId =
+      selectedTask?.dataSourceId ||
+      syncConnections.find((c) => c.connectionId === connectionInstanceId)
+        ?.dataSourceId ||
+      'default'
+
+    await createNewTimeEntry(db, {
+      taskId,
+      activityId: selectedActivity,
+      dataSourceId,
+      connectionInstanceId,
+      type: 'manual',
+      comments: description,
+      mode: timerDirection === 'up' ? 'countup' : 'countdown',
+      manualInitialSeconds,
+    })
+
+    toast.success('Lançamento direto efetuado com sucesso!')
+    setManualInitialSeconds(0)
+    setTaskId('')
+    setSelectedTask(null)
+    setDescription('')
+  }, [
+    db,
+    selectedTask,
+    selectedConnectionId,
+    syncConnections,
+    createNewTimeEntry,
+    taskId,
+    selectedActivity,
+    description,
+    timerDirection,
+    manualInitialSeconds,
+    dbTodaySeconds,
+  ])
 
   const content = children || (
     <>
@@ -671,6 +893,12 @@ export const UltimateTimeTracker = ({
     widgetHandleRef,
     taskId,
     setTaskId,
+    selectedTask,
+    setSelectedTask,
+    isTaskLookupOpen,
+    setIsTaskLookupOpen,
+    activities,
+    handleSelectTask,
     description,
     setDescription,
     selectedActivity,
@@ -685,6 +913,13 @@ export const UltimateTimeTracker = ({
     handleStart,
     handlePause,
     handleStop,
+    handleDirectLog,
+    selectedConnectionId,
+    setSelectedConnectionId,
+    syncConnections,
+    dbTodaySeconds,
+    timerError,
+    setTimerError,
   }
 
   return (
@@ -710,6 +945,11 @@ export const UltimateTimeTracker = ({
           {content}
         </CardContent>
       </Card>
+      <TaskLookup
+        open={isTaskLookupOpen}
+        onOpenChange={setIsTaskLookupOpen}
+        onSelect={handleSelectTask}
+      />
     </UltimateTimeTrackerContext.Provider>
   )
 }
@@ -961,24 +1201,7 @@ UltimateTimeTracker.Expander = function Expander() {
   )
 }
 UltimateTimeTracker.InlineInput = function TrackerInlineInput() {
-  const { isVertical, description, setDescription } = useTrackerContext()
-
-  if (isVertical) return null
-
-  return (
-    <div className="w-44 shrink-0 pl-1" data-no-drag>
-      <div className="hover:bg-muted/40 focus-within:bg-muted/40 flex h-9 items-center gap-1.5 rounded-lg bg-transparent px-2 transition-colors">
-        <Input
-          value={description}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setDescription(e.target.value)
-          }
-          placeholder="O que está fazendo?"
-          className="text-foreground h-full border-none bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
-        />
-      </div>
-    </div>
-  )
+  return null
 }
 
 // ---------------------------------------------------------------------------
@@ -990,6 +1213,7 @@ UltimateTimeTracker.TaskBlock = function TaskBlock() {
     isVertical,
     taskId,
     setTaskId,
+    selectedTask,
     selectedActivity,
     setSelectedActivity,
     isEditingVertical,
@@ -997,22 +1221,77 @@ UltimateTimeTracker.TaskBlock = function TaskBlock() {
     description,
     setDescription,
     widgetPosition,
+    setIsTaskLookupOpen,
+    activities,
+    selectedConnectionId,
+    setSelectedConnectionId,
+    syncConnections,
   } = useTrackerContext()
 
   const selectedAct =
-    mockActivities.find((a) => a.id === selectedActivity) || mockActivities[0]
+    activities.find((a) => a.id === selectedActivity) ||
+    activities[0] ||
+    mockActivities[0]
   const ActivityIcon = selectedAct.icon
 
-  if (isVertical) {
-    return (
-      <div className="flex shrink-0 items-center justify-center" data-no-drag>
-        <Popover open={isEditingVertical} onOpenChange={setIsEditingVertical}>
-          <PopoverTrigger asChild>
+  const [committedTaskId, setCommittedTaskId] = React.useState(taskId)
+  const [committedTask, setCommittedTask] = React.useState(selectedTask)
+
+  React.useEffect(() => {
+    setCommittedTaskId(taskId)
+    setCommittedTask(selectedTask)
+  }, [selectedTask])
+
+  React.useEffect(() => {
+    if (!isEditingVertical) {
+      setCommittedTaskId(taskId)
+      setCommittedTask(selectedTask)
+    }
+  }, [isEditingVertical, taskId, selectedTask])
+
+  const handleBlurInput = useCallback(() => {
+    setCommittedTaskId(taskId)
+    setCommittedTask(selectedTask)
+  }, [taskId, selectedTask])
+
+  const formattedLabel = React.useMemo(() => {
+    if (!committedTaskId) return null
+    const formattedId = /^\d+$/.test(committedTaskId)
+      ? `#${committedTaskId}`
+      : committedTaskId
+    return {
+      short: formattedId,
+      full: committedTask?.title
+        ? `${formattedId} - ${committedTask.title}`
+        : formattedId,
+    }
+  }, [committedTaskId, committedTask])
+
+  const popoverSide = isVertical
+    ? widgetPosition === 'left'
+      ? 'right'
+      : 'left'
+    : widgetPosition === 'bottom'
+      ? 'top'
+      : 'bottom'
+
+  return (
+    <div
+      className="flex shrink-0 flex-col items-center justify-center gap-0.5"
+      data-no-drag
+    >
+      <TaskPopover
+        open={isEditingVertical}
+        onOpenChange={setIsEditingVertical}
+        side={popoverSide}
+        sideOffset={12}
+        trigger={
+          <div className="relative cursor-pointer">
             <Button
               variant={isEditingVertical ? 'secondary' : 'ghost'}
               size="icon"
               className="text-muted-foreground hover:text-foreground h-7 w-7 shrink-0 rounded-full transition-colors"
-              title="Detalhes da Tarefa"
+              title={formattedLabel?.full || 'Detalhes da Tarefa'}
             >
               {isEditingVertical ? (
                 <X className="h-3.5 w-3.5" />
@@ -1020,160 +1299,139 @@ UltimateTimeTracker.TaskBlock = function TaskBlock() {
                 <MessageSquareDiff className="h-3.5 w-3.5" />
               )}
             </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            side={widgetPosition === 'left' ? 'right' : 'left'}
-            sideOffset={16}
-            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
-            className="border-border/50 bg-card flex w-[240px] flex-col gap-2.5 rounded-lg border p-2.5 shadow-lg"
-          >
-            <div className="mb-0.5 flex items-center justify-between">
-              <span className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-                Detalhes da Tarefa
-              </span>
-              <ActivityIcon className="text-primary h-3.5 w-3.5 opacity-80" />
-            </div>
-
-            <LookupInput
-              value={taskId}
-              onChange={setTaskId}
-              onOpenLookup={() => {}}
-              size="sm"
-              placeholder="Vincular Task ID"
-              className="w-full"
-            />
-
-            <Select
-              value={selectedActivity}
-              onValueChange={setSelectedActivity}
-            >
-              <SelectTrigger className="h-8 w-full text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {mockActivities.map(({ id, name, icon: Icon }) => (
-                  <SelectItem key={id} value={id} className="text-xs">
-                    <span className="flex items-center gap-2">
-                      <Icon
-                        className={cn(
-                          'h-3 w-3',
-                          id === selectedActivity
-                            ? 'text-primary'
-                            : 'text-muted-foreground',
-                        )}
-                      />
-                      {name}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Input
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="No que está trabalhando?"
-              className="h-8 text-xs focus-visible:ring-1"
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
-    )
-  }
-
-  return (
-    <div
-      className="flex h-10 w-32 shrink-0 flex-col justify-between gap-[4px]"
-      data-no-drag
-    >
-      <LookupInput
-        value={taskId}
-        onChange={setTaskId}
-        onOpenLookup={() => {}}
-        size="micro"
-        placeholder="Task ID"
+            {(() => {
+              const conn = syncConnections.find(
+                (c: any) => c.connectionId === selectedConnectionId,
+              )
+              if (conn?.addon?.logo) {
+                return (
+                  <div className="bg-background border-border/50 pointer-events-none absolute -top-0.5 -right-0.5 rounded-full border p-[2px] shadow-sm">
+                    <img
+                      src={conn.addon.logo}
+                      className="h-2 w-2 object-contain"
+                      alt=""
+                    />
+                  </div>
+                )
+              }
+              return null
+            })()}
+          </div>
+        }
       />
-      <Select value={selectedActivity} onValueChange={setSelectedActivity}>
-        <SelectTrigger
-          className={cn(
-            'cursor-pointer',
-            '!h-[18px] !min-h-0 w-full !border-none !bg-transparent !shadow-none',
-            '!inline-flex !items-center !justify-start !gap-0.5',
-            '!px-1 !py-0',
-            'text-muted-foreground text-[11px] leading-none',
-            'focus:ring-0 focus:ring-offset-0 focus-visible:ring-0',
-            '*:data-[slot=select-value]:flex',
-            '*:data-[slot=select-value]:items-center',
-            '*:data-[slot=select-value]:gap-0',
-            '*:data-[slot=select-value]:leading-none',
-            '*:data-[slot=select-value]:min-w-0',
-            '*:data-[slot=select-value]:w-full',
-            '[&>svg]:!size-2.5',
-            '[&>svg]:shrink-0',
-            '[&>svg]:opacity-50',
-          )}
+
+      {formattedLabel && (
+        <span
+          onClick={() => setIsEditingVertical(true)}
+          title={formattedLabel.full}
+          className="text-primary/90 hover:text-primary max-w-[64px] cursor-pointer truncate text-center font-mono text-[10px] leading-none font-semibold tracking-tight transition-colors"
         >
-          <SelectValue>
-            <span className="flex w-full min-w-0 items-center gap-2 pr-1">
-              <ActivityIcon className="text-primary h-2.5 w-2.5 shrink-0" />
-              <span className="truncate">{selectedAct.name}</span>
-            </span>
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent align="start" className="rounded-lg">
-          {mockActivities.map(({ id, name, icon: Icon }) => (
-            <SelectItem key={id} value={id} className="h-8 text-[11px]">
-              <span className="flex items-center gap-2">
-                <Icon
-                  className={cn(
-                    'h-3.5 w-3.5',
-                    id === selectedActivity
-                      ? 'text-primary'
-                      : 'text-muted-foreground',
-                  )}
-                />
-                {name}
-              </span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          {formattedLabel.short}
+        </span>
+      )}
     </div>
   )
 }
 
 UltimateTimeTracker.TimerBlock = function TimerBlock() {
-  const { isVertical, timerDirection, setManualInitialSeconds } =
-    useTrackerContext()
+  const {
+    isVertical,
+    timerDirection,
+    manualInitialSeconds,
+    setManualInitialSeconds,
+    dbTodaySeconds,
+    timerError,
+    setTimerError,
+  } = useTrackerContext()
+  const activeEntry = useTimeEntryStore((s) => s.active)
+  const liveActiveSeconds = useActiveTimer()
+
+  const hasError = Boolean(timerError)
 
   return (
     <div
       data-no-drag
       className={cn(
         'flex shrink-0 items-center justify-center',
-        isVertical ? 'flex-col' : '',
+        isVertical ? 'w-full flex-col' : 'flex-row',
       )}
     >
       <div
         className={cn(
+          'relative flex items-center justify-center',
           isVertical
-            ? 'flex w-full flex-col items-center justify-center text-center opacity-90'
-            : 'flex',
+            ? 'w-full flex-col items-center justify-center text-center opacity-90'
+            : 'flex-row items-center gap-1.5',
         )}
       >
         <TimerDisplay
           orientation={isVertical ? 'vertical' : 'horizontal'}
           editable
           mode={timerDirection === 'up' ? 'countup' : 'countdown'}
-          onInitialSecondsChange={setManualInitialSeconds}
+          initialValue={manualInitialSeconds}
+          onInitialSecondsChange={(secs) => {
+            setManualInitialSeconds(secs)
+            if (secs > 0) setTimerError(null)
+          }}
+          onError={setTimerError}
+          hasError={hasError}
+          status={activeEntry?.timeStatus}
+          seconds={
+            activeEntry?.timeStatus === 'paused'
+              ? timerDirection === 'up'
+                ? liveActiveSeconds
+                : manualInitialSeconds - liveActiveSeconds
+              : undefined
+          }
+          min={1}
+          max={Math.max(0, 86400 - dbTodaySeconds)}
         />
+
+        {timerError && (
+          <TooltipProvider>
+            <Tooltip defaultOpen open>
+              <TooltipTrigger asChild>
+                <div
+                  className={cn(
+                    'text-destructive hover:text-destructive/80 animate-in fade-in zoom-in flex cursor-pointer items-center justify-center rounded-full transition-all duration-200',
+                    isVertical ? 'mt-1' : 'ml-1',
+                  )}
+                  onClick={() => setTimerError(null)}
+                  title="Clique para fechar aviso"
+                >
+                  <AlertCircle className="text-destructive h-4 w-4 animate-pulse" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                side={isVertical ? 'right' : 'bottom'}
+                sideOffset={6}
+                className="bg-destructive text-destructive-foreground border-destructive/40 animate-in fade-in zoom-in-95 z-50 flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-medium shadow-xl select-none"
+              >
+                <Info className="h-3.5 w-3.5 shrink-0" />
+                <span>{timerError}</span>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
     </div>
   )
 }
 
 UltimateTimeTracker.TodayBlock = function TodayBlock() {
-  const { isVertical } = useTrackerContext()
+  const { isVertical, dbTodaySeconds } = useTrackerContext()
+  const activeEntry = useTimeEntryStore((s) => s.active)
+  const liveActiveSeconds = useActiveTimer()
+
+  const totalTodaySeconds =
+    dbTodaySeconds + (activeEntry ? liveActiveSeconds : 0)
+
+  const formatTodayTime = (totalSecs: number) => {
+    const h = Math.floor(totalSecs / 3600)
+    const m = Math.floor((totalSecs % 3600) / 60)
+    return `${h.toString().padStart(2, '0')}h ${m.toString().padStart(2, '0')}m`
+  }
+
   return (
     <div
       data-no-drag
@@ -1191,7 +1449,7 @@ UltimateTimeTracker.TodayBlock = function TodayBlock() {
         Hoje{isVertical ? '' : ':'}
       </span>
       <span className="text-muted-foreground font-mono text-[11px] tracking-tight tabular-nums">
-        00h 00m
+        {formatTodayTime(totalTodaySeconds)}
       </span>
     </div>
   )
@@ -1205,7 +1463,9 @@ UltimateTimeTracker.ActionsBlock = function ActionsBlock() {
     handleStart,
     handlePause,
     handleStop,
+    handleDirectLog,
   } = useTrackerContext()
+  const { logOption } = useTimerSettings()
 
   return (
     <div
@@ -1216,13 +1476,89 @@ UltimateTimeTracker.ActionsBlock = function ActionsBlock() {
       )}
     >
       {isIdle ? (
-        <Button
-          variant="default"
-          className="h-10 w-10 shrink-0 rounded-lg p-0 shadow-md transition-transform active:scale-95"
-          onClick={handleStart}
-        >
-          <Play className="ml-0.5 h-4 w-4 fill-current" />
-        </Button>
+        logOption === 'none' ? (
+          <Button
+            variant="default"
+            className="h-10 w-10 shrink-0 rounded-lg p-0 shadow-md transition-transform active:scale-95"
+            onClick={handleStart}
+            title="Iniciar cronômetro ao vivo"
+          >
+            <Play className="h-4 w-4 fill-current" />
+          </Button>
+        ) : logOption === 'manual' ? (
+          <div className="flex h-10 w-[42px] shrink-0 items-center justify-center gap-[1px]">
+            <Button
+              variant="default"
+              className="h-10 w-[31px] shrink-0 rounded-l-lg rounded-r-none p-0 shadow-md transition-transform active:scale-95"
+              onClick={handleStart}
+              title="Iniciar cronômetro ao vivo"
+            >
+              <Play className="ml-[6px] h-4 w-4 fill-current" />
+            </Button>
+            <Button
+              variant="default"
+              style={{ padding: '5px' }}
+              className="bg-primary/90 hover:bg-primary/80 flex h-10 w-[10px] shrink-0 items-center justify-center rounded-l-none rounded-r-lg opacity-90 shadow-md transition-transform hover:opacity-100 active:scale-95"
+              onClick={handleDirectLog}
+              title="Apontamento Manual"
+            >
+              <ChevronRight
+                style={{ width: '12px' }}
+                className="h-[7px] w-[7px] stroke-[2.5] opacity-50"
+              />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex h-10 w-[42px] shrink-0 items-center justify-center gap-[1px]">
+            <Button
+              variant="default"
+              className="h-10 w-[31px] shrink-0 rounded-l-lg rounded-r-none p-0 shadow-md transition-transform active:scale-95"
+              onClick={handleStart}
+              title="Iniciar cronômetro ao vivo"
+            >
+              <Play className="ml-[6px] h-4 w-4 fill-current" />
+            </Button>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="default"
+                  style={{ padding: '5px' }}
+                  className="bg-primary/90 hover:bg-primary/80 flex h-10 w-[10px] shrink-0 items-center justify-center rounded-l-none rounded-r-lg opacity-90 shadow-md transition-transform hover:opacity-100 active:scale-95"
+                >
+                  <ChevronRight
+                    style={{ width: '12px' }}
+                    className="h-[7px] w-[7px] stroke-[2.5] opacity-50"
+                  />
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent
+                side={isVertical ? 'right' : 'bottom'}
+                align="end"
+                className="flex w-48 flex-col gap-0.5 p-1"
+              >
+                <Button
+                  variant="ghost"
+                  className="h-8 justify-start text-xs"
+                  onClick={handleStart}
+                >
+                  <LucideIcons.Hourglass className="mr-2 h-3.5 w-3.5 opacity-70" />
+                  Iniciar Timer
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="h-8 justify-start text-xs"
+                  onClick={handleDirectLog}
+                >
+                  <LucideIcons.List className="mr-2 h-3.5 w-3.5 opacity-70" />
+                  Apontamento Manual
+                </Button>
+              </PopoverContent>
+            </Popover>
+          </div>
+        )
       ) : (
         <div
           className={cn('flex items-center gap-1.5', isVertical && 'flex-col')}

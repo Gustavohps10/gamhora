@@ -6,7 +6,6 @@
   "description": "Metric Desktop App.",
   "main": "./out/main/index.js",
   "type": "module",
- 
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",

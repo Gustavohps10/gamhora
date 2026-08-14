@@ -17,10 +17,14 @@ export interface TimerDisplayProps {
   mode?: TimerMode
   initialValue?: number | string
   onInitialSecondsChange?: (seconds: number) => void
+  onError?: (errorMsg: string | null) => void
+  hasError?: boolean
   className?: string
   status?: TimerStatus
   seconds?: number
   orientation?: 'horizontal' | 'vertical'
+  min?: number
+  max?: number
 }
 
 function resolveInitialSeconds(initialValue?: number | string): number {
@@ -34,10 +38,14 @@ export function TimerDisplay({
   mode = 'countup',
   initialValue,
   onInitialSecondsChange,
+  onError,
+  hasError = false,
   className,
   status: statusOverride,
   seconds: secondsOverride,
   orientation = 'horizontal',
+  min = 0,
+  max = Infinity,
 }: TimerDisplayProps) {
   const storeStatus = useTimeEntryStore((s) => s.active?.timeStatus) || 'idle'
   const client = useClient()
@@ -83,14 +91,15 @@ export function TimerDisplay({
     [displaySeconds],
   )
 
-  // Desestruturação manual para empilhar no modo vertical
-  const h = Math.floor(displaySeconds / 3600)
+  const absSeconds = Math.floor(Math.abs(displaySeconds))
+  const isNeg = displaySeconds < 0
+  const h = Math.floor(absSeconds / 3600)
     .toString()
     .padStart(2, '0')
-  const m = Math.floor((displaySeconds % 3600) / 60)
+  const m = Math.floor((absSeconds % 3600) / 60)
     .toString()
     .padStart(2, '0')
-  const s = (displaySeconds % 60).toString().padStart(2, '0')
+  const s = (absSeconds % 60).toString().padStart(2, '0')
 
   const isWarning =
     mode === 'countdown' &&
@@ -117,14 +126,19 @@ export function TimerDisplay({
       className={cn(
         'inline-flex items-center justify-center font-semibold tracking-tight tabular-nums transition-all duration-300',
         orientation === 'vertical'
-          ? 'w-full flex-col gap-0.5 font-mono text-[12px] leading-[1.15] whitespace-nowrap'
+          ? 'w-full flex-col gap-0.5 font-mono text-[14px] leading-[1.15] whitespace-nowrap'
           : 'font-mono text-[18px] leading-none',
-        resolvedStatus === 'idle' && 'text-muted-foreground/40',
-        resolvedStatus === 'running' && 'text-primary',
+        resolvedStatus === 'idle' && !hasError && 'text-muted-foreground/40',
+        hasError && [
+          'text-destructive',
+          'drop-shadow-[0_0_8px_hsl(var(--destructive)/0.5)]',
+        ],
+        resolvedStatus === 'running' && !hasError && 'text-primary',
         resolvedStatus === 'paused' &&
+          !hasError &&
           'text-muted-foreground animate-pulse opacity-80',
-        resolvedStatus === 'finished' && 'text-destructive',
-        isRunning && !isWarning && 'animate-timer-pulse',
+        resolvedStatus === 'finished' && !hasError && 'text-destructive',
+        isRunning && !isWarning && !hasError && 'animate-timer-pulse',
         isWarning && [
           'text-destructive',
           'drop-shadow-[0_0_8px_hsl(var(--destructive)/0.6)]',
@@ -137,20 +151,44 @@ export function TimerDisplay({
         <TimerInput
           value={displaySeconds}
           onChange={handleChange}
+          onError={onError}
+          hasError={hasError}
+          orientation={orientation}
+          min={min}
+          max={max}
           className={cn(
             'font-semibold tracking-tight',
             orientation === 'vertical'
-              ? 'w-10 text-center text-[11px]'
+              ? 'w-12 py-0.5 text-center text-[13px] font-bold'
               : 'text-[18px]',
-            resolvedStatus === 'idle' && 'text-muted-foreground/40',
+            resolvedStatus === 'idle' &&
+              !hasError &&
+              'text-muted-foreground/40',
+            hasError && 'text-destructive font-bold',
           )}
         />
       ) : orientation === 'vertical' ? (
-        <>
-          <span>{h}h</span>
-          <span>{m}m</span>
-          <span>{s}s</span>
-        </>
+        <div className="flex flex-col items-center gap-0.5 font-mono text-[14px] leading-none font-bold tracking-tight">
+          <span className="inline-flex items-baseline">
+            {isNeg ? '-' : ''}
+            {h}
+            <span className="text-muted-foreground ml-0.5 font-sans text-[10px] font-medium uppercase">
+              h
+            </span>
+          </span>
+          <span className="inline-flex items-baseline">
+            {m}
+            <span className="text-muted-foreground ml-0.5 font-sans text-[10px] font-medium uppercase">
+              m
+            </span>
+          </span>
+          <span className="inline-flex items-baseline opacity-85">
+            {s}
+            <span className="text-muted-foreground ml-0.5 font-sans text-[10px] font-medium uppercase">
+              s
+            </span>
+          </span>
+        </div>
       ) : (
         formattedTime
       )}
