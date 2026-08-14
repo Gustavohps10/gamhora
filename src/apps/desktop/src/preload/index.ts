@@ -1,6 +1,6 @@
 import { electronAPI } from '@electron-toolkit/preload'
 import { IApplicationAPI } from '@metric-org/application'
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 
 import {
   addonsInvoker,
@@ -43,6 +43,12 @@ const api: IApplicationAPI = {
 
       return unsubscribe
     },
+  },
+  timer: {
+    start: (input) => ipcRenderer.send('timer:start', input),
+    pause: () => ipcRenderer.send('timer:pause'),
+    resume: (input) => ipcRenderer.send('timer:resume', input),
+    stop: () => ipcRenderer.send('timer:stop'),
   },
 }
 

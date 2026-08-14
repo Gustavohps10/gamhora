@@ -11,9 +11,11 @@ export class ElectronJobEventEmitter implements IEventEmitter<IJobEvents> {
   emit<K extends keyof IJobEvents>(event: K, payload: IJobEvents[K]): void {
     const eventName = event as string
     this.emitter.emit(eventName, payload)
-    const window = this.getWindow()
-    if (window && !window.isDestroyed()) {
-      window.webContents.send(eventName, payload)
+
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) {
+        win.webContents.send(eventName, payload)
+      }
     }
   }
 

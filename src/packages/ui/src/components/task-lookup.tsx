@@ -8,10 +8,13 @@ import {
   Circle,
   Clock,
   FilterX,
+  FolderKanban,
   Hash,
+  Layers,
   Loader2,
   Search,
   User,
+  X,
 } from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
 import React, {
@@ -24,14 +27,12 @@ import React, {
 import { useDebounce } from 'use-debounce'
 
 import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogOverlay,
   DialogPortal,
-  DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -42,11 +43,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useDataSourceConnections } from '@/contexts/DataSourceConnectionsContext'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { cn } from '@/lib/utils'
 import { SyncMetadataRxDBDTO } from '@/local-db/schemas/metadata-sync-schema'
 import { SyncTaskRxDBDTO } from '@/local-db/schemas/tasks-sync-schema'
-import { useSyncStore } from '@/stores/syncStore'
+import { useConnectionsWithSync, useSyncStore } from '@/stores/syncStore'
 
 interface TaskLookupModalProps {
   trigger?: React.ReactNode
@@ -54,15 +56,11 @@ interface TaskLookupModalProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   currentUserId?: string | null
-  /**
-   * memberId por `connectionInstanceId` (ex: 'redmine-empresa-a'),
-   * para filtrar "minhas tarefas" corretamente em múltiplas contas.
-   */
   memberIdsByConnection?: Record<string, string | null | undefined>
 }
 
 const PAGE_SIZE = 50
-const ROW_HEIGHT = 54
+const ROW_HEIGHT = 48
 
 const DynamicIcon = ({
   name,
@@ -85,9 +83,20 @@ export function TaskLookup({
   open,
   onOpenChange,
   currentUserId = 'me',
-  memberIdsByConnection,
+  memberIdsByConnection: propMemberIdsByConnection,
 }: TaskLookupModalProps) {
   const db = useSyncStore((s) => s.db)
+  const syncConnections = useConnectionsWithSync()
+
+  const memberIdsByConnection = useMemo(() => {
+    if (propMemberIdsByConnection) return propMemberIdsByConnection
+    const map: Record<string, string | null | undefined> = {}
+    syncConnections.forEach((conn) => {
+      map[conn.connectionId] = conn.member?.id ? String(conn.member.id) : null
+    })
+    return map
+  }, [syncConnections, propMemberIdsByConnection])
+
   const { workspace } = useWorkspace()
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearch] = useDebounce(searchTerm, 300)
@@ -124,28 +133,33 @@ export function TaskLookup({
   const metaLookup = useMemo(() => {
     const statuses = new Map<string, any>()
     const priorities = new Map<string, any>()
+    const roles = new Map<string, any>()
     metadata?.taskStatuses?.forEach((s) => statuses.set(s.id, s))
     metadata?.taskPriorities?.forEach((p) => priorities.set(p.id, p))
-    return { statuses, priorities }
+    metadata?.participantRoles?.forEach((r) => roles.set(r.id, r))
+    return { statuses, priorities, roles }
   }, [metadata])
+
+  const { connections: dsConnections } = useDataSourceConnections()
 
   const availableConnections = useMemo(() => {
     const connections = workspace?.dataSourceConnections ?? []
-    return connections.map((c: WorkspaceConnectionDTO) => ({
-      id: c.id,
-      label: String(c.config?.name || c.dataSourceId),
-    }))
-  }, [workspace])
+    return connections.map((c: WorkspaceConnectionDTO) => {
+      const match = dsConnections?.find((dc) => dc.connectionId === c.id)
+      return {
+        id: c.id,
+        dataSourceId: c.dataSourceId,
+        label: String(c.config?.name || match?.addon?.name || c.dataSourceId),
+        logo: match?.addon?.logo,
+      }
+    })
+  }, [workspace, dsConnections])
 
   const effectiveConnectionIds = useMemo(() => {
     if (selectedConnectionIds.length === 0)
       return availableConnections.map((s) => s.id)
     return selectedConnectionIds
   }, [selectedConnectionIds, availableConnections])
-
-  const connectionLabelById = useMemo(() => {
-    return new Map(availableConnections.map((s) => [s.id, s.label]))
-  }, [availableConnections])
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
@@ -180,7 +194,6 @@ export function TaskLookup({
 
         if (effectiveConnectionIds.length > 0) {
           if (onlyMyTasks) {
-            // Filtra "Minhas Tarefas" respeitando o ID de usuário de cada conexão ativa
             const myTasksOr = effectiveConnectionIds
               .map((connId) => {
                 const memberId =
@@ -302,193 +315,214 @@ export function TaskLookup({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
       <DialogPortal>
-        <DialogOverlay className="bg-black/40 backdrop-blur-sm" />
+        <DialogOverlay className="pointer-events-auto bg-black/50 backdrop-blur-md transition-all" />
         <DialogContent
           onKeyDown={handleKeyDown}
-          className="bg-background border-border/50 flex max-h-[90vh] w-[95vw] max-w-3xl flex-col overflow-hidden border p-0 shadow-2xl"
+          className="bg-card/95 border-border/40 pointer-events-auto flex max-h-[85vh] w-[95vw] max-w-3xl flex-col overflow-hidden rounded-xl border p-0 shadow-2xl backdrop-blur-xl"
         >
-          <DialogHeader className="bg-muted/20 border-border/50 border-b p-4 pb-2">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-muted-foreground flex items-center gap-2 text-sm font-bold tracking-tight uppercase">
-                <Hash className="h-4 w-4" /> Selecionar Tarefa
-              </DialogTitle>
-              {(statusFilter !== 'all' ||
-                priorityFilter !== 'all' ||
-                !onlyMyTasks ||
-                selectedConnectionIds.length > 0) && (
+          {/* Header Command Input Bar */}
+          <DialogHeader className="border-border/30 space-y-0 border-b p-0">
+            <div className="border-border/20 relative flex items-center border-b px-4 py-3">
+              {isLoading ? (
+                <Loader2 className="text-primary h-5 w-5 shrink-0 animate-spin" />
+              ) : (
+                <Search className="text-muted-foreground/60 h-5 w-5 shrink-0" />
+              )}
+              <Input
+                autoFocus
+                placeholder="Pesquisar por ID, título ou palavra-chave..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="placeholder:text-muted-foreground/40 h-9 border-none bg-transparent px-3 text-base font-medium shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-search-cancel-button]:appearance-none"
+              />
+              {searchTerm && (
                 <button
-                  onClick={() => {
-                    setStatusFilter('all')
-                    setPriorityFilter('all')
-                    setOnlyMyTasks(true)
-                    setSelectedConnectionIds([])
-                  }}
-                  className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-[10px] font-bold uppercase transition-colors"
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="text-muted-foreground hover:text-foreground rounded-sm p-1 transition-colors"
                 >
-                  <FilterX className="h-3 w-3" /> Limpar Filtros
+                  <X className="h-4 w-4" />
                 </button>
               )}
             </div>
 
-            <div className="relative mt-2">
-              {isLoading ? (
-                <Loader2 className="text-primary absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 animate-spin" />
-              ) : (
-                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 opacity-30" />
-              )}
-              <Input
-                autoFocus
-                placeholder="ID ou título..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-10 border-none bg-transparent pl-10 text-lg shadow-none focus-visible:ring-0"
-              />
-            </div>
-
-            <div className="border-border/10 mt-1 flex flex-wrap items-center gap-3 border-t py-2">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="bg-muted/50 h-7 w-fit min-w-[130px] border-none text-[9px] font-bold uppercase focus:ring-0">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    value="all"
-                    className="text-[10px] font-bold uppercase"
-                  >
-                    Todos Status
-                  </SelectItem>
-                  {metadata?.taskStatuses?.map((s) => (
-                    <SelectItem
-                      key={s.id}
-                      value={s.id}
-                      className="text-[10px] font-bold uppercase"
-                    >
-                      <div className="flex items-center gap-2">
-                        <DynamicIcon
-                          name={s.icon}
-                          className="h-3.5 w-3.5 opacity-70"
-                        />
-                        {s.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger className="bg-muted/50 h-7 w-fit min-w-[110px] border-none text-[9px] font-bold uppercase focus:ring-0">
-                  <SelectValue placeholder="Prioridade" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    value="all"
-                    className="text-[10px] font-bold uppercase"
-                  >
-                    Todas Prioridades
-                  </SelectItem>
-                  {metadata?.taskPriorities?.map((p) => (
-                    <SelectItem
-                      key={p.id}
-                      value={p.id}
-                      className="text-[10px] font-bold uppercase"
-                    >
-                      <div className="flex items-center gap-2">
-                        <DynamicIcon
-                          name={p.icon}
-                          color={p.colors.badge}
-                          className="h-3.5 w-3.5"
-                        />
-                        {p.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {availableConnections.length > 0 && (
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="text-[9px] font-bold uppercase opacity-70">
-                    Fontes
-                  </span>
-                  {availableConnections.map((s) => {
-                    const checked =
-                      selectedConnectionIds.length === 0 ||
-                      selectedConnectionIds.includes(s.id)
-                    return (
-                      <label
-                        key={s.id}
-                        className="flex cursor-pointer items-center gap-2"
-                      >
-                        <Checkbox
-                          checked={checked}
-                          onCheckedChange={(v) => {
-                            if (v) {
-                              setSelectedConnectionIds((prev) => [
-                                ...prev,
-                                s.id,
-                              ])
-                            } else {
-                              setSelectedConnectionIds((prev) =>
-                                prev.filter((id) => id !== s.id),
-                              )
-                            }
-                          }}
-                        />
-                        <span className="text-[9px] font-bold uppercase opacity-80">
-                          {s.label}
-                        </span>
-                      </label>
-                    )
-                  })}
-                </div>
-              )}
-
-              <Select
-                value={sortOrder}
-                onValueChange={(v: any) => setSortOrder(v)}
-              >
-                <SelectTrigger className="bg-muted/50 h-7 w-fit border-none text-[9px] font-bold uppercase focus:ring-0">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-3 w-3 opacity-50" />
-                    <SelectValue placeholder="Ordem" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    value="desc"
-                    className="text-[10px] font-bold uppercase"
-                  >
-                    Mais Recentes
-                  </SelectItem>
-                  <SelectItem
-                    value="asc"
-                    className="text-[10px] font-bold uppercase"
-                  >
-                    Mais Antigas
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              <div className="border-border/20 ml-1 flex items-center gap-2 border-l px-2">
-                <Checkbox
-                  id="my-tasks"
-                  checked={onlyMyTasks}
-                  onCheckedChange={(v) => setOnlyMyTasks(!!v)}
-                />
-                <label
-                  htmlFor="my-tasks"
-                  className="cursor-pointer text-[9px] font-bold uppercase opacity-70 select-none"
+            {/* Filter Toolbar */}
+            <div className="bg-muted/30 flex flex-wrap items-center justify-between gap-2 px-4 py-2 text-xs">
+              {/* Left: DataSource Filter Pills */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedConnectionIds([])}
+                  className={cn(
+                    'inline-flex h-6 cursor-pointer items-center gap-1 rounded-md px-2.5 text-[10px] font-semibold transition-all select-none',
+                    selectedConnectionIds.length === 0
+                      ? 'bg-primary text-primary-foreground shadow-xs'
+                      : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )}
                 >
-                  Tarefas que participo
-                </label>
+                  <Layers className="h-3 w-3" />
+                  <span>Todas Fontes</span>
+                </button>
+
+                {availableConnections.map((s) => {
+                  const isSelected = selectedConnectionIds.includes(s.id)
+
+                  const toggleConnection = () => {
+                    if (isSelected) {
+                      setSelectedConnectionIds((prev) =>
+                        prev.filter((id) => id !== s.id),
+                      )
+                    } else {
+                      setSelectedConnectionIds((prev) => [...prev, s.id])
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={toggleConnection}
+                      className={cn(
+                        'inline-flex h-6 cursor-pointer items-center gap-1.5 rounded-md border px-2 text-[10px] font-semibold transition-all select-none',
+                        isSelected
+                          ? 'border-primary/50 bg-primary/15 text-primary shadow-xs'
+                          : 'border-border/40 bg-background/50 text-muted-foreground hover:border-border hover:text-foreground',
+                      )}
+                    >
+                      {s.logo ? (
+                        <img
+                          src={s.logo}
+                          alt={s.label}
+                          className="h-3.5 w-3.5 rounded-xs object-contain"
+                        />
+                      ) : (
+                        <Hash className="h-3 w-3 opacity-60" />
+                      )}
+                      <span>{s.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Right: Dropdowns & Filters */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setOnlyMyTasks(!onlyMyTasks)}
+                  className={cn(
+                    'inline-flex h-6 cursor-pointer items-center gap-1 rounded-md border px-2 text-[10px] font-semibold transition-all select-none',
+                    onlyMyTasks
+                      ? 'border-primary/40 bg-primary/10 text-primary'
+                      : 'border-border/30 bg-background/40 text-muted-foreground opacity-70 hover:opacity-100',
+                  )}
+                >
+                  <User className="h-3 w-3" />
+                  <span>Minhas</span>
+                </button>
+
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="bg-background/60 border-border/40 h-6 w-fit border px-2 text-[10px] font-semibold shadow-none focus:ring-0">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent align="end">
+                    <SelectItem value="all" className="text-xs font-medium">
+                      Todos Status
+                    </SelectItem>
+                    {metadata?.taskStatuses?.map((s) => (
+                      <SelectItem
+                        key={s.id}
+                        value={s.id}
+                        className="text-xs font-medium"
+                      >
+                        <div className="flex items-center gap-2">
+                          <DynamicIcon
+                            name={s.icon}
+                            className="h-3.5 w-3.5 opacity-70"
+                          />
+                          {s.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={priorityFilter}
+                  onValueChange={setPriorityFilter}
+                >
+                  <SelectTrigger className="bg-background/60 border-border/40 h-6 w-fit border px-2 text-[10px] font-semibold shadow-none focus:ring-0">
+                    <SelectValue placeholder="Prioridade" />
+                  </SelectTrigger>
+                  <SelectContent align="end">
+                    <SelectItem value="all" className="text-xs font-medium">
+                      Todas Prioridades
+                    </SelectItem>
+                    {metadata?.taskPriorities?.map((p) => (
+                      <SelectItem
+                        key={p.id}
+                        value={p.id}
+                        className="text-xs font-medium"
+                      >
+                        <div className="flex items-center gap-2">
+                          <DynamicIcon
+                            name={p.icon}
+                            color={p.colors?.badge}
+                            className="h-3.5 w-3.5"
+                          />
+                          {p.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={sortOrder}
+                  onValueChange={(v: any) => setSortOrder(v)}
+                >
+                  <SelectTrigger className="bg-background/60 border-border/40 h-6 w-fit border px-2 text-[10px] font-semibold shadow-none focus:ring-0">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3 w-3 opacity-50" />
+                      <SelectValue placeholder="Ordem" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent align="end">
+                    <SelectItem value="desc" className="text-xs font-medium">
+                      Mais Recentes
+                    </SelectItem>
+                    <SelectItem value="asc" className="text-xs font-medium">
+                      Mais Antigas
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {(statusFilter !== 'all' ||
+                  priorityFilter !== 'all' ||
+                  !onlyMyTasks ||
+                  selectedConnectionIds.length > 0) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStatusFilter('all')
+                      setPriorityFilter('all')
+                      setOnlyMyTasks(true)
+                      setSelectedConnectionIds([])
+                    }}
+                    title="Limpar todos os filtros"
+                    className="text-muted-foreground hover:text-destructive flex h-6 w-6 cursor-pointer items-center justify-center rounded-md transition-colors"
+                  >
+                    <FilterX className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
             </div>
           </DialogHeader>
 
+          {/* Virtual Task List */}
           <div
             ref={setScrollElement}
-            className="scrollbar-thin scrollbar-thumb-muted flex-1 overflow-y-auto"
-            style={{ height: '500px' }}
+            className="scrollbar-thin scrollbar-thumb-muted/50 flex-1 overflow-y-auto"
+            style={{ height: '288px' }}
           >
             {allTasks.length > 0 ? (
               <div
@@ -507,11 +541,17 @@ export function TaskLookup({
 
                   const pMeta = isLoaderRow
                     ? null
-                    : metaLookup.priorities.get(task.priority?.id ?? '')
+                    : metaLookup.priorities.get(task?.priority?.id ?? '')
                   const statusColor = isLoaderRow
                     ? 'transparent'
-                    : metaLookup.statuses.get(task.status?.id)?.colors.badge ||
-                      '#888888'
+                    : metaLookup.statuses.get(task?.status?.id)?.colors
+                        ?.badge || '#888888'
+
+                  const connObj = isLoaderRow
+                    ? undefined
+                    : availableConnections.find(
+                        (c) => c.id === task?.connectionInstanceId,
+                      )
 
                   return (
                     <div
@@ -521,10 +561,10 @@ export function TaskLookup({
                         !isLoaderRow && setSelectedIndex(virtualRow.index)
                       }
                       className={cn(
-                        'border-border/10 absolute top-0 left-0 flex w-full cursor-pointer items-center gap-4 border-b px-4 py-2 transition-colors',
+                        'border-border/20 absolute top-0 left-0 flex w-full cursor-pointer items-center justify-between gap-3 border-b px-4 transition-colors select-none',
                         isSelected
-                          ? 'bg-accent text-accent-foreground'
-                          : 'hover:bg-muted/50',
+                          ? 'bg-primary/10 text-foreground border-l-primary border-l-2'
+                          : 'hover:bg-muted/40 text-foreground/90',
                         isLoaderRow && 'pointer-events-none',
                       )}
                       style={{
@@ -535,81 +575,119 @@ export function TaskLookup({
                     >
                       {isLoaderRow ? (
                         <div className="flex w-full items-center justify-center py-4">
-                          <Loader2 className="h-4 w-4 animate-spin opacity-20" />
+                          <Loader2 className="h-4 w-4 animate-spin opacity-30" />
                         </div>
                       ) : (
                         <>
-                          <div className="flex shrink-0 items-center justify-center">
-                            <DynamicIcon
-                              name={pMeta?.icon}
-                              color={pMeta?.colors.badge}
-                              className="h-4 w-4"
-                            />
+                          {/* Priority Icon / Status Indicator */}
+                          <div className="flex w-6 shrink-0 items-center justify-center">
+                            {pMeta?.icon ? (
+                              <DynamicIcon
+                                name={pMeta.icon}
+                                color={pMeta.colors?.badge}
+                                className="h-4 w-4"
+                              />
+                            ) : (
+                              <Circle
+                                className="h-2.5 w-2.5 fill-current opacity-70"
+                                style={{ color: statusColor }}
+                              />
+                            )}
                           </div>
 
-                          <div className="min-w-0 flex-1">
-                            <div className="mb-0.5 flex items-center gap-2">
-                              <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 font-mono text-[11px] font-bold">
+                          {/* Task Information */}
+                          <div className="min-w-0 flex-1 py-1">
+                            <div className="mb-0.5 flex items-center gap-1.5">
+                              <span className="bg-muted/70 text-foreground/80 border-border/30 rounded border px-1.5 py-0.5 font-mono text-[9px] font-semibold">
                                 {task.id}
                               </span>
-                              <h4 className="text-foreground truncate text-[12px] font-bold tracking-tight">
+                              <h4
+                                className="text-foreground truncate text-xs font-medium tracking-tight opacity-90"
+                                title={task.title}
+                              >
                                 {task.title}
                               </h4>
                             </div>
-                            <div className="text-muted-foreground flex items-center gap-3 text-[9px] font-medium tracking-tight opacity-80">
-                              <span className="flex max-w-[150px] items-center gap-1 truncate font-semibold opacity-60">
-                                {task.projectName || 'Sem Projeto'}
-                              </span>
-                              <span className="opacity-40">•</span>
-                              <span className="flex shrink-0 items-center gap-1 font-semibold">
-                                <Circle
-                                  className="h-2 w-2 fill-current"
-                                  style={{ color: statusColor }}
-                                />
-                                {task.status?.name}
-                              </span>
-                              {task.connectionInstanceId ? (
-                                <>
-                                  <span className="opacity-40">•</span>
-                                  <Badge
-                                    variant="outline"
-                                    className="h-4 px-1 text-[10px] font-bold"
-                                  >
-                                    {connectionLabelById.get(
-                                      task.connectionInstanceId,
-                                    ) ?? task.connectionInstanceId}
-                                  </Badge>
-                                </>
-                              ) : null}
-                              {task.participants?.some((p) => {
+
+                            <div className="text-muted-foreground flex items-center gap-2 text-[9px] font-medium opacity-85">
+                              {task.projectName && (
+                                <span className="text-foreground/70 flex max-w-[140px] items-center gap-1 truncate font-medium">
+                                  <FolderKanban className="h-3 w-3 opacity-60" />
+                                  {task.projectName}
+                                </span>
+                              )}
+
+                              {task.status?.name && (
+                                <span className="text-foreground/80 inline-flex items-center gap-1 font-semibold">
+                                  <Circle
+                                    className="h-2 w-2 fill-current"
+                                    style={{ color: statusColor }}
+                                  />
+                                  {task.status.name}
+                                </span>
+                              )}
+
+                              {task.connectionInstanceId && (
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-muted/50 border-border/30 h-4 gap-1 border px-1.5 text-[9px] font-semibold"
+                                >
+                                  {connObj?.logo && (
+                                    <img
+                                      src={connObj.logo}
+                                      alt=""
+                                      className="h-2.5 w-2.5 rounded-xs object-contain"
+                                    />
+                                  )}
+                                  <span>
+                                    {connObj?.label ??
+                                      task.connectionInstanceId}
+                                  </span>
+                                </Badge>
+                              )}
+
+                              {(() => {
                                 const myId =
                                   memberIdsByConnection?.[
                                     task.connectionInstanceId
                                   ] ?? currentUserId
-                                return p.id === String(myId ?? '')
-                              }) && (
-                                <>
-                                  <span className="opacity-40">•</span>
+                                const myParticipant = task.participants?.find(
+                                  (p) => p.id === String(myId ?? ''),
+                                )
+                                if (!myParticipant) return null
+
+                                const roleMeta = myParticipant.role?.id
+                                  ? metaLookup.roles.get(myParticipant.role.id)
+                                  : null
+                                const roleName =
+                                  roleMeta?.name ||
+                                  (myParticipant.role as any)?.name ||
+                                  ''
+
+                                return (
                                   <Badge
                                     variant="outline"
-                                    className="h-4 gap-1 px-1 text-[10px] font-bold"
+                                    className="border-primary/40 text-primary h-4 gap-1 px-1.5 text-[9px] font-semibold"
                                   >
                                     <User className="h-2.5 w-2.5" /> Eu
+                                    {roleName ? ` - ${roleName}` : ''}
                                   </Badge>
-                                </>
-                              )}
+                                )
+                              })()}
                             </div>
                           </div>
 
-                          <div className="flex flex-col items-end gap-1">
-                            {isSelected && (
-                              <Badge className="h-4 px-1.5 text-[8px] font-bold uppercase">
-                                Selecionar
+                          {/* Right Side: Selection Badge & Date */}
+                          <div className="flex shrink-0 flex-col items-end gap-1">
+                            {isSelected ? (
+                              <Badge className="bg-primary text-primary-foreground h-4 px-2 text-[9px] font-bold">
+                                ↵ Selecionar
                               </Badge>
+                            ) : (
+                              <span className="font-mono text-[10px] opacity-50">
+                                {new Date(task.updatedAt).toLocaleDateString()}
+                              </span>
                             )}
-                            <span className="flex items-center gap-1 text-[10px] font-bold uppercase opacity-40">
-                              {new Date(task.updatedAt).toLocaleDateString()}
-                            </span>
                           </div>
                         </>
                       )}
@@ -618,27 +696,44 @@ export function TaskLookup({
                 })}
               </div>
             ) : !isLoading ? (
-              <div className="flex flex-col items-center justify-center py-24 opacity-20">
-                <AlertCircle className="mb-4 h-12 w-12" />
-                <p className="text-xs font-bold uppercase">Nenhum resultado</p>
+              <div className="text-muted-foreground/50 flex flex-col items-center justify-center py-20">
+                <AlertCircle className="mb-3 h-10 w-10 stroke-1" />
+                <p className="text-xs font-semibold tracking-wider uppercase">
+                  Nenhuma tarefa encontrada
+                </p>
+                <p className="mt-1 text-[11px] opacity-70">
+                  Tente alterar os termos de busca ou filtros
+                </p>
               </div>
             ) : null}
           </div>
 
-          <div className="bg-muted/30 text-muted-foreground border-border/50 flex items-center justify-between border-t px-4 py-2.5 text-[10px] font-bold uppercase">
-            <span>{allTasks.length} Resultados</span>
-            <div className="flex gap-4 opacity-60">
+          {/* Footer Navigation Bar */}
+          <div className="bg-muted/40 text-muted-foreground border-border/30 flex items-center justify-between border-t px-4 py-2.5 text-[11px] font-medium">
+            <div className="flex items-center gap-2">
+              <span className="text-foreground font-semibold">
+                {allTasks.length}
+              </span>
+              <span className="opacity-70">tarefas encontradas</span>
+            </div>
+            <div className="flex items-center gap-4 text-[10px] opacity-75">
               <span className="flex items-center gap-1">
-                <kbd className="bg-muted min-w-[16px] rounded border px-1 text-center">
+                <kbd className="bg-muted text-foreground border-border/50 rounded border px-1 py-0.5 font-mono text-[9px]">
                   ↑↓
                 </kbd>{' '}
                 Navegar
               </span>
               <span className="flex items-center gap-1">
-                <kbd className="bg-muted min-w-[16px] rounded border px-1 text-center">
-                  ⏎
+                <kbd className="bg-muted text-foreground border-border/50 rounded border px-1 py-0.5 font-mono text-[9px]">
+                  ↵
                 </kbd>{' '}
                 Escolher
+              </span>
+              <span className="flex items-center gap-1">
+                <kbd className="bg-muted text-foreground border-border/50 rounded border px-1 py-0.5 font-mono text-[9px]">
+                  ESC
+                </kbd>{' '}
+                Fechar
               </span>
             </div>
           </div>

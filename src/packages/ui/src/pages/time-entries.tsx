@@ -93,7 +93,6 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDataSourceConnections } from '@/hooks'
-import { useActiveTimer } from '@/hooks/use-active-timer'
 import { cn } from '@/lib'
 import { SyncMetadataItem } from '@/local-db/schemas/metadata-sync-schema'
 import { SyncTaskRxDBDTO } from '@/local-db/schemas/tasks-sync-schema'
@@ -245,6 +244,7 @@ const MemoizedCommentInput = React.memo(
 MemoizedCommentInput.displayName = 'MemoizedCommentInput'
 
 export function TimeEntries() {
+  console.log('TimeEntries')
   const db = useSyncStore((state) => state?.db)
 
   const { connections } = useDataSourceConnections()
@@ -308,13 +308,6 @@ export function TimeEntries() {
   const activeTimeEntry = useTimeEntryStore((s) => s.active)
   const createNewTimeEntry = useTimeEntryStore((s) => s.createNewTimeEntry)
   const stopCurrentTimeEntry = useTimeEntryStore((s) => s.stopCurrentTimeEntry)
-
-  const amountSecondsPassed = useActiveTimer()
-
-  const timerDisplay = useMemo(
-    () => decimalToHMS(amountSecondsPassed / 3600),
-    [amountSecondsPassed],
-  )
 
   const [selectedTask, setSelectedTask] = useState<SyncTaskRxDBDTO | null>(null)
   const [comments, setComments] = useState('')
@@ -574,7 +567,7 @@ export function TimeEntries() {
               return (
                 <div className="flex w-full justify-center">
                   <LookupInput
-                    size="2xs"
+                    size="micro"
                     value={currentTaskId ?? ''}
                     onChange={(id) =>
                       setTempData((p) => ({

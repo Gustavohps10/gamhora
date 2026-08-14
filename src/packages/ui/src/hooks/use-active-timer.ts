@@ -1,40 +1,34 @@
-'use client'
-
-import { differenceInSeconds, parseISO } from 'date-fns'
+import { parseISO } from 'date-fns'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 
 export function useActiveTimer(): number {
   const active = useTimeEntryStore((s) => s.active)
-  const [now, setNow] = useState<Date>(new Date())
+  const [tick, setTick] = useState(0)
 
   useEffect(() => {
     if (!active || active.timeStatus !== 'running') return
 
-    const interval = setInterval(() => {
-      setNow(new Date())
+    const id = window.setInterval(() => {
+      setTick((v) => v + 1)
     }, 1000)
 
-    return () => clearInterval(interval)
-  }, [active?.timeStatus])
+    return () => window.clearInterval(id)
+  }, [active?.timeStatus, active?.startDate])
 
-  const seconds = useMemo((): number => {
+  return useMemo(() => {
     if (!active) return 0
 
-    if (active.timeStatus === 'paused') {
-      return active.timeSpent ?? 0
+    const savedSeconds = active.timeSpent ?? 0
+
+    if (active.timeStatus !== 'running' || !active.startDate) {
+      return savedSeconds
     }
 
-    if (active.timeStatus === 'running') {
-      if (!active.startDate) return active.timeSpent ?? 0
+    const startMs = parseISO(active.startDate).getTime()
+    const elapsed = Math.floor((Date.now() - startMs) / 1000)
 
-      const start = parseISO(active.startDate)
-      return differenceInSeconds(now, start) + (active.timeSpent ?? 0)
-    }
-
-    return active.timeSpent ?? 0
-  }, [active, now])
-
-  return seconds
+    return savedSeconds + elapsed
+  }, [active, tick])
 }

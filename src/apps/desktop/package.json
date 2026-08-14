@@ -6,40 +6,6 @@
   "description": "Metric Desktop App.",
   "main": "./out/main/index.js",
   "type": "module",
-  "build": {
-    "appId": "com.metric.desktop",
-    "productName": "metric",
-    "directories": {
-      "output": "dist"
-    },
-    "artifactName": "${productName}-${version}-setup.${ext}",
-    "asar": true,
-    "asarUnpack": [
-      "out/main/assets/**/*"
-    ],
-    "files": [
-      "out/**/*",
-      "node_modules/**/*",
-      "package.json"
-    ],
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
-    "nsis": {
-      "oneClick": true,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": false,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
-    }
-  },
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",

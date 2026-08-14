@@ -9,7 +9,6 @@ import { ContainerBuilder, PlatformDependencies } from '@metric-org/IoC'
 import {
   app,
   BrowserWindow,
-  Menu,
   net,
   protocol,
   screen,
@@ -23,6 +22,7 @@ import { join } from 'path'
 import { pathToFileURL } from 'url'
 
 import { ElectronJobEventEmitter } from '@/main/adapters/ElectronJobEventEmitter'
+import { TimerRuntime } from '@/main/adapters/TimerRuntime'
 import {
   ConnectionHandler,
   SessionHandler,
@@ -35,6 +35,8 @@ import { MetadataHandler } from '@/main/handlers/MetadataHandler'
 import { WorkspacesHandler } from '@/main/handlers/WorkspacesHandler'
 import { DataSourceResolver } from '@/main/resolvers/data-source-resolver'
 import { openIpcRoutes } from '@/main/routes'
+import { getSettings } from '@/main/settings'
+import { createTray } from '@/main/tray'
 
 let mainWindow: BrowserWindow | null = null
 let tray: Tray | null = null
@@ -57,10 +59,45 @@ const createWindow = () => {
       preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false,
       contextIsolation: true,
+      backgroundThrottling: false,
     },
   })
+  ;(mainWindow as unknown as { windowType: string }).windowType = 'main'
+  mainWindow.on('ready-to-show', () => {
+    const settings = getSettings()
+    if (settings.startMinimized) {
+      mainWindow!.minimize()
+    } else {
+      mainWindow!.show()
+    }
+  })
 
-  mainWindow.on('ready-to-show', () => mainWindow!.show())
+  // --- INÍCIO DA CORREÇÃO DE ARRASTE ---
+  let moveTimeout: NodeJS.Timeout | null = null
+
+  mainWindow.on('will-move', () => {
+    if (secondaryWindow && !secondaryWindow.isDestroyed()) {
+      // Desativa o hit-testing pesado do widget enquanto a principal se move
+      secondaryWindow.setIgnoreMouseEvents(true, { forward: false })
+
+      if (moveTimeout) clearTimeout(moveTimeout)
+
+      // Restaura o forward 150ms após a janela principal parar de se mover
+      moveTimeout = setTimeout(() => {
+        if (secondaryWindow && !secondaryWindow.isDestroyed()) {
+          secondaryWindow.setIgnoreMouseEvents(true, { forward: true })
+        }
+      }, 150)
+    }
+  })
+  // --- FIM DA CORREÇÃO DE ARRASTE ---
+
+  mainWindow.on('moved', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      const bounds = mainWindow.getBounds()
+      mainWindow.webContents.send('window:bounds-changed', bounds)
+    }
+  })
 
   mainWindow.webContents.setWindowOpenHandler((d) => {
     shell.openExternal(d.url)
@@ -79,6 +116,75 @@ const createWindow = () => {
   }
 }
 
+const createSecondaryWindow = (
+  activeWorkspaceId?: string,
+  targetDisplayId?: number,
+) => {
+  // Pega todos os monitores disponíveis
+  const allDisplays = screen.getAllDisplays()
+  const primaryDisplay = screen.getPrimaryDisplay()
+
+  // Encontra o monitor de destino ou usa o primário como fallback
+  const targetDisplay =
+    allDisplays.find((d) => d.id === targetDisplayId) || primaryDisplay
+  const { x, y, width, height } = targetDisplay.workArea
+
+  secondaryWindow = new BrowserWindow({
+    width,
+    height,
+    x, // Aplica o offset global real do monitor (ex: 1920 se for o Monitor 2 à direita)
+    y,
+    show: false,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    resizable: false, // Evita redimensionamento acidental
+    hasShadow: false,
+    focusable: true, // Remove a janela da fila de foco do SO
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.mjs'),
+      contextIsolation: true,
+      backgroundThrottling: false,
+      sandbox: false,
+    },
+  })
+  ;(secondaryWindow as unknown as { windowType: string }).windowType = 'widget'
+
+  secondaryWindow.on('moved', () => {
+    if (secondaryWindow && !secondaryWindow.isDestroyed()) {
+      const bounds = secondaryWindow.getBounds()
+      secondaryWindow.webContents.send('window:bounds-changed', bounds)
+
+      // Força a re-aplicação em qualquer movimento para evitar reset do SO
+      secondaryWindow.setIgnoreMouseEvents(true, { forward: true })
+    }
+  })
+
+  secondaryWindow.setIgnoreMouseEvents(true, { forward: true })
+
+  secondaryWindow.once('ready-to-show', () => {
+    secondaryWindow!.show()
+  })
+
+  secondaryWindow.on('closed', () => {
+    secondaryWindow = null
+  })
+
+  const workspaceId = activeWorkspaceId ?? 'default'
+  const widgetHashPath = `/workspaces/${workspaceId}/widgets/timer`
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    secondaryWindow.loadURL(
+      `${process.env['ELECTRON_RENDERER_URL']}/#${widgetHashPath}`,
+    )
+  } else {
+    secondaryWindow.loadFile(join(__dirname, '../renderer/index.html'), {
+      hash: widgetHashPath,
+    })
+  }
+}
+
 export type IHandlersScope = {
   connectionHandler: typeof ConnectionHandler
   sessionHandler: typeof SessionHandler
@@ -88,83 +194,6 @@ export type IHandlersScope = {
   workspacesHandler: typeof WorkspacesHandler
   addonsHandler: typeof AddonsHandler
   metadataHandler: typeof MetadataHandler
-}
-
-const createSecondaryWindow = () => {
-  secondaryWindow = new BrowserWindow({
-    width: 400,
-    height: 420,
-    show: false,
-    frame: true,
-    transparent: true,
-    skipTaskbar: true,
-    alwaysOnTop: true,
-    resizable: false,
-    hasShadow: false,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.mjs'),
-      contextIsolation: true,
-      sandbox: false,
-    },
-  })
-
-  secondaryWindow.once('ready-to-show', () => {
-    const { width } = screen.getPrimaryDisplay().workAreaSize
-    const x = width - 280
-    const y = 160
-    secondaryWindow!.setBounds({ x, y, width: 220, height: 420 })
-    secondaryWindow!.show()
-  })
-
-  secondaryWindow.on('closed', () => {
-    secondaryWindow = null
-  })
-
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    secondaryWindow.loadURL(
-      `${process.env['ELECTRON_RENDERER_URL']}/widgets/timer`,
-    )
-    // Opcional: abrir o DevTools para a janela secundária
-    // secondaryWindow.webContents.openDevTools({ mode: 'detach' });
-  } else {
-    secondaryWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-}
-
-const createTray = () => {
-  tray = new Tray(join(__dirname, './assets/timer-icon.png'))
-
-  const buildContextMenu = () =>
-    Menu.buildFromTemplate([
-      {
-        label: secondaryWindow?.isVisible()
-          ? 'Ocultar Janela Flutuante'
-          : 'Habilitar Janela Flutuante',
-        click: () => {
-          if (!secondaryWindow || secondaryWindow.isDestroyed()) {
-            createSecondaryWindow()
-          } else {
-            secondaryWindow.isVisible()
-              ? secondaryWindow.hide()
-              : secondaryWindow.show()
-          }
-        },
-      },
-      { type: 'separator' },
-      { label: 'Sair', role: 'quit' },
-    ])
-
-  tray.setToolTip('Metric')
-
-  tray.on('click', () => {
-    const menu = buildContextMenu()
-    tray?.popUpContextMenu(menu)
-  })
-
-  tray.on('right-click', () => {
-    const menu = buildContextMenu()
-    tray?.popUpContextMenu(menu)
-  })
 }
 
 function handleProtocol() {
@@ -191,6 +220,9 @@ function handleProtocol() {
 }
 
 app.whenReady().then(async () => {
+  const timerRuntime = new TimerRuntime()
+  timerRuntime.init()
+
   handleProtocol()
   const userDataPath = app.getPath('userData')
   const credentialsStorage = new KeytarTokenStorage()
@@ -236,7 +268,33 @@ app.whenReady().then(async () => {
 
   electronApp.setAppUserModelId('com.electron')
 
-  app.on('browser-window-created', (_, w) => optimizer.watchWindowShortcuts(w))
+  app.on('browser-window-created', (_, browserWindow) => {
+    optimizer.watchWindowShortcuts(browserWindow)
+
+    browserWindow.webContents.on('before-input-event', (_, input) => {
+      const f12 = input.key === 'F12'
+
+      const ctrlShiftI =
+        input.control && input.shift && input.key.toLowerCase() === 'i'
+
+      const ctrlShiftR =
+        input.control && input.shift && input.key.toLowerCase() === 'r'
+
+      const ctrlR =
+        input.control && !input.shift && input.key.toLowerCase() === 'r'
+
+      const f5 = input.key === 'F5'
+
+      if (input.type === 'keyDown') {
+        if (f12 || ctrlShiftI) {
+          browserWindow.webContents.toggleDevTools()
+        }
+        if (ctrlShiftR || ctrlR || f5) {
+          browserWindow.webContents.reloadIgnoringCache()
+        }
+      }
+    })
+  })
 
   if (is.dev) {
     try {
@@ -250,7 +308,12 @@ app.whenReady().then(async () => {
     }
   }
 
+  tray = createTray(
+    () => secondaryWindow,
+    () => createSecondaryWindow(),
+  )
   createWindow()
+  createSecondaryWindow() // Cria a janela flutuante para o workspace padrão
 
   //ANALISAR FUTURAMENTE o uso no main process
   // exposeIpcMainRxStorage({
