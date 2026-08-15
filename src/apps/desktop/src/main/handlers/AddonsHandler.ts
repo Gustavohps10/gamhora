@@ -93,7 +93,7 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
     _event?: IpcMainInvokeEvent,
     _req?: IRequest,
   ): Promise<PaginatedViewModel<AddonManifestViewModel[]>> {
-    if (isDevelopment()) {
+    if (isDevelopment() || true) {
       return {
         isSuccess: true,
         statusCode: 200,

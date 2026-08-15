@@ -14,11 +14,21 @@ export function WidgetLayout() {
   const client = useClient()
 
   const handleMouseEnter = () => {
-    client.modules.system.setIgnoreMouseEvents?.(false)
+    client.modules.system.setIgnoreMouseEvents?.({
+      body: {
+        ignore: false,
+        forward: true,
+      },
+    })
   }
 
   const handleMouseLeave = () => {
-    client.modules.system.setIgnoreMouseEvents?.(true)
+    client.modules.system.setIgnoreMouseEvents?.({
+      body: {
+        ignore: true,
+        forward: true,
+      },
+    })
   }
 
   return (
