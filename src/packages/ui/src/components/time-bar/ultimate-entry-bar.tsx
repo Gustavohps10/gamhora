@@ -1034,15 +1034,15 @@ export const UltimateTimeTracker = ({
         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         className={cn(
           'group border-border/60 bg-card pointer-events-auto relative inline-flex w-fit items-center rounded-lg border shadow-md transition-transform duration-150 ease-out select-none',
-          isVertical ? 'h-fit w-16 flex-col items-center gap-1 pb-8' : 'pr-8',
+          isVertical ? 'h-fit w-16 flex-col items-center gap-1' : ' ',
         )}
       >
         <CardContent
           className={cn(
             'flex w-full transition-all',
             isVertical
-              ? 'h-full min-h-0 flex-col items-center justify-start gap-3 overflow-x-hidden overflow-y-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
-              : 'flex-row items-center gap-2 py-1 pl-1',
+              ? 'h-full min-h-0 flex-col items-center justify-start gap-3 overflow-x-hidden overflow-y-auto px-0 pt-2 pb-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+              : 'flex-row items-center gap-2 py-2 pl-1',
           )}
         >
           {content}
@@ -1282,7 +1282,7 @@ UltimateTimeTracker.Expander = function Expander() {
       data-no-drag
       onClick={() => setIsExpanded(!isExpanded)}
       className={cn(
-        'bg-muted/40 hover:bg-muted/80 text-muted-foreground hover:text-foreground z-10 flex shrink-0 cursor-pointer items-center justify-center transition-all active:scale-95',
+        'bg-muted/40 hover:bg-muted/80 text-muted-foreground hover:text-foreground z-10 flex shrink-0 cursor-pointer items-center justify-center pt-1 transition-all active:scale-95',
         isVertical
           ? 'absolute bottom-0 left-0 h-5 w-full rounded-b-md'
           : 'absolute top-0 right-0 h-full w-5 rounded-r-md',

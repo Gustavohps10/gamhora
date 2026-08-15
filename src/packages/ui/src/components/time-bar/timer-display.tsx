@@ -168,25 +168,20 @@ export function TimerDisplay({
           )}
         />
       ) : orientation === 'vertical' ? (
-        <div className="flex flex-col items-center gap-0.5 font-mono text-[14px] leading-none font-bold tracking-tight">
-          <span className="inline-flex items-baseline">
-            {isNeg ? '-' : ''}
-            {h}
-            <span className="text-muted-foreground ml-0.5 font-sans text-[10px] font-medium uppercase">
-              h
-            </span>
+        <div className="grid grid-cols-[2ch_auto] items-baseline gap-x-0.5 gap-y-0.5 font-mono text-[14px] leading-none font-bold tracking-tight">
+          <span>{isNeg ? `-${h}` : h}</span>
+          <span className="text-muted-foreground font-mono text-[12px] font-medium">
+            h
           </span>
-          <span className="inline-flex items-baseline">
-            {m}
-            <span className="text-muted-foreground ml-0.5 font-sans text-[10px] font-medium uppercase">
-              m
-            </span>
+
+          <span>{m}</span>
+          <span className="text-muted-foreground font-mono text-[12px] font-medium">
+            m
           </span>
-          <span className="inline-flex items-baseline opacity-85">
-            {s}
-            <span className="text-muted-foreground ml-0.5 font-sans text-[10px] font-medium uppercase">
-              s
-            </span>
+
+          <span className="opacity-85">{s}</span>
+          <span className="text-muted-foreground font-mono text-[12px] font-medium">
+            s
           </span>
         </div>
       ) : (

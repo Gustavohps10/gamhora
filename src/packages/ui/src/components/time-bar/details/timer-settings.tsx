@@ -481,8 +481,8 @@ export const TimerSettings = memo(() => {
                             </span>
                             <span className="mt-0.5 w-full truncate text-center text-[9px] leading-none opacity-60">
                               {display.isPrimary
-                                ? '(Principal)'
-                                : `(${display.label || 'Secundário'})`}
+                                ? 'Principal'
+                                : `${display.label || 'Secundário'}`}
                             </span>
                           </button>
                         )
