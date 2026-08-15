@@ -276,7 +276,9 @@ export interface AppSettings {
 export interface ISystemAPI {
   getAppVersion(): Promise<string>
   getEnvironment(): Promise<EnvironmentInfo>
-  setIgnoreMouseEvents(ignore: boolean): Promise<void>
+  setIgnoreMouseEvents(
+    payload: IRequest<{ ignore: boolean; forward: boolean }>,
+  ): Promise<void>
   getDisplays(): Promise<DisplayInfo[]>
   moveToDisplay(input: IRequest<MoveToDisplayInput>): Promise<void>
   minimizeWindow(windowType?: string): Promise<void>

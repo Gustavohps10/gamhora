@@ -155,12 +155,14 @@ export function openIpcRoutes(serviceProvider: IServiceProvider): void {
   // --- WIDGET / MOUSE EVENTS ---
   IpcHandler.register('WIDGET_SET_IGNORE_MOUSE', (event, req) => {
     const ignore = req?.body?.ignore ?? true
+    const forward = req?.body?.forward ?? true
     const win = BrowserWindow.fromWebContents(event.sender)
 
     if (win && !win.isDestroyed()) {
       const winType = (win as unknown as { windowType?: string }).windowType
       if (winType === 'widget') {
-        win.setIgnoreMouseEvents(ignore, { forward: true })
+        // Passa a flag forward explicitamente conforme recebida no payload
+        win.setIgnoreMouseEvents(ignore, { forward })
       }
     }
 
@@ -259,13 +261,21 @@ export function openIpcRoutes(serviceProvider: IServiceProvider): void {
   IpcHandler.register('SYSTEM_GET_DISPLAYS', () => {
     const primaryDisplay = screen.getPrimaryDisplay()
 
-    const displays = screen.getAllDisplays().map((display, index) => ({
-      id: display.id,
-      label: `Monitor ${index + 1}${
-        display.id === primaryDisplay.id ? ' (Principal)' : ''
-      }`,
-      isPrimary: display.id === primaryDisplay.id,
-    }))
+    const displays = screen.getAllDisplays().map((display, index) => {
+      const isPrimary = display.id === primaryDisplay.id
+
+      // Pega o nome do hardware (ex: "ASUS VG279", "DELL P2419H")
+      const deviceName = display.label?.trim() || `Monitor ${index + 1}`
+
+      return {
+        id: display.id,
+        label: `${deviceName}${isPrimary ? ' (Principal)' : ''}`,
+        name: deviceName,
+        isPrimary,
+        bounds: display.bounds,
+        workArea: display.workArea,
+      }
+    })
 
     return Promise.resolve(displays)
   })

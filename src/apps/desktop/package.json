@@ -11,7 +11,8 @@
     "build": "electron-vite build",
     "build:win": "yarn build && electron-builder --win",
     "build:mac": "yarn build && electron-builder --mac",
-    "build:linux": "yarn build && electron-builder --linux"
+    "build:linux": "yarn build && electron-builder --linux",
+    "native:rebuild": "node-gyp rebuild"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
@@ -30,6 +31,7 @@
     "fake-indexeddb": "^6.2.5",
     "keytar": "^7.9.0",
     "lokijs": "^1.5.12",
+    "node-addon-api": "^8.9.2",
     "nuqs": "^2.7.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -56,7 +58,9 @@
     "electron-builder": "26.0.12",
     "electron-devtools-installer": "^4.0.0",
     "electron-vite": "^3.1.0",
+    "node-gyp": "^13.0.1",
     "postcss": "^8.5.6",
+    "prebuildify": "^6.0.1",
     "vite": "^6.3.5"
   }
 }

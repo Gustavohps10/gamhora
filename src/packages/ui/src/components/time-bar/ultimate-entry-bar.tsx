@@ -394,46 +394,77 @@ export const UltimateTimeTracker = ({
   const freeOffsetsRef = useRef<FreeOffsets>(DEFAULT_FREE_OFFSETS)
   const isDraggingWidgetRef = useRef(false)
 
-  // -- INÍCIO DA LÓGICA DE BLINDAGEM DE HOVER / IPC --
+  // -- INÍCIO DA LÓGICA DE BLINDAGEM DE HOVER / IPC OTIMIZADA --
   useEffect(() => {
     const isWidgetWindow = window.location.hash.includes('/widgets/')
     if (!isWidgetWindow) return
 
     let isCurrentlyIgnored = true
 
-    const updateIgnore = (shouldIgnore: boolean) => {
-      if (shouldIgnore !== isCurrentlyIgnored) {
-        isCurrentlyIgnored = shouldIgnore
+    const setIgnoreState = (shouldIgnore: boolean) => {
+      if (shouldIgnore === isCurrentlyIgnored) return
+      isCurrentlyIgnored = shouldIgnore
 
-        client.modules.system.setIgnoreMouseEvents(shouldIgnore)
+      // Passar sempre { forward: true } quando for ignorar para o Chromium continuar recebendo o mousemove
+      client.modules.system.setIgnoreMouseEvents({
+        body: { ignore: shouldIgnore, forward: true },
+      })
+    }
+
+    const handlePointerEnter = (e: PointerEvent) => {
+      if (isDraggingWidgetRef.current) return
+      setIgnoreState(false)
+    }
+
+    const handlePointerLeave = (e: PointerEvent) => {
+      if (isDraggingWidgetRef.current) return
+
+      // Verifica se o cursor realmente saiu para o espaço vazio e não para um popover/portal
+      const related = e.relatedTarget as HTMLElement | null
+      const isMovingToInteractiveUI = Boolean(
+        related?.closest(
+          '[data-widget-card], [data-radix-popper-content-wrapper], [role="dialog"], [role="menu"], [role="tooltip"]',
+        ),
+      )
+
+      if (!isMovingToInteractiveUI) {
+        setIgnoreState(true)
       }
     }
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDraggingWidgetRef.current) return
+    const cardElement = cardRef.current
+    if (cardElement) {
+      cardElement.addEventListener('pointerenter', handlePointerEnter)
+      cardElement.addEventListener('pointerleave', handlePointerLeave)
+    }
 
-      const target = e.target as HTMLElement
-      const isUI = target.closest(
-        '[data-widget-card], [data-radix-popper-content-wrapper], [role="dialog"], [role="menu"], [role="tooltip"]',
+    // Monitora portals do Radix UI (Popovers/Tooltips) abertos dinamicamente no body
+    const observer = new MutationObserver(() => {
+      const overlays = document.querySelectorAll(
+        '[data-radix-popper-content-wrapper], [role="dialog"], [role="menu"], [role="tooltip"]',
       )
+      overlays.forEach((el) => {
+        el.removeEventListener('pointerenter', handlePointerEnter as any)
+        el.removeEventListener('pointerleave', handlePointerLeave as any)
+        el.addEventListener('pointerenter', handlePointerEnter as any)
+        el.addEventListener('pointerleave', handlePointerLeave as any)
+      })
+    })
 
-      updateIgnore(!isUI)
-    }
+    observer.observe(document.body, { childList: true, subtree: true })
 
-    const handleMouseLeave = () => {
-      if (isDraggingWidgetRef.current) return
-      updateIgnore(true)
-    }
-
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseleave', handleMouseLeave)
+    // Estado inicial: janela ignora cliques até o mouse entrar
+    setIgnoreState(true)
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseleave', handleMouseLeave)
+      if (cardElement) {
+        cardElement.removeEventListener('pointerenter', handlePointerEnter)
+        cardElement.removeEventListener('pointerleave', handlePointerLeave)
+      }
+      observer.disconnect()
     }
   }, [])
-  // -- FIM DA LÓGICA DE BLINDAGEM DE HOVER / IPC --
+  // -- FIM DA LÓGICA DE BLINDAGEM DE HOVER / IPC OTIMIZADA --
 
   const dragStateRef = useRef<{
     initialRect: DOMRect
@@ -584,9 +615,11 @@ export const UltimateTimeTracker = ({
       dragStateRef.current = null
       isDraggingWidgetRef.current = false
 
-      // Safely ensure we revert back to transparent if mouse left while dropping
-      if (!element.matches(':hover'))
-        client.modules.system.setIgnoreMouseEvents(true)
+      if (!element.matches(':hover')) {
+        client.modules.system.setIgnoreMouseEvents({
+          body: { ignore: true, forward: true },
+        })
+      }
 
       setFreeOffsets(nextOffsets)
 

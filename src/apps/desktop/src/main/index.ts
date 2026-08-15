@@ -1,3 +1,5 @@
+import { createRequire } from 'node:module'
+
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import {
   JSONWorkspacesQuery,
@@ -38,6 +40,35 @@ import { openIpcRoutes } from '@/main/routes'
 import { getSettings } from '@/main/settings'
 import { createTray } from '@/main/tray'
 
+const requireNative = createRequire(import.meta.url)
+
+interface NativeOverlay {
+  applyOverlayStyles: (handle: Buffer) => boolean
+}
+
+let nativeOverlay: NativeOverlay | null = null
+
+if (process.platform === 'win32') {
+  try {
+    const binaryPath = app.isPackaged
+      ? join(process.resourcesPath, 'native-prebuilds/window_overlay.node')
+      : join(__dirname, '../../native-prebuilds/window_overlay.node')
+
+    nativeOverlay = requireNative(binaryPath)
+
+    console.log('[@metric-org/desktop] ✓ Carregado: window_overlay.node:')
+  } catch (err) {
+    console.error(
+      '[@metric-org/desktop] Erro ao carregar window_overlay.node:',
+      err,
+    )
+  }
+}
+
+// Flags do Chromium para evitar estrangulamento de background
+app.commandLine.appendSwitch('disable-background-timer-throttling')
+app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion')
+
 let mainWindow: BrowserWindow | null = null
 let tray: Tray | null = null
 let secondaryWindow: BrowserWindow | null = null
@@ -65,11 +96,7 @@ const createWindow = () => {
   ;(mainWindow as unknown as { windowType: string }).windowType = 'main'
   mainWindow.on('ready-to-show', () => {
     const settings = getSettings()
-    if (settings.startMinimized) {
-      mainWindow!.minimize()
-    } else {
-      mainWindow!.show()
-    }
+    settings.startMinimized ? mainWindow?.minimize() : mainWindow?.show()
   })
 
   // --- INÍCIO DA CORREÇÃO DE ARRASTE ---
@@ -150,6 +177,12 @@ const createSecondaryWindow = (
     },
   })
   ;(secondaryWindow as unknown as { windowType: string }).windowType = 'widget'
+
+  // Aplica os estilos Win32 estendidos e o hook WM_MOUSEACTIVATE via C++
+  if (process.platform === 'win32' && nativeOverlay) {
+    const handle = secondaryWindow.getNativeWindowHandle()
+    nativeOverlay.applyOverlayStyles(handle)
+  }
 
   secondaryWindow.on('moved', () => {
     if (secondaryWindow && !secondaryWindow.isDestroyed()) {

@@ -118,11 +118,11 @@ export class DataSourceResolver implements IDataSourceResolver {
   }
 
   private async loadModule(pluginId: string): Promise<IDataSource> {
-    if (this.options.isDevelopment && pluginId === FAKE_DATASOURCE_ADDON_ID) {
+    if (pluginId === FAKE_DATASOURCE_ADDON_ID) {
       return DataSourceFake as IDataSource
     }
 
-    if (this.options.isDevelopment && pluginId === REDMINE4TEST_ADDON_ID) {
+    if (pluginId === REDMINE4TEST_ADDON_ID) {
       return Redmine4Test as IDataSource
     }
 

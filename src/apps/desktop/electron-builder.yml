@@ -15,6 +15,8 @@ extraResources:
     to: resources
     filter:
       - '**/*'
+  - from: native-prebuilds/window_overlay.node
+    to: native-prebuilds/window_overlay.node
 asarUnpack:
   - resources/**
 protocols:
