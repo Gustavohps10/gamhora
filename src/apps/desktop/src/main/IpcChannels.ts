@@ -1,6 +1,9 @@
 export const IpcChannels = {
   WIDGET_SET_IGNORE_MOUSE: 'widget:set-ignore-mouse',
   WIDGET_TOGGLE_FLOATING_WINDOW: 'widget:toggle-floating-window',
+  WIDGET_FORCE_TOPMOST: 'widget:force-topmost',
+  WIDGET_START_KEY_CAPTURE: 'widget:start-key-capture',
+  WIDGET_STOP_KEY_CAPTURE: 'widget:stop-key-capture',
   SYSTEM_VERSION: 'system:version',
   SYSTEM_GET_ENVIRONMENT: 'system:get-environment',
   SYSTEM_GET_DISPLAYS: 'system:get-displays',

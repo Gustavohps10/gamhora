@@ -26,4 +26,12 @@ export const systemInvoker: ISystemAPI = {
   getSettings: () => IpcInvoker.invoke('SYSTEM_GET_SETTINGS'),
   saveSettings: (settings: AppSettings) =>
     IpcInvoker.invoke('SYSTEM_SAVE_SETTINGS', { body: settings }),
+
+  // --- MÉTODOS DE FOCO NATIVO / INTERCEPTAÇÃO ---
+  forceTopmost: () => IpcInvoker.invoke('WIDGET_FORCE_TOPMOST'),
+
+  startKeyboardInterception: () =>
+    IpcInvoker.invoke('WIDGET_START_KEY_CAPTURE'),
+
+  stopKeyboardInterception: () => IpcInvoker.invoke('WIDGET_STOP_KEY_CAPTURE'),
 }

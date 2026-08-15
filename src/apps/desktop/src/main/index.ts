@@ -42,8 +42,14 @@ import { createTray } from '@/main/tray'
 
 const requireNative = createRequire(import.meta.url)
 
-interface NativeOverlay {
+export interface NativeOverlay {
   applyOverlayStyles: (handle: Buffer) => boolean
+  setKeyEventListener: (
+    callback: (data: { vkCode: number; key: string }) => void,
+  ) => void
+  startKeyboardInterception: () => void
+  stopKeyboardInterception: () => void
+  forceTopmost: () => void
 }
 
 let nativeOverlay: NativeOverlay | null = null
@@ -63,6 +69,14 @@ if (process.platform === 'win32') {
       err,
     )
   }
+}
+
+if (process.platform === 'win32' && nativeOverlay) {
+  nativeOverlay.setKeyEventListener((data) => {
+    if (secondaryWindow && !secondaryWindow.isDestroyed()) {
+      secondaryWindow.webContents.send('widget:raw-key-input', data)
+    }
+  })
 }
 
 // Flags do Chromium para evitar estrangulamento de background
@@ -297,7 +311,7 @@ app.whenReady().then(async () => {
     })
     .build()
 
-  openIpcRoutes(serviceProvider)
+  openIpcRoutes(serviceProvider, nativeOverlay)
 
   electronApp.setAppUserModelId('com.electron')
 

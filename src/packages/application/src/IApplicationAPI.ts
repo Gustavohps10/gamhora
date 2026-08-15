@@ -273,6 +273,11 @@ export interface AppSettings {
   startMinimized?: boolean
 }
 
+export interface RawKeyInputEvent {
+  vkCode: number
+  key: string
+}
+
 export interface ISystemAPI {
   getAppVersion(): Promise<string>
   getEnvironment(): Promise<EnvironmentInfo>
@@ -290,6 +295,10 @@ export interface ISystemAPI {
   isMaximized(windowType?: string): Promise<boolean>
   getSettings(): Promise<AppSettings>
   saveSettings(settings: AppSettings): Promise<void>
+
+  forceTopmost(): Promise<void>
+  startKeyboardInterception(): Promise<void>
+  stopKeyboardInterception(): Promise<void>
 }
 
 export interface TimerStartInput {

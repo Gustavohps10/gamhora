@@ -6,6 +6,7 @@ import {
 import { IRequest } from '@metric-org/shared/transport'
 import { app, BrowserWindow, screen } from 'electron'
 
+import { NativeOverlay } from '@/main'
 import { IpcHandler } from '@/main/adapters/IpcHandler'
 import {
   SessionHandler,
@@ -35,7 +36,10 @@ function getWindowByType(
   )
 }
 
-export function openIpcRoutes(serviceProvider: IServiceProvider): void {
+export function openIpcRoutes(
+  serviceProvider: IServiceProvider,
+  nativeOverlay?: NativeOverlay | null,
+): void {
   const tokenHandler = serviceProvider.resolve<TokenHandler>('tokenHandler')
   const workspacesHandler =
     serviceProvider.resolve<WorkspacesHandler>('workspacesHandler')
@@ -335,4 +339,26 @@ export function openIpcRoutes(serviceProvider: IServiceProvider): void {
       return Promise.resolve({ success: true })
     },
   )
+
+  // --- WIDGET NATIVE OVERLAY / KEYBOARD HOOK ---
+  IpcHandler.register('WIDGET_FORCE_TOPMOST', () => {
+    if (process.platform === 'win32' && nativeOverlay) {
+      nativeOverlay.forceTopmost()
+    }
+    return Promise.resolve({ success: true })
+  })
+
+  IpcHandler.register('WIDGET_START_KEY_CAPTURE', () => {
+    if (process.platform === 'win32' && nativeOverlay) {
+      nativeOverlay.startKeyboardInterception()
+    }
+    return Promise.resolve({ success: true })
+  })
+
+  IpcHandler.register('WIDGET_STOP_KEY_CAPTURE', () => {
+    if (process.platform === 'win32' && nativeOverlay) {
+      nativeOverlay.stopKeyboardInterception()
+    }
+    return Promise.resolve({ success: true })
+  })
 }

@@ -299,6 +299,76 @@ export const UltimateTimeTracker = ({
     }
   }, [db, selectedTask, selectedConnectionId])
 
+  useEffect(() => {
+    const isWidgetWindow = window.location.hash.includes('/widgets/')
+    if (!isWidgetWindow) return
+
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null
+      if (target?.matches?.('input, textarea')) {
+        client.modules.system.startKeyboardInterception?.()
+      }
+    }
+
+    const handleFocusOut = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null
+      if (target?.matches?.('input, textarea')) {
+        client.modules.system.stopKeyboardInterception?.()
+      }
+    }
+
+    window.addEventListener('focusin', handleFocusIn)
+    window.addEventListener('focusout', handleFocusOut)
+
+    // Ouve os caracteres interceptados pelo C++
+    const cleanupKeyListener = client.events.on<{
+      vkCode: number
+      key: string
+    }>('widget:raw-key-input', (data) => {
+      const activeEl = document.activeElement as
+        | HTMLInputElement
+        | HTMLTextAreaElement
+        | null
+      if (!activeEl || !['INPUT', 'TEXTAREA'].includes(activeEl.tagName)) return
+
+      if (data.vkCode === 8) {
+        // Backspace
+        const start = activeEl.selectionStart ?? activeEl.value.length
+        const end = activeEl.selectionEnd ?? activeEl.value.length
+        if (start === end && start > 0) {
+          activeEl.setRangeText('', start - 1, start, 'end')
+        } else {
+          activeEl.setRangeText('', start, end, 'end')
+        }
+        activeEl.dispatchEvent(new Event('input', { bubbles: true }))
+      } else if (data.vkCode === 13) {
+        // Enter
+        activeEl.dispatchEvent(
+          new KeyboardEvent('keydown', {
+            key: 'Enter',
+            code: 'Enter',
+            bubbles: true,
+          }),
+        )
+      } else if (data.vkCode === 27) {
+        // Escape
+        activeEl.blur()
+      } else if (data.key) {
+        // Insere o caractere digitado na posição do cursor
+        const start = activeEl.selectionStart ?? activeEl.value.length
+        const end = activeEl.selectionEnd ?? activeEl.value.length
+        activeEl.setRangeText(data.key, start, end, 'end')
+        activeEl.dispatchEvent(new Event('input', { bubbles: true }))
+      }
+    })
+
+    return () => {
+      window.removeEventListener('focusin', handleFocusIn)
+      window.removeEventListener('focusout', handleFocusOut)
+      cleanupKeyListener?.()
+    }
+  }, [])
+
   const activeEntry = useTimeEntryStore((s) => s.active)
 
   const [dbTodaySeconds, setDbTodaySeconds] = useState(0)
