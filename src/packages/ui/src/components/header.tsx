@@ -10,16 +10,38 @@ import {
   Clock,
   CloudOff,
   DatabaseIcon,
+  DownloadCloud,
   Monitor,
   RefreshCcw,
   Share2Icon,
+  Trash2,
+  UploadCloud,
   User2,
   XCircle,
 } from 'lucide-react'
+import { useState } from 'react'
 import { AiOutlineCloudSync } from 'react-icons/ai'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   Popover,
   PopoverContent,
@@ -69,10 +91,28 @@ export function Header() {
   const dbName = useSyncStore((s) => s.db?.name)
   const isInitialized = useSyncStore((s) => s.isInitialized) ?? false
 
+  const forceSync = useSyncStore((s) => s.forceSync)
+  const resetDatabase = useSyncStore((s) => s.resetDatabase)
+
+  const [isResetting, setIsResetting] = useState(false)
+
   const hasRemote = connections.length > 0
   const allStatuses = connections.flatMap((c) =>
     Object.values(c.sync).filter((v): v is ReplicationStatus => Boolean(v)),
   )
+
+  const isAnySyncingGlobally = allStatuses.some(
+    (v) => v.isPulling || v.isPushing,
+  )
+
+  const handleReset = async () => {
+    setIsResetting(true)
+    try {
+      await resetDatabase?.()
+    } finally {
+      setIsResetting(false)
+    }
+  }
 
   const getGlobalState = () => {
     if (!isInitialized)
@@ -81,8 +121,8 @@ export function Header() {
       return { color: 'bg-zinc-400', label: 'Modo Local', icon: 'local' }
 
     if (allStatuses.some((v) => v.error && !isAuthError(v.error)))
-      return { color: 'bg-red-500', label: 'Erro técnico', icon: 'sync' }
-    if (allStatuses.some((v) => v.isPulling || v.isPushing))
+      return { color: 'bg-destructive', label: 'Erro técnico', icon: 'sync' }
+    if (isAnySyncingGlobally)
       return {
         color: 'bg-blue-500 animate-pulse',
         label: 'Sincronizando...',
@@ -173,12 +213,65 @@ export function Header() {
                         </h4>
                         <div className="text-muted-foreground flex items-center gap-1 font-mono text-[10px] leading-4">
                           <DatabaseIcon size={10} />
-                          <span>
-                            {dbName || 'HOUVE UM ERRO AO CARREGAR O DATABASE '}
+                          <span className="max-w-[120px] truncate">
+                            {dbName || 'ERRO AO CARREGAR DB'}
                           </span>
                         </div>
                       </div>
                     </div>
+
+                    {hasRemote && (
+                      <DropdownMenu>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-7 w-7"
+                                disabled={isAnySyncingGlobally}
+                              >
+                                <RefreshCcw
+                                  size={12}
+                                  className={
+                                    isAnySyncingGlobally
+                                      ? 'animate-spin text-blue-500'
+                                      : 'text-foreground/70'
+                                  }
+                                />
+                              </Button>
+                            </DropdownMenuTrigger>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="text-[10px]">
+                            Opções de Sincronização
+                          </TooltipContent>
+                        </Tooltip>
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuItem
+                            onClick={() => forceSync?.(undefined, 'pull')}
+                            className="cursor-pointer text-[11px]"
+                          >
+                            <DownloadCloud className="mr-2 h-3.5 w-3.5" /> Pull
+                            (Baixar)
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => forceSync?.(undefined, 'push')}
+                            className="cursor-pointer text-[11px]"
+                          >
+                            <UploadCloud className="mr-2 h-3.5 w-3.5" /> Push
+                            (Enviar)
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => forceSync?.(undefined, 'both')}
+                            className="cursor-pointer text-[11px] font-medium"
+                          >
+                            <RefreshCcw className="mr-2 h-3.5 w-3.5" />{' '}
+                            Sincronizar (Pull e Push)
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    )}
                   </div>
 
                   <div className="max-h-[420px] overflow-y-auto p-2">
@@ -200,7 +293,6 @@ export function Header() {
                               <div className="mb-3 flex items-center justify-between">
                                 <div className="flex min-w-0 items-center gap-3">
                                   <div className="relative shrink-0">
-                                    {/* NOVO CONTAINER DE LOGO DO ADDON */}
                                     <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-zinc-100 p-1 shadow-sm dark:bg-zinc-900">
                                       {conn.addon?.logo ? (
                                         <img
@@ -241,27 +333,90 @@ export function Header() {
                                           <User2 size={8} />
                                         </AvatarFallback>
                                       </Avatar>
-                                      <span className="text-muted-foreground max-w-[180px] text-[10px]">
+                                      <span className="text-muted-foreground max-w-[180px] truncate text-[10px]">
                                         {conn.member?.name ||
-                                          'NÃO IDENTIFICADO '}{' '}
-                                        <span className="text-[9px] opacity-50">
+                                          'NÃO IDENTIFICADO '}
+                                        <span className="ml-1 text-[9px] opacity-50">
                                           {conn.member?.login}
                                         </span>
                                       </span>
                                     </div>
                                   </div>
                                 </div>
-                                {conn.status === 'connected' ? (
-                                  <CheckCircle2
-                                    size={14}
-                                    className="shrink-0 text-green-500"
-                                  />
-                                ) : (
-                                  <CloudOff
-                                    size={14}
-                                    className="text-muted-foreground shrink-0"
-                                  />
-                                )}
+                                <div className="flex items-center gap-1">
+                                  {conn.status === 'connected' && (
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="text-muted-foreground hover:text-foreground h-6 w-6"
+                                          disabled={isSyncing}
+                                        >
+                                          <RefreshCcw
+                                            size={12}
+                                            className={
+                                              isSyncing ? 'animate-spin' : ''
+                                            }
+                                          />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent
+                                        align="end"
+                                        className="w-44"
+                                      >
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            forceSync?.(
+                                              conn.connectionId,
+                                              'pull',
+                                            )
+                                          }
+                                          className="cursor-pointer text-[11px]"
+                                        >
+                                          <DownloadCloud className="mr-2 h-3.5 w-3.5" />{' '}
+                                          Pull (Baixar)
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            forceSync?.(
+                                              conn.connectionId,
+                                              'push',
+                                            )
+                                          }
+                                          className="cursor-pointer text-[11px]"
+                                        >
+                                          <UploadCloud className="mr-2 h-3.5 w-3.5" />{' '}
+                                          Push (Enviar)
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          onClick={() =>
+                                            forceSync?.(
+                                              conn.connectionId,
+                                              'both',
+                                            )
+                                          }
+                                          className="cursor-pointer text-[11px] font-medium"
+                                        >
+                                          <RefreshCcw className="mr-2 h-3.5 w-3.5" />{' '}
+                                          Sincronizar (Pull e Push)
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  )}
+                                  {conn.status === 'connected' ? (
+                                    <CheckCircle2
+                                      size={14}
+                                      className="shrink-0 text-green-500"
+                                    />
+                                  ) : (
+                                    <CloudOff
+                                      size={14}
+                                      className="text-muted-foreground shrink-0"
+                                    />
+                                  )}
+                                </div>
                               </div>
 
                               <div className="flex flex-col gap-1 px-1">
@@ -292,7 +447,7 @@ export function Header() {
                                     StatusIcon = (
                                       <XCircle
                                         size={12}
-                                        className="text-red-500"
+                                        className="text-destructive"
                                       />
                                     )
                                   } else if (isAuthError(status.error)) {
@@ -326,7 +481,7 @@ export function Header() {
                                         {StatusIcon}
                                         <div className="flex flex-col items-end">
                                           <span
-                                            className={`text-[9px] font-bold ${isErr ? 'text-red-500' : pulling ? 'text-blue-500' : 'text-foreground/80'}`}
+                                            className={`text-[9px] font-bold ${isErr ? 'text-destructive' : pulling ? 'text-blue-500' : 'text-foreground/80'}`}
                                           >
                                             {statusText}
                                           </span>
@@ -366,13 +521,38 @@ export function Header() {
                   </div>
 
                   <div className="bg-muted/20 flex items-center justify-between border-t px-4 py-2">
-                    <span className="text-muted-foreground font-mono text-[8px] tracking-widest uppercase opacity-50">
-                      Sync Engine v4.2
-                    </span>
-                    <span className="flex items-center gap-1.5 text-[9px] font-bold text-green-500">
-                      <Activity size={10} className="animate-pulse" />
-                      Motor Ativo
-                    </span>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive ml-auto h-6 px-2 text-[10px] transition-colors"
+                          disabled={isResetting || !isInitialized}
+                        >
+                          <Trash2 size={10} className="mr-1.5" />
+                          {isResetting ? 'Resetando...' : 'Resetar Dados'}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Atenção</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Isso apagará todos os dados salvos localmente.
+                            Qualquer alteração que ainda não foi sincronizada
+                            será perdida. Deseja continuar?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleReset}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Sim, Resetar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </PopoverContent>
               </Popover>

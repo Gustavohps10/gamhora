@@ -54,6 +54,21 @@ import {
 } from '@/local-db/schemas/time-entries-sync-schema'
 import { createTimeEntryStore } from '@/stores/timeEntryStore'
 
+// --- PLUGINS INIT (Executado apenas 1x globalmente) ---
+let pluginsLoaded = false
+const ensurePlugins = async (isDevelopment: boolean) => {
+  if (pluginsLoaded) return
+  pluginsLoaded = true
+
+  if (isDevelopment) {
+    const { RxDBDevModePlugin } = await import('rxdb/plugins/dev-mode')
+    addRxPlugin(RxDBDevModePlugin)
+  }
+
+  const { RxDBQueryBuilderPlugin } = await import('rxdb/plugins/query-builder')
+  addRxPlugin(RxDBQueryBuilderPlugin)
+}
+
 // --- TYPES ---
 export type ReplicationCheckpoint = { updatedAt: string; id: string }
 export type AppCollections = {
@@ -88,6 +103,11 @@ export type SyncStore = SyncState & {
   init: () => Promise<void>
   destroy: () => Promise<void>
   drop: () => Promise<void>
+  resetDatabase: () => Promise<void>
+  forceSync: (
+    connectionInstanceId?: string,
+    direction?: 'pull' | 'push' | 'both',
+  ) => void
   connectDataSource: (params: {
     connectionInstanceId: ConnectionInstanceId
     dataSourceId: string
@@ -403,6 +423,11 @@ class ReplicationModule {
     }
   }
 
+  forceSync(direction: 'pull' | 'push' | 'both' = 'both') {
+    if (!this.instance) return
+    this.instance.reSync()
+  }
+
   async destroy() {
     if (this.resyncInterval) clearInterval(this.resyncInterval)
     this.subs.forEach((s) => s.unsubscribe())
@@ -569,6 +594,28 @@ export const createSyncStore = (
       await destroyConnectionModules(connectionInstanceId, set)
     },
 
+    forceSync: (
+      connectionInstanceId?: string,
+      direction: 'pull' | 'push' | 'both' = 'both',
+    ) => {
+      console.log(
+        '[SYNC] Forçando sincronização manual...',
+        connectionInstanceId || 'TODAS AS FONTES',
+        '| Direção:',
+        direction,
+      )
+      if (connectionInstanceId) {
+        const modules = replications.get(connectionInstanceId)
+        if (modules) {
+          Array.from(modules.values()).forEach((m) => m.forceSync(direction))
+        }
+      } else {
+        Array.from(replications.values()).forEach((modules) => {
+          Array.from(modules.values()).forEach((m) => m.forceSync(direction))
+        })
+      }
+    },
+
     drop: async () => {
       const { db } = get()
       if (!db) return
@@ -585,38 +632,57 @@ export const createSyncStore = (
       set({ db: null, isInitialized: false, statuses: {} })
     },
 
+    resetDatabase: async () => {
+      console.log('[SYNC] Iniciando reset manual do banco local...')
+      const { drop, init } = get()
+      try {
+        await drop()
+        await init()
+      } catch (err) {
+        console.error(
+          '[SYNC] Falha ao resetar banco, recarregando processo...',
+          err,
+        )
+        window.location.reload()
+      }
+    },
+
     init: async () => {
       console.log('SYCRONIZADOR INICIALIZANDO....')
 
       if (get().isInitialized) return
 
       try {
-        if (isDevelopment) {
-          const { RxDBDevModePlugin } = await import('rxdb/plugins/dev-mode')
-          addRxPlugin(RxDBDevModePlugin)
-        }
-
-        const { RxDBQueryBuilderPlugin } =
-          await import('rxdb/plugins/query-builder')
-        addRxPlugin(RxDBQueryBuilderPlugin)
+        await ensurePlugins(isDevelopment)
 
         const db = await createRxDatabase<AppCollections>({
           name: `db-${workspaceId}`,
           storage: createAppStorage(),
-          // ignoreDuplicate: true,
+          ignoreDuplicate: true,
+          closeDuplicates: true,
           multiInstance: true,
           eventReduce: true,
           allowSlowCount: true,
         })
 
-        await db.addCollections({
-          metadata: { schema: metadataSyncSchema },
-          tasks: { schema: tasksSyncSchema },
-          timeEntries: { schema: timeEntriesSyncSchema },
-          kanbanColumns: { schema: kanbanColumnsSchema },
-          kanbanTaskColumns: { schema: kanbanTaskColumnsSchema },
-          automations: { schema: automationsSchema },
-        })
+        const collectionsToCreate: Record<string, any> = {}
+        if (!db.metadata)
+          collectionsToCreate.metadata = { schema: metadataSyncSchema }
+        if (!db.tasks) collectionsToCreate.tasks = { schema: tasksSyncSchema }
+        if (!db.timeEntries)
+          collectionsToCreate.timeEntries = { schema: timeEntriesSyncSchema }
+        if (!db.kanbanColumns)
+          collectionsToCreate.kanbanColumns = { schema: kanbanColumnsSchema }
+        if (!db.kanbanTaskColumns)
+          collectionsToCreate.kanbanTaskColumns = {
+            schema: kanbanTaskColumnsSchema,
+          }
+        if (!db.automations)
+          collectionsToCreate.automations = { schema: automationsSchema }
+
+        if (Object.keys(collectionsToCreate).length > 0) {
+          await db.addCollections(collectionsToCreate)
+        }
 
         set({ db, isInitialized: true })
       } catch (err) {
@@ -650,30 +716,47 @@ export const SyncProvider: React.FC<{ children: ReactNode }> = ({
 
   // Workspace muda → recria o banco do zero e recupera entradas ativas
   useEffect(() => {
+    let isCancelled = false
+
     const handleWorkspaceChange = async () => {
       const nextWorkspaceId = workspace?.id ?? null
 
-      if (currentWorkspaceId.current === nextWorkspaceId) return
+      if (
+        currentWorkspaceId.current === nextWorkspaceId &&
+        activeStoreRef.current
+      ) {
+        return
+      }
 
+      // 1. Destrói e aguarda a limpeza completa da instância anterior
       if (activeStoreRef.current) {
-        await activeStoreRef.current.getState().destroy()
+        const storeToDestroy = activeStoreRef.current
+        activeStoreRef.current = null
         setActiveStore(null)
         startedConnections.current.clear()
+        await storeToDestroy.getState().destroy()
       }
 
       currentWorkspaceId.current = nextWorkspaceId
 
-      if (!nextWorkspaceId) return
+      if (!nextWorkspaceId || isCancelled) {
+        return
+      }
 
       try {
         const newStore = createSyncStore(nextWorkspaceId, client, isDevelopment)
         await newStore.getState().init()
+
+        if (isCancelled) {
+          await newStore.getState().destroy()
+          return
+        }
+
+        activeStoreRef.current = newStore
         setActiveStore(newStore)
 
-        // 🚀 RECUPERAÇÃO APÓS INICIALIZAÇÃO
         const db = newStore.getState().db
         if (db) {
-          // Instancia a store local do TimeEntry usando a factory limpa
           const tempTimeEntryStore = createTimeEntryStore(client)
           await tempTimeEntryStore.getState().recoverRunningEntry(db)
         }
@@ -683,6 +766,10 @@ export const SyncProvider: React.FC<{ children: ReactNode }> = ({
     }
 
     handleWorkspaceChange()
+
+    return () => {
+      isCancelled = true
+    }
   }, [workspace?.id, client, isDevelopment])
 
   // Connections mudam → liga/desliga motores individualmente
