@@ -218,7 +218,9 @@ export class ContainerBuilder {
       serviceProvider: asValue(serviceProvider),
     })
 
-    console.log('Container principal construído e dependências registradas.')
+    console.log(
+      '✅ [IoC] Container principal construído e dependências registradas.',
+    )
     return serviceProvider
   }
 }

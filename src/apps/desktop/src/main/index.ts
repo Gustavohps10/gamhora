@@ -62,10 +62,10 @@ if (process.platform === 'win32') {
 
     nativeOverlay = requireNative(binaryPath)
 
-    console.log('[@metric-org/desktop] ✓ Carregado: window_overlay.node:')
+    console.log('✅ [C++ plugin] ✓ Carregado: window_overlay.node:')
   } catch (err) {
     console.error(
-      '[@metric-org/desktop] Erro ao carregar window_overlay.node:',
+      '❌ [@metric-org/desktop] Erro ao carregar window_overlay.node:',
       err,
     )
   }
@@ -349,7 +349,9 @@ app.whenReady().then(async () => {
         loadExtensionOptions: { allowFileAccess: true },
         // forceDownload: true,
       })
-      console.log(`✅ Extensão REACT DEV TOOLS instalada com sucesso`)
+      console.log(
+        `✅ [Extensões] Extensão do Chromium REACT DEV TOOLS instalada com sucesso`,
+      )
     } catch (err) {
       console.error('❌ Erro ao instalar a extensão React DevTools:', err)
     }

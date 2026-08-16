@@ -11,7 +11,7 @@ export class TimerRuntime {
   private status: 'running' | 'paused' | 'idle' = 'idle'
 
   public init(): void {
-    console.log('[TimerRuntime] init() called')
+    console.log('✅ [TimerRuntime] init() called')
 
     ipcMain.on(
       'timer:start',
