@@ -19,6 +19,7 @@ import {
   createRxDatabase,
   RxCollection,
   RxDatabase,
+  RXDB_VERSION,
   RxError,
 } from 'rxdb'
 import {
@@ -54,19 +55,58 @@ import {
 } from '@/local-db/schemas/time-entries-sync-schema'
 import { createTimeEntryStore } from '@/stores/timeEntryStore'
 
+// --- DEBUG HELPERS ---
+// DB9 (e outros códigos do RxDB) são reaproveitados entre versões da lib e,
+// em build de produção, a mensagem completa some (só sobra o código). Para
+// diagnosticar de verdade precisamos, em algum momento, carregar o
+// dev-mode plugin também fora do ambiente de dev — só assim o RxDB devolve
+// o texto humano do erro. Ativamos isso via flag manual (localStorage ou
+// query string), NUNCA automaticamente em produção normal.
+const shouldForceRxDBDebug = (): boolean => {
+  if (typeof window === 'undefined') return false
+  try {
+    const byQuery = new URLSearchParams(window.location.search).get('rxdbDebug')
+    const byStorage = window.localStorage.getItem('RXDB_DEBUG')
+    return byQuery === '1' || byStorage === '1'
+  } catch {
+    return false
+  }
+}
+
 // --- PLUGINS INIT (Executado apenas 1x globalmente) ---
 let pluginsLoaded = false
 const ensurePlugins = async (isDevelopment: boolean) => {
-  if (pluginsLoaded) return
+  console.log('[SYNC][plugins] ensurePlugins chamado', {
+    isDevelopment,
+    pluginsLoaded,
+  })
+
+  if (pluginsLoaded) {
+    console.log('[SYNC][plugins] já carregados anteriormente, pulando')
+    return
+  }
   pluginsLoaded = true
 
-  if (isDevelopment) {
+  const forceDebug = shouldForceRxDBDebug()
+
+  if (isDevelopment || forceDebug) {
+    console.log('[SYNC][plugins] carregando RxDBDevModePlugin', {
+      motivo: isDevelopment
+        ? 'isDevelopment=true'
+        : 'forceDebug=true (?rxdbDebug=1 ou localStorage.RXDB_DEBUG=1)',
+    })
     const { RxDBDevModePlugin } = await import('rxdb/plugins/dev-mode')
     addRxPlugin(RxDBDevModePlugin)
+    console.log('[SYNC][plugins] RxDBDevModePlugin carregado com sucesso')
+  } else {
+    console.log(
+      '[SYNC][plugins] RxDBDevModePlugin NÃO carregado (produção sem debug flag) — mensagens de erro do RxDB virão só com código, sem texto',
+    )
   }
 
   const { RxDBQueryBuilderPlugin } = await import('rxdb/plugins/query-builder')
   addRxPlugin(RxDBQueryBuilderPlugin)
+  console.log('[SYNC][plugins] RxDBQueryBuilderPlugin carregado com sucesso')
 }
 
 // --- TYPES ---
@@ -122,8 +162,10 @@ export interface DataSourceRef {
 }
 
 // --- STORAGE ---
-const createAppStorage = () =>
-  wrappedValidateAjvStorage({ storage: getRxStorageDexie() })
+const createAppStorage = () => {
+  console.log('[SYNC][storage] criando storage (Dexie + validate-ajv)')
+  return wrappedValidateAjvStorage({ storage: getRxStorageDexie() })
+}
 
 const dropAppStorage = async (dbName: string) => {
   const allDbs = await indexedDB.databases()
@@ -491,6 +533,143 @@ const COLLECTION_CONFIGS: CollectionConfig[] = [
   },
 ]
 
+// --- DATABASE CACHE (Singleton para evitar DB9) ---
+const dbPromiseCache = new Map<string, Promise<AppDatabase>>()
+
+const getOrCreateDatabase = async (
+  workspaceId: string,
+  isDevelopment: boolean,
+): Promise<AppDatabase> => {
+  const dbName = `db-${workspaceId}`
+
+  console.log('[SYNC][db] getOrCreateDatabase chamado', {
+    dbName,
+    isDevelopment,
+    jaEstaNoCache: dbPromiseCache.has(dbName),
+    chavesNoCache: Array.from(dbPromiseCache.keys()),
+  })
+
+  if (dbPromiseCache.has(dbName)) {
+    console.log('[SYNC][db] retornando promise já existente do cache', dbName)
+    return dbPromiseCache.get(dbName)!
+  }
+
+  const promise = (async () => {
+    // Checa se já existem bancos com esse nome no IndexedDB antes de criar.
+    // Ajuda a identificar se o problema é uma instância "fantasma" (aba
+    // antiga, service worker, etc) que não foi fechada corretamente.
+    try {
+      if (typeof indexedDB !== 'undefined' && indexedDB.databases) {
+        const existing = await indexedDB.databases()
+        console.log(
+          '[SYNC][db] bancos existentes no IndexedDB antes de criar:',
+          existing.map((d) => d.name).filter((n) => n?.includes(dbName)),
+        )
+      }
+    } catch (e) {
+      console.log('[SYNC][db] não foi possível listar indexedDB.databases()', e)
+    }
+
+    const rxDatabaseConfig = {
+      name: dbName,
+      storage: createAppStorage(),
+      // DB9 pode significar coisas diferentes dependendo da versão do RxDB
+      // instalada (o código é reciclado entre versões). Uma das causas mais
+      // comuns é "ignoreDuplicate is only allowed in dev-mode and must never
+      // be used in production" — por isso o valor abaixo é condicional.
+      ignoreDuplicate: isDevelopment,
+      closeDuplicates: true,
+      multiInstance: true,
+      eventReduce: true,
+      allowSlowCount: true,
+    }
+
+    console.log('[SYNC][db] chamando createRxDatabase com config:', {
+      ...rxDatabaseConfig,
+      storage: '<<RxStorage instance>>',
+    })
+
+    let db: AppDatabase
+    try {
+      db = await createRxDatabase<AppCollections>(rxDatabaseConfig)
+      console.log('[SYNC][db] createRxDatabase OK', {
+        dbName,
+        name: db.name,
+        colecoesExistentes: Object.keys(db.collections ?? {}),
+      })
+    } catch (err) {
+      const rxErr = err as RxError & {
+        code?: string
+        parameters?: unknown
+      }
+      console.error('[SYNC][db] ERRO em createRxDatabase', {
+        dbName,
+        isDevelopment,
+        code: rxErr?.code,
+        message: rxErr?.message,
+        parameters: rxErr?.parameters,
+        errorCompleto: rxErr,
+      })
+      throw err
+    }
+
+    const collectionsToCreate: Record<string, any> = {}
+    if (!db.metadata)
+      collectionsToCreate.metadata = { schema: metadataSyncSchema }
+    if (!db.tasks) collectionsToCreate.tasks = { schema: tasksSyncSchema }
+    if (!db.timeEntries)
+      collectionsToCreate.timeEntries = { schema: timeEntriesSyncSchema }
+    if (!db.kanbanColumns)
+      collectionsToCreate.kanbanColumns = { schema: kanbanColumnsSchema }
+    if (!db.kanbanTaskColumns)
+      collectionsToCreate.kanbanTaskColumns = {
+        schema: kanbanTaskColumnsSchema,
+      }
+    if (!db.automations)
+      collectionsToCreate.automations = { schema: automationsSchema }
+
+    console.log(
+      '[SYNC][db] coleções a criar nesta chamada:',
+      Object.keys(collectionsToCreate),
+    )
+
+    if (Object.keys(collectionsToCreate).length > 0) {
+      try {
+        await db.addCollections(collectionsToCreate)
+        console.log(
+          '[SYNC][db] addCollections OK',
+          Object.keys(collectionsToCreate),
+        )
+      } catch (err) {
+        const rxErr = err as RxError & { code?: string; parameters?: unknown }
+        console.error('[SYNC][db] ERRO em addCollections', {
+          code: rxErr?.code,
+          message: rxErr?.message,
+          parameters: rxErr?.parameters,
+          errorCompleto: rxErr,
+        })
+        throw err
+      }
+    }
+
+    return db
+  })()
+
+  dbPromiseCache.set(dbName, promise)
+
+  // Se a criação falhar, remove do cache para não deixar uma promise
+  // rejeitada presa lá (isso faria toda tentativa futura falhar igual,
+  // mesmo corrigindo a causa raiz).
+  promise.catch(() => {
+    console.log('[SYNC][db] removendo entrada do cache após falha:', dbName)
+    if (dbPromiseCache.get(dbName) === promise) {
+      dbPromiseCache.delete(dbName)
+    }
+  })
+
+  return promise
+}
+
 // --- STORE CORE ---
 export const createSyncStore = (
   workspaceId: string,
@@ -620,15 +799,25 @@ export const createSyncStore = (
       const { db } = get()
       if (!db) return
       await destroyAllModules()
+
+      // Limpa do cache e remove de fato
+      dbPromiseCache.delete(`db-${workspaceId}`)
       await db.remove()
       await dropAppStorage(`db-${workspaceId}`)
+
       set({ db: null, isInitialized: false, statuses: {} })
     },
 
     destroy: async () => {
       const { db } = get()
       await destroyAllModules()
-      if (db) await db.close()
+
+      // Limpa do cache e fecha conexões
+      if (db) {
+        dbPromiseCache.delete(`db-${workspaceId}`)
+        await db.close()
+      }
+
       set({ db: null, isInitialized: false, statuses: {} })
     },
 
@@ -648,45 +837,50 @@ export const createSyncStore = (
     },
 
     init: async () => {
-      console.log('SYCRONIZADOR INICIALIZANDO....')
+      console.log('SYCRONIZADOR INICIALIZANDO....', {
+        workspaceId,
+        isDevelopment,
+        rxdbVersion: RXDB_VERSION,
+        ambienteNodeEnv:
+          typeof process !== 'undefined'
+            ? process.env.NODE_ENV
+            : 'desconhecido',
+      })
 
-      if (get().isInitialized) return
+      if (get().isInitialized) {
+        console.log('[SYNC][init] já estava inicializado, ignorando chamada')
+        return
+      }
 
       try {
+        console.log('[SYNC][init] passo 1/2: ensurePlugins')
         await ensurePlugins(isDevelopment)
 
-        const db = await createRxDatabase<AppCollections>({
-          name: `db-${workspaceId}`,
-          storage: createAppStorage(),
-          ignoreDuplicate: true,
-          closeDuplicates: true,
-          multiInstance: true,
-          eventReduce: true,
-          allowSlowCount: true,
-        })
+        console.log('[SYNC][init] passo 2/2: getOrCreateDatabase')
+        // Chama pelo Helper com Cache global para evitar erro DB9
+        const db = await getOrCreateDatabase(workspaceId, isDevelopment)
 
-        const collectionsToCreate: Record<string, any> = {}
-        if (!db.metadata)
-          collectionsToCreate.metadata = { schema: metadataSyncSchema }
-        if (!db.tasks) collectionsToCreate.tasks = { schema: tasksSyncSchema }
-        if (!db.timeEntries)
-          collectionsToCreate.timeEntries = { schema: timeEntriesSyncSchema }
-        if (!db.kanbanColumns)
-          collectionsToCreate.kanbanColumns = { schema: kanbanColumnsSchema }
-        if (!db.kanbanTaskColumns)
-          collectionsToCreate.kanbanTaskColumns = {
-            schema: kanbanTaskColumnsSchema,
-          }
-        if (!db.automations)
-          collectionsToCreate.automations = { schema: automationsSchema }
-
-        if (Object.keys(collectionsToCreate).length > 0) {
-          await db.addCollections(collectionsToCreate)
-        }
-
+        console.log('[SYNC][init] concluído com sucesso', { workspaceId })
         set({ db, isInitialized: true })
       } catch (err) {
-        console.error('[SYNC] Erro:', err)
+        const rxErr = err as RxError & { code?: string; parameters?: unknown }
+        console.error('[SYNC][init] Erro FATAL ao inicializar', {
+          workspaceId,
+          isDevelopment,
+          code: rxErr?.code,
+          message: rxErr?.message,
+          parameters: rxErr?.parameters,
+          errorCompleto: rxErr,
+        })
+        if (rxErr?.code === 'DB9' && !isDevelopment) {
+          console.error(
+            '[SYNC][init] DICA: para ver a mensagem completa deste erro em produção, ' +
+              'acesse a página com ?rxdbDebug=1 na URL (ou rode localStorage.setItem("RXDB_DEBUG","1") ' +
+              'e recarregue) e reproduza o erro de novo. Isso carrega o dev-mode plugin do RxDB só para diagnóstico.',
+          )
+        }
+        // Limpa cache se falhar
+        dbPromiseCache.delete(`db-${workspaceId}`)
         throw err
       }
     },
@@ -718,40 +912,76 @@ export const SyncProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     let isCancelled = false
 
+    const runId = Math.random().toString(36).slice(2, 8)
+
     const handleWorkspaceChange = async () => {
       const nextWorkspaceId = workspace?.id ?? null
+
+      console.log('[SYNC][provider] handleWorkspaceChange disparado', {
+        runId,
+        nextWorkspaceId,
+        workspaceIdAnterior: currentWorkspaceId.current,
+        jaTemStoreAtiva: !!activeStoreRef.current,
+        isDevelopment,
+      })
 
       if (
         currentWorkspaceId.current === nextWorkspaceId &&
         activeStoreRef.current
       ) {
+        console.log(
+          '[SYNC][provider] mesmo workspace + store já ativa, ignorando',
+          { runId, nextWorkspaceId },
+        )
         return
       }
 
       // 1. Destrói e aguarda a limpeza completa da instância anterior
       if (activeStoreRef.current) {
+        console.log('[SYNC][provider] destruindo store anterior', { runId })
         const storeToDestroy = activeStoreRef.current
         activeStoreRef.current = null
         setActiveStore(null)
         startedConnections.current.clear()
         await storeToDestroy.getState().destroy()
+        console.log('[SYNC][provider] store anterior destruída', { runId })
       }
 
       currentWorkspaceId.current = nextWorkspaceId
 
       if (!nextWorkspaceId || isCancelled) {
+        console.log(
+          '[SYNC][provider] abortando (sem workspaceId ou effect cancelado)',
+          {
+            runId,
+            nextWorkspaceId,
+            isCancelled,
+          },
+        )
         return
       }
 
       try {
+        console.log('[SYNC][provider] criando nova store e chamando init()', {
+          runId,
+          nextWorkspaceId,
+        })
         const newStore = createSyncStore(nextWorkspaceId, client, isDevelopment)
         await newStore.getState().init()
 
         if (isCancelled) {
+          console.log(
+            '[SYNC][provider] cancelado durante init, destruindo store recém-criada',
+            { runId },
+          )
           await newStore.getState().destroy()
           return
         }
 
+        console.log('[SYNC][provider] store pronta, ativando no context', {
+          runId,
+          nextWorkspaceId,
+        })
         activeStoreRef.current = newStore
         setActiveStore(newStore)
 
@@ -759,15 +989,23 @@ export const SyncProvider: React.FC<{ children: ReactNode }> = ({
         if (db) {
           const tempTimeEntryStore = createTimeEntryStore(client)
           await tempTimeEntryStore.getState().recoverRunningEntry(db)
+          console.log('[SYNC][provider] recoverRunningEntry concluído', {
+            runId,
+          })
         }
       } catch (err) {
-        console.error('[SYNC] Erro ao inicializar store:', err)
+        console.error('[SYNC][provider] Erro ao inicializar store:', {
+          runId,
+          nextWorkspaceId,
+          err,
+        })
       }
     }
 
     handleWorkspaceChange()
 
     return () => {
+      console.log('[SYNC][provider] cleanup do effect disparado', { runId })
       isCancelled = true
     }
   }, [workspace?.id, client, isDevelopment])
