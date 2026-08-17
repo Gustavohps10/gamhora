@@ -277,6 +277,7 @@ export interface RawKeyInputEvent {
   vkCode: number
   key: string
 }
+export type ThemeMode = 'light' | 'dark' | 'system'
 
 export interface ISystemAPI {
   getAppVersion(): Promise<string>
@@ -299,6 +300,7 @@ export interface ISystemAPI {
   forceTopmost(): Promise<void>
   startKeyboardInterception(): Promise<void>
   stopKeyboardInterception(): Promise<void>
+  toggleTheme(payload: IRequest<{ theme: ThemeMode }>): Promise<void>
 }
 
 export interface TimerStartInput {

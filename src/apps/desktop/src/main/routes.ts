@@ -361,4 +361,20 @@ export function openIpcRoutes(
     }
     return Promise.resolve({ success: true })
   })
+
+  IpcHandler.register(
+    'SYSTEM_TOGGLE_THEME',
+    (_event, req: IRequest<{ theme: 'light' | 'dark' | 'system' }>) => {
+      const nextTheme = req?.body?.theme
+      if (!nextTheme) return Promise.resolve({ success: false })
+
+      BrowserWindow.getAllWindows().forEach((win) => {
+        if (!win.isDestroyed()) {
+          win.webContents.send('theme:changed', nextTheme)
+        }
+      })
+
+      return Promise.resolve({ success: true })
+    },
+  )
 }

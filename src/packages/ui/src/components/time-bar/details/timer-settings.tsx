@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import React, { memo, useEffect, useState } from 'react'
 
+import { ModeToggle } from '@/components/mode-toggle'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import {
@@ -343,7 +344,7 @@ export const TimerSettings = memo(() => {
             </div>
             <div className="space-y-1">
               {[
-                { id: 'task', label: 'Tarefa / Lookup' },
+                { id: 'task', label: 'Seletor de tarefas' },
                 { id: 'today', label: 'Tempo Hoje' },
                 { id: 'actions', label: 'Controles (Play/Stop)' },
                 { id: 'tools', label: 'Ferramentas' },
@@ -395,7 +396,7 @@ export const TimerSettings = memo(() => {
               </span>
             </div>
             <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
+              {/* <div className="flex items-center justify-between">
                 <Label
                   className="flex cursor-pointer items-center gap-1.5 text-[11px] font-medium"
                   htmlFor="discord-rpc"
@@ -408,7 +409,7 @@ export const TimerSettings = memo(() => {
                   checked={discordRpc}
                   onCheckedChange={setDiscordRpc}
                 />
-              </div>
+              </div> */}
               <div className="flex items-center justify-between">
                 <Label
                   className="flex cursor-pointer items-center gap-1.5 text-[11px] font-medium"
@@ -455,7 +456,7 @@ export const TimerSettings = memo(() => {
                 {displays.length > 1 && (
                   <div className="mb-3">
                     <div className="mb-1.5 flex items-center gap-1.5">
-                      <span className="text-muted-foreground text-[9px] font-semibold tracking-wider uppercase">
+                      <span className="text-muted-foreground text-[9px] font-semibold tracking-wider">
                         Selecionar Monitor
                       </span>
                     </div>
@@ -490,6 +491,23 @@ export const TimerSettings = memo(() => {
                     </div>
                   </div>
                 )}
+
+                <div
+                  className={cn(
+                    'space-y-2.5',
+                    displays.length > 1 && 'border-border/50 border-t py-2.5',
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <Label
+                      className="flex cursor-pointer items-center gap-1.5 text-[11px] font-medium"
+                      htmlFor="start-minimized"
+                    >
+                      Tema Claro/Escuro
+                    </Label>
+                    <ModeToggle className="shrink-0 cursor-pointer rounded-md border-transparent bg-transparent p-1.5 text-zinc-500 transition-all hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800" />
+                  </div>
+                </div>
 
                 <div
                   className={cn(

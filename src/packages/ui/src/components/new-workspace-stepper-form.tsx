@@ -727,7 +727,7 @@ export function StepperForm({
 
   async function onSubmit(data: WorkspaceFormData) {
     if (workspace?.id) {
-      await client.services.workspaces.markAsConfigured({
+      await client.services.workspaces.markWorkspaceAsConfigured({
         body: { workspaceId: workspace.id },
       })
 

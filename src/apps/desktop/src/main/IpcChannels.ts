@@ -17,6 +17,7 @@ export const IpcChannels = {
   SYSTEM_IS_MAXIMIZED: 'system:is-maximized',
   SYSTEM_GET_SETTINGS: 'system:get-settings',
   SYSTEM_SAVE_SETTINGS: 'system:save-settings',
+  SYSTEM_TOGGLE_THEME: 'system:toggle:theme',
 
   METADATA_PULL: 'metadata:pull',
 

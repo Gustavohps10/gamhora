@@ -34,4 +34,5 @@ export const systemInvoker: ISystemAPI = {
     IpcInvoker.invoke('WIDGET_START_KEY_CAPTURE'),
 
   stopKeyboardInterception: () => IpcInvoker.invoke('WIDGET_STOP_KEY_CAPTURE'),
+  toggleTheme: (payload) => IpcInvoker.invoke('SYSTEM_TOGGLE_THEME', payload),
 }

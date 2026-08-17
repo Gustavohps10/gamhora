@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 
+import { useClient } from '@/hooks'
+
 type Theme = 'dark' | 'light' | 'system'
 
 type ThemeProviderProps = {
@@ -28,17 +30,34 @@ export function ThemeProvider({
   storageKey = 'metric-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme)
+  const client = useClient()
+  const [theme, setThemeState] = useState<Theme>(defaultTheme)
   const [mounted, setMounted] = useState(false)
 
+  // Carrega o tema inicial do localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem(storageKey) as Theme
     if (savedTheme) {
-      setTheme(savedTheme)
+      setThemeState(savedTheme)
     }
     setMounted(true)
   }, [storageKey])
 
+  // Escuta alterações de tema disparadas por outras janelas via IPC
+  useEffect(() => {
+    const unsubscribe = client.events.on<Theme>('theme:changed', (newTheme) => {
+      if (newTheme) {
+        localStorage.setItem(storageKey, newTheme)
+        setThemeState(newTheme)
+      }
+    })
+
+    return () => {
+      unsubscribe?.()
+    }
+  }, [client, storageKey])
+
+  // Aplica as classes CSS no <html>
   useEffect(() => {
     if (!mounted) return
 
@@ -60,9 +79,10 @@ export function ThemeProvider({
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
+    setTheme: (nextTheme: Theme) => {
+      localStorage.setItem(storageKey, nextTheme)
+      setThemeState(nextTheme)
+      client.modules.system.toggleTheme({ body: { theme: nextTheme } })
     },
   }
 
