@@ -3,6 +3,7 @@
 import { cva } from 'class-variance-authority'
 import { motion } from 'framer-motion'
 import { Compass, HomeIcon, LayoutGridIcon, PlusIcon } from 'lucide-react'
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui'
@@ -10,13 +11,13 @@ import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { cn } from '@/lib'
 
 const sidebarButtonVariants = cva(
-  'group relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg shadow-sm transition-all duration-200 ease-in-out hover:rounded-xl',
+  'group relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg shadow-sm transition-colors duration-150',
   {
     variants: {
       isActive: {
         true: 'bg-primary text-primary-foreground',
         false:
-          'bg-background text-muted-foreground hover:bg-primary hover:text-primary-foreground',
+          'bg-background text-muted-foreground hover:bg-muted hover:text-foreground',
       },
     },
     defaultVariants: {
@@ -25,75 +26,109 @@ const sidebarButtonVariants = cva(
   },
 )
 
+interface IndicatorProps {
+  isActive: boolean
+  isHovered: boolean
+}
+
+function RailIndicators({ isActive, isHovered }: IndicatorProps) {
+  return (
+    <>
+      {/* Barra de Seleção Principal: Desliza apenas entre itens ativos */}
+      {isActive && (
+        <motion.span
+          layoutId="active-indicator"
+          className="bg-primary absolute top-0 -left-3.5 z-20 h-10 w-1 rounded-r-md"
+          transition={{
+            type: 'spring',
+            stiffness: 350,
+            damping: 28,
+          }}
+        />
+      )}
+
+      {/* Indicador de Hover: Desliza acompanhando o mouse apenas em itens inativos */}
+      {!isActive && isHovered && (
+        <motion.span
+          layoutId="hover-indicator"
+          className="bg-muted-foreground/40 absolute top-3 -left-3.5 z-10 h-4 w-1 rounded-r-md"
+          transition={{
+            type: 'spring',
+            stiffness: 400,
+            damping: 30,
+          }}
+        />
+      )}
+    </>
+  )
+}
+
 export function AppRail({
   onNewWorkspaceClick,
 }: {
   onNewWorkspaceClick: () => void
 }) {
-  const { workspaces, isLoading } = useWorkspace()
+  const { workspaces } = useWorkspace()
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
 
   return (
-    <nav className="relative flex h-full w-[72px] flex-col items-center space-y-3 py-4">
+    <nav
+      onMouseLeave={() => setHoveredId(null)}
+      className="relative flex h-full w-[72px] flex-col items-center space-y-3 py-4 select-none"
+    >
+      {/* Home */}
       <NavLink
         to="/"
         end
+        onMouseEnter={() => setHoveredId('home')}
         className={({ isActive }) =>
           cn(sidebarButtonVariants({ isActive }), 'shrink-0')
         }
       >
         {({ isActive }) => (
           <>
-            {isActive && (
-              <motion.span
-                layoutId="active-indicator"
-                className="bg-primary absolute top-0 -left-3.5 h-10 w-1 rounded-r-md"
-                transition={{
-                  type: 'spring',
-                  stiffness: 180,
-                  damping: 20,
-                }}
-              />
-            )}
+            <RailIndicators
+              isActive={isActive}
+              isHovered={hoveredId === 'home'}
+            />
             <HomeIcon className="size-5" />
           </>
         )}
       </NavLink>
 
-      <hr className="w-8 border-t" />
+      <hr className="border-border w-8 border-t" />
 
-      <div className="flex w-full flex-1 flex-col items-center space-y-3 overflow-y-auto">
+      {/* Workspaces */}
+      <div className="flex w-full flex-1 flex-col items-center space-y-3 overflow-x-hidden overflow-y-auto">
         {workspaces
-          .filter((w) => w.status == 'configured')
+          .filter((w) => w.status === 'configured')
           .map((workspace) => (
             <NavLink
               key={workspace.id}
               to={`/workspaces/${workspace.id}`}
+              onMouseEnter={() => setHoveredId(workspace.id)}
               className={({ isActive }) =>
-                cn(sidebarButtonVariants({ isActive }), 'relative shrink-0')
+                cn(
+                  'group bg-background text-muted-foreground hover:text-foreground relative flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg shadow-sm transition-colors duration-150',
+                  isActive && 'text-foreground',
+                )
               }
             >
               {({ isActive }) => (
                 <>
-                  {isActive && (
-                    <motion.span
-                      layoutId="active-indicator"
-                      className="bg-primary absolute top-0 -left-3.5 z-20 h-10 w-1 rounded-r-md"
-                      transition={{
-                        type: 'spring',
-                        stiffness: 180,
-                        damping: 20,
-                      }}
-                    />
-                  )}
+                  <RailIndicators
+                    isActive={isActive}
+                    isHovered={hoveredId === workspace.id}
+                  />
 
                   <div className="h-full w-full overflow-hidden rounded-lg">
-                    <Avatar className="h-full w-full rounded-none border-none">
+                    <Avatar className="bg-background h-full w-full rounded-lg border-none">
                       <AvatarImage
                         src={workspace.avatarUrl}
                         alt={workspace.name}
-                        className="object-cover"
+                        className="h-full w-full object-cover"
                       />
-                      <AvatarFallback className="rounded-none">
+                      <AvatarFallback className="bg-muted text-muted-foreground flex h-full w-full items-center justify-center rounded-lg">
                         <LayoutGridIcon className="size-5" />
                       </AvatarFallback>
                     </Avatar>
@@ -103,16 +138,28 @@ export function AppRail({
             </NavLink>
           ))}
 
-        <hr className="w-8 border-t" />
+        <hr className="border-border w-8 shrink-0 border-t" />
 
         <button
           onClick={onNewWorkspaceClick}
+          onMouseEnter={() => setHoveredId('new-workspace')}
           className={cn(sidebarButtonVariants(), 'shrink-0')}
         >
+          <RailIndicators
+            isActive={false}
+            isHovered={hoveredId === 'new-workspace'}
+          />
           <PlusIcon className="size-5" />
         </button>
 
-        <button className={cn(sidebarButtonVariants(), 'shrink-0')}>
+        <button
+          onMouseEnter={() => setHoveredId('explore')}
+          className={cn(sidebarButtonVariants(), 'shrink-0')}
+        >
+          <RailIndicators
+            isActive={false}
+            isHovered={hoveredId === 'explore'}
+          />
           <Compass className="size-5" />
         </button>
       </div>

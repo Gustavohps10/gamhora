@@ -3,10 +3,12 @@
 import {
   Brain,
   ChartColumnBig,
-  CloudCog,
+  ChevronRight,
   FileEditIcon,
+  FileText,
   LayoutDashboard,
   ListTodoIcon,
+  Lock,
   PuzzleIcon,
   ReceiptIcon,
   Scale,
@@ -14,10 +16,17 @@ import {
   Terminal,
   Timer,
   User,
+  WaypointsIcon,
 } from 'lucide-react'
+import { AiOutlineCloudSync } from 'react-icons/ai'
 import { NavLink, useParams } from 'react-router-dom'
 
 import { Badge } from '@/components/ui/badge'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -26,148 +35,348 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface NavItem {
   title: string
   path: string
   icon: React.ElementType
   isPro?: boolean
+  isBlocked?: boolean
+  blockedReason?: string
 }
 
 const workItems: NavItem[] = [
-  { title: 'Atividades', path: 'activities', icon: ListTodoIcon },
-  { title: 'Apontamento', path: 'time-entries', icon: Timer },
-  { title: 'Anotações', path: 'notes', icon: FileEditIcon },
+  {
+    title: 'Tarefas',
+    path: 'activities',
+    icon: ListTodoIcon,
+    isBlocked: true,
+    blockedReason: 'Em breve',
+  },
+  {
+    title: 'Apontamentos',
+    path: 'time-entries',
+    icon: Timer,
+  },
+  {
+    title: 'Anotações',
+    path: 'notes',
+    icon: FileEditIcon,
+    isBlocked: true,
+    blockedReason: 'Em breve',
+  },
 ]
 
-const analysisItems: NavItem[] = [
-  { title: 'Métricas Pessoais', path: 'my-metrics', icon: ChartColumnBig },
+const personalItems: NavItem[] = [
+  {
+    title: 'Métricas',
+    path: 'my-metrics',
+    icon: ChartColumnBig,
+  },
+  {
+    title: 'Relatórios',
+    path: 'my-reports',
+    icon: FileText,
+    isBlocked: true,
+    blockedReason: 'Em breve',
+  },
+  {
+    title: 'Hábitos',
+    path: 'habits',
+    icon: ChartColumnBig,
+    isBlocked: true,
+    blockedReason: 'Em breve',
+  },
 ]
 
 const teamItems: NavItem[] = [
-  { title: 'Visão Geral', path: 'team', icon: LayoutDashboard, isPro: true },
-  { title: 'Membros', path: 'members', icon: User, isPro: true },
-  { title: 'Carga de Trabalho', path: 'workload', icon: Scale, isPro: true },
-  { title: 'Insights IA', path: 'insights', icon: Brain, isPro: true },
+  {
+    title: 'Visão Geral',
+    path: 'team',
+    icon: LayoutDashboard,
+    isPro: true,
+  },
+  {
+    title: 'Membros',
+    path: 'members',
+    icon: User,
+    isPro: true,
+  },
+  {
+    title: 'Carga de Trabalho',
+    path: 'workload',
+    icon: Scale,
+    isPro: true,
+  },
+  {
+    title: 'Insights IA',
+    path: 'insights',
+    icon: Brain,
+    isPro: true,
+  },
 ]
 
-const extensionItems: NavItem[] = [
-  { title: 'Addons', path: 'addons', icon: PuzzleIcon },
+const financialItems: NavItem[] = [
+  {
+    title: 'Valores',
+    path: 'billing',
+    icon: ReceiptIcon,
+    isBlocked: true,
+    blockedReason: 'Em breve',
+  },
 ]
 
-// Reajustado: Sem repetição de ícones e com semântica de Workspace/Admin
+const integrationItems: NavItem[] = [
+  {
+    title: 'Addons',
+    path: 'addons',
+    icon: PuzzleIcon,
+  },
+]
+
 const workspaceItems: NavItem[] = [
-  { title: 'Configurações', path: 'settings', icon: SettingsIcon },
-  { title: 'Moeda & Valores', path: 'billing', icon: ReceiptIcon },
-  { title: 'Motor de Sync', path: 'sync', icon: CloudCog },
-  { title: 'Logs de Eventos', path: 'logs', icon: Terminal },
+  {
+    title: 'Configurações',
+    path: 'settings',
+    icon: SettingsIcon,
+  },
 ]
 
-export function AppSidebarWorkspacesContent() {
-  const { workspaceId } = useParams<{ workspaceId: string }>()
+const synchronizationItems: NavItem[] = [
+  {
+    title: 'Conexões',
+    path: 'sync/connections',
+    icon: WaypointsIcon,
+  },
+  {
+    title: 'Logs',
+    path: 'sync/logs',
+    icon: Terminal,
+  },
+]
 
-  const renderNavItems = (items: NavItem[], end = false) => (
+interface SidebarNavItemProps {
+  item: NavItem
+  workspaceId: string | undefined
+  end?: boolean
+  nested?: boolean
+}
+
+function SidebarNavItem({
+  item,
+  workspaceId,
+  end = false,
+  nested = false,
+}: SidebarNavItemProps) {
+  if (item.isBlocked) {
+    return <SidebarBlockedNavItem item={item} />
+  }
+
+  return (
+    <SidebarMenuItem className={nested ? 'ml-2' : undefined}>
+      <SidebarMenuButton asChild size={nested ? 'sm' : 'default'}>
+        <NavLink
+          to={`/workspaces/${workspaceId}/${item.path}`}
+          end={end}
+          className={[
+            'z-40 flex items-center justify-between rounded-md transition-colors',
+            '[&.active]:bg-zinc-100 dark:[&.active]:bg-zinc-800',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {({ isActive }) => (
+            <>
+              <div className="flex items-center gap-2">
+                <item.icon
+                  size={nested ? 16 : 18}
+                  className={
+                    isActive
+                      ? 'text-primary'
+                      : nested
+                        ? 'text-foreground/60'
+                        : 'text-foreground/70'
+                  }
+                />
+
+                <span>{item.title}</span>
+              </div>
+
+              {item.isPro && <ProBadge />}
+            </>
+          )}
+        </NavLink>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  )
+}
+
+interface SidebarBlockedNavItemProps {
+  item: NavItem
+}
+
+function SidebarBlockedNavItem({ item }: SidebarBlockedNavItemProps) {
+  return (
+    <SidebarMenuItem>
+      <TooltipProvider delayDuration={150}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SidebarMenuButton
+              disabled
+              className="cursor-not-allowed opacity-50 select-none hover:bg-transparent"
+            >
+              <div className="flex w-full items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <item.icon size={18} className="text-foreground/50" />
+
+                  <span className="text-foreground/60">{item.title}</span>
+                </div>
+
+                <Lock size={14} className="text-muted-foreground" />
+              </div>
+            </SidebarMenuButton>
+          </TooltipTrigger>
+
+          <TooltipContent side="right">
+            <p>{item.blockedReason ?? 'Bloqueado temporariamente'}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </SidebarMenuItem>
+  )
+}
+
+function ProBadge() {
+  return (
+    <Badge
+      variant="secondary"
+      className="h-4 border-amber-500/20 bg-amber-500/10 px-1 text-[9px] font-bold tracking-widest text-amber-600 uppercase"
+    >
+      Pro
+    </Badge>
+  )
+}
+
+interface SidebarNavItemsProps {
+  items: NavItem[]
+  workspaceId: string | undefined
+  end?: boolean
+  nested?: boolean
+}
+
+function SidebarNavItems({
+  items,
+  workspaceId,
+  end = false,
+  nested = false,
+}: SidebarNavItemsProps) {
+  return (
     <SidebarMenu>
       {items.map((item) => (
-        <SidebarMenuItem key={item.path}>
-          <SidebarMenuButton asChild>
-            <NavLink
-              to={`/workspaces/${workspaceId}/${item.path}`}
-              end={end}
-              className="z-40 flex items-center justify-between rounded-md transition-colors [&.active]:bg-zinc-100 dark:[&.active]:bg-zinc-800"
-            >
-              {({ isActive }) => (
-                <>
-                  <div className="flex items-center gap-2">
-                    <item.icon
-                      size={18}
-                      className={
-                        isActive ? 'text-primary' : 'text-foreground/70'
-                      }
-                    />
-                    <span>{item.title}</span>
-                  </div>
-
-                  {item.isPro && (
-                    <Badge
-                      variant="secondary"
-                      className="h-4 border-amber-500/20 bg-amber-500/10 px-1 text-[9px] font-bold tracking-widest text-amber-600 uppercase"
-                    >
-                      Pro
-                    </Badge>
-                  )}
-                </>
-              )}
-            </NavLink>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+        <SidebarNavItem
+          key={item.path}
+          item={item}
+          workspaceId={workspaceId}
+          end={end}
+          nested={nested}
+        />
       ))}
     </SidebarMenu>
   )
+}
+
+interface SidebarSectionProps {
+  title: string
+  children: React.ReactNode
+}
+
+function SidebarSection({ title, children }: SidebarSectionProps) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>{title}</SidebarGroupLabel>
+
+      <SidebarGroupContent>{children}</SidebarGroupContent>
+    </SidebarGroup>
+  )
+}
+
+interface SidebarSyncMenuProps {
+  workspaceId: string | undefined
+}
+
+function SidebarSyncMenu({ workspaceId }: SidebarSyncMenuProps) {
+  return (
+    <SidebarMenu>
+      <Collapsible defaultOpen className="group/synchronization">
+        <SidebarMenuItem>
+          <CollapsibleTrigger asChild>
+            <SidebarMenuButton>
+              <AiOutlineCloudSync
+                style={{ width: 18, height: 18 }}
+                className="text-foreground/70"
+              />
+
+              <span>Sincronização</span>
+
+              <ChevronRight className="ml-auto size-4 transition-transform group-data-[state=open]/synchronization:rotate-90" />
+            </SidebarMenuButton>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent>
+            <div className="mt-1">
+              <SidebarNavItems
+                items={synchronizationItems}
+                workspaceId={workspaceId}
+                nested
+              />
+            </div>
+          </CollapsibleContent>
+        </SidebarMenuItem>
+      </Collapsible>
+    </SidebarMenu>
+  )
+}
+
+export function AppSidebarWorkspacesContent() {
+  const { workspaceId } = useParams<{
+    workspaceId: string
+  }>()
 
   return (
     <>
-      <SidebarGroup>
-        <SidebarGroupLabel>Trabalho</SidebarGroupLabel>
-        <SidebarGroupContent>{renderNavItems(workItems)}</SidebarGroupContent>
-      </SidebarGroup>
+      <SidebarSection title="Trabalho">
+        <SidebarNavItems items={workItems} workspaceId={workspaceId} />
+      </SidebarSection>
 
-      <SidebarGroup>
-        <SidebarGroupLabel>Análise Individual</SidebarGroupLabel>
-        <SidebarGroupContent>
-          {renderNavItems(analysisItems, true)}
-        </SidebarGroupContent>
-      </SidebarGroup>
+      <SidebarSection title="Controle Pessoal">
+        <SidebarNavItems items={personalItems} workspaceId={workspaceId} />
+      </SidebarSection>
 
-      <SidebarGroup>
-        <SidebarGroupLabel>Gestão de Equipe</SidebarGroupLabel>
-        <SidebarGroupContent>{renderNavItems(teamItems)}</SidebarGroupContent>
-      </SidebarGroup>
+      <SidebarSection title="Gestão de Time">
+        <SidebarNavItems items={teamItems} workspaceId={workspaceId} />
+      </SidebarSection>
 
-      <SidebarGroup>
-        <SidebarGroupLabel>Extensões</SidebarGroupLabel>
-        <SidebarGroupContent>
-          {renderNavItems(extensionItems)}
-        </SidebarGroupContent>
-      </SidebarGroup>
+      <SidebarSection title="Financeiro">
+        <SidebarNavItems items={financialItems} workspaceId={workspaceId} />
+      </SidebarSection>
 
-      {/* Sessão de Configuração do Espaço (Workspace Admin) */}
-      <SidebarGroup>
-        <SidebarGroupLabel>Workspace</SidebarGroupLabel>
-        <SidebarGroupContent>
-          {renderNavItems(workspaceItems)}
-        </SidebarGroupContent>
-      </SidebarGroup>
+      <SidebarSection title="Integrações">
+        <SidebarNavItems items={integrationItems} workspaceId={workspaceId} />
+      </SidebarSection>
 
-      {/* <SidebarGroup>
-              <SidebarGroupLabel>Recursos</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <Collapsible defaultOpen className="group">
-                    <SidebarMenuItem>
-                      <div className="flex items-center">
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton className="flex-1">
-                            <span>Workspaces</span>
-                            <div className="ml-auto flex items-center gap-1">
-                              <ChevronRight className="h-4 w-4 transition-transform group-data-[state=open]:rotate-90" />
-                            </div>
-                          </SidebarMenuButton>
-                        </CollapsibleTrigger>
+      <SidebarSection title="Workspace">
+        <SidebarNavItems items={workspaceItems} workspaceId={workspaceId} />
 
-                        <Plus
-                          className="text-muted-foreground hover:text-foreground ml-2 h-4 w-4 cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setWorkspaceDialogIsOpen(true)
-                          }}
-                        />
-                      </div>
-                    </SidebarMenuItem>
-                  </Collapsible>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup> */}
+        <div className="mt-2">
+          <SidebarSyncMenu workspaceId={workspaceId} />
+        </div>
+      </SidebarSection>
     </>
   )
 }
