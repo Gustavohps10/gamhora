@@ -1,6 +1,6 @@
-import { IApplicationAPI } from '@metric-org/application'
+import { IOpenAPI } from '@metric-org/application'
 
-const ipcClient: IApplicationAPI = {
+const ipcClient: IOpenAPI = {
   timer: window.api.timer,
   services: window.api.services,
   modules: window.api.modules,

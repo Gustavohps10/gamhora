@@ -2,8 +2,8 @@ import '@/renderer/index.css'
 
 import { queryClient } from '@metric-org/ui/lib'
 import {
-  ClientProvider,
   EnvironmentProvider,
+  OpenAPIProvider,
   SidebarProvider,
   ThemeProvider,
   TooltipProvider,
@@ -29,7 +29,7 @@ export function AppDesktop() {
   }, [])
 
   return (
-    <ClientProvider client={ipcClient}>
+    <OpenAPIProvider client={ipcClient}>
       <EnvironmentProvider environment={environment}>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
           <TooltipProvider>
@@ -43,6 +43,6 @@ export function AppDesktop() {
           </TooltipProvider>
         </ThemeProvider>
       </EnvironmentProvider>
-    </ClientProvider>
+    </OpenAPIProvider>
   )
 }

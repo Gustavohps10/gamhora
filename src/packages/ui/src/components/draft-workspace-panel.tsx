@@ -17,7 +17,7 @@ import { toast } from 'sonner'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui'
 import { useWorkspace, workspaceKeys } from '@/contexts/WorkspaceContext'
-import { useClient } from '@/hooks'
+import { useOpenAPI } from '@/hooks'
 import { cn } from '@/lib'
 import { dropWorkspaceStorage } from '@/stores/syncStore'
 
@@ -29,7 +29,7 @@ export function DraftWorkspacesPanel({
   const [isOpen, setIsOpen] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const client = useClient()
+  const openAPI = useOpenAPI()
   const queryClient = useQueryClient()
   const { workspaces } = useWorkspace()
 
@@ -43,7 +43,7 @@ export function DraftWorkspacesPanel({
     setDeletingId(workspaceId)
 
     try {
-      const response = await client.services.workspaces.delete({
+      const response = await openAPI.services.workspaces.delete({
         body: { workspaceId },
       })
 

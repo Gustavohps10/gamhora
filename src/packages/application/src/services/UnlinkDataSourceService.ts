@@ -6,8 +6,8 @@ import {
   IWorkspacesRepository,
   UnlinkDataSourceInput,
 } from '@/contracts'
-import { getMemberStorageKey } from '@/credentials-storage-keys'
 import { toWorkspaceConnectionDTO, WorkspaceDTO } from '@/dtos'
+import { getMemberStorageKey } from '@/utils'
 
 export class UnlinkDataSourceService implements IUnlinkDataSourceUseCase {
   constructor(

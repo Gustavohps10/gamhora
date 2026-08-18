@@ -1,12 +1,12 @@
 // stores/timeEntryStore.tsx
 'use client'
 
-import { IApplicationAPI } from '@metric-org/sdk'
+import { IOpenAPI } from '@metric-org/sdk'
 import { differenceInSeconds, parseISO, subSeconds } from 'date-fns'
 import { createContext, ReactNode, useContext, useEffect, useRef } from 'react'
 import { createStore, StoreApi, useStore } from 'zustand'
 
-import { useClient } from '@/hooks'
+import { useOpenAPI } from '@/hooks'
 import { SyncTimeEntryRxDBDTO } from '@/local-db/schemas/time-entries-sync-schema'
 import { AppDatabase, useSyncStore } from '@/stores/syncStore'
 
@@ -55,7 +55,7 @@ export type TimeEntryStore = TimeEntryState & TimeEntryActions
 
 // Criação da store focada APENAS em transições de estado, sem interagir com ticks por segundo.
 export const createTimeEntryStore = (
-  client: IApplicationAPI,
+  client: IOpenAPI,
 ): StoreApi<TimeEntryStore> => {
   return createStore<TimeEntryStore>((set, get) => ({
     active: null,
@@ -148,7 +148,7 @@ export const createTimeEntryStore = (
 
       // Comunica o backend via IPC para iniciar o processamento pesado do timer
       client.timer.start({
-        baseSeconds,
+        initialSeconds,
         elapsedSeconds: initialElapsed,
         mode,
       })
@@ -224,7 +224,7 @@ export const createTimeEntryStore = (
       })
 
       client.timer.resume({
-        baseSeconds: active.timerConfig?.manualInitialSeconds ?? 0,
+        initialSeconds: active.timerConfig?.manualInitialSeconds ?? 0,
         elapsedSeconds: secondsAtLastPause,
       })
 
@@ -302,7 +302,7 @@ export const createTimeEntryStore = (
       const mode = activeEntry.timerConfig?.mode ?? 'countup'
 
       client.timer.start({
-        baseSeconds: activeEntry.timerConfig?.manualInitialSeconds ?? 0,
+        initialSeconds: activeEntry.timerConfig?.manualInitialSeconds ?? 0,
         elapsedSeconds: currentElapsed,
         mode,
       })
@@ -318,7 +318,7 @@ export const createTimeEntryStore = (
 const TimeEntryContext = createContext<StoreApi<TimeEntryStore> | null>(null)
 
 export function TimeEntryProvider({ children }: { children: ReactNode }) {
-  const client: IApplicationAPI = useClient()
+  const client: IOpenAPI = useOpenAPI()
   const db = useSyncStore((s) => s.db)
   const storeRef = useRef<StoreApi<TimeEntryStore> | null>(null)
 

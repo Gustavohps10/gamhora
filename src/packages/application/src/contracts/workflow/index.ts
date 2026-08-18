@@ -1,6 +1,2 @@
-export * from './IConnectionContextManager'
 export * from './IDataContext'
 export * from './IServiceProvider'
-export * from './ISessionManager'
-export * from './ISessionUser'
-export * from './IUnitOfWork'

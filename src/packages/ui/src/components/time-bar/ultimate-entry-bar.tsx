@@ -73,7 +73,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { useClient } from '@/hooks'
+import { useOpenAPI } from '@/hooks'
 import {
   useCurrentWidgetPosition,
   useTimerSettings,
@@ -231,7 +231,7 @@ export const UltimateTimeTracker = ({
   const { timerDirection, setTimerDirection } = useTimerSettings()
   const [widgetPosition] = useCurrentWidgetPosition()
   const db = useSyncStore((s) => s.db)
-  const client = useClient()
+  const openAPI = useOpenAPI()
 
   // Carrega dinamicamente as atividades do metadata baseado na Task / Conexões ativas
   useEffect(() => {
@@ -306,14 +306,14 @@ export const UltimateTimeTracker = ({
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement | null
       if (target?.matches?.('input, textarea')) {
-        client.modules.system.startKeyboardInterception?.()
+        openAPI.modules.system.startKeyboardInterception?.()
       }
     }
 
     const handleFocusOut = (e: FocusEvent) => {
       const target = e.target as HTMLElement | null
       if (target?.matches?.('input, textarea')) {
-        client.modules.system.stopKeyboardInterception?.()
+        openAPI.modules.system.stopKeyboardInterception?.()
       }
     }
 
@@ -321,7 +321,7 @@ export const UltimateTimeTracker = ({
     window.addEventListener('focusout', handleFocusOut)
 
     // Ouve os caracteres interceptados pelo C++
-    const cleanupKeyListener = client.events.on<{
+    const cleanupKeyListener = openAPI.events.on<{
       vkCode: number
       key: string
     }>('widget:raw-key-input', (data) => {
@@ -476,7 +476,7 @@ export const UltimateTimeTracker = ({
       isCurrentlyIgnored = shouldIgnore
 
       // Passar sempre { forward: true } quando for ignorar para o Chromium continuar recebendo o mousemove
-      client.modules.system.setIgnoreMouseEvents({
+      openAPI.modules.system.setIgnoreMouseEvents({
         body: { ignore: shouldIgnore, forward: true },
       })
     }
@@ -686,7 +686,7 @@ export const UltimateTimeTracker = ({
       isDraggingWidgetRef.current = false
 
       if (!element.matches(':hover')) {
-        client.modules.system.setIgnoreMouseEvents({
+        openAPI.modules.system.setIgnoreMouseEvents({
           body: { ignore: true, forward: true },
         })
       }

@@ -8,7 +8,7 @@ import type {
   ICredentialsStorage,
   IWorkspacesRepository,
 } from '@/contracts'
-import { getMemberStorageKey } from '@/credentials-storage-keys'
+import { getMemberStorageKey } from '@/utils'
 
 import { DisconnectDataSourceService } from './DisconnectDataSourceService'
 

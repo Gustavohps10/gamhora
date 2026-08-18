@@ -8,7 +8,7 @@ import type {
   IWorkspacesRepository,
   UnlinkDataSourceInput,
 } from '@/contracts'
-import { getMemberStorageKey } from '@/credentials-storage-keys'
+import { getMemberStorageKey } from '@/utils'
 
 import { UnlinkDataSourceService } from './UnlinkDataSourceService'
 

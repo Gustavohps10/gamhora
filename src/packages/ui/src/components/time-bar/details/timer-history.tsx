@@ -34,7 +34,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
-import { useClient } from '@/hooks'
+import { useOpenAPI } from '@/hooks'
 import { cn } from '@/lib/utils'
 import { useSyncStore } from '@/stores/syncStore'
 import { JournalEntry, useTimeEntryStore } from '@/stores/timeEntryStore'
@@ -74,7 +74,7 @@ function applyTimeToDate(dateString: string, timeString: string): string {
 }
 
 export const TimerHistory = memo(() => {
-  const client = useClient()
+  const openAPI = useOpenAPI()
   const db = useSyncStore((s) => s.db)
   const activeEntry = useTimeEntryStore((s) => s.active)
   const setActive = useTimeEntryStore((s) => s.setActive)
@@ -186,7 +186,7 @@ export const TimerHistory = memo(() => {
 
     if (newStatus === 'running') {
       const elapsed = differenceInSeconds(new Date(), parseISO(newStartDate))
-      client.timer.start({
+      openAPI.timer.start({
         baseSeconds: activeEntry.timerConfig?.manualInitialSeconds ?? 0,
         elapsedSeconds: Math.max(0, elapsed),
         mode: activeEntry.timerConfig?.mode ?? 'countup',

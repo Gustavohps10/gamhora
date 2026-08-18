@@ -28,7 +28,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useDataSourceConnections } from '@/hooks'
-import { useClient } from '@/hooks/use-client'
+import { useOpenAPI } from '@/hooks/use-open-api'
 import { queryClient } from '@/lib'
 
 import {
@@ -135,7 +135,7 @@ function addonCategory(m: AddonManifest): AddonCategory {
 // ---------------------------------------------------------------------------
 
 export function AddonsPage() {
-  const client = useClient()
+  const openAPI = useOpenAPI()
   const {
     connect,
     disconnect,
@@ -170,7 +170,7 @@ export function AddonsPage() {
     queryKey: workspaceQueryKey,
     queryFn: async () => {
       if (!workspaceId) return null
-      const res = await client.services.workspaces.getById({
+      const res = await openAPI.services.workspaces.getById({
         body: { workspaceId },
       })
       return res.data ?? null
@@ -181,7 +181,7 @@ export function AddonsPage() {
   const { data: installedList = [] } = useQuery({
     queryKey: ['plugins', 'installed'],
     queryFn: async () => {
-      const res = await client.integrations.addons.listInstalled()
+      const res = await openAPI.integrations.addons.listInstalled()
       if (!res.isSuccess)
         throw new Error(res.error ?? 'Falha ao listar plugins instalados')
       return res.data ?? []
@@ -191,7 +191,7 @@ export function AddonsPage() {
   const { data: availableList = [] } = useQuery({
     queryKey: ['plugins', 'available'],
     queryFn: async () => {
-      const res = await client.integrations.addons.listAvailable()
+      const res = await openAPI.integrations.addons.listAvailable()
       if (!res.isSuccess)
         throw new Error(res.error ?? 'Falha ao listar plugins disponíveis')
       return res.data ?? []
@@ -280,7 +280,7 @@ export function AddonsPage() {
       dataSourceId: string
       connectionInstanceId: string
     }) =>
-      client.services.workspaces.linkDataSource({
+      openAPI.services.workspaces.linkDataSource({
         body: { workspaceId: workspaceId!, ...input },
       }),
     onSuccess: () =>
@@ -315,7 +315,7 @@ export function AddonsPage() {
 
   const disconnectMutation = useMutation({
     mutationFn: (connectionInstanceId: string) =>
-      client.services.workspaces.disconnectDataSource({
+      openAPI.services.workspaces.disconnectDataSource({
         body: { workspaceId: workspaceId!, connectionInstanceId },
       }),
     onSuccess: async (_res, connectionInstanceId) => {
@@ -328,7 +328,7 @@ export function AddonsPage() {
 
   const unlinkMutation = useMutation({
     mutationFn: (connectionInstanceId: string) =>
-      client.services.workspaces.unlinkDataSource({
+      openAPI.services.workspaces.unlinkDataSource({
         body: { workspaceId: workspaceId!, connectionInstanceId },
       }),
     onSuccess: async (_res, connectionInstanceId) => {
@@ -346,12 +346,12 @@ export function AddonsPage() {
   const handleInstall = (addon: AddonItem, version: string) => {
     if (!addon.installerManifestUrl) return
     setIsInstalling(true)
-    client.integrations.addons
+    openAPI.integrations.addons
       .getInstaller({ body: { installerUrl: addon.installerManifestUrl } })
       .then((installer) => {
         const pkg = installer.data?.packages.find((p) => p.version === version)
         if (!pkg) throw new Error('Versão não encontrada.')
-        return client.integrations.addons.install({
+        return openAPI.integrations.addons.install({
           body: { downloadUrl: pkg.downloadUrl },
         })
       })
@@ -371,7 +371,7 @@ export function AddonsPage() {
       return
     }
     setSelectedAddon(addon)
-    client.integrations.addons
+    openAPI.integrations.addons
       .getInstaller({ body: { installerUrl: addon.installerManifestUrl } })
       .then(
         (installer) => {
@@ -433,7 +433,7 @@ export function AddonsPage() {
     const file = files[0]
     if (!file) return
     const buf = await file.arrayBuffer()
-    const res = await client.integrations.addons.import({
+    const res = await openAPI.integrations.addons.import({
       body: { addon: new Uint8Array(buf) },
     })
     if (!res.isSuccess) {

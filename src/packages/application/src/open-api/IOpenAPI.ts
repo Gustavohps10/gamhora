@@ -323,7 +323,7 @@ export interface IEventAPI {
   on<T = unknown>(channel: string, handler: (data: T) => void): () => void
 }
 
-export interface IApplicationAPI {
+export interface IOpenAPI {
   timer: ITimerAPI
   services: {
     workspaces: IWorkspacesAPI

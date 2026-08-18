@@ -5,7 +5,7 @@ import { createContext, ReactNode, useContext } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
-import { useClient } from '@/hooks'
+import { useOpenAPI } from '@/hooks'
 
 export interface CreateWorkspaceInput {
   name: string
@@ -55,7 +55,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({
   children,
   workspaceId,
 }) => {
-  const client = useClient()
+  const openAPI = useOpenAPI()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const { data: workspace, isLoading } = useQuery({
@@ -65,7 +65,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({
     queryFn: async () => {
       if (!workspaceId) return null
 
-      const response = await client.services.workspaces.getById({
+      const response = await openAPI.services.workspaces.getById({
         body: { workspaceId },
       })
 
@@ -79,7 +79,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({
   const { data: workspaces = [], isLoading: isLoadingWorkspaces } = useQuery({
     queryKey: workspaceKeys.all,
     queryFn: async () => {
-      const response = await client.services.workspaces.listAll()
+      const response = await openAPI.services.workspaces.listAll()
 
       if (!response.isSuccess) {
         toast.error('Falha ao carregar workspaces.')
@@ -92,7 +92,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({
 
   const { mutateAsync: create, isPending: isCreating } = useMutation({
     mutationFn: async (input: CreateWorkspaceInput) => {
-      const response = await client.services.workspaces.create({ body: input })
+      const response = await openAPI.services.workspaces.create({ body: input })
       if (!response.isSuccess) throw new Error(response.error)
       return response.data
     },
@@ -114,7 +114,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({
       mutationFn: async (input: UpdateIdentityInput) => {
         if (!workspaceId) throw new Error('workspaceId ausente.')
 
-        const response = await client.services.workspaces.updateIdentity({
+        const response = await openAPI.services.workspaces.updateIdentity({
           body: { workspaceId, ...input },
         })
 
@@ -151,7 +151,7 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({
     mutationFn: async () => {
       if (!workspaceId) return
 
-      const response = await client.services.workspaces.delete({
+      const response = await openAPI.services.workspaces.delete({
         body: { workspaceId },
       })
 

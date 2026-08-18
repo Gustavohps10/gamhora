@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { useClient } from '@/hooks'
+import { useOpenAPI } from '@/hooks'
 import { cn } from '@/lib/utils'
 import { useTimeEntryStore } from '@/stores/timeEntryStore'
 
@@ -48,7 +48,7 @@ export function TimerDisplay({
   max = Infinity,
 }: TimerDisplayProps) {
   const storeStatus = useTimeEntryStore((s) => s.active?.timeStatus) || 'idle'
-  const client = useClient()
+  const openAPI = useOpenAPI()
 
   const resolvedStatus: TimerStatus = statusOverride ?? storeStatus
   const isRunning = resolvedStatus === 'running'
@@ -66,14 +66,14 @@ export function TimerDisplay({
   useEffect(() => {
     if (!isRunning) return
 
-    const unsubscribeTick = client.events.on<{ seconds: number }>(
+    const unsubscribeTick = openAPI.events.on<{ seconds: number }>(
       'timer:tick',
       (data) => {
         setCurrentSeconds(data.seconds)
       },
     )
 
-    const unsubscribeFinished = client.events.on('timer:finished', () => {
+    const unsubscribeFinished = openAPI.events.on('timer:finished', () => {
       setCurrentSeconds(0)
     })
 

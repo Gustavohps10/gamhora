@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 
-import { useClient } from '@/hooks'
+import { useOpenAPI } from '@/hooks'
 
 type Theme = 'dark' | 'light' | 'system'
 
@@ -30,7 +30,7 @@ export function ThemeProvider({
   storageKey = 'metric-theme',
   ...props
 }: ThemeProviderProps) {
-  const client = useClient()
+  const openAPI = useOpenAPI()
   const [theme, setThemeState] = useState<Theme>(defaultTheme)
   const [mounted, setMounted] = useState(false)
 
@@ -45,17 +45,20 @@ export function ThemeProvider({
 
   // Escuta alterações de tema disparadas por outras janelas via IPC
   useEffect(() => {
-    const unsubscribe = client.events.on<Theme>('theme:changed', (newTheme) => {
-      if (newTheme) {
-        localStorage.setItem(storageKey, newTheme)
-        setThemeState(newTheme)
-      }
-    })
+    const unsubscribe = openAPI.events.on<Theme>(
+      'theme:changed',
+      (newTheme) => {
+        if (newTheme) {
+          localStorage.setItem(storageKey, newTheme)
+          setThemeState(newTheme)
+        }
+      },
+    )
 
     return () => {
       unsubscribe?.()
     }
-  }, [client, storageKey])
+  }, [openAPI, storageKey])
 
   // Aplica as classes CSS no <html>
   useEffect(() => {
@@ -82,7 +85,7 @@ export function ThemeProvider({
     setTheme: (nextTheme: Theme) => {
       localStorage.setItem(storageKey, nextTheme)
       setThemeState(nextTheme)
-      client.modules.system.toggleTheme({ body: { theme: nextTheme } })
+      openAPI.modules.system.toggleTheme({ body: { theme: nextTheme } })
     },
   }
 

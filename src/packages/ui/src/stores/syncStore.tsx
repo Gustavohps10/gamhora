@@ -1,6 +1,6 @@
 'use client'
 
-import { IApplicationAPI } from '@metric-org/application'
+import { IOpenAPI } from '@metric-org/application'
 import {
   TaskViewModel,
   TimeEntryViewModel,
@@ -37,7 +37,7 @@ import {
 } from '@/contexts/DataSourceConnectionsContext'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useEnvironment } from '@/hooks'
-import { useClient } from '@/hooks/use-client'
+import { useOpenAPI } from '@/hooks/use-open-api'
 import { automationsSchema } from '@/local-db/schemas/automations-schema'
 import { kanbanColumnsSchema } from '@/local-db/schemas/kanban-column-schema'
 import { kanbanTaskColumnsSchema } from '@/local-db/schemas/kanban-task-columns-schema'
@@ -198,7 +198,7 @@ class MetadataStrategy implements IReplicationStrategy<
   ReplicationCheckpoint
 > {
   constructor(
-    private client: IApplicationAPI,
+    private client: IOpenAPI,
     private workspaceId: string,
     private connectionInstanceId: string,
     private pluginId: string,
@@ -263,7 +263,7 @@ class TasksStrategy implements IReplicationStrategy<
   ReplicationCheckpoint
 > {
   constructor(
-    private client: IApplicationAPI,
+    private client: IOpenAPI,
     private workspaceId: string,
     private connectionInstanceId: string,
     private pluginId: string,
@@ -329,7 +329,7 @@ class TimeEntriesStrategy implements IReplicationStrategy<
   ReplicationCheckpoint
 > {
   constructor(
-    private client: IApplicationAPI,
+    private client: IOpenAPI,
     private workspaceId: string,
     private connectionInstanceId: string,
     private pluginId: string,
@@ -485,7 +485,7 @@ type ReplicationMap = Map<ConnectionInstanceId, Map<string, ReplicationModule>>
 type CollectionConfig = {
   name: keyof Pick<AppCollections, 'metadata' | 'tasks' | 'timeEntries'>
   strategyFactory: (
-    client: IApplicationAPI,
+    client: IOpenAPI,
     workspaceId: string,
     connectionInstanceId: string,
     dataSourceId: string,
@@ -673,7 +673,7 @@ const getOrCreateDatabase = async (
 // --- STORE CORE ---
 export const createSyncStore = (
   workspaceId: string,
-  client: IApplicationAPI,
+  client: IOpenAPI,
   isDevelopment: boolean,
 ): StoreApi<SyncStore> => {
   const replications: ReplicationMap = new Map()
@@ -893,7 +893,7 @@ export const SyncProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const { isDevelopment } = useEnvironment()
   const { workspace } = useWorkspace()
-  const client = useClient()
+  const openAPI = useOpenAPI()
   const { connections } = useDataSourceConnections()
 
   const [activeStore, setActiveStore] = useState<StoreApi<SyncStore> | null>(
@@ -966,7 +966,11 @@ export const SyncProvider: React.FC<{ children: ReactNode }> = ({
           runId,
           nextWorkspaceId,
         })
-        const newStore = createSyncStore(nextWorkspaceId, client, isDevelopment)
+        const newStore = createSyncStore(
+          nextWorkspaceId,
+          openAPI,
+          isDevelopment,
+        )
         await newStore.getState().init()
 
         if (isCancelled) {
@@ -987,7 +991,7 @@ export const SyncProvider: React.FC<{ children: ReactNode }> = ({
 
         const db = newStore.getState().db
         if (db) {
-          const tempTimeEntryStore = createTimeEntryStore(client)
+          const tempTimeEntryStore = createTimeEntryStore(openAPI)
           await tempTimeEntryStore.getState().recoverRunningEntry(db)
           console.log('[SYNC][provider] recoverRunningEntry concluído', {
             runId,
@@ -1008,7 +1012,7 @@ export const SyncProvider: React.FC<{ children: ReactNode }> = ({
       console.log('[SYNC][provider] cleanup do effect disparado', { runId })
       isCancelled = true
     }
-  }, [workspace?.id, client, isDevelopment])
+  }, [workspace?.id, openAPI, isDevelopment])
 
   // Connections mudam → liga/desliga motores individualmente
   useEffect(() => {

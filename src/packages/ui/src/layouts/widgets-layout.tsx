@@ -2,7 +2,7 @@ import { Outlet, useParams } from 'react-router-dom'
 
 import { DataSourceConnectionsProvider } from '@/contexts/DataSourceConnectionsContext'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
-import { useClient } from '@/hooks'
+import { useOpenAPI } from '@/hooks'
 import { useTimerSettings } from '@/hooks/use-timer-settings'
 import { cn } from '@/lib/utils'
 import { SyncProvider } from '@/stores/syncStore'
@@ -11,10 +11,10 @@ import { TimeEntryProvider } from '@/stores/timeEntryStore'
 export function WidgetLayout() {
   const { workspaceId } = useParams<{ workspaceId: string }>()
   const { widgetPosition } = useTimerSettings()
-  const client = useClient()
+  const openAPI = useOpenAPI()
 
   const handleMouseEnter = () => {
-    client.modules.system.setIgnoreMouseEvents?.({
+    openAPI.modules.system.setIgnoreMouseEvents?.({
       body: {
         ignore: false,
         forward: true,
@@ -23,7 +23,7 @@ export function WidgetLayout() {
   }
 
   const handleMouseLeave = () => {
-    client.modules.system.setIgnoreMouseEvents?.({
+    openAPI.modules.system.setIgnoreMouseEvents?.({
       body: {
         ignore: true,
         forward: true,

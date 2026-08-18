@@ -1,4 +1,4 @@
-export * from '../IApplicationAPI'
+export * from '../open-api/IOpenAPI'
 export * from './data'
 export * from './facades'
 export * from './infra'

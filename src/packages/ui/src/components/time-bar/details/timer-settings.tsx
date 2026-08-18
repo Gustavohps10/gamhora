@@ -28,7 +28,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Switch } from '@/components/ui/switch'
-import { useClient } from '@/hooks'
+import { useOpenAPI } from '@/hooks'
 import {
   useCurrentWidgetPosition,
   useTimerSettings,
@@ -120,7 +120,7 @@ function PositionCompass({
 }
 
 export const TimerSettings = memo(() => {
-  const client = useClient()
+  const openAPI = useOpenAPI()
   const isWidgetWindow =
     typeof window !== 'undefined' && window.location.hash.includes('/widgets/')
   const {
@@ -150,15 +150,15 @@ export const TimerSettings = memo(() => {
 
   // Sync initial settings from OS on startup
   useEffect(() => {
-    client.modules.system.getSettings().then((settings) => {
+    openAPI.modules.system.getSettings().then((settings) => {
       if (settings && typeof settings.startMinimized === 'boolean') {
         setStartMinimized(settings.startMinimized)
       }
     })
-  }, [client, setStartMinimized])
+  }, [openAPI, setStartMinimized])
 
   useEffect(() => {
-    client.modules.system.getDisplays().then((list) => {
+    openAPI.modules.system.getDisplays().then((list) => {
       setDisplays(list)
 
       if (list.length > 0 && initialLoad) {
@@ -170,30 +170,30 @@ export const TimerSettings = memo(() => {
           setSelectedDisplayId(displayToUse.id)
         }
 
-        client.modules.system.moveToDisplay({
+        openAPI.modules.system.moveToDisplay({
           body: { displayId: displayToUse.id, windowType: 'widget' },
         })
         setInitialLoad(false)
       }
     })
-  }, [client, selectedDisplayId, setSelectedDisplayId, initialLoad])
+  }, [openAPI, selectedDisplayId, setSelectedDisplayId, initialLoad])
 
   const handleDisplayChange = async (displayIdStr: string) => {
     const displayId = Number(displayIdStr)
     setSelectedDisplayId(displayId)
 
-    await client.modules.system.moveToDisplay({
+    await openAPI.modules.system.moveToDisplay({
       body: { displayId, windowType: 'widget' },
     })
   }
 
   const handleStartMinimizedChange = async (checked: boolean) => {
     setStartMinimized(checked)
-    await client.modules.system.saveSettings({ startMinimized: checked })
+    await openAPI.modules.system.saveSettings({ startMinimized: checked })
   }
 
   const handleHideWidget = async () => {
-    await client.modules.system.hideWindow('widget')
+    await openAPI.modules.system.hideWindow('widget')
   }
 
   return (

@@ -6,7 +6,7 @@ import {
   IDisconnectDataSourceUseCase,
   IWorkspacesRepository,
 } from '@/contracts'
-import { getMemberStorageKey } from '@/credentials-storage-keys'
+import { getMemberStorageKey } from '@/utils'
 
 export class DisconnectDataSourceService implements IDisconnectDataSourceUseCase {
   constructor(

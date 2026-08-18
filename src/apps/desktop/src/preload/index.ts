@@ -1,5 +1,5 @@
 import { electronAPI } from '@electron-toolkit/preload'
-import { IApplicationAPI } from '@metric-org/application'
+import { IOpenAPI } from '@metric-org/application'
 import { contextBridge, ipcRenderer } from 'electron'
 
 import {
@@ -15,7 +15,7 @@ import {
   workspacesInvoker,
 } from '@/main/invokers'
 
-const api: IApplicationAPI = {
+const api: IOpenAPI = {
   services: {
     workspaces: workspacesInvoker,
     session: sessionInvoker,

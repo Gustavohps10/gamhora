@@ -4,7 +4,6 @@ import { HttpClient } from '@metric-org/adapters/http'
 import { FileManager } from '@metric-org/adapters/tools'
 import {
   ConnectDataSourceService,
-  ConnectionContextManager,
   CreateWorkspaceService,
   DeleteWorkspaceService,
   DisconnectDataSourceService,
@@ -23,7 +22,6 @@ import {
   ListWorkspacesService,
   MarkWorkspaceAsConfiguredService,
   MetadataPullService,
-  SessionManager,
   TaskPullService,
   TimeEntriesPullService,
   TimeEntriesPushService,
@@ -122,8 +120,6 @@ export class ContainerBuilder {
    */
   public addApplicationServices(): this {
     this.container.register({
-      sessionManager: asClass(SessionManager).scoped(),
-      connectionContextManager: asClass(ConnectionContextManager).scoped(),
       listTasksService: asClass(ListTaskService).scoped(),
       taskPullService: asClass(TaskPullService).scoped(),
       listTimeEntriesService: asClass(ListTimeEntriesService).scoped(),
