@@ -54,7 +54,29 @@ const DEV_REDMINE_MANIFEST: AddonManifest = {
   tags: ['redmine', 'teste'],
 }
 
-const DEV_ADDONS: AddonManifest[] = [DEV_FAKE_MANIFEST, DEV_REDMINE_MANIFEST]
+const DEV_METRIC_AI_MANIFEST: AddonManifest = {
+  id: '@metric-org/metric-ai-for-tests',
+  name: 'Metric AI (Testes)',
+  creator: 'Metric',
+  description: 'Addon de IA para testes de OCR e análise de atividade visual.',
+  path: '',
+  logo: 'Sparkles',
+  downloads: 0,
+  version: '1.0.0',
+  stars: 0,
+  installed: true,
+  tags: ['ai', 'ocr', 'teste'],
+}
+
+const DEV_ADDONS: AddonManifest[] = [
+  DEV_FAKE_MANIFEST,
+  DEV_REDMINE_MANIFEST,
+  DEV_METRIC_AI_MANIFEST,
+]
+
+import { SidebarMenuItem, TimerbarMenuItem } from '@metric-org/sdk'
+
+import { AddonLoader } from '@/main/services/AddonLoader'
 
 function isDevelopment(): boolean {
   return !app.isPackaged
@@ -65,7 +87,91 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
     private readonly importAddonService: IImportAddonUseCase,
     private readonly addonsFacade: IAddonsFacade,
     private readonly jobEmitter: IEventEmitter<IJobEvents>,
+    private readonly addonLoader?: AddonLoader,
   ) {}
+
+  public async getSidebarMenus(): Promise<ViewModel<SidebarMenuItem[]>> {
+    const items = this.addonLoader ? this.addonLoader.getSidebarMenus() : []
+    return {
+      isSuccess: true,
+      statusCode: 200,
+      data: items,
+    }
+  }
+
+  public async getTimerbarMenus(): Promise<ViewModel<TimerbarMenuItem[]>> {
+    const items = this.addonLoader ? this.addonLoader.getTimerbarMenus() : []
+    return {
+      isSuccess: true,
+      statusCode: 200,
+      data: items,
+    }
+  }
+
+  public async executeCommand(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ commandId: string; args?: any[] }>,
+  ): Promise<ViewModel<any>> {
+    if (!body?.commandId) {
+      return {
+        isSuccess: false,
+        statusCode: 400,
+        error: 'COMMAND_ID_REQUIRED',
+      }
+    }
+    try {
+      const result = await this.addonLoader?.executeCommand(
+        body.commandId,
+        ...(body.args ?? []),
+      )
+      return {
+        isSuccess: true,
+        statusCode: 200,
+        data: result,
+      }
+    } catch (err: any) {
+      return {
+        isSuccess: false,
+        statusCode: 500,
+        error: err?.message ?? 'COMMAND_EXECUTION_FAILED',
+      }
+    }
+  }
+
+  public async showToast(
+    _event: IpcMainInvokeEvent,
+    {
+      body,
+    }: IRequest<{
+      type?: 'info' | 'success' | 'warning' | 'error' | 'loading'
+      message: string
+      title?: string
+      toastId?: string
+    }>,
+  ): Promise<ViewModel<string>> {
+    const id = this.addonLoader?.showToast(
+      body.type ?? 'info',
+      body.message,
+      body.title,
+      body.toastId,
+    )
+    return {
+      isSuccess: true,
+      statusCode: 200,
+      data: id ?? '',
+    }
+  }
+
+  public async dismissToast(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ toastId: string }>,
+  ): Promise<ViewModel<void>> {
+    this.addonLoader?.dismissToast(body.toastId)
+    return {
+      isSuccess: true,
+      statusCode: 200,
+    }
+  }
 
   public async listAvailable(
     _event?: IpcMainInvokeEvent,

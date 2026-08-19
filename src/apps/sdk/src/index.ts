@@ -1,4 +1,5 @@
 export * from './AddonConfig'
+export * from './contracts'
 export {
   ConfigField,
   Context,
@@ -9,6 +10,11 @@ export {
 } from './data-source'
 export * from './utils/MarkupConverter'
 export type {
+  AddonSidebarMenuItem,
+  AddonTimerbarActionItem,
+  AddonTimerbarMenuItem,
+  AddonTimerbarPopoverItem,
+  AddonTimerbarPopoverSubItem,
   AuthenticationDTO,
   AuthenticationResult,
   IAuthenticationStrategy,

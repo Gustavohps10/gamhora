@@ -1,23 +1,19 @@
-// /**
-//  * Registry responsável por receber implementações de Data Sources.
-//  */
-// export interface IDataSourceRegistry {
-//   register(dataSource: IDataSource): void
-// }
+import { IEventEmitter, ISystemEvents } from '@metric-org/shared/transport'
 
-// /**
-//  * Contexto entregue ao Addon no momento da inicialização (activate).
-//  */
-// export interface AddonContext {
-//   readonly dataSources: IDataSourceRegistry
+import { ICommandRegistry } from './commands/ICommandRegistry'
+import { IDataSourceRegistry } from './datasource/IDataSourceRegistry'
+import { IMenusRegistry } from './menus/IMenusRegistry'
+import { INotificationService } from './notifications/INotificationService'
+import { ITimeEntriesAPI } from './timer/ITimeEntriesAPI'
+import { ITimerAPI } from './timer/ITimerAPI'
 
-//   /**
-//    * Registro de comandos, atalhos e itens de menu na UI
-//    */
-//   readonly menus: IMenuRegistry
-
-//   /**
-//    * Barramento para escutar eventos do Core ou emitir eventos customizados
-//    */
-//   readonly events: IEventBus
-// }
+export interface AddonContext {
+  readonly addonId: string
+  readonly commands: ICommandRegistry
+  readonly menus: IMenusRegistry
+  readonly dataSources: IDataSourceRegistry
+  readonly events: IEventEmitter<ISystemEvents>
+  readonly notifications: INotificationService
+  readonly timer: ITimerAPI
+  readonly timeEntries: ITimeEntriesAPI
+}

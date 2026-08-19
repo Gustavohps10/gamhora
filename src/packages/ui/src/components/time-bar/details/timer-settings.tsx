@@ -1,6 +1,6 @@
 'use client'
 
-import { DisplayInfo } from '@metric-org/application'
+import { AddonTimerbarMenuItem, DisplayInfo } from '@metric-org/application'
 import {
   Clock3,
   ClockArrowDown,
@@ -14,6 +14,7 @@ import {
   Monitor,
   MonitorPlay,
   Moon,
+  Puzzle,
   Settings2Icon,
   X,
 } from 'lucide-react'
@@ -138,6 +139,8 @@ export const TimerSettings = memo(() => {
     setActiveWindowTracking,
     hiddenBlocks,
     toggleHiddenBlock,
+    enabledAddonIds,
+    toggleAddonVisibility,
     startMinimized,
     setStartMinimized,
   } = useTimerSettings()
@@ -147,6 +150,23 @@ export const TimerSettings = memo(() => {
   const isRunning = useTimeEntryStore((s) => s.active?.timeStatus === 'running')
   const [displays, setDisplays] = useState<DisplayInfo[]>([])
   const [initialLoad, setInitialLoad] = useState(true)
+  const [addonMenus, setAddonMenus] = useState<AddonTimerbarMenuItem[]>([])
+
+  useEffect(() => {
+    let isMounted = true
+    openAPI.integrations.addons
+      .getTimerbarMenus()
+      .then((res) => {
+        if (isMounted && res?.isSuccess && Array.isArray(res.data)) {
+          setAddonMenus(res.data)
+        }
+      })
+      .catch(() => {})
+
+    return () => {
+      isMounted = false
+    }
+  }, [openAPI])
 
   // Sync initial settings from OS on startup
   useEffect(() => {
@@ -386,6 +406,44 @@ export const TimerSettings = memo(() => {
                 )
               })}
             </div>
+
+            {addonMenus.length > 0 && (
+              <div className="border-border/40 mt-2 space-y-1.5 border-t pt-2">
+                <span className="text-muted-foreground block text-[11px] font-medium">
+                  Addons na Timerbar
+                </span>
+                <div className="space-y-1">
+                  {addonMenus.map((addon) => {
+                    const addonKey = addon.id
+                    const isEnabled = (enabledAddonIds ?? []).includes(addonKey)
+                    return (
+                      <div
+                        key={addonKey}
+                        className="hover:bg-muted/30 flex items-center justify-between rounded-md px-1.5 py-1 transition-colors"
+                      >
+                        <Label
+                          className="flex cursor-pointer items-center gap-1.5 truncate pr-2 text-[11px] font-medium"
+                          htmlFor={`addon-toggle-${addonKey}`}
+                        >
+                          <Puzzle className="text-muted-foreground h-3 w-3 shrink-0" />
+                          <span className="truncate">
+                            {addon.tooltip ?? addon.label ?? addonKey}
+                          </span>
+                        </Label>
+                        <Switch
+                          id={`addon-toggle-${addonKey}`}
+                          className="shrink-0 scale-75"
+                          checked={isEnabled}
+                          onCheckedChange={() =>
+                            toggleAddonVisibility(addonKey)
+                          }
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="bg-muted/30 border-border/50 rounded-lg border p-2">

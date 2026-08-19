@@ -1,14 +1,17 @@
-'use client'
-
+import type { SidebarMenuItem as AddonSidebarMenuItem } from '@metric-org/sdk'
 import {
   Brain,
   ChartColumnBig,
   ChevronRight,
   FileEditIcon,
   FileText,
+  FolderGit2,
+  Layers,
   LayoutDashboard,
+  ListTodo,
   ListTodoIcon,
   Lock,
+  LucideIcon,
   PuzzleIcon,
   ReceiptIcon,
   Scale,
@@ -18,6 +21,7 @@ import {
   User,
   WaypointsIcon,
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { AiOutlineCloudSync } from 'react-icons/ai'
 import { NavLink, useParams } from 'react-router-dom'
 
@@ -343,6 +347,120 @@ function SidebarSyncMenu({ workspaceId }: SidebarSyncMenuProps) {
   )
 }
 
+import { useOpenAPI } from '@/hooks'
+
+const iconMap: Record<string, LucideIcon> = {
+  Layers,
+  ListTodo,
+  FolderGit2,
+  Puzzle: PuzzleIcon,
+}
+
+function resolveIcon(name?: string): LucideIcon {
+  if (name && iconMap[name]) {
+    return iconMap[name]
+  }
+  return PuzzleIcon
+}
+
+function SidebarAddonSection({
+  workspaceId,
+}: {
+  workspaceId: string | undefined
+}) {
+  const api = useOpenAPI()
+  const [addonMenus, setAddonMenus] = useState<AddonSidebarMenuItem[]>([])
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadAddonMenus() {
+      try {
+        const response = await api.integrations.addons.getSidebarMenus()
+        if (!isMounted) return
+        if (!response?.isSuccess || !Array.isArray(response.data)) return
+        setAddonMenus(response.data)
+      } catch (err) {
+        console.error('Erro ao carregar menus dos addons:', err)
+      }
+    }
+
+    loadAddonMenus()
+    return () => {
+      isMounted = false
+    }
+  }, [api])
+
+  if (addonMenus.length === 0) return null
+
+  return (
+    <SidebarSection title="Addons Registrados">
+      <SidebarMenu>
+        {addonMenus.map((menu) => {
+          const Icon = resolveIcon(menu.icon)
+
+          if (menu.children && menu.children.length > 0) {
+            return (
+              <Collapsible
+                key={menu.id}
+                defaultOpen
+                className="group/addon-menu"
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <Icon size={18} className="text-foreground/70" />
+                      <span>{menu.label}</span>
+                      <ChevronRight className="ml-auto size-4 transition-transform group-data-[state=open]/addon-menu:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="mt-1 flex flex-col space-y-1">
+                      {menu.children.map((sub) => {
+                        const SubIcon = resolveIcon(sub.icon)
+                        return (
+                          <SidebarMenuItem key={sub.id} className="ml-2">
+                            <SidebarMenuButton asChild size="sm">
+                              <NavLink
+                                to={`/workspaces/${workspaceId}${sub.href}`}
+                                className="flex items-center gap-2 rounded-md transition-colors [&.active]:bg-zinc-100 dark:[&.active]:bg-zinc-800"
+                              >
+                                <SubIcon
+                                  size={16}
+                                  className="text-foreground/60"
+                                />
+                                <span>{sub.label}</span>
+                              </NavLink>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )
+                      })}
+                    </div>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            )
+          }
+
+          return (
+            <SidebarMenuItem key={menu.id}>
+              <SidebarMenuButton asChild>
+                <NavLink
+                  to={`/workspaces/${workspaceId}${menu.href ?? ''}`}
+                  className="flex items-center gap-2 rounded-md transition-colors [&.active]:bg-zinc-100 dark:[&.active]:bg-zinc-800"
+                >
+                  <Icon size={18} className="text-foreground/70" />
+                  <span>{menu.label}</span>
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )
+        })}
+      </SidebarMenu>
+    </SidebarSection>
+  )
+}
+
 export function AppSidebarWorkspacesContent() {
   const { workspaceId } = useParams<{
     workspaceId: string
@@ -369,6 +487,8 @@ export function AppSidebarWorkspacesContent() {
       <SidebarSection title="Integrações">
         <SidebarNavItems items={integrationItems} workspaceId={workspaceId} />
       </SidebarSection>
+
+      <SidebarAddonSection workspaceId={workspaceId} />
 
       <SidebarSection title="Workspace">
         <SidebarNavItems items={workspaceItems} workspaceId={workspaceId} />

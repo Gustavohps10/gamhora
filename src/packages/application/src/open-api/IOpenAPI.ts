@@ -232,6 +232,49 @@ export interface AddonInstaller {
   }[]
 }
 
+export interface AddonSidebarMenuItem {
+  id: string
+  label: string
+  href?: string
+  icon?: string
+  children?: {
+    id: string
+    label: string
+    href: string
+    icon?: string
+  }[]
+}
+
+export interface AddonTimerbarPopoverSubItem {
+  id: string
+  label: string
+  icon?: string
+  description?: string
+  shortcut?: string
+  danger?: boolean
+}
+
+export interface AddonTimerbarActionItem {
+  id: string
+  type: 'action'
+  label?: string
+  icon: string
+  tooltip?: string
+}
+
+export interface AddonTimerbarPopoverItem {
+  id: string
+  type: 'popover'
+  label?: string
+  icon: string
+  tooltip?: string
+  items?: AddonTimerbarPopoverSubItem[]
+}
+
+export type AddonTimerbarMenuItem =
+  | AddonTimerbarActionItem
+  | AddonTimerbarPopoverItem
+
 export interface IAddonsAPI {
   listAvailable(): Promise<PaginatedViewModel<AddonManifestViewModel[]>>
 
@@ -252,6 +295,25 @@ export interface IAddonsAPI {
   install(
     payload: IRequest<{ downloadUrl: string }>,
   ): Promise<ViewModel<IJobResult>>
+
+  getSidebarMenus(): Promise<ViewModel<AddonSidebarMenuItem[]>>
+
+  getTimerbarMenus(): Promise<ViewModel<AddonTimerbarMenuItem[]>>
+
+  executeCommand(
+    payload: IRequest<{ commandId: string; args?: unknown[] }>,
+  ): Promise<ViewModel<unknown>>
+
+  showToast(
+    payload: IRequest<{
+      type?: 'info' | 'success' | 'warning' | 'error' | 'loading'
+      message: string
+      title?: string
+      toastId?: string
+    }>,
+  ): Promise<ViewModel<string>>
+
+  dismissToast(payload: IRequest<{ toastId: string }>): Promise<ViewModel<void>>
 }
 
 export interface EnvironmentInfo {
@@ -304,18 +366,22 @@ export interface ISystemAPI {
 }
 
 export interface TimerStartInput {
-  initialSeconds: number
-  mode: 'countup' | 'countdown'
+  baseSeconds?: number
+  initialSeconds?: number
+  elapsedSeconds?: number
+  mode?: 'countup' | 'countdown'
 }
 
 export interface TimerResumeInput {
-  initialSeconds: number
+  baseSeconds?: number
+  initialSeconds?: number
+  elapsedSeconds?: number
 }
 
 export interface ITimerAPI {
   start(input: TimerStartInput): void
   pause(): void
-  resume(input: TimerResumeInput): void
+  resume(input?: TimerResumeInput): void
   stop(): void
 }
 

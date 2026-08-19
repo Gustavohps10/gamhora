@@ -23,4 +23,11 @@ export const addonsInvoker: IAddonsAPI = {
       { downloadUrl: string } & { onProgress?: (progress: number) => void }
     >,
   ) => IpcInvoker.invoke('ADDONS_INSTALL', payload),
+
+  getSidebarMenus: () => IpcInvoker.invoke('ADDONS_GET_SIDEBAR_MENUS'),
+  getTimerbarMenus: () => IpcInvoker.invoke('ADDONS_GET_TIMERBAR_MENUS'),
+  executeCommand: (payload: IRequest<{ commandId: string; args?: any[] }>) =>
+    IpcInvoker.invoke('ADDONS_EXECUTE_COMMAND', payload),
+  showToast: (payload) => IpcInvoker.invoke('ADDONS_SHOW_TOAST', payload),
+  dismissToast: (payload) => IpcInvoker.invoke('ADDONS_DISMISS_TOAST', payload),
 }

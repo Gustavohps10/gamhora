@@ -13,36 +13,37 @@ export class TimerRuntime {
   public init(): void {
     console.log('✅ [TimerRuntime] init() called')
 
-    ipcMain.on(
-      'timer:start',
-      (event, { baseSeconds = 0, elapsedSeconds = 0, mode }) => {
-        console.log('[TimerRuntime] timer:start received', {
-          baseSeconds,
-          elapsedSeconds,
-          mode,
-        })
+    ipcMain.on('timer:start', (_event, payload) => {
+      const baseSeconds = payload?.baseSeconds ?? payload?.initialSeconds ?? 0
+      const elapsedSeconds = payload?.elapsedSeconds ?? 0
+      const mode = payload?.mode ?? 'countup'
 
-        this.start(baseSeconds, elapsedSeconds, mode)
-      },
-    )
+      console.log('[TimerRuntime] timer:start received', {
+        baseSeconds,
+        elapsedSeconds,
+        mode,
+      })
+
+      this.start(baseSeconds, elapsedSeconds, mode)
+    })
 
     ipcMain.on('timer:pause', () => {
       console.log('[TimerRuntime] timer:pause received')
       this.pause()
     })
 
-    ipcMain.on(
-      'timer:resume',
-      (event, { baseSeconds = 0, elapsedSeconds = 0 }) => {
-        console.log('[TimerRuntime] timer:resume received', {
-          baseSeconds,
-          elapsedSeconds,
-          mode: this.mode,
-        })
+    ipcMain.on('timer:resume', (_event, payload) => {
+      const baseSeconds = payload?.baseSeconds ?? payload?.initialSeconds ?? 0
+      const elapsedSeconds = payload?.elapsedSeconds ?? 0
 
-        this.start(baseSeconds, elapsedSeconds, this.mode)
-      },
-    )
+      console.log('[TimerRuntime] timer:resume received', {
+        baseSeconds,
+        elapsedSeconds,
+        mode: this.mode,
+      })
+
+      this.start(baseSeconds, elapsedSeconds, this.mode)
+    })
 
     ipcMain.on('timer:stop', () => {
       console.log('[TimerRuntime] timer:stop received')

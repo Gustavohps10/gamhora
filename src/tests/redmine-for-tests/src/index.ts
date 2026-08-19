@@ -1,38 +1,71 @@
-import { DataSourceContext, IDataSource } from '@metric-org/sdk'
+import { AddonContext, IAddon } from '@metric-org/sdk'
 
-import { configurationFieldGroups, credentialFieldGroups } from '@/configFields'
-import { RedmineAuthenticationStrategy } from '@/RedmineAuthenticationStrategy'
-import { RedmineMemberQuery } from '@/RedmineMemberQuery'
-import { RedmineMetadataQuery } from '@/RedmineMetadataQuery'
-import { RedmineTaskQuery } from '@/RedmineTaskQuery'
-import { RedmineTaskRepository } from '@/RedmineTaskRepository'
-import { RedmineTimeEntryQuery } from '@/RedmineTimeEntryQuery'
-import { RedmineTimeEntryRepository } from '@/RedmineTimeEntryRepository'
+import { RedmineDataSource } from './RedmineDataSource'
 
-const RedmineDataSource: IDataSource = {
-  id: '@timelapse/redmine-plugin',
-  dataSourceType: 'redmine',
-  displayName: 'Redmine (Oficial)',
-  configFields: {
-    configuration: configurationFieldGroups,
-    credentials: credentialFieldGroups,
-  },
+export default class Redmine4TestAddon implements IAddon {
+  private dataSource = new RedmineDataSource()
 
-  /* eslint-disable */
-  getAuthenticationStrategy: (context: DataSourceContext) =>
-    new RedmineAuthenticationStrategy(),
-  getTaskQuery: (context: DataSourceContext) => new RedmineTaskQuery(context),
-  getTimeEntryQuery: (context: DataSourceContext) =>
-    new RedmineTimeEntryQuery(context),
-  getTimeEntryRepository: (context: DataSourceContext) =>
-    new RedmineTimeEntryRepository(context),
-  getMemberQuery: (context: DataSourceContext) =>
-    new RedmineMemberQuery(context),
-  getTaskRepository: (context: DataSourceContext) =>
-    new RedmineTaskRepository(),
-  getMetadataQuery: (context: DataSourceContext) =>
-    new RedmineMetadataQuery(context),
-  /* eslint-enable */
+  activate(context: AddonContext): void {
+    // 1. Registra capacidade de DataSource
+    context.dataSources.register(this.dataSource)
+
+    // 2. Registra Menus na Sidebar (Itens e Subitens de navegação)
+    context.menus.sidebar.register({
+      id: 'redmine-sidebar',
+      label: 'Redmine',
+      icon: 'Layers',
+      children: [
+        {
+          id: 'redmine-issues',
+          label: 'Minhas Tarefas',
+          href: '/addons/redmine/issues',
+          icon: 'ListTodo',
+        },
+        {
+          id: 'redmine-projects',
+          label: 'Projetos',
+          href: '/addons/redmine/projects',
+          icon: 'FolderGit2',
+        },
+      ],
+    })
+
+    // 3. Registra 1 único item de Popover na Timerbar (usando ícone PNG do Redmine)
+    context.menus.timerbar.register({
+      id: 'redmine-timerbar-popover',
+      type: 'popover',
+      icon: 'https://raw.githubusercontent.com/Gustavohps10/redmine-plugin/main/src/icon.png',
+      tooltip: 'Redmine (Integração)',
+      items: [
+        {
+          id: 'redmine:open-current-issue',
+          label: 'Abrir Tarefa no Navegador',
+          icon: 'ExternalLink',
+          shortcut: 'Ctrl+Shift+O',
+        },
+        {
+          id: 'redmine:force-full-sync',
+          label: 'Forçar Carga Completa',
+          icon: 'DownloadCloud',
+        },
+      ],
+    })
+
+    // 4. Registra os handlers dos comandos declarados
+    context.commands.register('redmine:open-current-issue', async () => {
+      console.log('🔴 [Redmine4Test] [Comando] Abrindo tarefa no navegador...')
+      return { status: 'success', url: 'https://redmine.org/issues/123' }
+    })
+
+    context.commands.register('redmine:force-full-sync', async () => {
+      console.log(
+        '🔴 [Redmine4Test] [Comando] Sincronização completa iniciada...',
+      )
+      return { status: 'success', syncedCount: 42 }
+    })
+  }
+
+  deactivate(): void {
+    console.log('🔴 [Redmine4TestAddon] Desativando addon Redmine.')
+  }
 }
-
-export default RedmineDataSource

@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import {
   UltimateTimeTracker,
+  useAddonBlocks,
   useTrackerContext,
 } from '@/components/time-bar/ultimate-entry-bar'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -96,6 +97,7 @@ export function TimerWidget() {
   const { workspaceId } = useParams()
   const navigate = useNavigate()
   const { selectedWorkspaceId, setSelectedWorkspaceId } = useTimerSettings()
+  const addonBlocks = useAddonBlocks()
 
   useEffect(() => {
     document.body.style.background = 'transparent'
@@ -167,6 +169,8 @@ export function TimerWidget() {
         <UltimateTimeTracker.Block id="tools">
           <UltimateTimeTracker.ToolsBlock />
         </UltimateTimeTracker.Block>
+
+        {addonBlocks}
       </UltimateTimeTracker.Blocks>
 
       <UltimateTimeTracker.InlineInput />

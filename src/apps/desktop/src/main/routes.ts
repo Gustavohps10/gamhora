@@ -155,6 +155,21 @@ export function openIpcRoutes(
   IpcHandler.register('ADDONS_INSTALL', (e, req) =>
     addonsHandler.install(e, req),
   )
+  IpcHandler.register('ADDONS_GET_SIDEBAR_MENUS', () =>
+    addonsHandler.getSidebarMenus(),
+  )
+  IpcHandler.register('ADDONS_GET_TIMERBAR_MENUS', () =>
+    addonsHandler.getTimerbarMenus(),
+  )
+  IpcHandler.register('ADDONS_EXECUTE_COMMAND', (e, req) =>
+    addonsHandler.executeCommand(e, req),
+  )
+  IpcHandler.register('ADDONS_SHOW_TOAST', (e, req) =>
+    addonsHandler.showToast(e, req),
+  )
+  IpcHandler.register('ADDONS_DISMISS_TOAST', (e, req) =>
+    addonsHandler.dismissToast(e, req),
+  )
 
   // --- WIDGET / MOUSE EVENTS ---
   IpcHandler.register('WIDGET_SET_IGNORE_MOUSE', (event, req) => {

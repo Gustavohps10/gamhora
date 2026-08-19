@@ -20,6 +20,7 @@
     "@metric-org/adapters": "workspace:*",
     "@metric-org/application": "workspace:*",
     "@metric-org/datasource-fake": "workspace:*",
+    "@metric-org/metric-ai-for-tests": "workspace:*",
     "@metric-org/redmine-for-tests": "workspace:*",
     "@metric-org/shared": "workspace:*",
     "@metric-org/ui": "workspace:*",

@@ -1,7 +1,7 @@
 // stores/timeEntryStore.tsx
 'use client'
 
-import { IOpenAPI } from '@metric-org/sdk'
+import { IOpenAPI } from '@metric-org/application'
 import { differenceInSeconds, parseISO, subSeconds } from 'date-fns'
 import { createContext, ReactNode, useContext, useEffect, useRef } from 'react'
 import { createStore, StoreApi, useStore } from 'zustand'

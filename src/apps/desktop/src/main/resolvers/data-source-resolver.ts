@@ -8,11 +8,12 @@ import {
   ResolvedConnection,
 } from '@metric-org/application'
 import DataSourceFake from '@metric-org/datasource-fake'
-import Redmine4Test from '@metric-org/redmine-for-tests'
 import { AppError, Either, type IDataSource } from '@metric-org/sdk'
 import { existsSync } from 'fs'
 import { resolve } from 'path'
 import { pathToFileURL } from 'url'
+
+import { AddonLoader } from '@/main/services/AddonLoader'
 
 export const FAKE_DATASOURCE_ADDON_ID = 'metric-datasource-fake'
 export const REDMINE4TEST_ADDON_ID = '@timelapse/redmine-plugin'
@@ -20,6 +21,7 @@ export const REDMINE4TEST_ADDON_ID = '@timelapse/redmine-plugin'
 export interface DataSourceResolverOptions {
   addonsBasePath: string
   isDevelopment?: boolean
+  addonLoader?: AddonLoader
 }
 
 export class DataSourceResolver implements IDataSourceResolver {
@@ -118,12 +120,13 @@ export class DataSourceResolver implements IDataSourceResolver {
   }
 
   private async loadModule(pluginId: string): Promise<IDataSource> {
-    if (pluginId === FAKE_DATASOURCE_ADDON_ID) {
-      return DataSourceFake as IDataSource
+    const registeredDs = this.options.addonLoader?.getDataSource(pluginId)
+    if (registeredDs) {
+      return registeredDs
     }
 
-    if (pluginId === REDMINE4TEST_ADDON_ID) {
-      return Redmine4Test as IDataSource
+    if (pluginId === FAKE_DATASOURCE_ADDON_ID) {
+      return DataSourceFake as IDataSource
     }
 
     const addonPath = resolve(this.options.addonsBasePath, pluginId, 'index.js')

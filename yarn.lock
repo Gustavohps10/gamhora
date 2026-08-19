@@ -3396,6 +3396,7 @@ __metadata:
     "@metric-org/adapters": "workspace:*"
     "@metric-org/application": "workspace:*"
     "@metric-org/datasource-fake": "workspace:*"
+    "@metric-org/metric-ai-for-tests": "workspace:*"
     "@metric-org/redmine-for-tests": "workspace:*"
     "@metric-org/shared": "workspace:*"
     "@metric-org/ui": "workspace:*"
@@ -3471,6 +3472,17 @@ __metadata:
     tailwindcss: "npm:^4"
     tailwindcss-animate: "npm:^1.0.7"
     typescript: "npm:^5"
+  languageName: unknown
+  linkType: soft
+
+"@metric-org/metric-ai-for-tests@workspace:*, @metric-org/metric-ai-for-tests@workspace:src/tests/metric-ai-for-tests":
+  version: 0.0.0-use.local
+  resolution: "@metric-org/metric-ai-for-tests@workspace:src/tests/metric-ai-for-tests"
+  dependencies:
+    "@metric-org/sdk": "workspace:*"
+    "@types/node": "npm:^24.3.0"
+    tsup: "npm:^8.5.0"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 

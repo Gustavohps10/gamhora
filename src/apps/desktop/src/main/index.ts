@@ -37,6 +37,7 @@ import { MetadataHandler } from '@/main/handlers/MetadataHandler'
 import { WorkspacesHandler } from '@/main/handlers/WorkspacesHandler'
 import { DataSourceResolver } from '@/main/resolvers/data-source-resolver'
 import { openIpcRoutes } from '@/main/routes'
+import { AddonLoader } from '@/main/services/AddonLoader'
 import { getSettings } from '@/main/settings'
 import { createTray } from '@/main/tray'
 
@@ -277,12 +278,17 @@ app.whenReady().then(async () => {
   const workspacesQuery = new JSONWorkspacesQuery(userDataPath)
   const eventEmitter = new ElectronJobEventEmitter(() => mainWindow)
   const nodeFileStorage = new HardDiskStorage(userDataPath, 'metric-app://')
+
+  const addonLoader = new AddonLoader()
+  await addonLoader.initializeDevAddons()
+
   const localDataSourceResolver = new DataSourceResolver(
     workspacesRepository,
     credentialsStorage,
     {
       addonsBasePath: join(__dirname, '../addons/datasource'),
       isDevelopment: !app.isPackaged,
+      addonLoader,
     },
   )
 
@@ -310,6 +316,8 @@ app.whenReady().then(async () => {
       metadataHandler: MetadataHandler,
     })
     .build()
+
+  serviceProvider.include({ addonLoader })
 
   openIpcRoutes(serviceProvider, nativeOverlay)
 

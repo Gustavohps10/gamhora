@@ -1,5 +1,6 @@
 import '@/renderer/index.css'
 
+import { AddonToastBridge, Toaster } from '@metric-org/ui/components'
 import { queryClient } from '@metric-org/ui/lib'
 import {
   EnvironmentProvider,
@@ -30,6 +31,7 @@ export function AppDesktop() {
 
   return (
     <OpenAPIProvider client={ipcClient}>
+      <AddonToastBridge />
       <EnvironmentProvider environment={environment}>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
           <TooltipProvider>
@@ -37,6 +39,7 @@ export function AppDesktop() {
               <QueryClientProvider client={queryClient}>
                 <NuqsAdapter>
                   <RouterProvider router={router} />
+                  <Toaster richColors position="bottom-right" />
                 </NuqsAdapter>
               </QueryClientProvider>
             </SidebarProvider>
