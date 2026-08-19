@@ -1,14 +1,23 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { ExternalLink, MessageSquareDiff, Pin, PinOff, X } from 'lucide-react'
+import {
+  Code,
+  ExternalLink,
+  MessageSquareDiff,
+  Palette,
+  Pin,
+  PinOff,
+  Wrench,
+  X,
+} from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useDebounce } from 'use-debounce'
 
 import { LookupInput } from '@/components/lookup-input'
 import { TaskLookup } from '@/components/task-lookup'
-import { useTrackerContext } from '@/components/time-bar/ultimate-entry-bar'
+import { useOptionalTrackerContext } from '@/components/time-bar/ultimate-entry-bar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -25,7 +34,17 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { SyncTaskRxDBDTO } from '@/local-db/schemas/tasks-sync-schema'
-import { useSyncStore } from '@/stores/syncStore'
+import { useConnectionsWithSync, useSyncStore } from '@/stores/syncStore'
+
+const DEFAULT_ACTIVITIES: Array<{
+  id: string
+  name: string
+  icon: React.ElementType
+}> = [
+  { id: 'dev', name: 'Desenvolvimento', icon: Code },
+  { id: 'design', name: 'Design', icon: Palette },
+  { id: 'fix', name: 'Correção', icon: Wrench },
+]
 
 const PINNED_TASKS_STORAGE_KEY = 'metric:pinned-task-ids'
 
@@ -56,6 +75,20 @@ export interface TaskPopoverProps {
   sideOffset?: number
   align?: 'start' | 'center' | 'end'
   className?: string
+
+  // Generic direct values & handlers (optional - fallback to tracker context if available):
+  taskId?: string
+  onTaskIdChange?: (taskId: string) => void
+  description?: string
+  onDescriptionChange?: (description: string) => void
+  selectedActivity?: string
+  onActivityChange?: (activityId: string) => void
+  selectedConnectionId?: string
+  onConnectionChange?: (connectionId: string) => void
+  activities?: Array<{ id: string; name: string; icon: React.ElementType }>
+  syncConnections?: any[]
+  onSelectTask?: (task: SyncTaskRxDBDTO) => void
+  onCommitAndClose?: () => void
 }
 
 export function TaskPopover({
@@ -66,20 +99,58 @@ export function TaskPopover({
   sideOffset = 12,
   align = 'start',
   className,
+  taskId: propTaskId,
+  onTaskIdChange: propOnTaskIdChange,
+  description: propDescription,
+  onDescriptionChange: propOnDescriptionChange,
+  selectedActivity: propSelectedActivity,
+  onActivityChange: propOnActivityChange,
+  selectedConnectionId: propSelectedConnectionId,
+  onConnectionChange: propOnConnectionChange,
+  activities: propActivities,
+  syncConnections: propSyncConnections,
+  onSelectTask: propOnSelectTask,
+  onCommitAndClose: propOnCommitAndClose,
 }: TaskPopoverProps) {
-  const {
-    taskId,
-    setTaskId,
-    description,
-    setDescription,
-    selectedActivity,
-    setSelectedActivity,
-    activities,
-    selectedConnectionId,
-    setSelectedConnectionId,
-    syncConnections,
-    handleSelectTask,
-  } = useTrackerContext()
+  const trackerContext = useOptionalTrackerContext()
+  const defaultSyncConnections = useConnectionsWithSync()
+
+  // Resolve state & handlers (props take priority, then context, then defaults)
+  const taskId = propTaskId ?? trackerContext?.taskId ?? ''
+  const setTaskId =
+    propOnTaskIdChange ?? trackerContext?.setTaskId ?? (() => {})
+
+  const description = propDescription ?? trackerContext?.description ?? ''
+  const setDescription =
+    propOnDescriptionChange ?? trackerContext?.setDescription ?? (() => {})
+
+  const selectedActivity =
+    propSelectedActivity ?? trackerContext?.selectedActivity ?? 'dev'
+  const setSelectedActivity =
+    propOnActivityChange ?? trackerContext?.setSelectedActivity ?? (() => {})
+
+  const syncConnections =
+    propSyncConnections ??
+    trackerContext?.syncConnections ??
+    defaultSyncConnections ??
+    []
+  const selectedConnectionId =
+    propSelectedConnectionId ??
+    trackerContext?.selectedConnectionId ??
+    syncConnections[0]?.connectionId ??
+    ''
+  const setSelectedConnectionId =
+    propOnConnectionChange ??
+    trackerContext?.setSelectedConnectionId ??
+    (() => {})
+
+  const activities =
+    propActivities ?? trackerContext?.activities ?? DEFAULT_ACTIVITIES
+
+  const handleSelectTask =
+    propOnSelectTask ?? trackerContext?.handleSelectTask ?? (() => {})
+
+  const onCommitAndClose = propOnCommitAndClose
 
   const db = useSyncStore((s) => s.db)
   const [internalOpen, setInternalOpen] = useState(false)
@@ -199,8 +270,17 @@ export function TaskPopover({
       }
     }
 
+    onCommitAndClose?.()
     setIsOpen(false)
-  }, [taskId, sortedTasks, db, handleSelectTask, setTaskId, setIsOpen])
+  }, [
+    taskId,
+    sortedTasks,
+    db,
+    handleSelectTask,
+    setTaskId,
+    setIsOpen,
+    onCommitAndClose,
+  ])
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {

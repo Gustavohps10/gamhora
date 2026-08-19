@@ -387,6 +387,7 @@ export interface ITimerAPI {
 
 export interface IEventAPI {
   on<T = unknown>(channel: string, handler: (data: T) => void): () => void
+  emit?<T = unknown>(channel: string, data?: T): void
 }
 
 export interface IOpenAPI {

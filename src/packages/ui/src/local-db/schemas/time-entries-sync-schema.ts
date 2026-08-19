@@ -79,11 +79,13 @@ export interface SyncTimeEntryRxDBDTO {
   comments?: string
   createdAt: string
   updatedAt: string
-  conflicted?: boolean
-  timeStatus?: 'running' | 'paused' | 'finished'
+  timeStatus?: 'running' | 'paused' | 'finished' | 'suggestion'
+  source?: 'manual' | 'timer' | 'ai_suggestion' | 'addon'
   type?: 'increasing' | 'decreasing' | 'manual'
+  conflicted?: boolean
   conflictData?: { server?: any; local?: any }
   validationError?: any
+
   syncedAt?: string
   assumedMasterState?: any
 
@@ -157,7 +159,11 @@ export const timeEntriesSyncSchema: RxJsonSchema<SyncTimeEntryRxDBDTO> = {
     assumedMasterState: { type: 'object' },
     timeStatus: {
       type: 'string',
-      enum: ['running', 'paused', 'finished'],
+      enum: ['running', 'paused', 'finished', 'suggestion'],
+    },
+    source: {
+      type: 'string',
+      enum: ['manual', 'timer', 'ai_suggestion', 'addon'],
     },
     type: {
       type: 'string',

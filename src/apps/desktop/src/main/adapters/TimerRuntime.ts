@@ -25,11 +25,19 @@ export class TimerRuntime {
       })
 
       this.start(baseSeconds, elapsedSeconds, mode)
+      this.broadcast('timer:started', {
+        baseSeconds,
+        elapsedSeconds,
+        mode,
+      })
     })
 
     ipcMain.on('timer:pause', () => {
       console.log('[TimerRuntime] timer:pause received')
       this.pause()
+      this.broadcast('timer:paused', {
+        currentSeconds: this.currentSeconds,
+      })
     })
 
     ipcMain.on('timer:resume', (_event, payload) => {
@@ -43,12 +51,32 @@ export class TimerRuntime {
       })
 
       this.start(baseSeconds, elapsedSeconds, this.mode)
+      this.broadcast('timer:resumed', {
+        baseSeconds,
+        elapsedSeconds,
+        mode: this.mode,
+      })
     })
 
     ipcMain.on('timer:stop', () => {
       console.log('[TimerRuntime] timer:stop received')
       this.stop()
+      this.broadcast('timer:stopped', {})
     })
+
+    ipcMain.on('events:broadcast', (_event, payload) => {
+      if (payload?.channel) {
+        this.broadcast(payload.channel, payload.data)
+      }
+    })
+  }
+
+  public broadcast(channel: string, data?: unknown): void {
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) {
+        win.webContents.send(channel, data)
+      }
+    }
   }
 
   private formatSeconds(sec: number): string {

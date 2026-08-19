@@ -320,8 +320,44 @@ export class AddonLoader {
           comments: payload.comments,
           timeSpentSeconds: payload.timeSpentSeconds,
           pauseSeconds: payload.pauseSeconds ?? 0,
+          status: payload.status ?? 'finished',
+          source: payload.source ?? 'addon',
           createdAt: new Date().toISOString(),
         }
+      },
+      createSuggestion: async (payload) => {
+        if (payload.timeSpentSeconds <= 0) {
+          throw new Error('[TimeEntriesAPI] Duração inválida.')
+        }
+        console.log(
+          `🤖 [TimeEntriesAPI] Sugestão de apontamento criada por addon ${addonId}:`,
+          payload,
+        )
+        return {
+          id: `sug_${Date.now()}`,
+          taskId: payload.taskId,
+          comments: payload.comments,
+          timeSpentSeconds: payload.timeSpentSeconds,
+          pauseSeconds: payload.pauseSeconds ?? 0,
+          status: 'suggestion',
+          source: payload.source ?? 'ai_suggestion',
+          createdAt: new Date().toISOString(),
+        }
+      },
+      acceptSuggestion: async (id) => {
+        console.log(`✅ [TimeEntriesAPI] Sugestão aceita: ${id}`)
+        return {
+          id,
+          timeSpentSeconds: 3600,
+          pauseSeconds: 0,
+          status: 'finished',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+      },
+      dismissSuggestion: async (id) => {
+        console.log(`🗑️ [TimeEntriesAPI] Sugestão descartada: ${id}`)
+        return true
       },
       update: async (id, payload) => {
         if (payload.pauseSeconds !== undefined && payload.pauseSeconds < 0) {
@@ -333,6 +369,7 @@ export class AddonLoader {
           id,
           timeSpentSeconds: payload.timeSpentSeconds ?? 3600,
           pauseSeconds: payload.pauseSeconds ?? 0,
+          status: payload.status ?? 'finished',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         }

@@ -185,8 +185,12 @@ type UltimateTimeTrackerContextType = {
   setTimerError: React.Dispatch<React.SetStateAction<string | null>>
 }
 
-const UltimateTimeTrackerContext =
+export const UltimateTimeTrackerContext =
   createContext<UltimateTimeTrackerContextType | null>(null)
+
+export const useOptionalTrackerContext = () => {
+  return useContext(UltimateTimeTrackerContext)
+}
 
 export const useTrackerContext = () => {
   const context = useContext(UltimateTimeTrackerContext)
@@ -440,12 +444,19 @@ export const UltimateTimeTracker = ({
     setFreeOffsets(loadFreeOffsets())
   }, [])
 
+  const prevActiveRef = useRef(activeEntry)
+
   useEffect(() => {
     if (activeEntry) {
-      if (activeEntry.task?.id) setTaskId(activeEntry.task.id)
+      if (activeEntry.task?.id !== undefined)
+        setTaskId(activeEntry.task?.id || '')
+      if (activeEntry.taskData !== undefined)
+        setSelectedTask(activeEntry.taskData || null)
       if (activeEntry.comments !== undefined)
-        setDescription(activeEntry.comments)
+        setDescription(activeEntry.comments || '')
       if (activeEntry.activity?.id) setSelectedActivity(activeEntry.activity.id)
+      if (activeEntry.connectionInstanceId)
+        setSelectedConnectionId(activeEntry.connectionInstanceId)
       if (activeEntry.timerConfig?.mode) {
         setTimerDirection(
           activeEntry.timerConfig.mode === 'countup' ? 'up' : 'down',
@@ -454,7 +465,13 @@ export const UltimateTimeTracker = ({
       if (activeEntry.timerConfig?.manualInitialSeconds !== undefined) {
         setManualInitialSeconds(activeEntry.timerConfig.manualInitialSeconds)
       }
+    } else if (prevActiveRef.current) {
+      setTaskId('')
+      setSelectedTask(null)
+      setDescription('')
+      setManualInitialSeconds(0)
     }
+    prevActiveRef.current = activeEntry
   }, [activeEntry, setTimerDirection])
 
   const isRunning = activeEntry?.timeStatus === 'running'
@@ -842,15 +859,183 @@ export const UltimateTimeTracker = ({
   }, [isVertical, widgetPosition])
 
   const handleSelectTask = useCallback(
-    (task: SyncTaskRxDBDTO) => {
+    async (task: SyncTaskRxDBDTO) => {
       setSelectedTask(task)
       setTaskId(task.id)
-      if (task.connectionInstanceId) {
-        setSelectedConnectionId(task.connectionInstanceId)
+      const connId = task.connectionInstanceId || selectedConnectionId
+      if (connId) {
+        setSelectedConnectionId(connId)
+      }
+
+      if (activeEntry && db) {
+        const docId = activeEntry._id || activeEntry.id
+        let doc = await db.timeEntries.findOne(docId).exec()
+        if (!doc) {
+          doc = await db.timeEntries
+            .findOne({
+              selector: { $or: [{ _id: docId }, { id: docId }] },
+            })
+            .exec()
+        }
+        if (doc) {
+          const updated = await doc.patch({
+            task: { id: task.id },
+            taskData: task,
+            connectionInstanceId: connId,
+            dataSourceId: task.dataSourceId || activeEntry.dataSourceId,
+            updatedAt: new Date().toISOString(),
+          })
+          const updatedJson = updated.toMutableJSON()
+          useTimeEntryStore.getState().setActive(updatedJson)
+          openAPI.events?.emit?.('time-entry:sync', updatedJson)
+        }
+      } else {
+        openAPI.events?.emit?.('tracker:draft-sync', {
+          taskId: task.id,
+          selectedTask: task,
+          selectedConnectionId: connId,
+        })
       }
     },
-    [description],
+    [activeEntry, db, selectedConnectionId, openAPI],
   )
+
+  const handleTaskIdChange = useCallback(
+    async (newTaskId: string) => {
+      setTaskId(newTaskId)
+      if (activeEntry && db) {
+        const docId = activeEntry._id || activeEntry.id
+        let doc = await db.timeEntries.findOne(docId).exec()
+        if (!doc) {
+          doc = await db.timeEntries
+            .findOne({
+              selector: { $or: [{ _id: docId }, { id: docId }] },
+            })
+            .exec()
+        }
+        if (doc) {
+          const updated = await doc.patch({
+            task: { id: newTaskId },
+            updatedAt: new Date().toISOString(),
+          })
+          const updatedJson = updated.toMutableJSON()
+          useTimeEntryStore.getState().setActive(updatedJson)
+          openAPI.events?.emit?.('time-entry:sync', updatedJson)
+        }
+      } else {
+        openAPI.events?.emit?.('tracker:draft-sync', { taskId: newTaskId })
+      }
+    },
+    [activeEntry, db, openAPI],
+  )
+
+  const handleDescriptionChange = useCallback(
+    async (desc: string) => {
+      setDescription(desc)
+      if (activeEntry && db) {
+        const docId = activeEntry._id || activeEntry.id
+        let doc = await db.timeEntries.findOne(docId).exec()
+        if (!doc) {
+          doc = await db.timeEntries
+            .findOne({
+              selector: { $or: [{ _id: docId }, { id: docId }] },
+            })
+            .exec()
+        }
+        if (doc) {
+          const updated = await doc.patch({
+            comments: desc,
+            updatedAt: new Date().toISOString(),
+          })
+          const updatedJson = updated.toMutableJSON()
+          useTimeEntryStore.getState().setActive(updatedJson)
+          openAPI.events?.emit?.('time-entry:sync', updatedJson)
+        }
+      } else {
+        openAPI.events?.emit?.('tracker:draft-sync', { description: desc })
+      }
+    },
+    [activeEntry, db, openAPI],
+  )
+
+  const handleActivityChange = useCallback(
+    async (actId: string) => {
+      setSelectedActivity(actId)
+      if (activeEntry && db) {
+        const docId = activeEntry._id || activeEntry.id
+        let doc = await db.timeEntries.findOne(docId).exec()
+        if (!doc) {
+          doc = await db.timeEntries
+            .findOne({
+              selector: { $or: [{ _id: docId }, { id: docId }] },
+            })
+            .exec()
+        }
+        if (doc) {
+          const updated = await doc.patch({
+            activity: { id: actId },
+            updatedAt: new Date().toISOString(),
+          })
+          const updatedJson = updated.toMutableJSON()
+          useTimeEntryStore.getState().setActive(updatedJson)
+          openAPI.events?.emit?.('time-entry:sync', updatedJson)
+        }
+      } else {
+        openAPI.events?.emit?.('tracker:draft-sync', {
+          selectedActivity: actId,
+        })
+      }
+    },
+    [activeEntry, db, openAPI],
+  )
+
+  const handleConnectionChange = useCallback(
+    async (connId: string) => {
+      setSelectedConnectionId(connId)
+      if (activeEntry && db) {
+        const docId = activeEntry._id || activeEntry.id
+        let doc = await db.timeEntries.findOne(docId).exec()
+        if (!doc) {
+          doc = await db.timeEntries
+            .findOne({
+              selector: { $or: [{ _id: docId }, { id: docId }] },
+            })
+            .exec()
+        }
+        if (doc) {
+          const updated = await doc.patch({
+            connectionInstanceId: connId,
+            updatedAt: new Date().toISOString(),
+          })
+          const updatedJson = updated.toMutableJSON()
+          useTimeEntryStore.getState().setActive(updatedJson)
+          openAPI.events?.emit?.('time-entry:sync', updatedJson)
+        }
+      } else {
+        openAPI.events?.emit?.('tracker:draft-sync', {
+          selectedConnectionId: connId,
+        })
+      }
+    },
+    [activeEntry, db, openAPI],
+  )
+
+  useEffect(() => {
+    if (!openAPI?.events?.on) return
+
+    const unsub = openAPI.events.on<any>('tracker:draft-sync', (data) => {
+      if (!data) return
+      if (data.taskId !== undefined) setTaskId(data.taskId)
+      if (data.selectedTask !== undefined) setSelectedTask(data.selectedTask)
+      if (data.description !== undefined) setDescription(data.description)
+      if (data.selectedActivity !== undefined)
+        setSelectedActivity(data.selectedActivity)
+      if (data.selectedConnectionId !== undefined)
+        setSelectedConnectionId(data.selectedConnectionId)
+    })
+
+    return () => unsub?.()
+  }, [openAPI])
 
   const handleStart = useCallback(async () => {
     if (!db) return
@@ -1003,7 +1188,7 @@ export const UltimateTimeTracker = ({
     setIsExpanded,
     widgetHandleRef,
     taskId,
-    setTaskId,
+    setTaskId: handleTaskIdChange as any,
     selectedTask,
     setSelectedTask,
     isTaskLookupOpen,
@@ -1011,9 +1196,9 @@ export const UltimateTimeTracker = ({
     activities,
     handleSelectTask,
     description,
-    setDescription,
+    setDescription: handleDescriptionChange as any,
     selectedActivity,
-    setSelectedActivity,
+    setSelectedActivity: handleActivityChange as any,
     manualInitialSeconds,
     setManualInitialSeconds,
     isEditingVertical,
@@ -1026,7 +1211,7 @@ export const UltimateTimeTracker = ({
     handleStop,
     handleDirectLog,
     selectedConnectionId,
-    setSelectedConnectionId,
+    setSelectedConnectionId: handleConnectionChange as any,
     syncConnections,
     dbTodaySeconds,
     timerError,

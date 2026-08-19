@@ -1,4 +1,5 @@
-import { Outlet, useParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Outlet, useNavigate, useParams } from 'react-router-dom'
 
 import { DataSourceConnectionsProvider } from '@/contexts/DataSourceConnectionsContext'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
@@ -10,8 +11,24 @@ import { TimeEntryProvider } from '@/stores/timeEntryStore'
 
 export function WidgetLayout() {
   const { workspaceId } = useParams<{ workspaceId: string }>()
-  const { widgetPosition } = useTimerSettings()
+  const { widgetPosition, setSelectedWorkspaceId } = useTimerSettings()
   const openAPI = useOpenAPI()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!openAPI?.events?.on) return
+
+    const unsub = openAPI.events.on<{ workspaceId: string }>(
+      'workspace:switched',
+      ({ workspaceId: targetId }) => {
+        if (!targetId || targetId === workspaceId) return
+        setSelectedWorkspaceId(targetId)
+        navigate(`/workspaces/${targetId}/widgets/timer`)
+      },
+    )
+
+    return () => unsub?.()
+  }, [openAPI, navigate, workspaceId, setSelectedWorkspaceId])
 
   const handleMouseEnter = () => {
     openAPI.modules.system.setIgnoreMouseEvents?.({

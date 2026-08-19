@@ -43,7 +43,11 @@ const api: IOpenAPI = {
 
       return unsubscribe
     },
+    emit: <T = unknown>(channel: string, data?: T) => {
+      ipcRenderer.send('events:broadcast', { channel, data })
+    },
   },
+
   timer: {
     start: (input) => ipcRenderer.send('timer:start', input),
     pause: () => ipcRenderer.send('timer:pause'),

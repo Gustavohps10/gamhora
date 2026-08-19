@@ -14,6 +14,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useOpenAPI } from '@/hooks'
 import { useTimerSettings } from '@/hooks/use-timer-settings'
 import { cn } from '@/lib/utils'
 
@@ -21,6 +22,7 @@ function WorkspaceSelectorBlock() {
   const { workspaces } = useWorkspace()
   const { workspaceId } = useParams()
   const navigate = useNavigate()
+  const openAPI = useOpenAPI()
   const [isOpen, setIsOpen] = useState(false)
 
   // Consome a função de setar o cache
@@ -71,6 +73,9 @@ function WorkspaceSelectorBlock() {
                 setSelectedWorkspaceId(ws.id)
                 // Navega atualizando a UI
                 navigate(`/workspaces/${ws.id}/widgets/timer`)
+                openAPI.events?.emit?.('workspace:switched', {
+                  workspaceId: ws.id,
+                })
                 setIsOpen(false)
               }}
               className={cn(
