@@ -48,15 +48,19 @@ export const TimeEntriesDayCard = React.memo(function TimeEntriesDayCard({
 
   const dayEntries: SuggestionRow[] = useMemo(() => {
     const persisted: SuggestionRow[] = entries
-      .filter((e) => e.startDate && isSameDay(parseISO(e.startDate), day))
+      .filter((e) => {
+        const dateStr = e.startDate || e.createdAt
+        return Boolean(dateStr && isSameDay(parseISO(dateStr), day))
+      })
       .map((e) => ({
         ...e,
         isSuggestion: e.timeStatus === 'suggestion',
       }))
 
-    const drafts: SuggestionRow[] = draftEntries.filter(
-      (d) => d.startDate && isSameDay(parseISO(d.startDate), day),
-    )
+    const drafts: SuggestionRow[] = draftEntries.filter((d) => {
+      const dateStr = d.startDate || d.createdAt
+      return Boolean(dateStr && isSameDay(parseISO(dateStr), day))
+    })
 
     return [...persisted, ...drafts]
   }, [entries, draftEntries, day])
@@ -120,6 +124,7 @@ export const TimeEntriesDayCard = React.memo(function TimeEntriesDayCard({
 
       <TimeEntrySuggestionBanner
         count={suggestions.length}
+        suggestions={suggestions}
         onAcceptAll={
           onAcceptAllSuggestions
             ? () => onAcceptAllSuggestions(suggestions)
@@ -166,6 +171,11 @@ export const TimeEntriesDayCard = React.memo(function TimeEntriesDayCard({
           // 3. Apontamento Pausado
           if (row.timeStatus === 'paused') {
             return 'bg-amber-500/10 dark:bg-amber-500/15 border-l-4 border-l-amber-500 font-medium hover:bg-amber-500/15 transition-colors shadow-xs'
+          }
+
+          // 4. Linha de Sugestão (Ghostline com borda tracejada e destaque âmbar com lâmpada)
+          if (row.isSuggestion || row.timeStatus === 'suggestion') {
+            return 'bg-primary/5 dark:bg-primary/10 border-l-4 border-l-primary border-y border-dashed border-primary/30 text-foreground font-medium hover:bg-primary/10 transition-all shadow-xs'
           }
 
           // 4. Sublinhas de grupo (filhas dentro de grupo expandido)

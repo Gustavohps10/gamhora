@@ -7,6 +7,7 @@ import { createContext, ReactNode, useContext, useEffect, useRef } from 'react'
 import { createStore, StoreApi, useStore } from 'zustand'
 
 import { useOpenAPI } from '@/hooks'
+import { queryClient } from '@/lib'
 import { SyncTimeEntryRxDBDTO } from '@/local-db/schemas/time-entries-sync-schema'
 import { AppDatabase, useSyncStore } from '@/stores/syncStore'
 
@@ -430,6 +431,73 @@ export function TimeEntryProvider({ children }: { children: ReactNode }) {
       unsubs.forEach((unsub) => unsub?.())
     }
   }, [client])
+
+  // Process and persist Addon Suggestions directly into RxDB timeEntries collection
+  useEffect(() => {
+    if (!client?.events?.on || !db) return
+
+    const unsub = client.events.on(
+      'addons:suggestion-created',
+      async (item: any) => {
+        console.log('🤖 [TimeEntryStore] Sugestão recebida para RxDB:', item)
+        if (!item) return
+
+        const timeSpentHours = Number(
+          ((item.timeSpentSeconds || 0) / 3600).toFixed(4),
+        )
+        const nowIso = new Date().toISOString()
+        const docId = `addon::local-${item.id}`
+
+        const suggestionDoc: SyncTimeEntryRxDBDTO = {
+          _id: docId,
+          id: item.id,
+          _deleted: false,
+          dataSourceId: 'addon',
+          connectionInstanceId: 'addon',
+          task: { id: item.taskId || '' },
+          activity: { id: 'default', name: 'Sugestão' },
+          user: { id: 'local-user', name: 'Watcher Simulado' },
+          startDate: item.startDate || item.createdAt || nowIso,
+          endDate: item.endDate || nowIso,
+          timeSpent: timeSpentHours,
+          timeStatus: 'suggestion',
+          source: item.source || 'ai_suggestion',
+          addonSource: item.addonSource,
+          type: 'manual',
+          comments: item.comments,
+          createdAt: item.createdAt || nowIso,
+          updatedAt: nowIso,
+          journal: [],
+        }
+
+        try {
+          await db.timeEntries.upsert(suggestionDoc)
+          console.log(
+            '✅ [TimeEntryStore] Sugestão salva com sucesso no RxDB:',
+            suggestionDoc,
+          )
+          queryClient.invalidateQueries({ queryKey: ['time-entries-range'] })
+        } catch (err: any) {
+          if (err?.status === 409 || err?.code === 'CONFLICT') {
+            console.log(
+              'ℹ️ [TimeEntryStore] Conflito ignorado ao salvar sugestão (upsert mantido):',
+              docId,
+            )
+            queryClient.invalidateQueries({ queryKey: ['time-entries-range'] })
+            return
+          }
+          console.error(
+            '❌ [TimeEntryStore] Erro ao salvar sugestão no RxDB:',
+            err?.message || err,
+          )
+        }
+      },
+    )
+
+    return () => {
+      unsub?.()
+    }
+  }, [client, db])
 
   return (
     <TimeEntryContext.Provider value={storeRef.current}>

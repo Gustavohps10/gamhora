@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronRight,
   CloudOff,
+  Lightbulb,
   MessageSquareDiff,
   Pause,
   Plus,
@@ -190,10 +191,40 @@ export function createTimeEntriesColumns(
     {
       id: 'expand',
       header: '',
-      size: 52,
+      size: 105,
       minSize: 52,
-      maxSize: 60,
+      maxSize: 130,
       cell: ({ row }) => {
+        if (
+          row.original.isSuggestion ||
+          row.original.timeStatus === 'suggestion'
+        ) {
+          const source = row.original.addonSource
+          const sourceName = source?.name
+            ? `@${source.name.toLowerCase().replace(/\s+/g, '')}`
+            : '@addon'
+
+          return (
+            <div className="flex items-center justify-start pl-1">
+              <div
+                className="border-border/80 bg-background/80 text-foreground inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px] font-medium shadow-2xs"
+                title={`Fonte: ${source?.name || 'Addon'}`}
+              >
+                {source?.imageUrl ? (
+                  <img
+                    src={source.imageUrl}
+                    alt={source.name}
+                    className="h-3.5 w-3.5 rounded-sm object-cover"
+                  />
+                ) : (
+                  <Sparkles className="text-primary h-3.5 w-3.5" />
+                )}
+                <span>{sourceName}</span>
+              </div>
+            </div>
+          )
+        }
+
         const isRunning = row.original.timeStatus === 'running'
         const isPaused = row.original.timeStatus === 'paused'
 
@@ -286,13 +317,13 @@ export function createTimeEntriesColumns(
           (original.subRows?.length ?? 0) > 1 && !row.getParentRow()
 
         const isEditing =
-          original.isSuggestion ||
-          (Boolean(
-            editingRows[rowKey] ||
-            editingRows[original.id] ||
-            (original._id && editingRows[original._id]),
-          ) &&
-            !isGroupMaster)
+          !isGroupMaster &&
+          (Boolean(original.isSuggestion) ||
+            Boolean(
+              editingRows[rowKey] ||
+              editingRows[original.id] ||
+              (original._id && editingRows[original._id]),
+            ))
 
         const data =
           getRowData(rowKey) ||
@@ -573,10 +604,10 @@ export function createTimeEntriesColumns(
             <div className="flex justify-center">
               <Badge
                 variant="outline"
-                className="border-primary/40 bg-primary/10 text-primary gap-1 px-1.5 py-0.5 text-[10px] font-semibold"
+                className="gap-1 border-amber-500/50 bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400"
               >
-                <Sparkles className="h-3 w-3" />
-                <span>IA</span>
+                <Lightbulb className="h-3 w-3 fill-current text-amber-500" />
+                <span>SUGESTÃO</span>
               </Badge>
             </div>
           )
@@ -618,13 +649,13 @@ export function createTimeEntriesColumns(
         const isGroupMaster =
           (original.subRows?.length ?? 0) > 1 && !row.getParentRow()
         const isEditing =
-          original.isSuggestion ||
-          (Boolean(
-            editingRows[rowKey] ||
-            editingRows[original.id] ||
-            (original._id && editingRows[original._id]),
-          ) &&
-            !isGroupMaster)
+          !isGroupMaster &&
+          (Boolean(original.isSuggestion) ||
+            Boolean(
+              editingRows[rowKey] ||
+              editingRows[original.id] ||
+              (original._id && editingRows[original._id]),
+            ))
 
         const updateField = (updates: Partial<SyncTimeEntryRxDBDTO>) => {
           if (onDirectUpdateRow) {
@@ -757,13 +788,13 @@ export function createTimeEntriesColumns(
         const isGroupMaster =
           (original.subRows?.length ?? 0) > 1 && !row.getParentRow()
         const isEditing =
-          original.isSuggestion ||
-          (Boolean(
-            editingRows[rowKey] ||
-            editingRows[original.id] ||
-            (original._id && editingRows[original._id]),
-          ) &&
-            !isGroupMaster)
+          !isGroupMaster &&
+          (Boolean(original.isSuggestion) ||
+            Boolean(
+              editingRows[rowKey] ||
+              editingRows[original.id] ||
+              (original._id && editingRows[original._id]),
+            ))
 
         const updateField = (updates: Partial<SyncTimeEntryRxDBDTO>) => {
           if (onDirectUpdateRow) {
@@ -910,12 +941,13 @@ export function createTimeEntriesColumns(
         }
 
         const isEditing =
-          original.isSuggestion ||
-          Boolean(
-            editingRows[rowKey] ||
-            editingRows[original.id] ||
-            (original._id && editingRows[original._id]),
-          )
+          !isGroupMaster &&
+          (Boolean(original.isSuggestion) ||
+            Boolean(
+              editingRows[rowKey] ||
+              editingRows[original.id] ||
+              (original._id && editingRows[original._id]),
+            ))
 
         return (
           <TimeEntryRowActions

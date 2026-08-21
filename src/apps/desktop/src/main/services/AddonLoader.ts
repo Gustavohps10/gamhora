@@ -2,11 +2,15 @@ import {
   AddonContext,
   CommandHandler,
   IAddon,
+  IAddonEventsAPI,
   ICommandRegistry,
   IDataSource,
   IDataSourceRegistry,
   IMenusRegistry,
+  INotificationService,
   IRegistry,
+  ITimeEntriesAPI,
+  ITimerAPI,
   SidebarMenuItem,
   TimerbarMenuItem,
 } from '@metric-org/sdk'
@@ -108,22 +112,6 @@ export class SimpleEventEmitter<
     }
   }
 }
-
-import {
-  AddonContext,
-  IAddon,
-  IAddonEventsAPI,
-  ICommandRegistry,
-  IDataSource,
-  IDataSourceRegistry,
-  IMenusRegistry,
-  INotificationService,
-  IRegistry,
-  ITimeEntriesAPI,
-  ITimerAPI,
-  SidebarMenuItem,
-  TimerbarMenuItem,
-} from '@metric-org/sdk'
 
 export interface ActiveAddonInfo {
   addonId: string
@@ -369,23 +357,66 @@ export class AddonLoader {
         }
       },
       createSuggestion: async (payload) => {
-        if (payload.timeSpentSeconds <= 0) {
+        const now = new Date()
+        const nowIso = now.toISOString()
+
+        const endDate = payload.endDate || nowIso
+        let startDate = payload.startDate
+
+        if (!startDate) {
+          const seconds = payload.timeSpentSeconds || 0
+          startDate = new Date(
+            new Date(endDate).getTime() - seconds * 1000,
+          ).toISOString()
+        }
+
+        let timeSpentSeconds = payload.timeSpentSeconds
+        if (!timeSpentSeconds && startDate && endDate) {
+          timeSpentSeconds = Math.max(
+            0,
+            Math.round(
+              (new Date(endDate).getTime() - new Date(startDate).getTime()) /
+                1000,
+            ),
+          )
+        }
+
+        if (timeSpentSeconds <= 0) {
           throw new Error('[TimeEntriesAPI] Duração inválida.')
         }
+
+        const addonSource = this.getAddonSourceInfo(addonId)
+
         console.log(
           `🤖 [TimeEntriesAPI] Sugestão de apontamento criada por addon ${addonId}:`,
           payload,
         )
-        return {
-          id: `sug_${Date.now()}`,
+        const item = {
+          id: `sug_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
           taskId: payload.taskId,
           comments: payload.comments,
-          timeSpentSeconds: payload.timeSpentSeconds,
+          startDate,
+          endDate,
+          timeSpentSeconds,
           pauseSeconds: payload.pauseSeconds ?? 0,
-          status: 'suggestion',
+          status: 'suggestion' as const,
           source: payload.source ?? 'ai_suggestion',
-          createdAt: new Date().toISOString(),
+          addonSource,
+          createdAt: nowIso,
         }
+
+        try {
+          const windows = BrowserWindow.getAllWindows()
+          windows.forEach((win) => {
+            if (!win.isDestroyed()) {
+              win.webContents.send('addons:suggestion-created', item)
+            }
+          })
+        } catch (err) {
+          console.error('❌ [AddonLoader] Erro ao enviar IPC de sugestão:', err)
+        }
+
+        return item
       },
       acceptSuggestion: async (id) => {
         console.log(`✅ [TimeEntriesAPI] Sugestão aceita: ${id}`)
@@ -516,5 +547,23 @@ export class AddonLoader {
 
   public async executeCommand(commandId: string, ...args: any[]): Promise<any> {
     return await this.commandRegistry.execute(commandId, ...args)
+  }
+
+  private getAddonSourceInfo(addonId: string): {
+    id: string
+    name: string
+    imageUrl?: string
+  } {
+    const active = this.activeAddons.get(addonId)
+    const meta = active?.instance?.metadata
+
+    const name = meta?.name || addonId.split('/').pop() || addonId
+    const imageUrl = meta?.iconUrl
+
+    return {
+      id: addonId,
+      name,
+      imageUrl,
+    }
   }
 }

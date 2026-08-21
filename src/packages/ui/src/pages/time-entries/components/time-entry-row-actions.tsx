@@ -1,5 +1,5 @@
 import {
-  Check,
+  CheckCheck,
   CopyIcon,
   EditIcon,
   History,
@@ -52,6 +52,39 @@ export function TimeEntryRowActions({
   onResumeTimer,
   onStopTimer,
 }: TimeEntryRowActionsProps) {
+  if (row.isSuggestion || row.timeStatus === 'suggestion') {
+    return (
+      <div className="flex items-center justify-end gap-1">
+        <Button
+          size="sm"
+          variant="default"
+          className="h-6 gap-1 px-2 text-[11px] font-semibold"
+          onClick={(e) => {
+            e.stopPropagation()
+            onAcceptSuggestion?.()
+          }}
+          title="Aceitar e confirmar sugestão"
+        >
+          <CheckCheck className="h-3.5 w-3.5" />
+          <span>Aceitar</span>
+        </Button>
+
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-6 w-6 p-0"
+          onClick={(e) => {
+            e.stopPropagation()
+            onDismissSuggestion?.()
+          }}
+          title="Descartar Sugestão"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    )
+  }
+
   if (isEditing) {
     return (
       <div className="flex items-center justify-end gap-1">
@@ -169,33 +202,6 @@ export function TimeEntryRowActions({
             <Square className="h-3 w-3 rounded-[1px] fill-current" />
           </Button>
         )}
-      </div>
-    )
-  }
-
-  if (row.isSuggestion) {
-    return (
-      <div className="flex items-center justify-end gap-1">
-        <Button
-          size="sm"
-          variant="default"
-          className="h-6 gap-1 bg-emerald-600 px-2 text-[11px] text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
-          onClick={onAcceptSuggestion}
-          title="Aceitar Sugestão"
-        >
-          <Check className="h-3 w-3" />
-          <span>Aceitar</span>
-        </Button>
-
-        <Button
-          size="sm"
-          variant="ghost"
-          className="text-muted-foreground hover:text-destructive h-6 w-6 p-0"
-          onClick={onDismissSuggestion}
-          title="Descartar Sugestão"
-        >
-          <X className="h-3.5 w-3.5" />
-        </Button>
       </div>
     )
   }

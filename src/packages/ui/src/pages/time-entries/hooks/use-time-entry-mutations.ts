@@ -334,32 +334,40 @@ export function useTimeEntryMutations(
         }
       }
 
-      if (Object.keys(changes).length > 0) {
-        const updated = await doc.patch({
-          ...changes,
-          updatedAt: new Date().toISOString(),
-        })
-        const updatedJson = updated.toMutableJSON()
-        toast.success('Alterações salvas')
+      const isSuggestion =
+        docJson.timeStatus === 'suggestion' ||
+        Boolean((docJson as unknown as Record<string, unknown>).isSuggestion)
+      const nextTimeStatus = isSuggestion
+        ? 'finished'
+        : changes.timeStatus || docJson.timeStatus
 
-        // Sincroniza a store local e via IPC para todas as janelas
-        const isCurrentActive =
-          activeTimeEntry &&
-          (activeTimeEntry._id === updatedJson._id ||
-            activeTimeEntry.id === updatedJson.id ||
-            activeTimeEntry._id === rowUid ||
-            activeTimeEntry.id === rowUid)
+      const updated = await doc.patch({
+        ...changes,
+        timeStatus: nextTimeStatus,
+        updatedAt: new Date().toISOString(),
+      })
+      const updatedJson = updated.toMutableJSON()
+      toast.success(
+        isSuggestion ? 'Sugestão confirmada e salva!' : 'Alterações salvas',
+      )
 
-        if (isCurrentActive) {
-          if (updatedJson.timeStatus === 'finished') {
-            clearActive()
-          } else {
-            setActive(updatedJson)
-          }
+      // Sincroniza a store local e via IPC para todas as janelas
+      const isCurrentActive =
+        activeTimeEntry &&
+        (activeTimeEntry._id === updatedJson._id ||
+          activeTimeEntry.id === updatedJson.id ||
+          activeTimeEntry._id === rowUid ||
+          activeTimeEntry.id === rowUid)
+
+      if (isCurrentActive) {
+        if (updatedJson.timeStatus === 'finished') {
+          clearActive()
+        } else {
+          setActive(updatedJson)
         }
-
-        openAPI.events?.emit?.('time-entry:sync', updatedJson)
       }
+
+      openAPI.events?.emit?.('time-entry:sync', updatedJson)
 
       setEditingRows((prev) => {
         const next = { ...prev }
@@ -436,7 +444,14 @@ export function useTimeEntryMutations(
     async (row: SuggestionRow) => {
       if (!db) return
       try {
-        let doc = await db.timeEntries.findOne(row.id).exec()
+        const rawId = row._id || row.id
+        const cleanId = rawId.replace(/^addon::local-/, '')
+        const addonDocId = `addon::local-${cleanId}`
+
+        let doc = await db.timeEntries.findOne(rawId).exec()
+        if (!doc) {
+          doc = await db.timeEntries.findOne(addonDocId).exec()
+        }
         if (!doc) {
           doc = await db.timeEntries
             .findOne({
@@ -446,16 +461,20 @@ export function useTimeEntryMutations(
                   { _id: row.id },
                   { id: row._id },
                   { _id: row._id },
+                  { id: cleanId },
+                  { _id: addonDocId },
                 ],
               },
             })
             .exec()
         }
-        if (!doc) return
+        if (!doc) {
+          toast.error('Sugestão não encontrada')
+          return
+        }
 
-        const rowKey = row._id || row.id
         const edited =
-          tempDataRef.current[rowKey] ||
+          tempDataRef.current[rawId] ||
           tempDataRef.current[row.id] ||
           (row._id ? tempDataRef.current[row._id] : undefined) ||
           {}
@@ -470,15 +489,19 @@ export function useTimeEntryMutations(
 
         setEditingRows((prev) => {
           const next = { ...prev }
-          delete next[rowKey]
+          delete next[rawId]
           delete next[row.id]
+          delete next[cleanId]
+          delete next[addonDocId]
           if (row._id) delete next[row._id]
           return next
         })
         setTempData((prev) => {
           const next = { ...prev }
-          delete next[rowKey]
+          delete next[rawId]
           delete next[row.id]
+          delete next[cleanId]
+          delete next[addonDocId]
           if (row._id) delete next[row._id]
           return next
         })
@@ -498,20 +521,49 @@ export function useTimeEntryMutations(
     async (id: string) => {
       if (!db) return
       try {
+        const cleanId = id.replace(/^addon::local-/, '')
+        const addonDocId = `addon::local-${cleanId}`
+
         let doc = await db.timeEntries.findOne(id).exec()
+        if (!doc) {
+          doc = await db.timeEntries.findOne(addonDocId).exec()
+        }
         if (!doc) {
           doc = await db.timeEntries
             .findOne({
-              selector: { $or: [{ id }, { _id: id }] },
+              selector: {
+                $or: [
+                  { id },
+                  { _id: id },
+                  { id: cleanId },
+                  { _id: addonDocId },
+                ],
+              },
             })
             .exec()
         }
         if (doc) {
           await doc.remove()
           toast.info('Sugestão descartada')
+          setEditingRows((prev) => {
+            const next = { ...prev }
+            delete next[id]
+            delete next[cleanId]
+            delete next[addonDocId]
+            return next
+          })
+          setTempData((prev) => {
+            const next = { ...prev }
+            delete next[id]
+            delete next[cleanId]
+            delete next[addonDocId]
+            return next
+          })
           await queryClient.invalidateQueries({
             queryKey: ['time-entries-range'],
           })
+        } else {
+          console.warn('Sugestão não encontrada para remoção:', id)
         }
       } catch (err) {
         console.error('Erro ao descartar sugestao:', err)

@@ -11,6 +11,7 @@ export interface TimeEntryItemDTO {
   pauseSeconds: number
   status?: 'running' | 'paused' | 'finished' | 'suggestion'
   source?: 'manual' | 'timer' | 'ai_suggestion' | 'addon'
+  addonSource?: { id: string; name: string; imageUrl?: string }
   createdAt: string
   updatedAt?: string
 }

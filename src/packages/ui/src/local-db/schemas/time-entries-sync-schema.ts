@@ -37,6 +37,12 @@ export interface TimerConfig {
 // SyncTimeEntryRxDBDTO
 // ─────────────────────────────────────────────
 
+export interface AddonSourceInfo {
+  id: string
+  name: string
+  imageUrl?: string
+}
+
 export interface SyncTimeEntryRxDBDTO {
   // ── Campos sincronizados ──────────────────────
   _id: string
@@ -81,6 +87,7 @@ export interface SyncTimeEntryRxDBDTO {
   updatedAt: string
   timeStatus?: 'running' | 'paused' | 'finished' | 'suggestion'
   source?: 'manual' | 'timer' | 'ai_suggestion' | 'addon'
+  addonSource?: AddonSourceInfo
   type?: 'increasing' | 'decreasing' | 'manual'
   conflicted?: boolean
   conflictData?: { server?: any; local?: any }
@@ -164,6 +171,15 @@ export const timeEntriesSyncSchema: RxJsonSchema<SyncTimeEntryRxDBDTO> = {
     source: {
       type: 'string',
       enum: ['manual', 'timer', 'ai_suggestion', 'addon'],
+    },
+    addonSource: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        name: { type: 'string' },
+        imageUrl: { type: 'string' },
+      },
+      required: ['id', 'name'],
     },
     type: {
       type: 'string',

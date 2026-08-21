@@ -120,7 +120,22 @@ export function TimeEntries() {
       if (!db || suggestions.length === 0) return
       try {
         for (const sug of suggestions) {
-          const doc = await db.timeEntries.findOne(sug.id).exec()
+          const docId = sug._id || sug.id
+          let doc = await db.timeEntries.findOne(docId).exec()
+          if (!doc) {
+            doc = await db.timeEntries
+              .findOne({
+                selector: {
+                  $or: [
+                    { id: sug.id },
+                    { _id: sug._id },
+                    { id: sug._id },
+                    { _id: sug.id },
+                  ],
+                },
+              })
+              .exec()
+          }
           if (doc) {
             await doc.patch({
               timeStatus: 'finished',
@@ -131,8 +146,11 @@ export function TimeEntries() {
         toast.success(
           `${suggestions.length} sugestões confirmadas com sucesso!`,
         )
-        queryClient.invalidateQueries({ queryKey: ['time-entries-range'] })
-      } catch {
+        await queryClient.invalidateQueries({
+          queryKey: ['time-entries-range'],
+        })
+      } catch (err) {
+        console.error('Erro ao aceitar todas sugestoes:', err)
         toast.error('Erro ao aceitar sugestões')
       }
     },
@@ -144,14 +162,32 @@ export function TimeEntries() {
       if (!db || suggestions.length === 0) return
       try {
         for (const sug of suggestions) {
-          const doc = await db.timeEntries.findOne(sug.id).exec()
+          const docId = sug._id || sug.id
+          let doc = await db.timeEntries.findOne(docId).exec()
+          if (!doc) {
+            doc = await db.timeEntries
+              .findOne({
+                selector: {
+                  $or: [
+                    { id: sug.id },
+                    { _id: sug._id },
+                    { id: sug._id },
+                    { _id: sug.id },
+                  ],
+                },
+              })
+              .exec()
+          }
           if (doc) {
             await doc.remove()
           }
         }
         toast.info(`${suggestions.length} sugestões descartadas`)
-        queryClient.invalidateQueries({ queryKey: ['time-entries-range'] })
-      } catch {
+        await queryClient.invalidateQueries({
+          queryKey: ['time-entries-range'],
+        })
+      } catch (err) {
+        console.error('Erro ao descartar todas sugestoes:', err)
         toast.error('Erro ao descartar sugestões')
       }
     },

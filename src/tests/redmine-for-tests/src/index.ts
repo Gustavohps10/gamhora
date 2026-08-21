@@ -3,6 +3,11 @@ import { AddonContext, IAddon } from '@metric-org/sdk'
 import { RedmineDataSource } from './RedmineDataSource'
 
 export default class Redmine4TestAddon implements IAddon {
+  public metadata = {
+    name: 'Redmine',
+    iconUrl:
+      'https://raw.githubusercontent.com/Gustavohps10/redmine-plugin/main/src/icon.png',
+  }
   private dataSource = new RedmineDataSource()
 
   activate(context: AddonContext): void {
@@ -44,6 +49,11 @@ export default class Redmine4TestAddon implements IAddon {
           shortcut: 'Ctrl+Shift+O',
         },
         {
+          id: 'redmine:generate-fake-meeting',
+          label: 'Gerar Reunião Fake (Sugestão)',
+          icon: 'Sparkles',
+        },
+        {
           id: 'redmine:force-full-sync',
           label: 'Forçar Carga Completa',
           icon: 'DownloadCloud',
@@ -55,6 +65,21 @@ export default class Redmine4TestAddon implements IAddon {
     context.commands.register('redmine:open-current-issue', async () => {
       console.log('🔴 [Redmine4Test] [Comando] Abrindo tarefa no navegador...')
       return { status: 'success', url: 'https://redmine.org/issues/123' }
+    })
+
+    context.commands.register('redmine:generate-fake-meeting', async () => {
+      console.log('🔴 [Redmine4Test] Gerando sugestão fake de reunião...')
+      await context.timeEntries.createSuggestion({
+        taskId: '',
+        comments: 'Alinhamento Redmine - Sprint Review (30 min)',
+        timeSpentSeconds: 1800,
+        source: 'addon',
+      })
+      await context.notifications.success(
+        'Sugestão "Alinhamento Redmine - Sprint Review" gerada!',
+        '🔴 Redmine Plugin',
+      )
+      return { status: 'success' }
     })
 
     context.commands.register('redmine:force-full-sync', async () => {

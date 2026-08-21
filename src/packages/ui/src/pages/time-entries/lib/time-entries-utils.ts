@@ -78,6 +78,22 @@ export function hasNoTask(item?: Partial<SuggestionRow> | null): boolean {
   )
 }
 
+export function getItemDateIso(item?: Partial<SuggestionRow> | null): string {
+  if (!item) return new Date().toISOString()
+  const raw = item.startDate || item.createdAt
+  if (raw) {
+    try {
+      const parsed = parseISO(raw)
+      if (!isNaN(parsed.getTime())) {
+        return raw
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return new Date().toISOString()
+}
+
 export function sortSubRows(items: SuggestionRow[]): SuggestionRow[] {
   return [...items].sort((a, b) => {
     // 1. Drafts always at the very bottom/end of the group
@@ -99,8 +115,8 @@ export function sortSubRows(items: SuggestionRow[]): SuggestionRow[] {
     if (!aNoTask && bNoTask) return 1
 
     // 5. Date descending
-    const aDate = a.startDate ? new Date(a.startDate).getTime() : 0
-    const bDate = b.startDate ? new Date(b.startDate).getTime() : 0
+    const aDate = new Date(getItemDateIso(a)).getTime()
+    const bDate = new Date(getItemDateIso(b)).getTime()
     return bDate - aDate
   })
 }
@@ -128,8 +144,8 @@ export function sortFlatEntries(data: SuggestionRow[]): SuggestionRow[] {
       if (!aNoTask && bNoTask) return 1
 
       // 5. Date descending
-      const aDate = a.startDate ? new Date(a.startDate).getTime() : 0
-      const bDate = b.startDate ? new Date(b.startDate).getTime() : 0
+      const aDate = new Date(getItemDateIso(a)).getTime()
+      const bDate = new Date(getItemDateIso(b)).getTime()
       return bDate - aDate
     })
 }
@@ -137,7 +153,8 @@ export function sortFlatEntries(data: SuggestionRow[]): SuggestionRow[] {
 export function groupByIssue(data: SuggestionRow[]): SuggestionRow[] {
   const counts: Record<string, number> = {}
   for (const item of data) {
-    const dayKey = format(parseISO(item.startDate ?? ''), 'yyyy-MM-dd')
+    const dateIso = getItemDateIso(item)
+    const dayKey = format(parseISO(dateIso), 'yyyy-MM-dd')
     const key = `${dayKey}-${hasNoTask(item) ? 'sem-issue' : (item.task?.id ?? 'sem-issue')}`
     counts[key] = (counts[key] || 0) + 1
   }
@@ -146,7 +163,8 @@ export function groupByIssue(data: SuggestionRow[]): SuggestionRow[] {
   const result: SuggestionRow[] = []
 
   for (const item of data) {
-    const dayKey = format(parseISO(item.startDate ?? ''), 'yyyy-MM-dd')
+    const dateIso = getItemDateIso(item)
+    const dayKey = format(parseISO(dateIso), 'yyyy-MM-dd')
     const key = `${dayKey}-${hasNoTask(item) ? 'sem-issue' : (item.task?.id ?? 'sem-issue')}`
 
     if (counts[key] > 1) {
@@ -155,6 +173,8 @@ export function groupByIssue(data: SuggestionRow[]): SuggestionRow[] {
           ...item,
           _id: key,
           id: key,
+          startDate: dateIso,
+          isSuggestion: false,
           timeStatus: 'finished',
           timeSpent: 0,
           comments: '',
@@ -189,11 +209,6 @@ export function groupByIssue(data: SuggestionRow[]): SuggestionRow[] {
   })
 
   // Sort top-level groups and standalone items:
-  // 1. Group or entry with running timer always on TOP
-  // 2. Group or entry with paused timer on TOP (same priority level)
-  // 3. Drafts (standalone new entry) always at the bottom
-  // 4. Entries/groups WITHOUT tasks (hasNoTask) AT THE TOP
-  // 5. By date descending
   return result.sort((a, b) => {
     // 1. Running timers / groups with running timers always at the very top
     const aHasRunning =
@@ -228,8 +243,8 @@ export function groupByIssue(data: SuggestionRow[]): SuggestionRow[] {
     if (!aNoTask && bNoTask) return 1
 
     // 5. Date descending
-    const aDate = a.startDate ? new Date(a.startDate).getTime() : 0
-    const bDate = b.startDate ? new Date(b.startDate).getTime() : 0
+    const aDate = new Date(getItemDateIso(a)).getTime()
+    const bDate = new Date(getItemDateIso(b)).getTime()
     return bDate - aDate
   })
 }
