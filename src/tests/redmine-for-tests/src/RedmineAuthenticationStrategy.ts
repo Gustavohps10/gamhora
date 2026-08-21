@@ -12,12 +12,10 @@ export interface RedmineConfiguration {
 }
 
 export interface RedmineCredentials {
-  login?: string
-  password?: string
-  apiKey?: string
+  apiKey: string
+  atomKey: string
 }
 
-// Novo tipo que unifica a entrada
 export interface RedmineAuthInput {
   configuration: RedmineConfiguration
   credentials: RedmineCredentials
@@ -55,20 +53,20 @@ export class RedmineAuthenticationStrategy implements IAuthenticationStrategy<Re
     try {
       const { configuration, credentials } = input
 
-      const apiClient = this.getApiClient(configuration.apiUrl)
+      if (!credentials?.apiKey || !credentials?.atomKey) {
+        return Either.failure(
+          AppError.ValidationError(
+            'Chave de Acesso à API e Chave de Acesso ao Atom são obrigatórias.',
+          ),
+        )
+      }
 
-      const authHeaders = credentials.apiKey
-        ? { 'X-Redmine-API-Key': credentials.apiKey }
-        : {
-            Authorization: `Basic ${Buffer.from(
-              `${credentials.login}:${credentials.password}`,
-            ).toString('base64')}`,
-          }
+      const apiClient = this.getApiClient(configuration.apiUrl)
 
       const response = await apiClient.get<RedmineUserResponse>(
         '/users/current.json',
         {
-          headers: authHeaders,
+          headers: { 'X-Redmine-API-Key': credentials.apiKey },
         },
       )
 
@@ -88,7 +86,8 @@ export class RedmineAuthenticationStrategy implements IAuthenticationStrategy<Re
       const authenticationResult: AuthenticationResult = {
         member: member,
         credentials: {
-          apiKey: redmineUser.api_key,
+          apiKey: credentials.apiKey,
+          atomKey: credentials.atomKey,
         },
       }
 
@@ -96,7 +95,7 @@ export class RedmineAuthenticationStrategy implements IAuthenticationStrategy<Re
     } catch {
       return Either.failure(
         AppError.Unauthorized(
-          'Não foi possível autenticar com Redmine. Verifique suas credenciais e a URL.',
+          'Não foi possível autenticar com Redmine. Verifique suas chaves de acesso e a URL.',
         ),
       )
     }

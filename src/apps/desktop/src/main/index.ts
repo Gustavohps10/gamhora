@@ -23,6 +23,7 @@ import installExtension, {
 import { join } from 'path'
 import { pathToFileURL } from 'url'
 
+import { ElectronHttpClient } from '@/main/adapters/ElectronHttpClient'
 import { ElectronJobEventEmitter } from '@/main/adapters/ElectronJobEventEmitter'
 import { TimerRuntime } from '@/main/adapters/TimerRuntime'
 import {
@@ -268,8 +269,11 @@ function handleProtocol() {
 }
 
 app.whenReady().then(async () => {
+  const addonLoader = new AddonLoader()
+  await addonLoader.initializeDevAddons()
+
   const timerRuntime = new TimerRuntime()
-  timerRuntime.init()
+  timerRuntime.init(addonLoader)
 
   handleProtocol()
   const userDataPath = app.getPath('userData')
@@ -278,9 +282,7 @@ app.whenReady().then(async () => {
   const workspacesQuery = new JSONWorkspacesQuery(userDataPath)
   const eventEmitter = new ElectronJobEventEmitter(() => mainWindow)
   const nodeFileStorage = new HardDiskStorage(userDataPath, 'metric-app://')
-
-  const addonLoader = new AddonLoader()
-  await addonLoader.initializeDevAddons()
+  const electronHttpClient = new ElectronHttpClient()
 
   const localDataSourceResolver = new DataSourceResolver(
     workspacesRepository,
@@ -290,6 +292,7 @@ app.whenReady().then(async () => {
       isDevelopment: !app.isPackaged,
       addonLoader,
     },
+    electronHttpClient,
   )
 
   const platformDeps: PlatformDependencies = {
@@ -299,6 +302,7 @@ app.whenReady().then(async () => {
     workspacesQuery,
     fileStorage: nodeFileStorage,
     dataSourceResolver: localDataSourceResolver,
+    httpClient: electronHttpClient,
   }
 
   const serviceProvider = new ContainerBuilder()

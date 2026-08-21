@@ -3396,6 +3396,7 @@ __metadata:
     "@metric-org/adapters": "workspace:*"
     "@metric-org/application": "workspace:*"
     "@metric-org/datasource-fake": "workspace:*"
+    "@metric-org/fake-watcher-for-tests": "workspace:*"
     "@metric-org/metric-ai-for-tests": "workspace:*"
     "@metric-org/redmine-for-tests": "workspace:*"
     "@metric-org/shared": "workspace:*"
@@ -3447,6 +3448,17 @@ __metadata:
     tsup: "npm:^8.2.3"
     typescript: "npm:^5.8.3"
     zod: "npm:^3.24.2"
+  languageName: unknown
+  linkType: soft
+
+"@metric-org/fake-watcher-for-tests@workspace:*, @metric-org/fake-watcher-for-tests@workspace:src/tests/fake-watcher-for-tests":
+  version: 0.0.0-use.local
+  resolution: "@metric-org/fake-watcher-for-tests@workspace:src/tests/fake-watcher-for-tests"
+  dependencies:
+    "@metric-org/sdk": "workspace:*"
+    "@types/node": "npm:^24.3.0"
+    tsup: "npm:^8.5.0"
+    typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft
 

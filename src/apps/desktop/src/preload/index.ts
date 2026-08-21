@@ -44,15 +44,50 @@ const api: IOpenAPI = {
       return unsubscribe
     },
     emit: <T = unknown>(channel: string, data?: T) => {
-      ipcRenderer.send('events:broadcast', { channel, data })
+      let workspaceId = 'default'
+      if (typeof window !== 'undefined') {
+        const match = window.location.hash.match(/#\/workspaces\/([^\/]+)/)
+        if (match) {
+          workspaceId = match[1]
+        }
+      }
+      ipcRenderer.send('events:broadcast', { channel, data, workspaceId })
     },
   },
 
   timer: {
-    start: (input) => ipcRenderer.send('timer:start', input),
-    pause: () => ipcRenderer.send('timer:pause'),
-    resume: (input) => ipcRenderer.send('timer:resume', input),
-    stop: () => ipcRenderer.send('timer:stop'),
+    start: (input) => {
+      let workspaceId = 'default'
+      if (typeof window !== 'undefined') {
+        const match = window.location.hash.match(/#\/workspaces\/([^\/]+)/)
+        if (match) workspaceId = match[1]
+      }
+      ipcRenderer.send('timer:start', { ...input, workspaceId })
+    },
+    pause: () => {
+      let workspaceId = 'default'
+      if (typeof window !== 'undefined') {
+        const match = window.location.hash.match(/#\/workspaces\/([^\/]+)/)
+        if (match) workspaceId = match[1]
+      }
+      ipcRenderer.send('timer:pause', { workspaceId })
+    },
+    resume: (input) => {
+      let workspaceId = 'default'
+      if (typeof window !== 'undefined') {
+        const match = window.location.hash.match(/#\/workspaces\/([^\/]+)/)
+        if (match) workspaceId = match[1]
+      }
+      ipcRenderer.send('timer:resume', { ...input, workspaceId })
+    },
+    stop: () => {
+      let workspaceId = 'default'
+      if (typeof window !== 'undefined') {
+        const match = window.location.hash.match(/#\/workspaces\/([^\/]+)/)
+        if (match) workspaceId = match[1]
+      }
+      ipcRenderer.send('timer:stop', { workspaceId })
+    },
   },
 }
 

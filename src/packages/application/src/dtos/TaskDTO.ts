@@ -13,11 +13,11 @@ export interface TaskDTO {
     name: string
   }
   assignedTo?: {
-    id: string
+    id?: string
     name: string
   }
   author?: {
-    id: string
+    id?: string
     name: string
   }
   tracker?: {

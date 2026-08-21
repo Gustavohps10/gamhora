@@ -2,32 +2,20 @@ import { FieldGroup } from '@metric-org/sdk'
 
 export const credentialFieldGroups: FieldGroup[] = [
   {
-    id: 'auth-api-key',
-    label: 'Autenticação com Chave de API (Recomendado)',
+    id: 'auth-keys',
+    label: 'Chaves de Acesso',
     fields: [
       {
         id: 'apiKey',
-        label: 'Sua Chave de Acesso da API',
+        label: 'Chave de Acesso à API (REST)',
         type: 'password',
-        required: false,
-      },
-    ],
-  },
-  {
-    id: 'auth-user-pass',
-    label: 'Autenticação com Usuário e Senha',
-    fields: [
-      {
-        id: 'login',
-        label: 'Usuário',
-        type: 'text',
-        required: false,
+        required: true,
       },
       {
-        id: 'password',
-        label: 'Senha',
+        id: 'atomKey',
+        label: 'Chave de Acesso ao Atom (RSS)',
         type: 'password',
-        required: false,
+        required: true,
       },
     ],
   },

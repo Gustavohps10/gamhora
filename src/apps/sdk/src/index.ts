@@ -10,6 +10,10 @@ export {
 } from './data-source'
 export * from './utils/MarkupConverter'
 export type {
+  IHttpClient,
+  IHttpClientConfig,
+} from '@metric-org/adapters/contracts'
+export type {
   AddonSidebarMenuItem,
   AddonTimerbarActionItem,
   AddonTimerbarMenuItem,

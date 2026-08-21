@@ -1,3 +1,4 @@
+import type { IHttpClient } from '@metric-org/adapters/contracts'
 import type {
   IAuthenticationStrategy,
   IMemberQuery,
@@ -24,6 +25,7 @@ export interface FieldGroup {
 }
 
 export interface DataSourceContext {
+  httpClient: IHttpClient
   credentials?: Record<string, unknown>
   config?: Record<string, unknown>
 }

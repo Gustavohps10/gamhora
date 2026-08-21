@@ -1,3 +1,4 @@
+import { IHttpClient } from '@metric-org/adapters/contracts'
 import {
   DataSourceContext,
   FieldGroup,
@@ -29,12 +30,13 @@ export class DataSourceResolver implements IDataSourceResolver {
     private readonly workspacesRepository: IWorkspacesRepository,
     private readonly credentialsStorage: ICredentialsStorage,
     private readonly options: DataSourceResolverOptions,
+    private readonly httpClient: IHttpClient,
   ) {}
 
   async getDataSource(
     workspaceId: string,
     connectionInstanceId: string,
-    contextOverride?: DataSourceContext,
+    contextOverride?: Partial<DataSourceContext>,
   ): Promise<IDataSourceAdapter> {
     const workspace = await this.workspacesRepository.findById(workspaceId)
     if (!workspace) {
@@ -53,6 +55,7 @@ export class DataSourceResolver implements IDataSourceResolver {
         authenticatedMemberData: contextOverride.authenticatedMemberData,
         config: contextOverride.config ?? config,
         credentials: contextOverride.credentials,
+        httpClient: contextOverride.httpClient ?? this.httpClient,
       }
     } else {
       const storageKey = `workspace-connection-${workspaceId}-${connectionInstanceId}`
@@ -69,6 +72,7 @@ export class DataSourceResolver implements IDataSourceResolver {
         authenticatedMemberData: parsed?.member,
         config,
         credentials: parsed?.credentials,
+        httpClient: this.httpClient,
       }
     }
 

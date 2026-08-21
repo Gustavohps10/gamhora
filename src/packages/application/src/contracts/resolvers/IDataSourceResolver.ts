@@ -1,9 +1,12 @@
+import { IHttpClient } from '@metric-org/adapters/contracts'
+
 import { MemberDTO } from '@/dtos'
 
 import type { FieldGroup } from '../../open-api/IOpenAPI'
 import { IDataSourceAdapter } from './IDataSourceAdapter'
 
 export interface DataSourceContext {
+  httpClient: IHttpClient
   authenticatedMemberData?: MemberDTO
   config?: Record<string, unknown>
   credentials?: Record<string, unknown>
@@ -19,7 +22,7 @@ export interface IDataSourceResolver {
   getDataSource(
     workspaceId: string,
     pluginId: string,
-    contextOverride?: DataSourceContext,
+    contextOverride?: Partial<DataSourceContext>,
   ): Promise<IDataSourceAdapter>
 
   getDataSourcesForWorkspace(workspaceId: string): Promise<ResolvedConnection[]>

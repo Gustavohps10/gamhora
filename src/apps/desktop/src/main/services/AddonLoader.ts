@@ -112,6 +112,7 @@ export class SimpleEventEmitter<
 import {
   AddonContext,
   IAddon,
+  IAddonEventsAPI,
   ICommandRegistry,
   IDataSource,
   IDataSourceRegistry,
@@ -129,6 +130,48 @@ export interface ActiveAddonInfo {
   instance: IAddon
 }
 
+export class AddonEventEmitter
+  extends SimpleEventEmitter<ISystemEvents>
+  implements IAddonEventsAPI
+{
+  onTimerStart(callback: (payload: ISystemEvents['timer:start']) => void) {
+    return this.on('timer:start', callback)
+  }
+  onTimerPause(callback: (payload: ISystemEvents['timer:pause']) => void) {
+    return this.on('timer:pause', callback)
+  }
+  onTimerResume(callback: (payload: ISystemEvents['timer:resume']) => void) {
+    return this.on('timer:resume', callback)
+  }
+  onTimerStop(callback: (payload: ISystemEvents['timer:stop']) => void) {
+    return this.on('timer:stop', callback)
+  }
+  onTimerUpdate(callback: (payload: ISystemEvents['timer:update']) => void) {
+    return this.on('timer:update', callback)
+  }
+  onSystemIdle(callback: (payload: ISystemEvents['system:idle']) => void) {
+    return this.on('system:idle', callback)
+  }
+  onSystemActive(callback: (payload: ISystemEvents['system:active']) => void) {
+    return this.on('system:active', callback)
+  }
+  onTimeEntryCreated(
+    callback: (payload: ISystemEvents['timeEntry:created']) => void,
+  ) {
+    return this.on('timeEntry:created', callback)
+  }
+  onTimeEntryUpdated(
+    callback: (payload: ISystemEvents['timeEntry:updated']) => void,
+  ) {
+    return this.on('timeEntry:updated', callback)
+  }
+  onTimeEntryDeleted(
+    callback: (payload: ISystemEvents['timeEntry:deleted']) => void,
+  ) {
+    return this.on('timeEntry:deleted', callback)
+  }
+}
+
 export class AddonLoader {
   private activeAddons = new Map<string, ActiveAddonInfo>()
   private activeTimerControllerAddonId: string | null = null
@@ -139,7 +182,7 @@ export class AddonLoader {
   public readonly dataSourceRegistry: IDataSourceRegistry =
     new MemoryRegistry<IDataSource>()
   public readonly commandRegistry = new CommandRegistry()
-  public readonly systemEventEmitter = new SimpleEventEmitter<ISystemEvents>()
+  public readonly systemEventEmitter = new AddonEventEmitter()
 
   public showToast(
     type: 'info' | 'success' | 'warning' | 'error' | 'loading',
@@ -435,6 +478,23 @@ export class AddonLoader {
     } catch (err) {
       console.error(
         '❌ [AddonLoader] Erro ao carregar addon MetricAI4Test:',
+        err,
+      )
+    }
+
+    try {
+      const watcherModule = await import('@metric-org/fake-watcher-for-tests')
+      const FakeWatcherAddon = watcherModule.default
+      if (FakeWatcherAddon && typeof FakeWatcherAddon === 'function') {
+        const addonInstance = new (FakeWatcherAddon as new () => IAddon)()
+        await this.activateAddon(
+          '@metric-org/fake-watcher-for-tests',
+          addonInstance,
+        )
+      }
+    } catch (err) {
+      console.error(
+        '❌ [AddonLoader] Erro ao carregar addon FakeWatcherForTests:',
         err,
       )
     }

@@ -22,9 +22,9 @@ export class RedmineTimeEntryRepository
   }
 
   public async create(entity: TimeEntry): Promise<void> {
-    const client = await this.getAuthenticatedClient()
+    const client = this.getHttpClient()
     if (!entity.id) return
-    await client.post('/time_entries.json', {
+    const response = await client.post('/time_entries.json', {
       time_entry: {
         project_id: entity.task.id,
         issue_id: entity.task.id,
@@ -35,12 +35,15 @@ export class RedmineTimeEntryRepository
         spent_on: entity.startDate?.toISOString().split('T')[0],
       },
     })
+    if (response.isFailure()) {
+      throw new Error(response.failure.messageKey)
+    }
   }
 
   public async update(entity: TimeEntry): Promise<void> {
-    const client = await this.getAuthenticatedClient()
+    const client = this.getHttpClient()
     if (!entity.id) return
-    await client.put(`/time_entries/${entity.id}.json`, {
+    const response = await client.put(`/time_entries/${entity.id}.json`, {
       time_entry: {
         project_id: entity.task.id,
         issue_id: entity.task.id,
@@ -51,19 +54,27 @@ export class RedmineTimeEntryRepository
         spent_on: entity.startDate?.toISOString().split('T')[0],
       },
     })
+    if (response.isFailure()) {
+      throw new Error(response.failure.messageKey)
+    }
   }
 
   public async delete(id?: string): Promise<void> {
     if (!id) return
-    const client = await this.getAuthenticatedClient()
-    await client.delete(`/time_entries/${id}.json`)
+    const client = this.getHttpClient()
+    const response = await client.delete(`/time_entries/${id}.json`)
+    if (response.isFailure()) {
+      throw new Error(response.failure.messageKey)
+    }
   }
 
   public async findById(id?: string): Promise<TimeEntry | undefined> {
     if (!id) return undefined
-    const client = await this.getAuthenticatedClient()
-    const response = await client.get(`/time_entries/${id}.json`)
-    const entry = response.data.time_entry
+    const client = this.getHttpClient()
+    const response = await client.get<any>(`/time_entries/${id}.json`)
+    if (response.isFailure()) return undefined
+
+    const entry = response.success?.time_entry
     if (!entry) return undefined
 
     return this.hydrateTimeEntry({
