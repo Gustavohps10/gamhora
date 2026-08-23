@@ -1,4 +1,4 @@
-import type { AddonCategory } from './addon-category-sidebar'
+import type { AddonCategory } from '../components/addon-category-sidebar'
 
 export type ConnectionStatus =
   | 'connected'

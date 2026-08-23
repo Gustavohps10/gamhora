@@ -62,7 +62,14 @@ export const TimeEntriesDayCard = React.memo(function TimeEntriesDayCard({
       return Boolean(dateStr && isSameDay(parseISO(dateStr), day))
     })
 
-    return [...persisted, ...drafts]
+    const combined = [...persisted, ...drafts]
+    const seen = new Set<string>()
+    return combined.filter((item) => {
+      const id = item._id || item.id
+      if (!id || seen.has(id)) return false
+      seen.add(id)
+      return true
+    })
   }, [entries, draftEntries, day])
 
   const groupedData = useMemo(() => {

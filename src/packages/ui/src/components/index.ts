@@ -1,3 +1,4 @@
+export * from './addon-settings-panel'
 export * from './addon-toast-bridge'
 export * from './app-sidebar'
 export * from './app-sidebar/app-sidebar-home-content'

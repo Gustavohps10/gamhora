@@ -4,7 +4,6 @@ import { contextBridge, ipcRenderer } from 'electron'
 
 import {
   addonsInvoker,
-  discordInvoker,
   headersInvoker,
   metadataInvoker,
   sessionInvoker,
@@ -29,7 +28,6 @@ const api: IOpenAPI = {
     system: systemInvoker,
   },
   integrations: {
-    discord: discordInvoker,
     addons: addonsInvoker,
   },
   events: {

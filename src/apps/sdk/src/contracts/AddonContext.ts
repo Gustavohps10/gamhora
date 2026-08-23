@@ -38,6 +38,15 @@ export interface IAddonEventsAPI extends IEventEmitter<ISystemEvents> {
   onTimeEntryDeleted(
     callback: (payload: ISystemEvents['timeEntry:deleted']) => void,
   ): () => void
+  onWorkspaceChange(
+    callback: (payload: ISystemEvents['workspace:changed']) => void,
+  ): () => void
+}
+
+export interface IAddonStorage {
+  get(key: string): Promise<string | null>
+  set(key: string, value: string): Promise<void>
+  delete(key: string): Promise<void>
 }
 
 export interface AddonContext {
@@ -49,4 +58,5 @@ export interface AddonContext {
   readonly notifications: INotificationService
   readonly timer: ITimerAPI
   readonly timeEntries: ITimeEntriesAPI
+  readonly storage: IAddonStorage
 }

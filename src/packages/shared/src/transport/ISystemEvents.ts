@@ -36,6 +36,10 @@ export interface ISystemEvents {
     id: string
     timeSpentSeconds: number
   }
+  'workspace:changed': {
+    previousWorkspaceId?: string
+    currentWorkspaceId: string
+  }
   'timeEntry:deleted': { workspaceId?: string; id: string }
   [event: string]: unknown
 }

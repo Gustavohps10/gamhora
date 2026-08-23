@@ -139,7 +139,7 @@ const financialItems: NavItem[] = [
 const integrationItems: NavItem[] = [
   {
     title: 'Addons',
-    path: 'addons',
+    path: 'addons/store',
     icon: PuzzleIcon,
   },
 ]

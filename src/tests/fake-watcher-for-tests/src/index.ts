@@ -47,24 +47,6 @@ export default class FakeWatcherAddon implements IAddon {
     // 2. Simula um Watcher em execução contínua
     console.log('👁️ [FakeWatcherAddon] Watcher de chamadas e atividades ativo.')
 
-    // Gera uma sugestão inicial simulada ao iniciar o addon (após 4 segundos)
-    setTimeout(async () => {
-      try {
-        await context.timeEntries.createSuggestion({
-          taskId: '',
-          comments: 'Reunião Discord - Daily Dev (Watcher Simulado)',
-          timeSpentSeconds: 1800, // 30 min
-          source: 'ai_suggestion',
-        })
-        await context.notifications.info(
-          'Nova sugestão capturada: "Reunião Discord - Daily Dev" (30 min)',
-          '👁️ Watcher Simulado',
-        )
-      } catch (err) {
-        console.error('❌ [FakeWatcherAddon] Erro ao criar sugestão:', err)
-      }
-    }, 4000)
-
     // 3. Registra comandos e botões na Timerbar para testes interativos
     context.menus.timerbar.register({
       id: 'fake-watcher-popover',

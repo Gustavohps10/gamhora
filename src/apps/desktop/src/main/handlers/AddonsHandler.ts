@@ -4,6 +4,7 @@ import {
   IAddonsFacade,
   IImportAddonUseCase,
 } from '@metric-org/application'
+import { AddonSettingsField } from '@metric-org/sdk'
 import { createResponseViewModel } from '@metric-org/shared/helpers'
 import {
   IEventEmitter,
@@ -68,10 +69,40 @@ const DEV_METRIC_AI_MANIFEST: AddonManifest = {
   tags: ['ai', 'ocr', 'teste'],
 }
 
+const DEV_DISCORD_MANIFEST: AddonManifest = {
+  id: '@metric-org/discord-for-tests',
+  name: 'Discord Presence',
+  creator: 'Metric',
+  description: 'Sincroniza status do timer no Discord',
+  path: '',
+  logo: 'https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png',
+  downloads: 0,
+  version: '1.0.0',
+  stars: 0,
+  installed: true,
+  tags: ['discord', 'watcher', 'teste'],
+}
+
+const DEV_FAKE_WATCHER_MANIFEST: AddonManifest = {
+  id: '@metric-org/fake-watcher-for-tests',
+  name: 'Fake Watcher',
+  creator: 'Metric',
+  description: 'Watcher falso para testes',
+  path: '',
+  logo: '',
+  downloads: 0,
+  version: '1.0.0',
+  stars: 0,
+  installed: true,
+  tags: ['watcher', 'teste'],
+}
+
 const DEV_ADDONS: AddonManifest[] = [
   DEV_FAKE_MANIFEST,
   DEV_REDMINE_MANIFEST,
   DEV_METRIC_AI_MANIFEST,
+  DEV_DISCORD_MANIFEST,
+  DEV_FAKE_WATCHER_MANIFEST,
 ]
 
 import { SidebarMenuItem, TimerbarMenuItem } from '@metric-org/sdk'
@@ -171,6 +202,49 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
       isSuccess: true,
       statusCode: 200,
     }
+  }
+
+  public async getSchema(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ addonId: string }>,
+  ): Promise<ViewModel<AddonSettingsField[]>> {
+    if (!this.addonLoader) return { isSuccess: true, data: [] }
+    try {
+      const schema = await this.addonLoader.getSettingsSchema(body.addonId)
+      return { isSuccess: true, data: schema }
+    } catch (e: unknown) {
+      return { isSuccess: false, error: (e as Error).message }
+    }
+  }
+
+  public async executeAction(
+    _event: IpcMainInvokeEvent,
+    {
+      body,
+    }: IRequest<{ addonId: string; actionId: string; payload?: unknown }>,
+  ): Promise<ViewModel<unknown>> {
+    if (!this.addonLoader)
+      return { isSuccess: false, error: 'LOADER_NOT_FOUND' }
+    try {
+      const data = await this.addonLoader.executeAction(
+        body.addonId,
+        body.actionId,
+        body.payload,
+      )
+      return { isSuccess: true, data }
+    } catch (e: unknown) {
+      return { isSuccess: false, error: (e as Error).message }
+    }
+  }
+
+  public async setActiveWorkspace(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ workspaceId: string }>,
+  ): Promise<ViewModel<void>> {
+    if (this.addonLoader && body?.workspaceId) {
+      this.addonLoader.setActiveWorkspace(body.workspaceId)
+    }
+    return { isSuccess: true }
   }
 
   public async listAvailable(

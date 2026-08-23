@@ -1,8 +1,11 @@
+import { ICredentialsStorage } from '@metric-org/application'
 import {
   AddonContext,
+  AddonSettingsField,
   CommandHandler,
   IAddon,
   IAddonEventsAPI,
+  IAddonStorage,
   ICommandRegistry,
   IDataSource,
   IDataSourceRegistry,
@@ -158,6 +161,11 @@ export class AddonEventEmitter
   ) {
     return this.on('timeEntry:deleted', callback)
   }
+  onWorkspaceChange(
+    callback: (payload: ISystemEvents['workspace:changed']) => void,
+  ) {
+    return this.on('workspace:changed', callback)
+  }
 }
 
 export class AddonLoader {
@@ -171,6 +179,8 @@ export class AddonLoader {
     new MemoryRegistry<IDataSource>()
   public readonly commandRegistry = new CommandRegistry()
   public readonly systemEventEmitter = new AddonEventEmitter()
+
+  constructor(private credentialsStorage: ICredentialsStorage) {}
 
   public showToast(
     type: 'info' | 'success' | 'warning' | 'error' | 'loading',
@@ -234,7 +244,85 @@ export class AddonLoader {
     }
   }
 
+  private activeWorkspaceId: string | null = null
+
+  public setActiveWorkspace(workspaceId: string): void {
+    if (workspaceId && workspaceId !== this.activeWorkspaceId) {
+      const previousWorkspaceId = this.activeWorkspaceId
+      this.activeWorkspaceId = workspaceId
+      console.log(
+        `[AddonLoader] 🔄 Workspace alterado de "${previousWorkspaceId || 'Nenhum'}" para "${workspaceId}"`,
+      )
+      this.systemEventEmitter.emit('workspace:changed', {
+        previousWorkspaceId: previousWorkspaceId || undefined,
+        currentWorkspaceId: workspaceId,
+      })
+    }
+  }
+
   public createContext(addonId: string): AddonContext {
+    const storage: IAddonStorage = {
+      get: async (key: string) => {
+        if (!this.activeWorkspaceId) return null
+        const workspaceId = this.activeWorkspaceId
+        const masterKey = `ws_${workspaceId}_config`
+        const raw = await this.credentialsStorage.getToken(addonId, masterKey)
+        if (!raw) return null
+        try {
+          const data = JSON.parse(raw)
+          if (data && typeof data === 'object' && key in data) {
+            return data[key]
+          }
+        } catch {
+          // ignore
+        }
+        return null
+      },
+      set: async (key: string, value: string) => {
+        if (!this.activeWorkspaceId) return
+        const workspaceId = this.activeWorkspaceId
+        const masterKey = `ws_${workspaceId}_config`
+        let data: Record<string, string> = {}
+        const raw = await this.credentialsStorage.getToken(addonId, masterKey)
+        if (raw) {
+          try {
+            data = JSON.parse(raw) || {}
+          } catch {
+            data = {}
+          }
+        }
+        data[key] = value
+        await this.credentialsStorage.saveToken(
+          addonId,
+          masterKey,
+          JSON.stringify(data),
+        )
+      },
+      delete: async (key: string) => {
+        if (!this.activeWorkspaceId) return
+        const workspaceId = this.activeWorkspaceId
+        const masterKey = `ws_${workspaceId}_config`
+        const raw = await this.credentialsStorage.getToken(addonId, masterKey)
+        if (raw) {
+          try {
+            const data = JSON.parse(raw) || {}
+            delete data[key]
+            if (Object.keys(data).length > 0) {
+              await this.credentialsStorage.saveToken(
+                addonId,
+                masterKey,
+                JSON.stringify(data),
+              )
+            } else {
+              await this.credentialsStorage.deleteToken(addonId, masterKey)
+            }
+          } catch {
+            await this.credentialsStorage.deleteToken(addonId, masterKey)
+          }
+        }
+      },
+    }
+
     const addonTimerbarRegistry: IRegistry<TimerbarMenuItem> = {
       register: (item: TimerbarMenuItem) => {
         // Restrição Estrutural: Cada addon possui no máximo 1 item na Timerbar
@@ -460,6 +548,7 @@ export class AddonLoader {
       notifications,
       timer,
       timeEntries,
+      storage,
     }
   }
 
@@ -479,6 +568,30 @@ export class AddonLoader {
       await item.instance.deactivate()
     }
     this.activeAddons.delete(addonId)
+  }
+
+  public async getSettingsSchema(
+    addonId: string,
+  ): Promise<AddonSettingsField[]> {
+    const item = this.activeAddons.get(addonId)
+    if (!item?.instance?.getSettingsSchema) return []
+    return await item.instance.getSettingsSchema()
+  }
+
+  public async executeAction(
+    addonId: string,
+    actionId: string,
+    payload?: unknown,
+  ): Promise<unknown> {
+    const item = this.activeAddons.get(addonId)
+    if (!item?.instance?.executeAction) return null
+    if (payload && typeof payload === 'object' && 'workspaceId' in payload) {
+      const wsId = (payload as { workspaceId?: string }).workspaceId
+      if (wsId) {
+        this.setActiveWorkspace(wsId)
+      }
+    }
+    return await item.instance.executeAction(actionId, payload)
   }
 
   public async initializeDevAddons(): Promise<void> {
@@ -526,6 +639,20 @@ export class AddonLoader {
     } catch (err) {
       console.error(
         '❌ [AddonLoader] Erro ao carregar addon FakeWatcherForTests:',
+        err,
+      )
+    }
+
+    try {
+      const discordModule = await import('@metric-org/discord-for-tests')
+      const DiscordAddon = discordModule.default
+      if (DiscordAddon && typeof DiscordAddon === 'function') {
+        const addonInstance = new (DiscordAddon as new () => IAddon)()
+        await this.activateAddon('@metric-org/discord-for-tests', addonInstance)
+      }
+    } catch (err) {
+      console.error(
+        '❌ [AddonLoader] Erro ao carregar addon DiscordForTests:',
         err,
       )
     }

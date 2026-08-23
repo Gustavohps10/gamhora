@@ -1,7 +1,7 @@
 import { FileData } from '@metric-org/application'
 import { WorkspaceViewModel } from '@metric-org/shared/view-models'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createContext, ReactNode, useContext } from 'react'
+import { createContext, ReactNode, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 
@@ -75,6 +75,12 @@ export const WorkspaceProvider: React.FC<WorkspaceProviderProps> = ({
     enabled: !!workspaceId,
     retry: false,
   })
+
+  useEffect(() => {
+    if (workspaceId) {
+      openAPI.integrations.addons.setActiveWorkspace({ body: { workspaceId } })
+    }
+  }, [workspaceId, openAPI])
 
   const { data: workspaces = [], isLoading: isLoadingWorkspaces } = useQuery({
     queryKey: workspaceKeys.all,

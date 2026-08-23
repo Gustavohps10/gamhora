@@ -1,0 +1,533 @@
+import type { AddonContext, AddonSettingsField, IAddon } from '@metric-org/sdk'
+import axios from 'axios'
+import { shell } from 'electron'
+import http from 'http'
+import net from 'net'
+import url from 'url'
+
+interface DiscordIPCUser {
+  id: string
+  username: string
+  global_name?: string
+  avatar?: string
+  avatarUrl?: string
+}
+
+interface DiscordIPCPayload {
+  cmd?: string
+  evt?: string
+  nonce?: string
+  data?: {
+    user?: DiscordIPCUser
+    channel_id?: string | null
+    guild_id?: string | null
+    code?: number
+    message?: string
+  }
+}
+
+function encodeDiscordFrame(opcode: number, payload: object): Buffer {
+  const jsonStr = JSON.stringify(payload)
+  const jsonBuf = Buffer.from(jsonStr, 'utf8')
+  const header = Buffer.alloc(8)
+  header.writeInt32LE(opcode, 0)
+  header.writeInt32LE(jsonBuf.length, 4)
+  return Buffer.concat([header, jsonBuf])
+}
+
+function parseDiscordFrames(buffer: Buffer): {
+  frames: { opcode: number; payload: DiscordIPCPayload }[]
+  remaining: Buffer
+} {
+  const frames: { opcode: number; payload: DiscordIPCPayload }[] = []
+  let offset = 0
+
+  while (offset + 8 <= buffer.length) {
+    const opcode = buffer.readInt32LE(offset)
+    const length = buffer.readInt32LE(offset + 4)
+
+    if (offset + 8 + length > buffer.length) {
+      break
+    }
+
+    const payloadStr = buffer.toString('utf8', offset + 8, offset + 8 + length)
+    try {
+      const payload = JSON.parse(payloadStr) as DiscordIPCPayload
+      frames.push({ opcode, payload })
+    } catch {
+      // Ignore malformed JSON
+    }
+    offset += 8 + length
+  }
+
+  return { frames, remaining: buffer.subarray(offset) as Buffer }
+}
+
+export default class DiscordAddon implements IAddon {
+  private context?: AddonContext
+  private socket: net.Socket | null = null
+  private callStartTime: number | null = null
+  private currentChannelId: string | null = null
+  private connectedUser: DiscordIPCUser | null = null
+  private accessToken: string | null = null
+
+  get metadata() {
+    return {
+      id: '@metric-org/discord-for-tests',
+      name: 'Discord (Real IPC Observer)',
+      version: '1.0.0',
+      iconUrl:
+        'https://cdn.icon-icons.com/icons2/2108/PNG/512/discord_icon_130958.png',
+      description:
+        'Observador real do aplicativo Desktop do Discord via IPC Pipe',
+    }
+  }
+
+  async activate(context: AddonContext): Promise<void> {
+    this.context = context
+    console.log(`[DiscordAddon] Ativado: ${context.addonId}`)
+    this.connectDiscordIPC()
+
+    context.events.onWorkspaceChange(
+      async (evtPayload: {
+        currentWorkspaceId: string
+        previousWorkspaceId?: string
+      }) => {
+        const currentWorkspaceId = evtPayload?.currentWorkspaceId || ''
+        console.log(
+          `[Discord IPC Log] 🔄 Mudança de Workspace detectada! Mudando para: "${currentWorkspaceId}"`,
+        )
+        this.currentChannelId = null
+        this.callStartTime = null
+        this.accessToken = null
+        this.connectedUser = null
+
+        if (this.socket) {
+          console.log(
+            `[Discord IPC Log] ♻️ Reiniciando Socket IPC para limpar estado de autenticação anterior...`,
+          )
+          this.socket.destroy()
+          this.socket = null
+        }
+
+        // Reconnect fresh. The READY handler will auto-authenticate if the new workspace has a token.
+        this.connectDiscordIPC()
+      },
+    )
+  }
+
+  async deactivate(): Promise<void> {
+    if (this.socket) {
+      this.socket.destroy()
+      this.socket = null
+    }
+    this.accessToken = null
+    console.log(`[DiscordAddon] Desativado`)
+  }
+
+  async getSettingsSchema(): Promise<AddonSettingsField[]> {
+    return [
+      {
+        id: 'login',
+        type: 'button',
+        label: 'Conectar ao Discord via OAuth',
+      },
+    ]
+  }
+
+  async executeAction(actionId: string, payload?: unknown): Promise<unknown> {
+    if (actionId === 'login') {
+      return this.handleDiscordLogin()
+    }
+    if (actionId === 'disconnect') {
+      return this.handleDiscordDisconnect(payload)
+    }
+    return null
+  }
+
+  private async handleDiscordDisconnect(_payload?: unknown): Promise<unknown> {
+    this.accessToken = null
+    this.connectedUser = null
+    if (this.socket) {
+      this.socket.destroy()
+      this.socket = null
+    }
+    if (this.context) {
+      await this.context.storage.delete('accessToken')
+      await this.context.storage.delete('discordUser')
+      this.context.notifications.info(
+        'Conta do Discord desconectada neste workspace.',
+        'Discord Desconectado',
+      )
+    }
+    this.connectDiscordIPC()
+    return { isSuccess: true }
+  }
+
+  private connectDiscordIPC(pipeIndex = 0): void {
+    if (pipeIndex > 9 || this.socket) return
+
+    const pipePath =
+      process.platform === 'win32'
+        ? `\\\\.\\pipe\\discord-ipc-${pipeIndex}`
+        : `/tmp/discord-ipc-${pipeIndex}`
+
+    const socket = net.connect(pipePath, () => {
+      console.log(`🟢 [DiscordAddon] Conectado ao IPC Pipe Real: ${pipePath}`)
+      this.socket = socket
+
+      // Send Handshake
+      const handshake = encodeDiscordFrame(0, {
+        v: 1,
+        client_id: '1372352088457220126',
+      })
+      socket.write(handshake)
+    })
+
+    let rxBuffer = Buffer.alloc(0)
+
+    socket.on('data', (chunk) => {
+      rxBuffer = Buffer.concat([rxBuffer, chunk])
+      const result = parseDiscordFrames(rxBuffer)
+      rxBuffer = Buffer.from(result.remaining)
+      result.frames.forEach(({ payload }) => this.handleIPCPayload(payload))
+    })
+
+    socket.on('error', () => {
+      this.socket = null
+      this.connectDiscordIPC(pipeIndex + 1)
+    })
+
+    socket.on('close', () => {
+      if (this.socket === socket) {
+        this.socket = null
+      }
+    })
+  }
+
+  private handleIPCPayload(payload: DiscordIPCPayload): void {
+    console.log(
+      `[Discord IPC Log] Received payload -> cmd: "${payload.cmd || 'N/A'}", evt: "${payload.evt || 'N/A'}", nonce: "${payload.nonce || 'N/A'}"`,
+    )
+
+    // 1. Ready event (handshake response with real Discord desktop user)
+    if (payload.evt === 'READY' && payload.data?.user) {
+      const user = payload.data.user
+      const avatarUrl = user.avatar
+        ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128`
+        : undefined
+
+      console.log(
+        `[Discord IPC Log] Handshake OK! Usuário desktop reconhecido: @${user.username}`,
+      )
+
+      if (this.context) {
+        this.context.storage.get('accessToken').then((storedToken) => {
+          const token = this.accessToken || storedToken
+          if (token) {
+            this.connectedUser = { ...user, avatarUrl }
+            this.context!.storage.set(
+              'discordUser',
+              JSON.stringify(this.connectedUser),
+            )
+            this.context!.notifications.success(
+              `Conectado ao aplicativo Discord Desktop como @${user.username}`,
+              'Discord Real IPC',
+            )
+
+            this.accessToken = token
+            console.log(
+              '[Discord IPC Log] 🔑 Access Token de sessão recuperado com sucesso! Autenticando IPC automaticamente...',
+            )
+            const authFrame = encodeDiscordFrame(1, {
+              cmd: 'AUTHENTICATE',
+              args: { access_token: token },
+              nonce: 'auth_auto',
+            })
+            this.socket?.write(authFrame)
+          } else {
+            this.connectedUser = null
+            console.log(
+              '[Discord IPC Log] Nenhum token de sessão encontrado. Aguardando login OAuth pelo painel de Configurações.',
+            )
+          }
+        })
+      }
+      return
+    }
+
+    // Handle authentication error (e.g. 4009 invalid token)
+    if (payload.evt === 'ERROR' && payload.cmd === 'AUTHENTICATE') {
+      console.error(
+        '[Discord IPC Log] ❌ Erro de Autenticação IPC:',
+        payload.data?.message || payload.data,
+      )
+      this.accessToken = null
+      this.connectedUser = null
+      if (this.context) {
+        this.context.storage.delete('accessToken')
+        this.context.storage.delete('discordUser')
+        this.context.notifications.error(
+          'Sessão expirada. Por favor, clique em "Conectar ao Discord via OAuth" nas Configurações.',
+          'Discord Desconectado',
+        )
+      }
+      return
+    }
+
+    // Handle authentication response
+    if (payload.cmd === 'AUTHENTICATE' && payload.evt !== 'ERROR') {
+      console.log(
+        '[Discord IPC Log] ✅ IPC Autenticado com sucesso! Enviando SUBSCRIBE para VOICE_CHANNEL_SELECT...',
+      )
+      const subscribeFrame = encodeDiscordFrame(1, {
+        cmd: 'SUBSCRIBE',
+        evt: 'VOICE_CHANNEL_SELECT',
+        nonce: 'sub_voice',
+      })
+      this.socket?.write(subscribeFrame)
+      return
+    }
+
+    // Handle subscribe confirmation or error
+    if (payload.cmd === 'SUBSCRIBE') {
+      if (payload.evt === 'ERROR') {
+        console.error(
+          '[Discord IPC Log] ❌ Falha ao assinar eventos de voz:',
+          payload.data?.message || payload.data,
+        )
+      } else {
+        console.log(
+          '[Discord IPC Log] 🎧 Inscrição em VOICE_CHANNEL_SELECT confirmada pelo Discord! Aguardando chamadas...',
+        )
+      }
+      return
+    }
+
+    // 2. Real Voice Channel Events
+    if (payload.evt === 'VOICE_CHANNEL_SELECT') {
+      const channelId = payload.data?.channel_id
+      console.log(
+        `[Discord IPC Log] 🔔 EVENTO DE VOZ DETECTADO! Channel ID: ${channelId || 'Nenhum (Desconectado)'}`,
+      )
+
+      // User entered a real voice channel
+      if (channelId && !this.currentChannelId) {
+        this.context?.storage.get('accessToken').then((token) => {
+          if (!token) {
+            console.log(
+              '[Discord IPC Log] ⚠️ Entrada em canal de voz ignorada: Workspace ativo não possui autenticação no Discord.',
+            )
+            return
+          }
+
+          this.currentChannelId = channelId
+          this.callStartTime = Date.now()
+          console.log(
+            `[Discord IPC Log] 🎙️ Entrada registrada em canal de voz: ${channelId}`,
+          )
+
+          if (this.context) {
+            this.context.notifications.info(
+              `🎧 [Discord Real] Entrada detectada em canal de voz no app Desktop!`,
+              'Captura de Atividade Real',
+            )
+          }
+        })
+        return
+      }
+
+      // User left the voice channel
+      if (!channelId && this.currentChannelId) {
+        const durationSeconds = this.callStartTime
+          ? Math.max(1, Math.round((Date.now() - this.callStartTime) / 1000))
+          : 0
+
+        const minutes = Math.max(1, Math.round(durationSeconds / 60))
+
+        const startChannelId = this.currentChannelId
+        this.currentChannelId = null
+        this.callStartTime = null
+
+        this.context?.storage.get('accessToken').then((token) => {
+          if (!token) {
+            console.log(
+              `[Discord IPC Log] ⚠️ Saída do canal ${startChannelId} ignorada: Workspace ativo não possui autenticação no Discord.`,
+            )
+            return
+          }
+
+          console.log(
+            `[Discord IPC Log] 🛑 Saída registrada. Duração: ${durationSeconds}s (${minutes} min)`,
+          )
+
+          if (this.context) {
+            this.context.notifications.success(
+              `🎉 [Discord Real] Chamada de voz encerrada (${minutes} min). Sugestão de apontamento registrada!`,
+              'Sugestão Automática de Tempo',
+            )
+
+            if (this.context.timeEntries?.createSuggestion) {
+              this.context.timeEntries.createSuggestion({
+                taskId: '',
+                comments: 'Reunião Discord (Real IPC)',
+                timeSpentSeconds: durationSeconds,
+                source: 'ai_suggestion',
+              })
+            }
+          }
+        })
+      }
+    }
+  }
+
+  private async handleDiscordLogin(): Promise<unknown> {
+    const authUrl = `https://discord.com/api/oauth2/authorize?client_id=1372352088457220126&redirect_uri=http%3A%2F%2Flocalhost%3A5353%2Fcallback&response_type=code&scope=identify%20rpc`
+
+    shell.openExternal(authUrl)
+
+    return new Promise((resolve) => {
+      let isResolving = false
+
+      const server = http.createServer(async (req, res) => {
+        if (!req.url || !req.url.includes('/callback')) return
+
+        isResolving = true
+        const { code } = url.parse(req.url, true).query
+
+        res.end('<h1>Autenticação concluída! Você pode fechar esta aba.</h1>')
+        server.close()
+        if (
+          typeof (server as unknown as { closeAllConnections?: () => void })
+            .closeAllConnections === 'function'
+        ) {
+          ;(
+            server as unknown as { closeAllConnections: () => void }
+          ).closeAllConnections()
+        }
+
+        if (!code) {
+          resolve({
+            isSuccess: false,
+            error: 'Código de autorização não recebido.',
+          })
+          return
+        }
+
+        try {
+          const { user: discordUser, accessToken } =
+            await this.exchangeCodeAndGetUser(String(code))
+          const { id, avatar } = discordUser
+
+          if (!id) {
+            resolve({
+              isSuccess: false,
+              error: 'ID do usuário não recebido.',
+            })
+            return
+          }
+
+          const avatarUrl = avatar
+            ? `https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=128`
+            : undefined
+
+          // Save accessToken in memory AND storage so session survives app restarts
+          this.accessToken = accessToken
+          this.connectedUser = { ...discordUser, avatarUrl }
+
+          if (this.context) {
+            await this.context.storage.set('accessToken', accessToken)
+            await this.context.storage.set(
+              'discordUser',
+              JSON.stringify(this.connectedUser),
+            )
+
+            // Send AUTHENTICATE frame to IPC socket with the new token
+            if (this.socket && !this.socket.destroyed) {
+              console.log(
+                '[Discord IPC Log] 🔐 Token recebido via OAuth! Enviando AUTHENTICATE para o IPC Socket...',
+              )
+              const authFrame = encodeDiscordFrame(1, {
+                cmd: 'AUTHENTICATE',
+                args: { access_token: this.accessToken },
+                nonce: 'auth_from_login',
+              })
+              this.socket.write(authFrame)
+            } else {
+              console.log(
+                '[Discord IPC Log] 🔐 Token recebido via OAuth! Conectando Socket IPC...',
+              )
+              this.connectDiscordIPC()
+            }
+          }
+
+          resolve({
+            isSuccess: true,
+            data: this.connectedUser,
+          })
+        } catch (error) {
+          resolve({ isSuccess: false, error: (error as Error).message })
+        }
+      })
+
+      server.on('error', (err: Error) => {
+        console.error('[DiscordAddon] Erro no servidor OAuth local:', err)
+        server.close()
+        if (
+          typeof (server as unknown as { closeAllConnections?: () => void })
+            .closeAllConnections === 'function'
+        ) {
+          ;(
+            server as unknown as { closeAllConnections: () => void }
+          ).closeAllConnections()
+        }
+        if (!isResolving) {
+          isResolving = true
+          resolve({ isSuccess: false, error: err.message })
+        }
+      })
+
+      server.listen(5353)
+
+      setTimeout(() => {
+        if (!isResolving) {
+          server.close()
+          if (
+            typeof (server as unknown as { closeAllConnections?: () => void })
+              .closeAllConnections === 'function'
+          ) {
+            ;(
+              server as unknown as { closeAllConnections: () => void }
+            ).closeAllConnections()
+          }
+          resolve({ isSuccess: false, error: 'Tempo esgotado.' })
+        }
+      }, 60000)
+    })
+  }
+
+  private async exchangeCodeAndGetUser(code: string) {
+    const CLIENT_ID = '1372352088457220126'
+    const CLIENT_SECRET = '8t0EQSv04PG-odB3IZkuk2JOjcon0qsu'
+    const REDIRECT_URI = 'http://localhost:5353/callback'
+
+    const params = new URLSearchParams({
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: REDIRECT_URI,
+    })
+
+    const tokenResponse = await axios.post(
+      'https://discord.com/api/oauth2/token',
+      params,
+    )
+    const accessToken = tokenResponse.data.access_token
+
+    const userResponse = await axios.get('https://discord.com/api/users/@me', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    return { user: userResponse.data, accessToken }
+  }
+}

@@ -6,6 +6,7 @@ import {
   Download,
   Info,
   MoreHorizontal,
+  PackageOpen,
   Plus,
   Settings2,
   Trash2,
@@ -30,7 +31,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useConnectionsWithSync } from '@/stores/syncStore'
 
-import type { AddonConnection, AddonItem } from './addon-types'
+import type { AddonConnection, AddonItem } from '../types'
 
 // ---------------------------------------------------------------------------
 // ConnectionCard
@@ -43,7 +44,7 @@ interface ConnectionCardProps {
   onUninstall: (connection: AddonConnection) => void
 }
 
-function ConnectionCard({
+export function ConnectionCard({
   connection,
   onOpenSettings,
   onDisconnect,
@@ -62,7 +63,7 @@ function ConnectionCard({
   return (
     <div
       className={cn(
-        'relative flex flex-col gap-3 rounded-xl border p-3 transition-colors',
+        'relative flex flex-col gap-3 rounded-lg border p-3 transition-colors',
         isConnected
           ? 'bg-card/40 border-border'
           : 'bg-muted/20 border-dashed opacity-75',
@@ -239,6 +240,7 @@ interface AddonRowProps {
   onDisconnect: (addon: AddonItem, connection: AddonConnection) => void
   onUpdate: (addon: AddonItem) => void
   onUninstall: (addon: AddonItem, connection: AddonConnection) => void
+  onConfigure: (addon: AddonItem) => void
 }
 
 function AddonRow({
@@ -250,59 +252,56 @@ function AddonRow({
   onDisconnect,
   onUpdate,
   onUninstall,
+  onConfigure,
 }: AddonRowProps) {
   const isInstalled = addon.installed
 
   return (
     <AccordionItem
       value={addon.id}
-      className="bg-card/40 border-border overflow-hidden rounded-xl border"
+      className="border-border/50 bg-card rounded-lg border px-1"
     >
-      <AccordionTrigger className="px-4 py-3 hover:no-underline [&>svg]:shrink-0">
-        <div className="flex w-full items-center gap-3">
-          {/* Chevron — rendered by AccordionTrigger's default svg, sits left via flex order */}
-          {/* Logo + info */}
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <div className="bg-background flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border shadow-sm">
+      <AccordionTrigger
+        className={cn(
+          'px-4 py-4 hover:no-underline',
+          (addon.category !== 'integrations' || !isInstalled) &&
+            'pointer-events-none cursor-default [&>svg]:hidden',
+        )}
+      >
+        <div className="pointer-events-auto flex w-full items-center justify-between">
+          {/* Left: Icon and info */}
+          <div className="flex items-center gap-4">
+            <div className="bg-secondary/40 flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border">
               {addon.logo ? (
                 <img
                   src={addon.logo}
                   alt={addon.name}
-                  className="h-7 w-7 object-contain"
+                  className="h-8 w-8 object-contain"
                 />
               ) : (
-                <span className="text-lg">📦</span>
+                <PackageOpen className="text-muted-foreground/50 h-6 w-6" />
               )}
             </div>
-            <div className="min-w-0 text-left">
-              <div className="flex items-center gap-2">
-                <span className="text-foreground text-sm font-bold tracking-tight">
-                  {addon.name}
-                </span>
-                <span className="text-muted-foreground/50 font-mono text-[9px] uppercase">
-                  v{addon.version}
-                </span>
-              </div>
-              <p className="text-muted-foreground line-clamp-1 text-[11px]">
+            <div className="flex flex-col items-start gap-1">
+              <span className="font-semibold">{addon.name}</span>
+              <span className="text-muted-foreground line-clamp-1 max-w-[280px] text-left text-xs">
                 {addon.description}
-              </p>
-              <p className="text-muted-foreground/50 mt-0.5 text-[10px]">
-                por {addon.author}
-              </p>
+              </span>
             </div>
           </div>
 
-          {/* Right side badges + actions — stop propagation so clicks don't toggle accordion */}
+          {/* Right: Badges and actions */}
           <div
             className="flex shrink-0 items-center gap-2"
             onClick={(e) => e.stopPropagation()}
           >
-            {addon.connections.length > 0 && (
-              <span className="text-muted-foreground bg-secondary/60 rounded-full px-2 py-0.5 text-[10px]">
-                {addon.connections.length}{' '}
-                {addon.connections.length === 1 ? 'instância' : 'instâncias'}
-              </span>
-            )}
+            {addon.category === 'integrations' &&
+              addon.connections.length > 0 && (
+                <span className="text-muted-foreground bg-secondary/60 rounded-full px-2 py-0.5 text-[10px]">
+                  {addon.connections.length}{' '}
+                  {addon.connections.length === 1 ? 'instância' : 'instâncias'}
+                </span>
+              )}
 
             {addon.updateAvailable ? (
               <Badge
@@ -348,35 +347,53 @@ function AddonRow({
                 </Button>
               </>
             ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              <>
+                {addon.category !== 'integrations' && (
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-lg"
+                    size="sm"
+                    variant="outline"
+                    className="mr-1 h-8 gap-1.5"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onConfigure(addon)
+                    }}
                   >
-                    <MoreHorizontal className="h-4 w-4" />
+                    <Settings2 className="h-3.5 w-3.5" />
+                    Configurar
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => onAddConnection(addon)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Nova instância
-                  </DropdownMenuItem>
-                  {addon.updateAvailable && (
-                    <DropdownMenuItem onClick={() => onUpdate(addon)}>
-                      <ArrowUpCircle className="mr-2 h-4 w-4" />
-                      Atualizar plugin
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-lg"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {addon.category === 'integrations' && (
+                      <DropdownMenuItem onClick={() => onAddConnection(addon)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nova instância
+                      </DropdownMenuItem>
+                    )}
+                    {addon.updateAvailable && (
+                      <DropdownMenuItem onClick={() => onUpdate(addon)}>
+                        <ArrowUpCircle className="mr-2 h-4 w-4" />
+                        Atualizar plugin
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             )}
           </div>
         </div>
       </AccordionTrigger>
 
-      {isInstalled && (
+      {isInstalled && addon.category === 'integrations' && (
         <AccordionContent className="border-border/40 border-t px-4 pb-4">
           <div className="space-y-2 pt-3">
             {addon.connections.length > 0 ? (
@@ -395,13 +412,12 @@ function AddonRow({
                 ))}
               </>
             ) : (
-              <div className="bg-muted/5 flex flex-col items-center justify-center rounded-xl border border-dashed py-6">
+              <div className="bg-muted/5 flex flex-col items-center justify-center rounded-lg border border-dashed py-6">
                 <p className="text-muted-foreground text-xs">
                   Nenhuma instância configurada.
                 </p>
               </div>
             )}
-
             <Button
               variant="outline"
               size="sm"
@@ -431,6 +447,7 @@ export interface AddonListProps {
   onDisconnect: (addon: AddonItem, connection: AddonConnection) => void
   onUpdate: (addon: AddonItem) => void
   onUninstall: (addon: AddonItem, connection: AddonConnection) => void
+  onConfigure: (addon: AddonItem) => void
 }
 
 export function AddonList({
@@ -442,6 +459,7 @@ export function AddonList({
   onDisconnect,
   onUpdate,
   onUninstall,
+  onConfigure,
 }: AddonListProps) {
   if (addons.length === 0) {
     return (
@@ -472,6 +490,7 @@ export function AddonList({
           onDisconnect={onDisconnect}
           onUpdate={onUpdate}
           onUninstall={onUninstall}
+          onConfigure={onConfigure}
         />
       ))}
     </Accordion>

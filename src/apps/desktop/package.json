@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@metric-org/discord-for-tests": "workspace:*",
     "@rollup/plugin-image": "^3.0.3",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/better-sqlite3": "^7.6.13",

@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-import type { AddonItem } from './addon-types'
+import type { AddonItem } from '../types'
 
 export interface ConnectionFormData {
   name?: string

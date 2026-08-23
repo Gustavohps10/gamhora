@@ -269,15 +269,15 @@ function handleProtocol() {
 }
 
 app.whenReady().then(async () => {
-  const addonLoader = new AddonLoader()
+  handleProtocol()
+  const userDataPath = app.getPath('userData')
+  const credentialsStorage = new KeytarTokenStorage()
+  const addonLoader = new AddonLoader(credentialsStorage)
   await addonLoader.initializeDevAddons()
 
   const timerRuntime = new TimerRuntime()
   timerRuntime.init(addonLoader)
 
-  handleProtocol()
-  const userDataPath = app.getPath('userData')
-  const credentialsStorage = new KeytarTokenStorage()
   const workspacesRepository = new JSONWorkspacesRepository(userDataPath)
   const workspacesQuery = new JSONWorkspacesQuery(userDataPath)
   const eventEmitter = new ElectronJobEventEmitter(() => mainWindow)

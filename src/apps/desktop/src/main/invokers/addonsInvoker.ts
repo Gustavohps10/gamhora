@@ -30,4 +30,9 @@ export const addonsInvoker: IAddonsAPI = {
     IpcInvoker.invoke('ADDONS_EXECUTE_COMMAND', payload),
   showToast: (payload) => IpcInvoker.invoke('ADDONS_SHOW_TOAST', payload),
   dismissToast: (payload) => IpcInvoker.invoke('ADDONS_DISMISS_TOAST', payload),
+  getSchema: (payload) => IpcInvoker.invoke('ADDON_GET_SCHEMA', payload),
+  executeAction: (payload) =>
+    IpcInvoker.invoke('ADDON_EXECUTE_ACTION', payload),
+  setActiveWorkspace: (payload) =>
+    IpcInvoker.invoke('ADDONS_SET_ACTIVE_WORKSPACE', payload),
 }

@@ -195,16 +195,6 @@ export interface ITokenStorageAPI {
   ): Promise<ViewModel<void>>
 }
 
-export interface IDiscordAPI {
-  login(): Promise<{
-    id: string
-    username: string
-    avatar: string
-    global_name: string | null
-    avatarUrl: string
-  }>
-}
-
 export interface AddonManifest {
   id: string
   name: string
@@ -275,6 +265,23 @@ export type AddonTimerbarMenuItem =
   | AddonTimerbarActionItem
   | AddonTimerbarPopoverItem
 
+export type AddonSettingsFieldType = 'button' | 'text' | 'password' | 'checkbox'
+
+export interface AddonSettingsField {
+  id: string
+  type: AddonSettingsFieldType
+  label: string
+  defaultValue?: unknown
+  description?: string
+  variant?:
+    | 'default'
+    | 'destructive'
+    | 'outline'
+    | 'secondary'
+    | 'ghost'
+    | 'link'
+}
+
 export interface IAddonsAPI {
   listAvailable(): Promise<PaginatedViewModel<AddonManifestViewModel[]>>
 
@@ -313,7 +320,15 @@ export interface IAddonsAPI {
     }>,
   ): Promise<ViewModel<string>>
 
-  dismissToast(payload: IRequest<{ toastId: string }>): Promise<ViewModel<void>>
+  getSchema(
+    payload: IRequest<{ addonId: string }>,
+  ): Promise<ViewModel<AddonSettingsField[]>>
+  executeAction(
+    payload: IRequest<{ addonId: string; actionId: string; payload?: unknown }>,
+  ): Promise<ViewModel<void>>
+  setActiveWorkspace(
+    payload: IRequest<{ workspaceId: string }>,
+  ): Promise<ViewModel<void>>
 }
 
 export interface EnvironmentInfo {
@@ -405,7 +420,6 @@ export interface IOpenAPI {
     system: ISystemAPI
   }
   integrations: {
-    discord: IDiscordAPI
     addons: IAddonsAPI
   }
   events: IEventAPI

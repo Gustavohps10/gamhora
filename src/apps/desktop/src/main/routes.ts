@@ -15,7 +15,6 @@ import {
   TokenHandler,
 } from '@/main/handlers'
 import { AddonsHandler } from '@/main/handlers/AddonsHandler'
-import { handleDiscordLogin } from '@/main/handlers/discord-handler'
 import { MetadataHandler } from '@/main/handlers/MetadataHandler'
 import { WorkspacesHandler } from '@/main/handlers/WorkspacesHandler'
 import { getSettings, saveSettings } from '@/main/settings'
@@ -59,9 +58,6 @@ export function openIpcRoutes(
   IpcHandler.register('SYSTEM_GET_ENVIRONMENT', () =>
     Promise.resolve({ isDevelopment: !app.isPackaged }),
   )
-
-  // --- AUTH / DISCORD ---
-  IpcHandler.register('DISCORD_LOGIN', () => handleDiscordLogin())
 
   // --- TOKEN STORAGE ---
   IpcHandler.register('SAVE_TOKEN', (e, req) => tokenHandler.saveToken(e, req))
@@ -169,6 +165,15 @@ export function openIpcRoutes(
   )
   IpcHandler.register('ADDONS_DISMISS_TOAST', (e, req) =>
     addonsHandler.dismissToast(e, req),
+  )
+  IpcHandler.register('ADDON_GET_SCHEMA', (e, req) =>
+    addonsHandler.getSchema(e, req),
+  )
+  IpcHandler.register('ADDON_EXECUTE_ACTION', (e, req) =>
+    addonsHandler.executeAction(e, req),
+  )
+  IpcHandler.register('ADDONS_SET_ACTIVE_WORKSPACE', (e, req) =>
+    addonsHandler.setActiveWorkspace(e, req),
   )
 
   // --- WIDGET / MOUSE EVENTS ---
