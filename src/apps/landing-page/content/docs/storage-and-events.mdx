@@ -1,0 +1,50 @@
+---
+title: Armazenamento e Eventos do Sistema
+description: Como persistir dados com isolamento por workspace e escutar eventos nativos do Metric.
+---
+
+# Armazenamento e Eventos do Sistema
+
+## Armazenamento Isolado por Workspace (`context.storage`)
+
+O Metric garante que cada workspace tenha um espaço de armazenamento de dados e configurações totalmente isolado. Quando o usuário altera o workspace ativo no aplicativo desktop, o `context.storage` de cada addon é remapeado automaticamente para o novo workspace.
+
+### Métodos Principais
+
+```typescript
+// Salvar uma propriedade no armazenamento do workspace atual
+await context.storage.set('userToken', 'abc123xyz')
+
+// Ler uma propriedade
+const token = await context.storage.get('userToken')
+
+// Remover uma chave
+await context.storage.remove('userToken')
+```
+
+> ⚠️ **Importante**: Nunca salve credenciais ou tokens usando bibliotecas de arquivos globais estáticas do Node.js (`fs`). Use sempre o `context.storage` para garantir a segurança multi-tenant.
+
+## Assinatura de Eventos em Tempo Real (`context.events`)
+
+O SDK fornece manipuladores de eventos para reagir a ações executadas pelo usuário ou pelo sistema operacional.
+
+```typescript
+export default class MeuAddon implements IAddon {
+  public async onActivate(context: AddonContext): Promise<void> {
+    // 1. Timer do Metric iniciado
+    context.events.onTimerStart((payload) => {
+      console.log('Timer rodando:', payload.taskId, payload.description)
+    })
+
+    // 2. Timer pausado ou parado
+    context.events.onTimerStop((payload) => {
+      console.log('Timer parado. Duração total em segundos:', payload.duration)
+    })
+
+    // 3. Sistema ficou inativo (AFK / Idle)
+    context.events.onSystemIdle((idleTime) => {
+      console.log('O usuário esteve longe do teclado por:', idleTime, 'segundos')
+    })
+  }
+}
+```

@@ -37,6 +37,7 @@ import {
   X,
 } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import * as React from 'react'
 
 import { DownloadCTA } from '@/app/components/download-cta'
@@ -225,11 +226,17 @@ export default function LandingPage() {
 
 // --- Navbar ---
 
-function Navbar() {
+export function Navbar() {
   return (
-    <header className="border-border/40 bg-background/80 supports-backdrop-filter:bg-background/60 fixed top-0 z-50 w-full border-b backdrop-blur-xl">
+    <header
+      id="landing-navbar"
+      className="border-border/40 bg-background/80 supports-backdrop-filter:bg-background/60 fixed top-0 z-50 w-full border-b backdrop-blur-xl"
+    >
       <div className="container mx-auto flex h-16 items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-2.5 text-base font-bold tracking-tight">
+        <a
+          href="/"
+          className="flex items-center gap-2.5 text-base font-bold tracking-tight"
+        >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-950 dark:ring-zinc-800">
             <Image
               src="/logo-icon.svg"
@@ -252,15 +259,15 @@ function Navbar() {
               Open Core
             </span>
           </div>
-        </div>
+        </a>
 
         <nav className="hidden h-full items-center py-2 md:flex">
           <div className="mr-4 flex items-center gap-5">
             {[
-              { href: '#features', label: 'Funcionalidades' },
-              { href: '#integrations', label: 'Integrações' },
-              { href: '#offline', label: 'Arquitetura' },
-              { href: '#pricing', label: 'Preços' },
+              { href: '/#features', label: 'Funcionalidades' },
+              { href: '/#integrations', label: 'Integrações' },
+              { href: '/#offline', label: 'Arquitetura' },
+              { href: '/#pricing', label: 'Preços' },
             ].map((item) => (
               <a
                 key={item.href}
@@ -274,13 +281,13 @@ function Navbar() {
 
           <Separator orientation="vertical" className="mx-3 h-4" />
 
-          <a
+          <Link
             href="/docs"
             className="text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm font-medium transition-colors"
           >
             <BookOpenTextIcon className="size-4" />
             Docs
-          </a>
+          </Link>
 
           <Separator orientation="vertical" className="mx-2 h-4" />
 

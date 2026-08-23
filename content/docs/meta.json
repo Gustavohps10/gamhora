@@ -1,0 +1,12 @@
+{
+  "title": "Documentação do SDK",
+  "pages": [
+    "index",
+    "quickstart",
+    "categories",
+    "datasources",
+    "watchers",
+    "oauth-pkce",
+    "storage-and-events"
+  ]
+}

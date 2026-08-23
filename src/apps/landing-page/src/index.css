@@ -5,8 +5,11 @@
 @source "../../../packages/ui/src";
 
 @plugin "tailwindcss-animate";
-@plugin "@tailwindcss/typography";
 @import '../../../packages/ui/src/styles/globals.css';
+
+/* Official Fumadocs Shadcn UI preset */
+@import 'fumadocs-ui/css/shadcn.css';
+@import 'fumadocs-ui/css/preset.css';
 
 /* Firefox */
 * {
@@ -34,3 +37,63 @@
 *::-webkit-scrollbar-thumb:hover {
   background-color: rgba(100, 100, 100, 0.8);
 }
+
+/* Ensure header nav items on desktop are visible */
+@media (min-width: 768px) {
+  #landing-navbar nav {
+    display: flex !important;
+  }
+}
+
+#nd-docs-layout {
+  --fd-header-height: 0px !important;
+}
+
+/* Hide native Fumadocs theme toggle */
+[data-theme-toggle],
+button[aria-label="Toggle Theme"] {
+  display: none !important;
+}
+
+/* Code block container & line background fix */
+pre.shiki,
+.fd-codeblock pre,
+.prose pre {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  padding: 1.25rem !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  box-sizing: border-box !important;
+}
+
+pre.shiki code,
+pre.shiki code .line,
+pre.shiki code span,
+.fd-codeblock pre code,
+.fd-codeblock pre code .line,
+.fd-codeblock pre code span,
+.prose pre code,
+.prose pre code .line,
+.prose pre code span {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: var(--shiki-dark, inherit) !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Inline code tags outside pre */
+:not(pre) > code {
+  background-color: var(--muted) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 0.25rem !important;
+  padding: 0.15rem 0.35rem !important;
+  font-size: 0.85em !important;
+}
+

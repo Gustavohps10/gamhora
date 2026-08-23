@@ -1,0 +1,24 @@
+---
+title: Visão Geral e Arquitetura
+description: Conheça a arquitetura desacoplada do ecossistema de Addons do Metric.
+---
+
+# Ecossistema de Addons do Metric
+
+O **Metric** é projetado com uma arquitetura **100% descentralizada e agnóstica**. O aplicativo principal (Core Desktop) não contém regras de negócio ou lógicas específicas de provedores de terceiros (como Discord, Jira, Redmine, Google ou Microsoft).
+
+Em vez disso, todo o poder de extensão é exposto através do **`@metric-org/sdk`**.
+
+## Princípios Fundamentais
+
+1. **Isolamento Total**: Cada addon roda em seu próprio contexto e não compartilha memória com outros addons.
+2. **Multi-Tenant / Workspace Scoped**: Todas as credenciais, tokens de acesso e configurações persistidas via `context.storage` são isoladas estritamente por `workspaceId`.
+3. **Zero Secrets**: Nenhuma chave secreta (`CLIENT_SECRET`) é embutida ou exigida no código do addon. Todo o fluxo OAuth utiliza a especificação **PKCE (RFC 7636)**.
+4. **Comunicação por Eventos**: Os addons reagem a eventos em tempo real do sistema (timer iniciado/pausado, inatividade/idle do sistema, mudanças de workspace).
+
+## Arquitetura em Camadas
+
+- **Core Desktop**: Gerencia janelas, atalhos globais, armazenamento criptografado local e o ciclo de vida do AddonLoader.
+- **SDK (`@metric-org/sdk`)**: Define os contratos estritos de TypeScript (`IAddon`, `AddonContext`, `IOAuthAPI`, `IStorageAPI`).
+- **Landing Page Callback (`metric-app://`)**: Atua como ponte universal de autenticação OAuth para capturar autorizações web e devolvê-las ao desktop.
+- **Addon (.addon)**: Módulo independente exportando uma classe que implementa a interface `IAddon`.

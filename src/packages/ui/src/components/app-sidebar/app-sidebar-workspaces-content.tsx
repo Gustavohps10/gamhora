@@ -1,10 +1,9 @@
 import type { SidebarMenuItem as AddonSidebarMenuItem } from '@metric-org/sdk'
 import {
   Brain,
+  CalendarDays,
   ChartColumnBig,
   ChevronRight,
-  FileEditIcon,
-  FileText,
   FolderGit2,
   Layers,
   LayoutDashboard,
@@ -13,7 +12,6 @@ import {
   Lock,
   LucideIcon,
   PuzzleIcon,
-  ReceiptIcon,
   Scale,
   SettingsIcon,
   Terminal,
@@ -55,45 +53,28 @@ interface NavItem {
   blockedReason?: string
 }
 
-const workItems: NavItem[] = [
+const personalItems: NavItem[] = [
   {
-    title: 'Tarefas',
+    title: 'Minhas Tarefas',
     path: 'activities',
     icon: ListTodoIcon,
     isBlocked: true,
     blockedReason: 'Em breve',
   },
   {
-    title: 'Apontamentos',
+    title: 'Meus Apontamentos',
     path: 'time-entries',
     icon: Timer,
   },
-  {
-    title: 'Anotações',
-    path: 'notes',
-    icon: FileEditIcon,
-    isBlocked: true,
-    blockedReason: 'Em breve',
-  },
-]
-
-const personalItems: NavItem[] = [
   {
     title: 'Métricas',
     path: 'my-metrics',
     icon: ChartColumnBig,
   },
   {
-    title: 'Relatórios',
-    path: 'my-reports',
-    icon: FileText,
-    isBlocked: true,
-    blockedReason: 'Em breve',
-  },
-  {
-    title: 'Hábitos',
-    path: 'habits',
-    icon: ChartColumnBig,
+    title: 'Calendário',
+    path: 'calendar',
+    icon: CalendarDays,
     isBlocked: true,
     blockedReason: 'Em breve',
   },
@@ -123,16 +104,6 @@ const teamItems: NavItem[] = [
     path: 'insights',
     icon: Brain,
     isPro: true,
-  },
-]
-
-const financialItems: NavItem[] = [
-  {
-    title: 'Valores',
-    path: 'billing',
-    icon: ReceiptIcon,
-    isBlocked: true,
-    blockedReason: 'Em breve',
   },
 ]
 
@@ -468,20 +439,12 @@ export function AppSidebarWorkspacesContent() {
 
   return (
     <>
-      <SidebarSection title="Trabalho">
-        <SidebarNavItems items={workItems} workspaceId={workspaceId} />
-      </SidebarSection>
-
       <SidebarSection title="Controle Pessoal">
         <SidebarNavItems items={personalItems} workspaceId={workspaceId} />
       </SidebarSection>
 
       <SidebarSection title="Gestão de Time">
         <SidebarNavItems items={teamItems} workspaceId={workspaceId} />
-      </SidebarSection>
-
-      <SidebarSection title="Financeiro">
-        <SidebarNavItems items={financialItems} workspaceId={workspaceId} />
       </SidebarSection>
 
       <SidebarSection title="Integrações">

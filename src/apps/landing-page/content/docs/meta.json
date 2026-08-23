@@ -1,0 +1,14 @@
+{
+  "title": "Documentação do SDK",
+  "pages": [
+    "index",
+    "quickstart",
+    "categories",
+    "datasources",
+    "watchers",
+    "calendars",
+    "punch",
+    "oauth-pkce",
+    "storage-and-events"
+  ]
+}

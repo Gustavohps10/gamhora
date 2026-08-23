@@ -1,0 +1,41 @@
+---
+title: Watchers e Sugestões Inteligentes
+description: Monitoramento em segundo plano e emissão de sugestões automáticas de apontamento.
+---
+
+# Watchers e Sugestões Inteligentes
+
+Os **Watchers** são plugins projetados para observar em tempo real o ambiente de trabalho do usuário (aplicativos de voz, IDEs, chamadas ou eventos do sistema) e sugerir lançamentos de tempo com zero esforço manual.
+
+## Exemplo: Monitor de Chamadas e Discord IPC
+
+Um Watcher se conecta a APIs de presença ou IPC local (como o socket IPC do Discord) e escuta eventos de atividade.
+
+```typescript
+import type { IAddon, AddonContext } from '@metric-org/sdk'
+
+export default class DiscordWatcherAddon implements IAddon {
+  public id = 'discord-watcher'
+  public name = 'Discord Call Watcher'
+  public version = '1.0.0'
+
+  public async onActivate(context: AddonContext): Promise<void> {
+    // Escuta eventos de inatividade ou término de reuniões
+    context.events.onSystemIdle((idleTimeInSeconds) => {
+      console.log(`Usuário inativo por ${idleTimeInSeconds}s`)
+    })
+  }
+
+  public emitSuggestion(title: string, durationSeconds: number): void {
+    // Notifica a UI do Metric para exibir o card de sugestão reativa
+    console.log(`[Sugestão Emitida] ${title} (${durationSeconds}s)`)
+  }
+}
+```
+
+## Como a UI processa as Sugestões
+
+Quando um Watcher detecta o fim de uma reunião ou sessão de código:
+1. Ele emite uma sugestão contendo título, duração e projeto sugerido.
+2. O Metric renderiza um card reativo na interface de Time Entries.
+3. O usuário pode aceitar a sugestão com **1 clique** ou descartá-la.

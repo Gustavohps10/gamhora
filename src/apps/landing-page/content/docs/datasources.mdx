@@ -1,0 +1,66 @@
+---
+title: DataSources (Provedores de Dados)
+description: Como criar integrações com sistemas de gestão de projetos como Jira e Redmine.
+---
+
+# DataSources (Provedores de Dados)
+
+Um **DataSource** é um tipo especial de Addon responsável por alimentar a interface do Metric com tarefas e sincronizar os lançamentos de tempo com plataformas externas.
+
+## Estrutura de um DataSource
+
+Para registrar um DataSource, seu addon pode implementar métodos de consulta e mutação consumidos pelo container de IoC do Metric.
+
+```typescript
+export interface ITask {
+  id: string
+  title: string
+  projectName: string
+  status?: string
+}
+
+export interface ITimeEntryPayload {
+  taskId: string
+  description: string
+  timeInSeconds: number
+  startTime: Date
+}
+
+export default class RedmineDataSourceAddon implements IAddon {
+  public id = 'redmine-datasource'
+  public name = 'Redmine Integration'
+  public version = '1.0.0'
+
+  public async fetchTasks(): Promise<ITask[]> {
+    // Faz a chamada à API externa do Redmine
+    const response = await fetch('https://redmine.empresa.com/issues.json')
+    const data = await response.json()
+
+    return data.issues.map((issue: any) => ({
+      id: String(issue.id),
+      title: issue.subject,
+      projectName: issue.project.name,
+    }))
+  }
+
+  public async logTime(payload: ITimeEntryPayload): Promise<boolean> {
+    // Envia o lançamento de horas para a API do Redmine
+    const hours = (payload.timeInSeconds / 3600).toFixed(2)
+    await fetch('https://redmine.empresa.com/time_entries.json', {
+      method: 'POST',
+      body: JSON.stringify({
+        time_entry: {
+          issue_id: payload.taskId,
+          hours,
+          comments: payload.description,
+        },
+      }),
+    })
+    return true
+  }
+}
+```
+
+## Sincronização em Segundo Plano
+
+O Metric consulta periodicamente os DataSources ativos no workspace atual para manter a lista de tarefas atualizada no widget e na janela principal.

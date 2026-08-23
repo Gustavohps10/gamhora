@@ -1,0 +1,38 @@
+---
+title: Punch (Ponto Eletrônico)
+description: Como integrar sistemas formais de bate-ponto corporativo como Pontomais e Ahgora.
+---
+
+# Punch (Ponto Eletrônico & Jornada)
+
+Addons da categoria **Punch** conectam o Metric a sistemas de controle de ponto eletrônico formal para comparar a jornada de trabalho registrada com as horas apontadas em tarefas.
+
+## Estrutura de um Punch Addon
+
+Plugins da categoria **Punch** lidam com o registro oficial da jornada corporativa do colaborador.
+
+```typescript
+import type { IAddon, AddonContext } from '@metric-org/sdk'
+
+export interface IPunchRecord {
+  timestamp: Date
+  type: 'in' | 'lunch_start' | 'lunch_end' | 'out'
+}
+
+export default class PontomaisPunchAddon implements IAddon {
+  public id = 'pontomais-punch'
+  public name = 'Pontomais Integration'
+  public version = '1.0.0'
+
+  public async registerPunch(type: 'in' | 'out'): Promise<boolean> {
+    // Executa a batida de ponto oficial via API do Pontomais/Ahgora
+    console.log(`[Punch] Batida de ponto registrada: ${type}`)
+    return true
+  }
+
+  public async getDailyBalance(): Promise<{ workedSeconds: number; expectedSeconds: number }> {
+    // Retorna o saldo de horas acumulado no espelho de ponto do dia
+    return { workedSeconds: 28800, expectedSeconds: 28800 }
+  }
+}
+```

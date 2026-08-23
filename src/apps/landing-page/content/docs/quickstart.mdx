@@ -1,0 +1,78 @@
+---
+title: Criando seu Primeiro Addon
+description: Passo a passo para criar um Addon utilizando o SDK oficial do Metric.
+---
+
+# Criando seu Primeiro Addon
+
+Neste guia, você aprenderá como estruturar e criar um Addon do Metric a partir do zero usando TypeScript.
+
+## 1. Instalação do SDK
+
+Adicione a dependência do SDK ao seu projeto:
+
+```bash
+npm install @metric-org/sdk
+# ou
+yarn add @metric-org/sdk
+```
+
+## 2. Estrutura do Addon
+
+Todo addon deve exportar como `default` uma classe que implemente a interface `IAddon`.
+
+```typescript
+import type { IAddon, AddonContext, AddonSettingsField } from '@metric-org/sdk'
+
+export default class MeuPrimeiroAddon implements IAddon {
+  public id = 'meu-primeiro-addon'
+  public name = 'Meu Primeiro Addon'
+  public version = '1.0.0'
+  public description = 'Um addon de exemplo para o Metric'
+
+  private context?: AddonContext
+
+  // Formulário de preferências renderizado automaticamente na UI do Metric
+  public settingsFields: AddonSettingsField[] = [
+    {
+      key: 'apiKey',
+      label: 'Chave de API',
+      type: 'text',
+      required: true,
+      description: 'Informe sua chave de API para sincronização.',
+    },
+    {
+      key: 'enableNotifications',
+      label: 'Ativar Notificações',
+      type: 'boolean',
+      defaultValue: true,
+    },
+  ]
+
+  public async onActivate(context: AddonContext): Promise<void> {
+    this.context = context
+    console.log('[MeuAddon] Addon ativado com sucesso!')
+
+    // Lendo uma preferência salva pelo usuário
+    const apiKey = await context.storage.get('apiKey')
+    
+    // Inscrevendo-se em eventos do timer
+    context.events.onTimerStart((data) => {
+      console.log('Timer iniciado para a tarefa:', data.taskId)
+    })
+  }
+
+  public async onDeactivate(): Promise<void> {
+    console.log('[MeuAddon] Addon desativado.')
+  }
+}
+```
+
+## 3. Menus e Configurações Dinâmicas (`settingsFields`)
+
+O Metric constrói automaticamente a interface de configurações do seu Addon no painel de preferências a partir da propriedade `settingsFields`. 
+
+Tipos de campos suportados:
+- `text`: Campo de texto simples ou senha.
+- `boolean`: Botão de alternância (Toggle).
+- `select`: Menu suspenso com opções personalizadas.

@@ -8,6 +8,7 @@ import {
   SheetTrigger,
 } from '@metric-org/ui/components'
 import { BookOpenTextIcon, Github, Menu, Star } from 'lucide-react'
+import Link from 'next/link'
 import * as React from 'react'
 
 import { ServerSideModeToggle } from '@/components/mode-toggle'
@@ -46,13 +47,13 @@ export function MobileMenu() {
             <Separator />
 
             {/* Docs */}
-            <a
+            <Link
               href="/docs"
               className="text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm font-medium"
             >
               <BookOpenTextIcon className="size-4" />
               Docs
-            </a>
+            </Link>
 
             <Separator />
 
