@@ -3,6 +3,7 @@ import {
   AddonContext,
   AddonSettingsField,
   CommandHandler,
+  generatePKCE,
   IAddon,
   IAddonEventsAPI,
   IAddonStorage,
@@ -11,14 +12,17 @@ import {
   IDataSourceRegistry,
   IMenusRegistry,
   INotificationService,
+  IOAuthAPI,
   IRegistry,
   ITimeEntriesAPI,
   ITimerAPI,
+  OAuthAuthorizeOptions,
+  OAuthResult,
   SidebarMenuItem,
   TimerbarMenuItem,
 } from '@metric-org/sdk'
 import { IEventEmitter, ISystemEvents } from '@metric-org/shared/transport'
-import { BrowserWindow } from 'electron'
+import { BrowserWindow, shell } from 'electron'
 
 export class MemoryRegistry<T extends { id: string }> implements IRegistry<T> {
   private items = new Map<string, T>()
@@ -179,6 +183,14 @@ export class AddonLoader {
     new MemoryRegistry<IDataSource>()
   public readonly commandRegistry = new CommandRegistry()
   public readonly systemEventEmitter = new AddonEventEmitter()
+  private pendingOAuthRequests = new Map<
+    string,
+    {
+      resolve: (val: OAuthResult) => void
+      reject: (err: Error) => void
+      timeoutId: NodeJS.Timeout
+    }
+  >()
 
   constructor(private credentialsStorage: ICredentialsStorage) {}
 
@@ -539,6 +551,31 @@ export class AddonLoader {
       delete: async () => true,
     }
 
+    const oauth: IOAuthAPI = {
+      generatePKCE: () => generatePKCE(),
+      authorize: (options: OAuthAuthorizeOptions) => {
+        return new Promise<OAuthResult>((resolve, reject) => {
+          const state =
+            options.state ||
+            `${addonId}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
+          const timeoutMs = options.timeoutMs || 120000
+
+          const timeoutId = setTimeout(() => {
+            this.pendingOAuthRequests.delete(state)
+            reject(new Error('Tempo limite de autenticação esgotado.'))
+          }, timeoutMs)
+
+          this.pendingOAuthRequests.set(state, {
+            resolve,
+            reject,
+            timeoutId,
+          })
+
+          shell.openExternal(options.authUrl)
+        })
+      },
+    }
+
     return {
       addonId,
       commands: this.commandRegistry,
@@ -549,6 +586,68 @@ export class AddonLoader {
       timer,
       timeEntries,
       storage,
+      oauth,
+    }
+  }
+
+  public handleOAuthCallbackUrl(rawUrl: string): boolean {
+    try {
+      if (!rawUrl.startsWith('metric-app://oauth/callback')) {
+        return false
+      }
+
+      console.log(`[AddonLoader] 🔗 Deep Link OAuth recebido: ${rawUrl}`)
+      const parsed = new URL(
+        rawUrl.replace('metric-app://', 'http://localhost/'),
+      )
+      const params: Record<string, string> = {}
+      parsed.searchParams.forEach((val, key) => {
+        params[key] = val
+      })
+
+      const state = params.state
+      const code = params.code
+      const error = params.error || params.error_description
+
+      if (state && this.pendingOAuthRequests.has(state)) {
+        const req = this.pendingOAuthRequests.get(state)!
+        clearTimeout(req.timeoutId)
+        this.pendingOAuthRequests.delete(state)
+
+        if (error) {
+          req.reject(new Error(error))
+        } else if (code) {
+          req.resolve({ code, state, ...params })
+        } else {
+          req.reject(new Error('Código de autorização não retornado.'))
+        }
+        return true
+      }
+
+      if (this.pendingOAuthRequests.size === 1) {
+        const [firstState, req] = Array.from(
+          this.pendingOAuthRequests.entries(),
+        )[0]
+        clearTimeout(req.timeoutId)
+        this.pendingOAuthRequests.delete(firstState)
+
+        if (error) {
+          req.reject(new Error(error))
+        } else if (code) {
+          req.resolve({ code, state: firstState, ...params })
+        } else {
+          req.reject(new Error('Código de autorização não retornado.'))
+        }
+        return true
+      }
+
+      return false
+    } catch (err) {
+      console.error(
+        '❌ [AddonLoader] Erro ao processar callback OAuth deep link:',
+        err,
+      )
+      return false
     }
   }
 

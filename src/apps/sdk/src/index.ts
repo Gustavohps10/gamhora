@@ -9,6 +9,7 @@ export {
   IDataSource,
 } from './data-source'
 export * from './utils/MarkupConverter'
+export * from './utils/pkce'
 export type {
   IHttpClient,
   IHttpClientConfig,

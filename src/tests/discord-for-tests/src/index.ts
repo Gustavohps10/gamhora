@@ -1,9 +1,6 @@
 import type { AddonContext, AddonSettingsField, IAddon } from '@metric-org/sdk'
 import axios from 'axios'
-import { shell } from 'electron'
-import http from 'http'
 import net from 'net'
-import url from 'url'
 
 interface DiscordIPCUser {
   id: string
@@ -382,146 +379,120 @@ export default class DiscordAddon implements IAddon {
   }
 
   private async handleDiscordLogin(): Promise<unknown> {
-    const authUrl = `https://discord.com/api/oauth2/authorize?client_id=1372352088457220126&redirect_uri=http%3A%2F%2Flocalhost%3A5353%2Fcallback&response_type=code&scope=identify%20rpc`
+    if (!this.context) {
+      return { isSuccess: false, error: 'Contexto de addon não inicializado.' }
+    }
 
-    shell.openExternal(authUrl)
+    try {
+      const { codeVerifier, codeChallenge } = this.context.oauth.generatePKCE()
+      const state = `discord_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
 
-    return new Promise((resolve) => {
-      let isResolving = false
+      const CLIENT_ID = '1372352088457220126'
+      const REDIRECT_URI =
+        process.env.METRIC_OAUTH_REDIRECT_URI ||
+        'http://localhost:3000/oauth/callback'
 
-      const server = http.createServer(async (req, res) => {
-        if (!req.url || !req.url.includes('/callback')) return
+      const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
+        REDIRECT_URI,
+      )}&response_type=code&scope=identify%20rpc&code_challenge=${codeChallenge}&code_challenge_method=S256&state=${state}`
 
-        isResolving = true
-        const { code } = url.parse(req.url, true).query
+      console.log(
+        '[DiscordAddon] 🚀 Iniciando fluxo OAuth PKCE via Landing Page. Aguardando Deep Link...',
+      )
 
-        res.end('<h1>Autenticação concluída! Você pode fechar esta aba.</h1>')
-        server.close()
-        if (
-          typeof (server as unknown as { closeAllConnections?: () => void })
-            .closeAllConnections === 'function'
-        ) {
-          ;(
-            server as unknown as { closeAllConnections: () => void }
-          ).closeAllConnections()
-        }
-
-        if (!code) {
-          resolve({
-            isSuccess: false,
-            error: 'Código de autorização não recebido.',
-          })
-          return
-        }
-
-        try {
-          const { user: discordUser, accessToken } =
-            await this.exchangeCodeAndGetUser(String(code))
-          const { id, avatar } = discordUser
-
-          if (!id) {
-            resolve({
-              isSuccess: false,
-              error: 'ID do usuário não recebido.',
-            })
-            return
-          }
-
-          const avatarUrl = avatar
-            ? `https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=128`
-            : undefined
-
-          // Save accessToken in memory AND storage so session survives app restarts
-          this.accessToken = accessToken
-          this.connectedUser = { ...discordUser, avatarUrl }
-
-          if (this.context) {
-            await this.context.storage.set('accessToken', accessToken)
-            await this.context.storage.set(
-              'discordUser',
-              JSON.stringify(this.connectedUser),
-            )
-
-            // Send AUTHENTICATE frame to IPC socket with the new token
-            if (this.socket && !this.socket.destroyed) {
-              console.log(
-                '[Discord IPC Log] 🔐 Token recebido via OAuth! Enviando AUTHENTICATE para o IPC Socket...',
-              )
-              const authFrame = encodeDiscordFrame(1, {
-                cmd: 'AUTHENTICATE',
-                args: { access_token: this.accessToken },
-                nonce: 'auth_from_login',
-              })
-              this.socket.write(authFrame)
-            } else {
-              console.log(
-                '[Discord IPC Log] 🔐 Token recebido via OAuth! Conectando Socket IPC...',
-              )
-              this.connectDiscordIPC()
-            }
-          }
-
-          resolve({
-            isSuccess: true,
-            data: this.connectedUser,
-          })
-        } catch (error) {
-          resolve({ isSuccess: false, error: (error as Error).message })
-        }
+      const result = await this.context.oauth.authorize({
+        authUrl,
+        state,
+        timeoutMs: 120000,
       })
 
-      server.on('error', (err: Error) => {
-        console.error('[DiscordAddon] Erro no servidor OAuth local:', err)
-        server.close()
-        if (
-          typeof (server as unknown as { closeAllConnections?: () => void })
-            .closeAllConnections === 'function'
-        ) {
-          ;(
-            server as unknown as { closeAllConnections: () => void }
-          ).closeAllConnections()
+      if (!result.code) {
+        return {
+          isSuccess: false,
+          error: 'Código de autorização não recebido.',
         }
-        if (!isResolving) {
-          isResolving = true
-          resolve({ isSuccess: false, error: err.message })
-        }
-      })
+      }
 
-      server.listen(5353)
+      console.log(
+        '[DiscordAddon] 🔑 Código OAuth recebido via Deep Link! Trocando via PKCE...',
+      )
 
-      setTimeout(() => {
-        if (!isResolving) {
-          server.close()
-          if (
-            typeof (server as unknown as { closeAllConnections?: () => void })
-              .closeAllConnections === 'function'
-          ) {
-            ;(
-              server as unknown as { closeAllConnections: () => void }
-            ).closeAllConnections()
-          }
-          resolve({ isSuccess: false, error: 'Tempo esgotado.' })
-        }
-      }, 60000)
-    })
+      const { user: discordUser, accessToken } =
+        await this.exchangeCodeAndGetUser(
+          result.code,
+          codeVerifier,
+          REDIRECT_URI,
+        )
+
+      const { id, avatar } = discordUser
+      if (!id) {
+        return { isSuccess: false, error: 'ID do usuário não recebido.' }
+      }
+
+      const avatarUrl = avatar
+        ? `https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=128`
+        : undefined
+
+      this.accessToken = accessToken
+      this.connectedUser = { ...discordUser, avatarUrl }
+
+      await this.context.storage.set('accessToken', accessToken)
+      await this.context.storage.set(
+        'discordUser',
+        JSON.stringify(this.connectedUser),
+      )
+
+      // Send AUTHENTICATE frame to IPC socket with the new token
+      if (this.socket && !this.socket.destroyed) {
+        console.log(
+          '[Discord IPC Log] 🔐 Token recebido via OAuth PKCE! Enviando AUTHENTICATE para o IPC Socket...',
+        )
+        const authFrame = encodeDiscordFrame(1, {
+          cmd: 'AUTHENTICATE',
+          args: { access_token: this.accessToken },
+          nonce: 'auth_from_login',
+        })
+        this.socket.write(authFrame)
+      } else {
+        console.log(
+          '[Discord IPC Log] 🔐 Token recebido via OAuth PKCE! Conectando Socket IPC...',
+        )
+        this.connectDiscordIPC()
+      }
+
+      return {
+        isSuccess: true,
+        data: this.connectedUser,
+      }
+    } catch (error) {
+      console.error('[DiscordAddon] Erro no fluxo OAuth PKCE:', error)
+      return { isSuccess: false, error: (error as Error).message }
+    }
   }
 
-  private async exchangeCodeAndGetUser(code: string) {
+  private async exchangeCodeAndGetUser(
+    code: string,
+    codeVerifier: string,
+    redirectUri: string,
+  ) {
     const CLIENT_ID = '1372352088457220126'
-    const CLIENT_SECRET = '8t0EQSv04PG-odB3IZkuk2JOjcon0qsu'
-    const REDIRECT_URI = 'http://localhost:5353/callback'
 
     const params = new URLSearchParams({
       client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
       grant_type: 'authorization_code',
       code,
-      redirect_uri: REDIRECT_URI,
+      code_verifier: codeVerifier,
+      redirect_uri: redirectUri,
     })
 
     const tokenResponse = await axios.post(
       'https://discord.com/api/oauth2/token',
       params,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
     )
     const accessToken = tokenResponse.data.access_token
 

@@ -4,8 +4,11 @@ import { ICommandRegistry } from './commands/ICommandRegistry'
 import { IDataSourceRegistry } from './datasource/IDataSourceRegistry'
 import { IMenusRegistry } from './menus/IMenusRegistry'
 import { INotificationService } from './notifications/INotificationService'
+import { IOAuthAPI } from './oauth/IOAuthAPI'
 import { ITimeEntriesAPI } from './timer/ITimeEntriesAPI'
 import { ITimerAPI } from './timer/ITimerAPI'
+
+export * from './oauth/IOAuthAPI'
 
 export interface IAddonEventsAPI extends IEventEmitter<ISystemEvents> {
   onTimerStart(
@@ -59,4 +62,5 @@ export interface AddonContext {
   readonly timer: ITimerAPI
   readonly timeEntries: ITimeEntriesAPI
   readonly storage: IAddonStorage
+  readonly oauth: IOAuthAPI
 }
