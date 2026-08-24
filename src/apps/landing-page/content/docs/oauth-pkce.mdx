@@ -19,12 +19,14 @@ O Metric fornece uma API nativa de **OAuth 2.0 com PKCE (Proof Key for Code Exch
 
 ```typescript
 public async handleLogin(context: AddonContext): Promise<void> {
-  // 1. Gera par PKCE
+  // 1. Gera par PKCE e state criptograficamente seguro
   const { codeVerifier, codeChallenge } = context.oauth.generatePKCE()
-  const state = `plugin_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
+  const state = context.oauth.generateState('plugin')
 
   const CLIENT_ID = 'SUA_CLIENT_ID_PUBLICA'
-  const REDIRECT_URI = 'https://metricapp.com.br/oauth/callback'
+  const REDIRECT_URI =
+    process.env.METRIC_OAUTH_REDIRECT_URI ||
+    'http://localhost:3000/oauth/callback'
 
   const authUrl =
     `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}` +
@@ -43,7 +45,7 @@ public async handleLogin(context: AddonContext): Promise<void> {
     throw new Error('Autorização cancelada ou código não recebido.')
   }
 
-  // 3. Troca o código pelo access_token usando PKCE
+  // 3. Troca o código pelo token usando PKCE e validação segura
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     grant_type: 'authorization_code',
@@ -58,9 +60,26 @@ public async handleLogin(context: AddonContext): Promise<void> {
     body: params,
   })
 
-  const { access_token } = await response.json()
+  if (!response.ok) {
+    throw new Error(`Falha na autenticação OAuth: status HTTP ${response.status}`)
+  }
 
-  // 4. Salva o token com segurança no storage do workspace
-  await context.storage.set('accessToken', access_token)
+  const tokenData = await response.json()
+  if (!tokenData.access_token) {
+    throw new Error('access_token não retornado pelo provedor OAuth.')
+  }
+
+  // 4. Salva os dados de token (com suporte a refresh token e expiração) no storage
+  const storedToken = {
+    accessToken: tokenData.access_token,
+    refreshToken: tokenData.refresh_token,
+    tokenType: tokenData.token_type,
+    expiresAt: tokenData.expires_in
+      ? new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
+      : undefined,
+  }
+
+  await context.storage.set('accessToken', storedToken.accessToken)
+  await context.storage.set('tokenData', JSON.stringify(storedToken))
 }
 ```

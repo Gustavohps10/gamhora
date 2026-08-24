@@ -1,8 +1,13 @@
+import path from 'node:path'
+
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   resolve: {
     tsconfigPaths: true,
+    alias: {
+      '@metric-org/sdk': path.resolve(__dirname, './src/apps/sdk/src'),
+    },
   },
   test: {
     globals: true,

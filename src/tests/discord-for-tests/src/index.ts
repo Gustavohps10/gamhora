@@ -1,4 +1,9 @@
-import type { AddonContext, AddonSettingsSchema, IAddon } from '@metric-org/sdk'
+import {
+  AddonContext,
+  AddonSettingsSchema,
+  formatStoredToken,
+  IAddon,
+} from '@metric-org/sdk'
 import axios from 'axios'
 import net from 'net'
 
@@ -191,6 +196,7 @@ export default class DiscordAddon implements IAddon {
     }
     if (this.context) {
       await this.context.storage.delete('accessToken')
+      await this.context.storage.delete('tokenData')
       await this.context.storage.delete('discordUser')
       this.context.notifications.info(
         'Conta do Discord desconectada neste workspace.',
@@ -259,8 +265,22 @@ export default class DiscordAddon implements IAddon {
       )
 
       if (this.context) {
-        this.context.storage.get('accessToken').then((storedToken) => {
-          const token = this.accessToken || storedToken
+        Promise.all([
+          this.context.storage.get('tokenData'),
+          this.context.storage.get('accessToken'),
+        ]).then(([storedTokenData, storedAccessToken]) => {
+          let token = this.accessToken
+          if (!token && storedTokenData) {
+            try {
+              const parsed = JSON.parse(storedTokenData)
+              token = parsed.accessToken
+            } catch {
+              // ignore
+            }
+          }
+          if (!token) {
+            token = storedAccessToken
+          }
           if (token) {
             this.connectedUser = { ...user, avatarUrl }
             this.context!.storage.set(
@@ -425,7 +445,7 @@ export default class DiscordAddon implements IAddon {
 
     try {
       const { codeVerifier, codeChallenge } = this.context.oauth.generatePKCE()
-      const state = `discord_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
+      const state = this.context.oauth.generateState('discord')
 
       const CLIENT_ID = '1372352088457220126'
       const REDIRECT_URI =
@@ -457,7 +477,7 @@ export default class DiscordAddon implements IAddon {
         '[DiscordAddon] 🔑 Código OAuth recebido via Deep Link! Trocando via PKCE...',
       )
 
-      const { user: discordUser, accessToken } =
+      const { user: discordUser, storedToken } =
         await this.exchangeCodeAndGetUser(
           result.code,
           codeVerifier,
@@ -473,10 +493,11 @@ export default class DiscordAddon implements IAddon {
         ? `https://cdn.discordapp.com/avatars/${id}/${avatar}.png?size=128`
         : undefined
 
-      this.accessToken = accessToken
+      this.accessToken = storedToken.accessToken
       this.connectedUser = { ...discordUser, avatarUrl }
 
-      await this.context.storage.set('accessToken', accessToken)
+      await this.context.storage.set('accessToken', storedToken.accessToken)
+      await this.context.storage.set('tokenData', JSON.stringify(storedToken))
       await this.context.storage.set(
         'discordUser',
         JSON.stringify(this.connectedUser),
@@ -542,13 +563,31 @@ export default class DiscordAddon implements IAddon {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
+        validateStatus: () => true,
       },
     )
-    const accessToken = tokenResponse.data.access_token
+
+    if (tokenResponse.status < 200 || tokenResponse.status >= 300) {
+      const errDetail =
+        tokenResponse.data?.error_description ||
+        tokenResponse.data?.error ||
+        `HTTP ${tokenResponse.status}`
+      throw new Error(`Falha ao obter token OAuth: ${errDetail}`)
+    }
+
+    const storedToken = formatStoredToken(tokenResponse.data)
 
     const userResponse = await axios.get('https://discord.com/api/users/@me', {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${storedToken.accessToken}` },
+      validateStatus: () => true,
     })
-    return { user: userResponse.data, accessToken }
+
+    if (userResponse.status < 200 || userResponse.status >= 300) {
+      throw new Error(
+        `Falha ao obter dados do usuário: HTTP ${userResponse.status}`,
+      )
+    }
+
+    return { user: userResponse.data, storedToken }
   }
 }

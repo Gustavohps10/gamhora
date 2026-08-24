@@ -14,15 +14,14 @@ function OAuthCallbackContent() {
     const error = searchParams.get('error')
     const errorDescription = searchParams.get('error_description')
 
-    if (error) {
-      setHasError(true)
-      setErrorMessage(errorDescription || error)
-      return
-    }
-
     const query = searchParams.toString()
     const targetUrl = `metric-app://oauth/callback${query ? `?${query}` : ''}`
     setDeepLinkUrl(targetUrl)
+
+    if (error) {
+      setHasError(true)
+      setErrorMessage(errorDescription || error)
+    }
 
     // Attempt automatic redirect to desktop app protocol
     try {

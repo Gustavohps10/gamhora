@@ -6,6 +6,7 @@ import {
   AddonSettingsTab,
   AddonTheme,
   CommandHandler,
+  generateOAuthState,
   generatePKCE,
   IAddon,
   IAddonEventsAPI,
@@ -194,6 +195,7 @@ export class AddonLoader {
   private pendingOAuthRequests = new Map<
     string,
     {
+      addonId: string
       resolve: (val: OAuthResult) => void
       reject: (err: Error) => void
       timeoutId: NodeJS.Timeout
@@ -561,25 +563,82 @@ export class AddonLoader {
 
     const oauth: IOAuthAPI = {
       generatePKCE: () => generatePKCE(),
+      generateState: (prefix?: string) => generateOAuthState(prefix || addonId),
       authorize: (options: OAuthAuthorizeOptions) => {
         return new Promise<OAuthResult>((resolve, reject) => {
-          const state =
-            options.state ||
-            `${addonId}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`
-          const timeoutMs = options.timeoutMs || 120000
+          try {
+            if (!options || !options.authUrl) {
+              return reject(
+                new Error('URL de autorização (authUrl) é obrigatória.'),
+              )
+            }
 
-          const timeoutId = setTimeout(() => {
-            this.pendingOAuthRequests.delete(state)
-            reject(new Error('Tempo limite de autenticação esgotado.'))
-          }, timeoutMs)
+            let parsedUrl: URL
+            try {
+              parsedUrl = new URL(options.authUrl)
+            } catch {
+              return reject(
+                new Error(`URL de autorização inválida: "${options.authUrl}"`),
+              )
+            }
 
-          this.pendingOAuthRequests.set(state, {
-            resolve,
-            reject,
-            timeoutId,
-          })
+            const isHttps = parsedUrl.protocol === 'https:'
+            const isLocalDevelopment =
+              parsedUrl.protocol === 'http:' &&
+              (parsedUrl.hostname === 'localhost' ||
+                parsedUrl.hostname === '127.0.0.1')
 
-          shell.openExternal(options.authUrl)
+            if (!isHttps && !isLocalDevelopment) {
+              return reject(
+                new Error(
+                  'Protocolo de URL inválido. Utilize HTTPS ou HTTP somente para localhost/127.0.0.1 em desenvolvimento.',
+                ),
+              )
+            }
+
+            const state = options.state ?? generateOAuthState(addonId)
+            const existingStateInUrl = parsedUrl.searchParams.get('state')
+
+            if (existingStateInUrl && existingStateInUrl !== state) {
+              return reject(
+                new Error(
+                  'Inconsistência de state: o state da authUrl não corresponde ao state esperado.',
+                ),
+              )
+            }
+
+            parsedUrl.searchParams.set('state', state)
+
+            const timeoutMs =
+              options.timeoutMs && options.timeoutMs > 0
+                ? options.timeoutMs
+                : 120000
+
+            const timeoutId = setTimeout(() => {
+              this.pendingOAuthRequests.delete(state)
+              reject(new Error('Tempo limite de autenticação esgotado.'))
+            }, timeoutMs)
+
+            this.pendingOAuthRequests.set(state, {
+              addonId,
+              resolve,
+              reject,
+              timeoutId,
+            })
+
+            const finalUrl = parsedUrl.toString()
+            Promise.resolve(shell.openExternal(finalUrl)).catch((err) => {
+              clearTimeout(timeoutId)
+              this.pendingOAuthRequests.delete(state)
+              reject(
+                new Error(
+                  `Falha ao abrir navegador para autorização: ${err instanceof Error ? err.message : String(err)}`,
+                ),
+              )
+            })
+          } catch (err) {
+            reject(err instanceof Error ? err : new Error(String(err)))
+          }
         })
       },
     }
@@ -601,13 +660,27 @@ export class AddonLoader {
 
   public handleOAuthCallbackUrl(rawUrl: string): boolean {
     try {
-      if (!rawUrl.startsWith('metric-app://oauth/callback')) {
+      if (!rawUrl || typeof rawUrl !== 'string') {
         return false
       }
 
-      console.log(`[AddonLoader] 🔗 Deep Link OAuth recebido: ${rawUrl}`)
-      const parsed = new URL(
-        rawUrl.replace('metric-app://', 'http://localhost/'),
+      if (!rawUrl.startsWith('metric-app://')) {
+        return false
+      }
+
+      let parsed: URL
+      try {
+        parsed = new URL(rawUrl.replace('metric-app://', 'http://localhost/'))
+      } catch {
+        return false
+      }
+
+      if (parsed.pathname !== '/oauth/callback') {
+        return false
+      }
+
+      console.log(
+        '[AddonLoader] 🔗 Deep Link OAuth recebido em /oauth/callback',
       )
       const params: Record<string, string> = {}
       parsed.searchParams.forEach((val, key) => {
@@ -618,39 +691,38 @@ export class AddonLoader {
       const code = params.code
       const error = params.error || params.error_description
 
-      if (state && this.pendingOAuthRequests.has(state)) {
-        const req = this.pendingOAuthRequests.get(state)!
-        clearTimeout(req.timeoutId)
-        this.pendingOAuthRequests.delete(state)
-
-        if (error) {
-          req.reject(new Error(error))
-        } else if (code) {
-          req.resolve({ code, state, ...params })
-        } else {
-          req.reject(new Error('Código de autorização não retornado.'))
-        }
-        return true
+      if (!state) {
+        console.warn(
+          '[AddonLoader] ⚠️ Callback OAuth ignorado: state ausente no Deep Link.',
+        )
+        return false
       }
 
-      if (this.pendingOAuthRequests.size === 1) {
-        const [firstState, req] = Array.from(
-          this.pendingOAuthRequests.entries(),
-        )[0]
-        clearTimeout(req.timeoutId)
-        this.pendingOAuthRequests.delete(firstState)
-
-        if (error) {
-          req.reject(new Error(error))
-        } else if (code) {
-          req.resolve({ code, state: firstState, ...params })
-        } else {
-          req.reject(new Error('Código de autorização não retornado.'))
-        }
-        return true
+      const req = this.pendingOAuthRequests.get(state)
+      if (!req) {
+        console.warn(
+          `[AddonLoader] ⚠️ Callback OAuth ignorado: state "${state}" desconhecido ou expirado.`,
+        )
+        return false
       }
 
-      return false
+      // Prevenção de replay: remove imediatamente e cancela timeout antes de resolver/rejeitar
+      clearTimeout(req.timeoutId)
+      this.pendingOAuthRequests.delete(state)
+
+      if (error) {
+        const errorDesc =
+          params.error && params.error_description
+            ? `${params.error}: ${params.error_description}`
+            : error
+        req.reject(new Error(errorDesc))
+      } else if (code) {
+        req.resolve({ code, state, ...params })
+      } else {
+        req.reject(new Error('Código de autorização não retornado.'))
+      }
+
+      return true
     } catch (err) {
       console.error(
         '❌ [AddonLoader] Erro ao processar callback OAuth deep link:',
@@ -671,6 +743,15 @@ export class AddonLoader {
   }
 
   public async deactivateAddon(addonId: string): Promise<void> {
+    for (const [state, req] of this.pendingOAuthRequests.entries()) {
+      if (req.addonId === addonId) {
+        clearTimeout(req.timeoutId)
+        this.pendingOAuthRequests.delete(state)
+        req.reject(
+          new Error(`Addon '${addonId}' desativado durante a autenticação.`),
+        )
+      }
+    }
     const item = this.activeAddons.get(addonId)
     if (item && item.instance.deactivate) {
       await item.instance.deactivate()

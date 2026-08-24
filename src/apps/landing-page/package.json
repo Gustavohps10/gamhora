@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "clean": "rimraf .next dist .turbo",
     "start": "next start",
     "lint": "eslint"
   },
