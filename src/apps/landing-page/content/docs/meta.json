@@ -1,14 +1,13 @@
 {
-  "title": "Documentação do SDK",
+  "title": "Documentação",
   "pages": [
+    "---Começando---",
     "index",
+    "sync-engine",
     "quickstart",
+    "---Extensões---",
     "categories",
-    "datasources",
-    "watchers",
-    "calendars",
-    "punch",
-    "oauth-pkce",
-    "storage-and-events"
+    "---APIs & Segurança---",
+    "apis"
   ]
 }

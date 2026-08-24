@@ -1,0 +1,103 @@
+---
+title: Punch
+description: Integração com sistemas de controle de ponto corporativo para registro e conferência de horas de trabalho.
+---
+
+# Punch (Ponto Eletrônico & Jornada)
+
+Os addons da categoria **Punch** integram o Metric a sistemas formais de **Bate-Ponto e Controle de Ponto Eletrônico** (como Pontomais, Ahgora, Factorial, Secullum e Kairos).
+
+A finalidade do Punch é permitir que o usuário bata o ponto diretamente pelo Metric e realize a **conferência automática de jornada** — comparando o saldo de horas trabalhadas do dia com o total de horas alocadas em tarefas e projetos.
+
+---
+
+## 🎯 Principais Recursos
+
+- **Batida de Ponto Rápida**: Botão de 1 clique no menu de contexto ou atalho de teclado para registrar Entrada, Intervalo e Saída.
+- **Auditoria de Horas (Jornada vs. Apontamentos)**: Exibe a diferença entre o tempo formal de trabalho e o tempo apontado em tarefas no DataSource, evitando inconsistências ao final do mês.
+- **Histórico e Espelho de Ponto**: Visualização do extrato diário de batidas diretamente no Metric.
+
+---
+
+## 💻 Exemplo de Implementação de Punch
+
+```typescript
+import type { IAddon, AddonContext, AddonSettingsField } from '@metric-org/sdk'
+
+export interface PunchRecordDTO {
+  id: string
+  timestamp: Date
+  type: 'in' | 'out' | 'break_start' | 'break_end'
+  source: string
+}
+
+export default class PontoCorporativoAddon implements IAddon {
+  public id = 'ponto-corporativo'
+  public name = 'Ponto Corporativo Integration'
+  public version = '1.0.0'
+  public description = 'Bate-ponto integrado com conferência de jornada'
+
+  private context?: AddonContext
+
+  public settingsFields: AddonSettingsField[] = [
+    {
+      key: 'pontoApiUrl',
+      label: 'URL da API de Ponto',
+      type: 'text',
+      required: true,
+      description: 'Endereço da API do sistema de ponto da empresa.',
+    },
+    {
+      key: 'pontoToken',
+      label: 'Token de Acesso / Chave do Colaborador',
+      type: 'password',
+      required: true,
+    },
+  ]
+
+  public async onActivate(context: AddonContext): Promise<void> {
+    this.context = context
+    console.log('[Punch] Addon de Ponto ativado!')
+  }
+
+  public async onDeactivate(): Promise<void> {
+    this.context = undefined
+  }
+
+  // Executa uma nova batida de ponto
+  public async registerPunch(type: 'in' | 'out' | 'break_start' | 'break_end'): Promise<PunchRecordDTO> {
+    const apiUrl = await this.context?.storage.get('pontoApiUrl')
+    const token = await this.context?.storage.get('pontoToken')
+
+    const response = await fetch(`${apiUrl}/punches`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        type,
+        timestamp: new Date().toISOString(),
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Falha ao registrar batida de ponto: HTTP ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    await this.context?.notifications.show({
+      title: 'Ponto Registrado',
+      body: `Batida de ponto (${type}) realizada com sucesso!`,
+    })
+
+    return {
+      id: data.id,
+      timestamp: new Date(data.timestamp),
+      type,
+      source: 'Metric Desktop',
+    }
+  }
+}
+```

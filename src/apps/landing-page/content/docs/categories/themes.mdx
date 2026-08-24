@@ -1,0 +1,85 @@
+---
+title: Themes
+description: Como criar temas visuais personalizados, paletas de cores e estilos para a interface do Metric.
+---
+
+# Themes (Temas & Customização Visual)
+
+Os addons da categoria **Themes** permitem personalizar completamente a estética visual do Metric — definindo paletas de cores para modos Claro (Light) e Escuro (Dark), contrastes, bordas e tipografia.
+
+O Metric adota o padrão de design system baseado em **Tokens CSS** (compatível com Tailwind CSS e shadcn/ui), tornando a criação de novos temas simples e declarativa.
+
+---
+
+## 🎨 Estrutura de um Tema
+
+Um tema exporta as variáveis de cores correspondentes aos papéis de interface:
+
+```typescript
+export interface ThemeDefinition {
+  id: string
+  name: string
+  version: string
+  description?: string
+  author?: string
+  colors: {
+    light: Record<string, string>
+    dark: Record<string, string>
+  }
+}
+```
+
+---
+
+## 💻 Exemplo de Implementação de Tema
+
+```typescript
+import type { IAddon, AddonContext } from '@metric-org/sdk'
+
+export default class CyberpunkThemeAddon implements IAddon {
+  public id = 'cyberpunk-theme'
+  public name = 'Cyberpunk Neon Theme'
+  public version = '1.0.0'
+  public description = 'Tema com estética cyberpunk e cores neon vibrantes'
+
+  public theme = {
+    id: 'cyberpunk',
+    name: 'Cyberpunk Neon',
+    colors: {
+      light: {
+        '--background': '0 0% 100%',
+        '--foreground': '240 10% 3.9%',
+        '--primary': '326 100% 50%', // Pink Neon
+        '--primary-foreground': '0 0% 98%',
+        '--card': '0 0% 100%',
+        '--card-foreground': '240 10% 3.9%',
+        '--border': '240 5.9% 90%',
+      },
+      dark: {
+        '--background': '260 25% 8%',   // Roxo Escuro Profundo
+        '--foreground': '180 100% 95%',  // Ciano Claro
+        '--primary': '180 100% 50%',     // Ciano Neon
+        '--primary-foreground': '260 25% 8%',
+        '--card': '260 20% 12%',
+        '--card-foreground': '180 100% 95%',
+        '--border': '260 20% 20%',
+      },
+    },
+  }
+
+  public async onActivate(context: AddonContext): Promise<void> {
+    console.log('[Theme] Tema Cyberpunk carregado com sucesso!')
+  }
+
+  public async onDeactivate(): Promise<void> {
+    console.log('[Theme] Tema Cyberpunk desativado.')
+  }
+}
+```
+
+---
+
+## ⚙️ Como o Metric Aplica os Temas
+
+1. Quando o usuário seleciona o tema nas preferências do Metric, o Core injeta dinamicamente as variáveis CSS na raiz do DOM (`:root` ou classe `.dark`).
+2. Todos os componentes da interface (Time Bar, Listas de Tarefas, Modais e Menus) atualizam suas cores instantaneamente sem necessidade de recarregar a janela.

@@ -1,0 +1,77 @@
+---
+title: Observers & Watchers
+description: Como criar observadores em segundo plano, escutar eventos do sistema e emitir sugestões de apontamento com 1 clique.
+---
+
+# Observers & Watchers de Atividade
+
+Os **Watchers** (ou Observers) são plugins projetados para monitorar passivamente o fluxo de trabalho do usuário no computador — como presença em canais de voz, commits em repositórios Git, arquivos abertos em IDEs ou períodos de inatividade.
+
+O objetivo de um Watcher é emitir **Sugestões Inteligentes de Apontamento** para que o usuário registre suas horas com apenas **1 clique**, sem digitação manual.
+
+---
+
+## 🎧 Casos de Uso Comuns
+
+- **Monitor de Reuniões**: Detecta entrada e saída de chamadas de voz no Discord, Google Meet ou Slack e sugere o apontamento da reunião com a duração exata.
+- **Detector de Inatividade (Idle)**: Escuta o evento `onIdleDetected` do Metric e sugere pausar o cronômetro ou alocar o tempo ausente.
+- **Monitor de Git / IDE**: Observa branches de desenvolvimento e sugere apontamentos vinculados aos tickets das branches trabalhadas no dia.
+
+---
+
+## 💻 Exemplo Prático de um Watcher
+
+```typescript
+import type { IAddon, AddonContext, AddonSettingsField } from '@metric-org/sdk'
+
+export default class ReuniõesWatcherAddon implements IAddon {
+  public id = 'reunioes-watcher'
+  public name = 'Watcher de Reuniões'
+  public version = '1.0.0'
+  public description = 'Detecta chamadas e sugere apontamentos de reuniões'
+
+  private context?: AddonContext
+
+  public settingsFields: AddonSettingsField[] = [
+    {
+      key: 'atividadePadrao',
+      label: 'ID da Atividade de Reunião',
+      type: 'text',
+      description: 'Código da atividade padrão para reuniões no seu DataSource.',
+    },
+  ]
+
+  public async onActivate(context: AddonContext): Promise<void> {
+    this.context = context
+
+    // 1. Escutando eventos do sistema nativo
+    context.events.onSystemIdle?.((idleTimeSeconds) => {
+      console.log(`[Watcher] Usuário inativo por ${idleTimeSeconds} segundos.`)
+    })
+  }
+
+  public async onDeactivate(): Promise<void> {
+    this.context = undefined
+  }
+
+  // Emite a sugestão para a interface do Metric
+  public async emitirSugestaoDeApontamento(titulo: string, duracaoSegundos: number): Promise<void> {
+    if (!this.context) return
+
+    await this.context.notifications.show({
+      title: 'Sugestão de Apontamento',
+      body: `Deseja registrar ${Math.round(duracaoSegundos / 60)} min em "${titulo}"?`,
+    })
+
+    console.log(`[Sugestão Gerada] ${titulo} - ${duracaoSegundos}s`)
+  }
+}
+```
+
+---
+
+## ⚡ Como a Interface Processa as Sugestões
+
+1. O Watcher identifica o término de uma atividade contextual e dispara uma notificação ou evento.
+2. O Metric exibe um **card de sugestão contextual** na tela de *Time Entries*.
+3. O usuário pode clicar em **Aceitar** (salvando o apontamento imediatamente com os dados sugeridos) ou **Descartar**.

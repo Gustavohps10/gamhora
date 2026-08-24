@@ -1,0 +1,11 @@
+{
+  "title": "Categorias de Addons",
+  "pages": [
+    "index",
+    "datasources",
+    "watchers",
+    "calendars",
+    "themes",
+    "punch"
+  ]
+}
