@@ -1,5 +1,6 @@
-import { AddonContext, IAddon } from '@metric-org/sdk'
+import { AddonContext, AddonSettingsSchema, IAddon } from '@metric-org/sdk'
 
+import { redmineSettingsSchema } from './configFields'
 import { RedmineDataSource } from './RedmineDataSource'
 
 export default class Redmine4TestAddon implements IAddon {
@@ -9,6 +10,10 @@ export default class Redmine4TestAddon implements IAddon {
       'https://raw.githubusercontent.com/Gustavohps10/redmine-plugin/main/src/icon.png',
   }
   private dataSource = new RedmineDataSource()
+
+  async getSettingsSchema(): Promise<AddonSettingsSchema> {
+    return redmineSettingsSchema
+  }
 
   activate(context: AddonContext): void {
     // 1. Registra capacidade de DataSource

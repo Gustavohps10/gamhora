@@ -1,4 +1,3 @@
-import type { IHttpClient } from '@metric-org/adapters/contracts'
 import type {
   IAuthenticationStrategy,
   IMemberQuery,
@@ -9,20 +8,8 @@ import type {
   ITimeEntryRepository,
 } from '@metric-org/application'
 
-export interface ConfigField {
-  id: string
-  label: string
-  type: 'text' | 'password' | 'url'
-  required: boolean
-  placeholder?: string
-}
-
-export interface FieldGroup {
-  id: string
-  label: string
-  description?: string
-  fields: ConfigField[]
-}
+import { AddonSettingsGroup } from './contracts/IAddon'
+import type { IHttpClient } from './contracts/IHttpClient'
 
 export interface DataSourceContext {
   httpClient: IHttpClient
@@ -35,8 +22,8 @@ export interface IDataSource {
   readonly dataSourceType: string
   readonly displayName: string
   readonly configFields: {
-    credentials: FieldGroup[]
-    configuration: FieldGroup[]
+    credentials: AddonSettingsGroup[]
+    configuration: AddonSettingsGroup[]
   }
 
   getAuthenticationStrategy(context: DataSourceContext): IAuthenticationStrategy

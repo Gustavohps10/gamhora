@@ -1,6 +1,6 @@
-import { FieldGroup } from '@metric-org/sdk'
+import { AddonSettingsGroup, AddonSettingsTab } from '@metric-org/sdk'
 
-export const credentialFieldGroups: FieldGroup[] = [
+export const credentialFieldGroups: AddonSettingsGroup[] = [
   {
     id: 'auth-keys',
     label: 'Chaves de Acesso',
@@ -9,19 +9,17 @@ export const credentialFieldGroups: FieldGroup[] = [
         id: 'apiKey',
         label: 'Chave de Acesso à API (REST)',
         type: 'password',
-        required: true,
       },
       {
         id: 'atomKey',
         label: 'Chave de Acesso ao Atom (RSS)',
         type: 'password',
-        required: true,
       },
     ],
   },
 ]
 
-export const configurationFieldGroups: FieldGroup[] = [
+export const configurationFieldGroups: AddonSettingsGroup[] = [
   {
     id: 'connection',
     label: 'Configuração da Conexão',
@@ -29,10 +27,66 @@ export const configurationFieldGroups: FieldGroup[] = [
       {
         id: 'apiUrl',
         label: 'URL da sua instância Redmine',
-        type: 'url',
-        required: true,
+        type: 'text',
         placeholder: 'https://redmine.suaempresa.com',
       },
     ],
+  },
+]
+
+export const customFieldGroups: AddonSettingsGroup[] = [
+  {
+    id: 'custom-mappings',
+    label: 'Configurações Avançadas e Logs',
+    description:
+      'Defina preferências de sincronização e armazenamento local para este addon.',
+    fields: [
+      {
+        id: 'customFieldEnableAutoSync',
+        label: 'Sincronização Automática de Metadados',
+        type: 'boolean',
+        defaultValue: true,
+        description:
+          'Habilita a sincronização periódica de metadados da instância.',
+      },
+      {
+        id: 'customFieldSyncInterval',
+        label: 'Intervalo de Sincronização (minutos)',
+        type: 'number',
+        defaultValue: 15,
+        description: 'Tempo entre cada ciclo de sincronização automática.',
+      },
+      {
+        id: 'customFieldLogLevel',
+        label: 'Nível de Detalhamento de Log',
+        type: 'select',
+        defaultValue: 'info',
+        description:
+          'Nível de log interno gerado durante a execução do plugin.',
+        options: [
+          { label: 'Informativo (Info)', value: 'info' },
+          { label: 'Depuração (Debug)', value: 'debug' },
+          { label: 'Avisos Apenas (Warning)', value: 'warning' },
+          { label: 'Erros Apenas (Error)', value: 'error' },
+        ],
+      },
+      {
+        id: 'customFieldExportDirectory',
+        label: 'Diretório Local de Logs / Cache',
+        type: 'directory',
+        placeholder: '/caminho/para/logs',
+        description:
+          'Selecione o diretório local onde os relatórios e logs serão gravados.',
+      },
+    ],
+  },
+]
+
+export const redmineSettingsSchema: AddonSettingsTab[] = [
+  {
+    id: 'custom-fields',
+    label: 'Configurações Avançadas',
+    description: 'Preferências de execução, sincronização e logs locais',
+    groups: customFieldGroups,
   },
 ]

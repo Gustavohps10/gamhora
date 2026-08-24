@@ -1,6 +1,6 @@
 AddonId: meu-addon-exemplo
 Version: 1.0.0
-Type: Generic
+Category: DataSources
 Name: Meu Addon Exemplo
 Author: Gustavo Henrique
 ShortDescription: Addon de exemplo para testes

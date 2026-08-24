@@ -169,6 +169,12 @@ export function openIpcRoutes(
   IpcHandler.register('ADDON_GET_SCHEMA', (e, req) =>
     addonsHandler.getSchema(e, req),
   )
+  IpcHandler.register('ADDON_GET_SETTINGS', (e, req) =>
+    addonsHandler.getSettings(e, req),
+  )
+  IpcHandler.register('ADDON_SAVE_SETTINGS', (e, req) =>
+    addonsHandler.saveSettings(e, req),
+  )
   IpcHandler.register('ADDON_EXECUTE_ACTION', (e, req) =>
     addonsHandler.executeAction(e, req),
   )

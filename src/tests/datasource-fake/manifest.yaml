@@ -1,6 +1,6 @@
 AddonId: metric-datasource-fake
 Version: 1.0.0
-Type: DataSource
+Category: DataSources
 Name: DataSource Fake (Testes)
 Author: Metric
 ShortDescription: Datasource mock para testes

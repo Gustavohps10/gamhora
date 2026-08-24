@@ -2,6 +2,8 @@ import { ICredentialsStorage } from '@metric-org/application'
 import {
   AddonContext,
   AddonSettingsField,
+  AddonSettingsSchema,
+  AddonSettingsTab,
   CommandHandler,
   generatePKCE,
   IAddon,
@@ -671,10 +673,98 @@ export class AddonLoader {
 
   public async getSettingsSchema(
     addonId: string,
-  ): Promise<AddonSettingsField[]> {
+  ): Promise<AddonSettingsSchema> {
     const item = this.activeAddons.get(addonId)
-    if (!item?.instance?.getSettingsSchema) return []
-    return await item.instance.getSettingsSchema()
+    if (!item?.instance) return []
+
+    let schema: AddonSettingsSchema = []
+
+    if (item.instance.getSettingsSchema) {
+      schema = await item.instance.getSettingsSchema()
+    }
+
+    const dataSources = this.dataSourceRegistry.getItems()
+    const isDataSource = dataSources.some((d) => d.id === addonId)
+
+    if (isDataSource) {
+      const instancesTab: AddonSettingsTab = {
+        id: 'instances',
+        label: 'Instâncias',
+        fields: [
+          {
+            id: 'connection-manager',
+            type: 'datasource-instances',
+            label: 'Instâncias Conectadas',
+          },
+        ],
+      }
+
+      if (Array.isArray(schema)) {
+        if (
+          schema.length > 0 &&
+          !('groups' in schema[0]) &&
+          !('fields' in schema[0])
+        ) {
+          // Schema is a flat array of fields. Convert to tabs.
+          const fields = schema as AddonSettingsField[]
+          schema = [
+            instancesTab,
+            {
+              id: 'general',
+              label: 'Geral',
+              fields,
+            },
+          ]
+        } else {
+          // Schema is already tabs (or empty)
+          const tabs = schema as AddonSettingsTab[]
+          schema = [instancesTab, ...tabs]
+        }
+      } else {
+        schema = [instancesTab]
+      }
+    }
+
+    return schema
+  }
+
+  public async getAddonSettings(
+    addonId: string,
+  ): Promise<Record<string, unknown>> {
+    if (!this.activeWorkspaceId) return {}
+    const workspaceId = this.activeWorkspaceId
+    const masterKey = `ws_${workspaceId}_config`
+    const raw = await this.credentialsStorage.getToken(addonId, masterKey)
+    if (!raw) return {}
+    try {
+      return (JSON.parse(raw) as Record<string, unknown>) ?? {}
+    } catch {
+      return {}
+    }
+  }
+
+  public async saveAddonSettings(
+    addonId: string,
+    settings: Record<string, unknown>,
+  ): Promise<void> {
+    if (!this.activeWorkspaceId) return
+    const workspaceId = this.activeWorkspaceId
+    const masterKey = `ws_${workspaceId}_config`
+    let data: Record<string, unknown> = {}
+    const raw = await this.credentialsStorage.getToken(addonId, masterKey)
+    if (raw) {
+      try {
+        data = (JSON.parse(raw) as Record<string, unknown>) ?? {}
+      } catch {
+        data = {}
+      }
+    }
+    Object.assign(data, settings)
+    await this.credentialsStorage.saveToken(
+      addonId,
+      masterKey,
+      JSON.stringify(data),
+    )
   }
 
   public async executeAction(
@@ -752,6 +842,20 @@ export class AddonLoader {
     } catch (err) {
       console.error(
         '❌ [AddonLoader] Erro ao carregar addon DiscordForTests:',
+        err,
+      )
+    }
+
+    try {
+      const fakeDsModule = await import('@metric-org/datasource-fake')
+      const FakeDataSourceAddon = fakeDsModule.default
+      if (FakeDataSourceAddon && typeof FakeDataSourceAddon === 'function') {
+        const addonInstance = new (FakeDataSourceAddon as new () => IAddon)()
+        await this.activateAddon('metric-datasource-fake', addonInstance)
+      }
+    } catch (err) {
+      console.error(
+        '❌ [AddonLoader] Erro ao carregar addon FakeDataSource:',
         err,
       )
     }

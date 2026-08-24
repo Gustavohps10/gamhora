@@ -19,21 +19,6 @@ import {
   UpdateWorkspaceIdentityInput,
 } from '@/contracts/use-cases'
 
-export interface ConfigField {
-  id: string
-  label: string
-  type: 'text' | 'password' | 'url'
-  required: boolean
-  placeholder?: string
-}
-
-export interface FieldGroup {
-  id: string
-  label: string
-  description?: string
-  fields: ConfigField[]
-}
-
 export interface IWorkspacesAPI {
   create(
     input: IRequest<{
@@ -54,8 +39,8 @@ export interface IWorkspacesAPI {
   listAll(): Promise<PaginatedViewModel<WorkspaceViewModel[]>>
 
   getDataSourceFields(input: IRequest<{ pluginId: string }>): Promise<{
-    credentials: FieldGroup[]
-    configuration: FieldGroup[]
+    credentials: AddonSettingsGroup[]
+    configuration: AddonSettingsGroup[]
   }>
 
   linkDataSource(
@@ -209,6 +194,13 @@ export interface AddonManifest {
   installerManifestUrl?: string
   sourceUrl?: string
   tags?: string[]
+  category?:
+    | 'DataSources'
+    | 'Watchers'
+    | 'Calendars'
+    | 'Punch'
+    | 'Themes'
+    | string
 }
 
 export interface AddonInstaller {
@@ -265,14 +257,32 @@ export type AddonTimerbarMenuItem =
   | AddonTimerbarActionItem
   | AddonTimerbarPopoverItem
 
-export type AddonSettingsFieldType = 'button' | 'text' | 'password' | 'checkbox'
+export type AddonSettingsFieldType =
+  | 'text'
+  | 'password'
+  | 'number'
+  | 'boolean'
+  | 'select'
+  | 'button'
+  | 'file'
+  | 'directory'
+  | 'datasource-instances'
+  | 'info-card'
+
+export interface AddonSettingsOption {
+  label: string
+  value: string | number | boolean
+}
 
 export interface AddonSettingsField {
   id: string
   type: AddonSettingsFieldType
   label: string
-  defaultValue?: unknown
+  defaultValue?: any
   description?: string
+  placeholder?: string
+  options?: AddonSettingsOption[] // For select
+  actionId?: string // For button
   variant?:
     | 'default'
     | 'destructive'
@@ -280,6 +290,40 @@ export interface AddonSettingsField {
     | 'secondary'
     | 'ghost'
     | 'link'
+  display?: {
+    title?: string
+    message?: string
+    avatarUrl?: string
+    data?: Record<string, string>
+  } // For info-card
+}
+
+export interface AddonSettingsGroup {
+  id: string
+  label: string
+  description?: string
+  fields: AddonSettingsField[]
+}
+
+export interface AddonSettingsTab {
+  id: string
+  label: string
+  description?: string
+  groups?: AddonSettingsGroup[]
+  fields?: AddonSettingsField[]
+}
+
+export type AddonSettingsSchema = AddonSettingsTab[] | AddonSettingsField[]
+
+export interface AddonActionResponse {
+  isSuccess: boolean
+  error?: string
+  display?: {
+    title?: string
+    message?: string
+    avatarUrl?: string
+    data?: Record<string, string>
+  }
 }
 
 export interface IAddonsAPI {
@@ -322,10 +366,16 @@ export interface IAddonsAPI {
 
   getSchema(
     payload: IRequest<{ addonId: string }>,
-  ): Promise<ViewModel<AddonSettingsField[]>>
+  ): Promise<ViewModel<AddonSettingsSchema>>
+  getSettings(
+    payload: IRequest<{ addonId: string }>,
+  ): Promise<ViewModel<Record<string, unknown>>>
+  saveSettings(
+    payload: IRequest<{ addonId: string; settings: Record<string, unknown> }>,
+  ): Promise<ViewModel<void>>
   executeAction(
     payload: IRequest<{ addonId: string; actionId: string; payload?: unknown }>,
-  ): Promise<ViewModel<void>>
+  ): Promise<ViewModel<AddonActionResponse>>
   setActiveWorkspace(
     payload: IRequest<{ workspaceId: string }>,
   ): Promise<ViewModel<void>>

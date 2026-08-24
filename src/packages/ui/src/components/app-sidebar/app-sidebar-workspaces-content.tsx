@@ -43,6 +43,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useAddonsModalStore } from '@/stores/addonsModalStore'
 
 interface NavItem {
   title: string
@@ -51,6 +52,7 @@ interface NavItem {
   isPro?: boolean
   isBlocked?: boolean
   blockedReason?: string
+  onClick?: () => void
 }
 
 const personalItems: NavItem[] = [
@@ -110,8 +112,9 @@ const teamItems: NavItem[] = [
 const integrationItems: NavItem[] = [
   {
     title: 'Addons',
-    path: 'addons/store',
+    path: '',
     icon: PuzzleIcon,
+    onClick: () => useAddonsModalStore.getState().openModal(),
   },
 ]
 
@@ -151,6 +154,27 @@ function SidebarNavItem({
 }: SidebarNavItemProps) {
   if (item.isBlocked) {
     return <SidebarBlockedNavItem item={item} />
+  }
+
+  if (item.onClick) {
+    return (
+      <SidebarMenuItem className={nested ? 'ml-2' : undefined}>
+        <SidebarMenuButton
+          size={nested ? 'sm' : 'default'}
+          onClick={item.onClick}
+          className="flex w-full cursor-pointer items-center justify-between"
+        >
+          <div className="flex items-center gap-2">
+            <item.icon
+              size={nested ? 16 : 18}
+              className={nested ? 'text-foreground/60' : 'text-foreground/70'}
+            />
+            <span>{item.title}</span>
+          </div>
+          {item.isPro && <ProBadge />}
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    )
   }
 
   return (

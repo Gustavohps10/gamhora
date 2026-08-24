@@ -1,8 +1,13 @@
-import { IHttpClient } from '@metric-org/adapters/contracts'
+export interface IHttpClient {
+  get<T = unknown>(url: string, config?: unknown): Promise<T>
+  post<T = unknown>(url: string, data?: unknown, config?: unknown): Promise<T>
+  put<T = unknown>(url: string, data?: unknown, config?: unknown): Promise<T>
+  delete<T = unknown>(url: string, config?: unknown): Promise<T>
+}
 
 import { MemberDTO } from '@/dtos'
 
-import type { FieldGroup } from '../../open-api/IOpenAPI'
+import type { AddonSettingsGroup } from '../../open-api/IOpenAPI'
 import { IDataSourceAdapter } from './IDataSourceAdapter'
 
 export interface DataSourceContext {
@@ -28,7 +33,7 @@ export interface IDataSourceResolver {
   getDataSourcesForWorkspace(workspaceId: string): Promise<ResolvedConnection[]>
 
   getConfigFields(pluginId: string): Promise<{
-    credentials: FieldGroup[]
-    configuration: FieldGroup[]
+    credentials: AddonSettingsGroup[]
+    configuration: AddonSettingsGroup[]
   }>
 }

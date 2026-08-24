@@ -1,4 +1,4 @@
-import type { AddonContext, AddonSettingsField, IAddon } from '@metric-org/sdk'
+import type { AddonContext, AddonSettingsSchema, IAddon } from '@metric-org/sdk'
 import axios from 'axios'
 import net from 'net'
 
@@ -68,18 +68,6 @@ export default class DiscordAddon implements IAddon {
   private connectedUser: DiscordIPCUser | null = null
   private accessToken: string | null = null
 
-  get metadata() {
-    return {
-      id: '@metric-org/discord-for-tests',
-      name: 'Discord (Real IPC Observer)',
-      version: '1.0.0',
-      iconUrl:
-        'https://cdn.icon-icons.com/icons2/2108/PNG/512/discord_icon_130958.png',
-      description:
-        'Observador real do aplicativo Desktop do Discord via IPC Pipe',
-    }
-  }
-
   async activate(context: AddonContext): Promise<void> {
     this.context = context
     console.log(`[DiscordAddon] Ativado: ${context.addonId}`)
@@ -100,11 +88,7 @@ export default class DiscordAddon implements IAddon {
         this.connectedUser = null
 
         if (this.socket) {
-          console.log(
-            `[Discord IPC Log] ♻️ Reiniciando Socket IPC para limpar estado de autenticação anterior...`,
-          )
           this.socket.destroy()
-          this.socket = null
         }
 
         // Reconnect fresh. The READY handler will auto-authenticate if the new workspace has a token.
@@ -122,12 +106,68 @@ export default class DiscordAddon implements IAddon {
     console.log(`[DiscordAddon] Desativado`)
   }
 
-  async getSettingsSchema(): Promise<AddonSettingsField[]> {
+  async getSettingsSchema(): Promise<AddonSettingsSchema> {
+    if (this.connectedUser) {
+      return [
+        {
+          id: 'general',
+          label: 'Geral',
+          groups: [
+            {
+              id: 'auth',
+              label: 'Conta Conectada',
+              description: 'Você já está conectado ao Discord.',
+              fields: [
+                {
+                  id: 'account-info',
+                  type: 'info-card',
+                  label: '',
+                  display: {
+                    title: 'Autenticado com sucesso!',
+                    avatarUrl: this.connectedUser.avatarUrl,
+                    data: {
+                      Usuário: this.connectedUser.username,
+                      'Nome Global':
+                        this.connectedUser.global_name ||
+                        this.connectedUser.username,
+                      'ID Discord': this.connectedUser.id,
+                    },
+                  },
+                },
+                {
+                  id: 'disconnect',
+                  type: 'button',
+                  label: 'Desconectar conta',
+                  variant: 'destructive',
+                  actionId: 'disconnect',
+                },
+              ],
+            },
+          ],
+        },
+      ]
+    }
+
     return [
       {
-        id: 'login',
-        type: 'button',
-        label: 'Conectar ao Discord via OAuth',
+        id: 'general',
+        label: 'Geral',
+        groups: [
+          {
+            id: 'auth',
+            label: 'Autenticação',
+            description:
+              'Conecte sua conta do Discord para monitorar a atividade.',
+            fields: [
+              {
+                id: 'login',
+                type: 'button',
+                label: 'Conectar ao Discord via OAuth',
+                actionId: 'login',
+              },
+            ],
+          },
+        ],
       },
     ]
   }
@@ -462,7 +502,17 @@ export default class DiscordAddon implements IAddon {
 
       return {
         isSuccess: true,
-        data: this.connectedUser,
+        display: {
+          title: 'Autenticado com sucesso!',
+          message: 'Sua conta do Discord foi vinculada ao Metric.',
+          avatarUrl,
+          data: {
+            Usuário: discordUser.username,
+            'Nome Global': discordUser.global_name || discordUser.username,
+            'ID Discord': id,
+          },
+        },
+        data: this.connectedUser, // keep original data if needed
       }
     } catch (error) {
       console.error('[DiscordAddon] Erro no fluxo OAuth PKCE:', error)

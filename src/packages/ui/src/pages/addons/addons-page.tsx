@@ -226,7 +226,7 @@ export function AddonsPage() {
       return manifestToAddonItem(m, addonConnections, addonCategory(m))
     })
 
-    return [...realAddons, ...(MOCK_ADDONS as any)]
+    return [...realAddons, ...MOCK_ADDONS]
   }, [installedList, availableList, connections, connectionState])
 
   const filteredAddons = useMemo(() => {

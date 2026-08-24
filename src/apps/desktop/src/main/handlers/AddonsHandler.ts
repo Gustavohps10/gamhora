@@ -4,7 +4,7 @@ import {
   IAddonsFacade,
   IImportAddonUseCase,
 } from '@metric-org/application'
-import { AddonSettingsField } from '@metric-org/sdk'
+import { AddonSettingsSchema } from '@metric-org/sdk'
 import { createResponseViewModel } from '@metric-org/shared/helpers'
 import {
   IEventEmitter,
@@ -38,6 +38,7 @@ const DEV_FAKE_MANIFEST: AddonManifest = {
   version: '1.0.0',
   stars: 0,
   installed: true,
+  category: 'DataSources',
   tags: ['teste', 'mock', 'desenvolvimento'],
 }
 
@@ -52,6 +53,7 @@ const DEV_REDMINE_MANIFEST: AddonManifest = {
   version: '1.0.3',
   stars: 0,
   installed: true,
+  category: 'DataSources',
   tags: ['redmine', 'teste'],
 }
 
@@ -66,6 +68,7 @@ const DEV_METRIC_AI_MANIFEST: AddonManifest = {
   version: '1.0.0',
   stars: 0,
   installed: true,
+  category: 'Watchers',
   tags: ['ai', 'ocr', 'teste'],
 }
 
@@ -80,6 +83,7 @@ const DEV_DISCORD_MANIFEST: AddonManifest = {
   version: '1.0.0',
   stars: 0,
   installed: true,
+  category: 'Watchers',
   tags: ['discord', 'watcher', 'teste'],
 }
 
@@ -94,6 +98,7 @@ const DEV_FAKE_WATCHER_MANIFEST: AddonManifest = {
   version: '1.0.0',
   stars: 0,
   installed: true,
+  category: 'Watchers',
   tags: ['watcher', 'teste'],
 }
 
@@ -207,11 +212,38 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
   public async getSchema(
     _event: IpcMainInvokeEvent,
     { body }: IRequest<{ addonId: string }>,
-  ): Promise<ViewModel<AddonSettingsField[]>> {
+  ): Promise<ViewModel<AddonSettingsSchema>> {
     if (!this.addonLoader) return { isSuccess: true, data: [] }
     try {
       const schema = await this.addonLoader.getSettingsSchema(body.addonId)
       return { isSuccess: true, data: schema }
+    } catch (e: unknown) {
+      return { isSuccess: false, error: (e as Error).message }
+    }
+  }
+
+  public async getSettings(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ addonId: string }>,
+  ): Promise<ViewModel<Record<string, unknown>>> {
+    if (!this.addonLoader) return { isSuccess: true, data: {} }
+    try {
+      const data = await this.addonLoader.getAddonSettings(body.addonId)
+      return { isSuccess: true, data }
+    } catch (e: unknown) {
+      return { isSuccess: false, error: (e as Error).message }
+    }
+  }
+
+  public async saveSettings(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ addonId: string; settings: Record<string, unknown> }>,
+  ): Promise<ViewModel<void>> {
+    if (!this.addonLoader)
+      return { isSuccess: false, error: 'LOADER_NOT_FOUND' }
+    try {
+      await this.addonLoader.saveAddonSettings(body.addonId, body.settings)
+      return { isSuccess: true }
     } catch (e: unknown) {
       return { isSuccess: false, error: (e as Error).message }
     }
