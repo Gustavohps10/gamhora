@@ -1,24 +1,35 @@
-﻿@startuml Architecture
-node "Client Side (Desktop/Web)" {
-    component "UI (React/Shared)" as UI
-    database "RxDB (NoSQL Local)" as DB
-    component "Sync Engine" as Sync
+@startuml Architecture
+title METRIC - Arquitetura Local-First e Addons SDK
+
+node "Client Desktop (Electron)" {
+    component "Renderer UI (React / Tailwind v4)" as UI
+    component "Timer Service & IPC Bridge" as MainTimer
+    component "Addon Loader & Registry" as AddonLoader
+    database "Persistência Local (RxDB / SQLite / settings.json)" as DB
+    component "Native Floating Widget" as Widget
 }
 
-node "Cloud Control Plane" {
-    component "Auth API" as Auth
-    component "License Manager" as Lic
-    database "PostgreSQL" as CloudDB
+node "Addon Ecosystem (@metric-org/sdk)" {
+    [DataSources (Redmine, Jira...)] as DS
+    [Themes (CSS Injected)] as Themes
+    [Watchers (Window, Git, Idle)] as Watchers
+    [Timerbar & Sidebar Menus] as Menus
 }
 
-node "External Sources" {
-    [Jira API]
-    [Redmine API]
+node "External Tools (Direct Connection)" {
+    [Redmine On-Premise] as RedmineServer
+    [Jira Cloud / Server] as JiraServer
 }
 
-UI <-> DB
-DB <-> Sync
-Sync <-> [External Sources]
-UI <-> Auth
-Auth <-> CloudDB
+UI <-> MainTimer : IPC (timer:start / timer:tick)
+UI <-> DB : Leitura/Escrita Local
+MainTimer <-> Widget : Eventos IPC de Sincronia
+UI <-> AddonLoader : Ativação / Execução de Ações
+AddonLoader --> DS : Registra
+AddonLoader --> Themes : Injeta no DOM
+AddonLoader --> Watchers : Monitora Background
+AddonLoader --> Menus : Registra Menus
+
+DS <--> RedmineServer : Chamadas REST Diretas (Sem intermediários)
+DS <--> JiraServer : Chamadas REST Diretas (Sem intermediários)
 @enduml
