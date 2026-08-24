@@ -1,0 +1,32 @@
+{
+  "name": "@metric-org/supabase-theme",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Supabase Dark Emerald theme addon for tests.",
+  "author": "Metric",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@metric-org/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
+  }
+}

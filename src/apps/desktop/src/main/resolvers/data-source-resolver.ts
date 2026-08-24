@@ -1,14 +1,13 @@
 import { IHttpClient } from '@metric-org/adapters/contracts'
 import {
   DataSourceContext,
-  FieldGroup,
   ICredentialsStorage,
   IDataSourceAdapter,
   IDataSourceResolver,
   IWorkspacesRepository,
   ResolvedConnection,
 } from '@metric-org/application'
-import DataSourceFake from '@metric-org/datasource-fake'
+import { FakeDataSource } from '@metric-org/datasource-fake'
 import { AppError, Either, type IDataSource } from '@metric-org/sdk'
 import { existsSync } from 'fs'
 import { resolve } from 'path'
@@ -130,7 +129,7 @@ export class DataSourceResolver implements IDataSourceResolver {
     }
 
     if (pluginId === FAKE_DATASOURCE_ADDON_ID) {
-      return DataSourceFake as IDataSource
+      return FakeDataSource as IDataSource
     }
 
     const addonPath = resolve(this.options.addonsBasePath, pluginId, 'index.js')

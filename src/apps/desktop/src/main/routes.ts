@@ -181,6 +181,12 @@ export function openIpcRoutes(
   IpcHandler.register('ADDONS_SET_ACTIVE_WORKSPACE', (e, req) =>
     addonsHandler.setActiveWorkspace(e, req),
   )
+  IpcHandler.register('ADDONS_GET_ACTIVE_THEME', () =>
+    addonsHandler.getActiveTheme(),
+  )
+  IpcHandler.register('ADDONS_SET_ACTIVE_THEME', (e, req) =>
+    addonsHandler.setActiveTheme(e, req),
+  )
 
   // --- WIDGET / MOUSE EVENTS ---
   IpcHandler.register('WIDGET_SET_IGNORE_MOUSE', (event, req) => {

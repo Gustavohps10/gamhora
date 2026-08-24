@@ -4,6 +4,7 @@ import {
   AddonSettingsField,
   AddonSettingsSchema,
   AddonSettingsTab,
+  AddonTheme,
   CommandHandler,
   generatePKCE,
   IAddon,
@@ -18,6 +19,7 @@ import {
   IRegistry,
   ITimeEntriesAPI,
   ITimerAPI,
+  MemoryRegistry,
   OAuthAuthorizeOptions,
   OAuthResult,
   SidebarMenuItem,
@@ -25,6 +27,8 @@ import {
 } from '@metric-org/sdk'
 import { IEventEmitter, ISystemEvents } from '@metric-org/shared/transport'
 import { BrowserWindow, shell } from 'electron'
+
+import { getSettings, saveSettings } from '@/main/settings'
 
 export class MemoryRegistry<T extends { id: string }> implements IRegistry<T> {
   private items = new Map<string, T>()
@@ -183,6 +187,8 @@ export class AddonLoader {
   private addonTimerbarItems = new Map<string, TimerbarMenuItem>()
   public readonly dataSourceRegistry: IDataSourceRegistry =
     new MemoryRegistry<IDataSource>()
+  public readonly themesRegistry = new MemoryRegistry<AddonTheme>()
+  private activeThemeId: string | null = null
   public readonly commandRegistry = new CommandRegistry()
   public readonly systemEventEmitter = new AddonEventEmitter()
   private pendingOAuthRequests = new Map<
@@ -583,6 +589,7 @@ export class AddonLoader {
       commands: this.commandRegistry,
       menus: menusRegistry,
       dataSources: this.dataSourceRegistry,
+      themes: this.themesRegistry,
       events: this.systemEventEmitter,
       notifications,
       timer,
@@ -846,6 +853,12 @@ export class AddonLoader {
       )
     }
 
+    this.commandRegistry.register('theme:set', async (themeId: unknown) => {
+      const targetThemeId = typeof themeId === 'string' ? themeId : null
+      this.setActiveTheme(targetThemeId)
+      return { status: 'success', themeId: targetThemeId }
+    })
+
     try {
       const fakeDsModule = await import('@metric-org/datasource-fake')
       const FakeDataSourceAddon = fakeDsModule.default
@@ -856,6 +869,47 @@ export class AddonLoader {
     } catch (err) {
       console.error(
         '❌ [AddonLoader] Erro ao carregar addon FakeDataSource:',
+        err,
+      )
+    }
+
+    try {
+      const supabaseModule = await import('@metric-org/supabase-theme')
+      const SupabaseThemeAddon = supabaseModule.default
+      if (SupabaseThemeAddon && typeof SupabaseThemeAddon === 'function') {
+        const addonInstance = new (SupabaseThemeAddon as new () => IAddon)()
+        await this.activateAddon('@metric-org/supabase-theme', addonInstance)
+      }
+    } catch (err) {
+      console.error(
+        '❌ [AddonLoader] Erro ao carregar addon SupabaseTheme:',
+        err,
+      )
+    }
+
+    try {
+      const purpleModule = await import('@metric-org/purple-theme')
+      const PurpleThemeAddon = purpleModule.default
+      if (PurpleThemeAddon && typeof PurpleThemeAddon === 'function') {
+        const addonInstance = new (PurpleThemeAddon as new () => IAddon)()
+        await this.activateAddon('@metric-org/purple-theme', addonInstance)
+      }
+    } catch (err) {
+      console.error('❌ [AddonLoader] Erro ao carregar addon PurpleTheme:', err)
+    }
+
+    // Restaura o tema ativo persistido nas configurações do app
+    try {
+      const savedSettings = getSettings()
+      if (savedSettings?.activeThemeId) {
+        this.activeThemeId = savedSettings.activeThemeId
+        console.log(
+          `🎨 [AddonLoader] Tema ativo restaurado das configurações: ${this.activeThemeId}`,
+        )
+      }
+    } catch (err) {
+      console.error(
+        '❌ [AddonLoader] Erro ao restaurar tema das configurações:',
         err,
       )
     }
@@ -873,6 +927,47 @@ export class AddonLoader {
     return this.dataSourceRegistry
       .getItems()
       .find((ds) => ds.id === dataSourceId)
+  }
+
+  public getActiveTheme(): AddonTheme | null {
+    if (!this.activeThemeId) return null
+    return (
+      this.themesRegistry.getItems().find((t) => t.id === this.activeThemeId) ??
+      null
+    )
+  }
+
+  public setActiveTheme(themeId: string | null): void {
+    this.activeThemeId = themeId
+
+    // Persiste o tema nas configurações do aplicativo
+    try {
+      const currentSettings = getSettings()
+      saveSettings({
+        ...currentSettings,
+        activeThemeId: themeId,
+      })
+    } catch (err) {
+      console.error('❌ [AddonLoader] Erro ao salvar tema ativo:', err)
+    }
+
+    const activeTheme = this.getActiveTheme()
+    console.log(
+      `🎨 [AddonLoader] Tema ativo alterado para: ${themeId || 'Padrão (Nenhum)'}`,
+    )
+    try {
+      const windows = BrowserWindow.getAllWindows()
+      windows.forEach((win) => {
+        if (!win.isDestroyed()) {
+          win.webContents.send('addons:theme-changed', activeTheme)
+        }
+      })
+    } catch (err) {
+      console.error(
+        '❌ [AddonLoader] Erro ao enviar IPC de theme-changed:',
+        err,
+      )
+    }
   }
 
   public async executeCommand(commandId: string, ...args: any[]): Promise<any> {

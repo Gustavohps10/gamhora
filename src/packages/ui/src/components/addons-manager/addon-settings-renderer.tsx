@@ -432,6 +432,9 @@ function FieldRenderer({
                   queryClient.invalidateQueries({
                     queryKey: ['addon-schema', addonId],
                   })
+                  await queryClient.refetchQueries({
+                    queryKey: ['addons', 'activeTheme'],
+                  })
 
                   if (res.isSuccess && res.data) {
                     setActionState({
@@ -442,14 +445,16 @@ function FieldRenderer({
                   } else {
                     setActionState({ isOpen: false, isLoading: false })
                   }
-                } catch (err: any) {
-                  queryClient.invalidateQueries({
-                    queryKey: ['addon-schema', addonId],
+                } catch (err: unknown) {
+                  await queryClient.refetchQueries({
+                    queryKey: ['addons', 'activeTheme'],
                   })
+                  const errorMessage =
+                    err instanceof Error ? err.message : 'Erro ao executar ação'
                   setActionState({
                     isOpen: true,
                     isLoading: false,
-                    result: { isSuccess: false, error: err.message },
+                    result: { isSuccess: false, error: errorMessage },
                   })
                 }
               }

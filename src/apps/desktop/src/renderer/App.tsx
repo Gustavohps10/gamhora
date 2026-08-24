@@ -1,6 +1,10 @@
 import '@/renderer/index.css'
 
-import { AddonToastBridge, Toaster } from '@metric-org/ui/components'
+import {
+  AddonThemeBridge,
+  AddonToastBridge,
+  Toaster,
+} from '@metric-org/ui/components'
 import { queryClient } from '@metric-org/ui/lib'
 import {
   EnvironmentProvider,
@@ -38,6 +42,7 @@ export function AppDesktop() {
             <SidebarProvider>
               <QueryClientProvider client={queryClient}>
                 <NuqsAdapter>
+                  <AddonThemeBridge />
                   <RouterProvider router={router} />
                   <Toaster richColors position="bottom-right" />
                 </NuqsAdapter>

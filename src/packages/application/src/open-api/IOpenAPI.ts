@@ -326,6 +326,13 @@ export interface AddonActionResponse {
   }
 }
 
+export interface AddonThemeViewModel {
+  id: string
+  name: string
+  description?: string
+  css: string
+}
+
 export interface IAddonsAPI {
   listAvailable(): Promise<PaginatedViewModel<AddonManifestViewModel[]>>
 
@@ -379,6 +386,10 @@ export interface IAddonsAPI {
   setActiveWorkspace(
     payload: IRequest<{ workspaceId: string }>,
   ): Promise<ViewModel<void>>
+  getActiveTheme(): Promise<ViewModel<AddonThemeViewModel | null>>
+  setActiveTheme(
+    payload: IRequest<{ themeId: string | null }>,
+  ): Promise<ViewModel<void>>
 }
 
 export interface EnvironmentInfo {
@@ -398,6 +409,7 @@ export interface MoveToDisplayInput {
 
 export interface AppSettings {
   startMinimized?: boolean
+  activeThemeId?: string | null
 }
 
 export interface RawKeyInputEvent {

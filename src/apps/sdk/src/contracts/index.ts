@@ -1,4 +1,5 @@
 export * from './AddonContext'
+export * from './AddonTheme'
 export * from './commands'
 export * from './common'
 export * from './datasource'

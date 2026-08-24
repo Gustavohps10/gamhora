@@ -82,7 +82,37 @@ export const customFieldGroups: AddonSettingsGroup[] = [
   },
 ]
 
+export const themeFieldGroups: AddonSettingsGroup[] = [
+  {
+    id: 'theme_controls',
+    label: 'Tema Redmine Classic',
+    description:
+      'Aplique o arquivo CSS clássico do Redmine com todas as variáveis, modo claro/escuro e estilos.',
+    fields: [
+      {
+        id: 'apply-redmine-theme',
+        type: 'button',
+        label: 'Ativar Tema Redmine',
+        actionId: 'apply-redmine-theme',
+      },
+      {
+        id: 'reset-theme',
+        type: 'button',
+        label: 'Restaurar Tema Padrão',
+        variant: 'destructive',
+        actionId: 'reset-theme',
+      },
+    ],
+  },
+]
+
 export const redmineSettingsSchema: AddonSettingsTab[] = [
+  {
+    id: 'theme',
+    label: 'Tema Visual',
+    description: 'Personalização de cores e tema fornecido pelo Redmine',
+    groups: themeFieldGroups,
+  },
   {
     id: 'custom-fields',
     label: 'Configurações Avançadas',

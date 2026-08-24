@@ -1,7 +1,8 @@
 import { AddonContext, AddonSettingsSchema, IAddon } from '@metric-org/sdk'
 
-import { redmineSettingsSchema } from './configFields'
-import { RedmineDataSource } from './RedmineDataSource'
+import { redmineSettingsSchema } from './configFields.js'
+import { REDMINE_CSS } from './redmineCss.js'
+import { RedmineDataSource } from './RedmineDataSource.js'
 
 export default class Redmine4TestAddon implements IAddon {
   public metadata = {
@@ -10,12 +11,15 @@ export default class Redmine4TestAddon implements IAddon {
       'https://raw.githubusercontent.com/Gustavohps10/redmine-plugin/main/src/icon.png',
   }
   private dataSource = new RedmineDataSource()
+  private activeContext: AddonContext | null = null
 
   async getSettingsSchema(): Promise<AddonSettingsSchema> {
     return redmineSettingsSchema
   }
 
   activate(context: AddonContext): void {
+    this.activeContext = context
+
     // 1. Registra capacidade de DataSource
     context.dataSources.register(this.dataSource)
 
@@ -63,6 +67,11 @@ export default class Redmine4TestAddon implements IAddon {
           label: 'Forçar Carga Completa',
           icon: 'DownloadCloud',
         },
+        {
+          id: 'redmine:apply-theme',
+          label: 'Ativar Tema Redmine (Visual)',
+          icon: 'Palette',
+        },
       ],
     })
 
@@ -93,9 +102,57 @@ export default class Redmine4TestAddon implements IAddon {
       )
       return { status: 'success', syncedCount: 42 }
     })
+
+    context.commands.register('redmine:apply-theme', async () => {
+      await context.commands.execute('theme:set', 'redmine-classic-theme')
+      await context.notifications.success(
+        'Tema Clássico Redmine Ativado!',
+        '🔴 Redmine Plugin',
+      )
+      return { status: 'success' }
+    })
+
+    // 5. Registra capacidade de Tema Visual (100% do arquivo redmine.css)
+    context.themes.register({
+      id: 'redmine-classic-theme',
+      name: 'Redmine Classic Red',
+      description: 'Tema clássico do Redmine (100% de redmine.css).',
+      css: REDMINE_CSS,
+    })
   }
 
   deactivate(): void {
-    console.log('🔴 [Redmine4TestAddon] Desativando addon Redmine.')
+    if (this.activeContext) {
+      this.activeContext.themes.unregister('redmine-classic-theme')
+    }
+  }
+
+  async executeAction(actionId: string): Promise<unknown> {
+    if (actionId === 'apply-redmine-theme') {
+      await this.activeContext?.commands.execute(
+        'theme:set',
+        'redmine-classic-theme',
+      )
+      return {
+        isSuccess: true,
+        display: {
+          title: 'Tema Redmine Ativado!',
+          message: 'Arquivo CSS completo do Redmine aplicado com sucesso.',
+        },
+      }
+    }
+
+    if (actionId === 'reset-theme') {
+      await this.activeContext?.commands.execute('theme:set', null)
+      return {
+        isSuccess: true,
+        display: {
+          title: 'Tema Padrão Restaurado!',
+          message: 'A interface retornou ao estilo nativo do Metric.',
+        },
+      }
+    }
+
+    return { isSuccess: false, error: 'Ação desconhecida' }
   }
 }

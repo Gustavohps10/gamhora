@@ -15,6 +15,7 @@ import {
 import {
   AddonInstallerViewModel,
   AddonManifestViewModel,
+  AddonThemeViewModel,
   PaginatedViewModel,
   ViewModel,
 } from '@metric-org/shared/view-models'
@@ -54,7 +55,7 @@ const DEV_REDMINE_MANIFEST: AddonManifest = {
   stars: 0,
   installed: true,
   category: 'DataSources',
-  tags: ['redmine', 'teste'],
+  tags: ['redmine', 'datasource', 'theme', 'tema', 'teste'],
 }
 
 const DEV_METRIC_AI_MANIFEST: AddonManifest = {
@@ -102,12 +103,44 @@ const DEV_FAKE_WATCHER_MANIFEST: AddonManifest = {
   tags: ['watcher', 'teste'],
 }
 
+const DEV_SUPABASE_THEME_MANIFEST: AddonManifest = {
+  id: '@metric-org/supabase-theme',
+  name: 'Supabase Emerald',
+  creator: 'Metric',
+  description: 'Tema verde esmeralda inspirado no Supabase.',
+  path: '',
+  logo: 'Palette',
+  downloads: 0,
+  version: '1.0.0',
+  stars: 0,
+  installed: true,
+  category: 'Themes',
+  tags: ['theme', 'tema', 'supabase', 'dark'],
+}
+
+const DEV_PURPLE_THEME_MANIFEST: AddonManifest = {
+  id: '@metric-org/purple-theme',
+  name: 'Purple Neon',
+  creator: 'Metric',
+  description: 'Tema roxo vibrante neon.',
+  path: '',
+  logo: 'Palette',
+  downloads: 0,
+  version: '1.0.0',
+  stars: 0,
+  installed: true,
+  category: 'Themes',
+  tags: ['theme', 'tema', 'purple', 'neon'],
+}
+
 const DEV_ADDONS: AddonManifest[] = [
   DEV_FAKE_MANIFEST,
   DEV_REDMINE_MANIFEST,
   DEV_METRIC_AI_MANIFEST,
   DEV_DISCORD_MANIFEST,
   DEV_FAKE_WATCHER_MANIFEST,
+  DEV_SUPABASE_THEME_MANIFEST,
+  DEV_PURPLE_THEME_MANIFEST,
 ]
 
 import { SidebarMenuItem, TimerbarMenuItem } from '@metric-org/sdk'
@@ -277,6 +310,27 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
       this.addonLoader.setActiveWorkspace(body.workspaceId)
     }
     return { isSuccess: true }
+  }
+
+  public async getActiveTheme(): Promise<
+    ViewModel<AddonThemeViewModel | null>
+  > {
+    const theme = this.addonLoader ? this.addonLoader.getActiveTheme() : null
+    return {
+      isSuccess: true,
+      statusCode: 200,
+      data: theme,
+    }
+  }
+
+  public async setActiveTheme(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ themeId: string | null }>,
+  ): Promise<ViewModel<void>> {
+    if (this.addonLoader) {
+      this.addonLoader.setActiveTheme(body?.themeId ?? null)
+    }
+    return { isSuccess: true, statusCode: 200 }
   }
 
   public async listAvailable(

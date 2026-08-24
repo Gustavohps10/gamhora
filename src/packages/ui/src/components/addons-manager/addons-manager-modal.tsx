@@ -48,59 +48,55 @@ const OFFICIAL_CATEGORIES = [
   { id: 'Themes', label: 'Temas', icon: Palette },
 ]
 
-function getAddonCategory(addon: AddonManifestViewModel): string {
-  if (addon.category) return addon.category.toLowerCase()
-  const tags = addon.tags || []
-  if (
-    tags.some(
-      (t: string) =>
-        t.toLowerCase().includes('datasource') ||
-        t.toLowerCase().includes('redmine') ||
-        t.toLowerCase().includes('mock') ||
-        t.toLowerCase().includes('fonte'),
+function addonMatchesCategory(
+  addon: AddonManifestViewModel,
+  categoryId: string,
+): boolean {
+  const cat = categoryId.toLowerCase()
+  const primaryCat = (addon.category || '').toLowerCase()
+  const tags = (addon.tags || []).map((t: string) => t.toLowerCase())
+
+  if (cat === 'themes') {
+    return (
+      primaryCat === 'themes' ||
+      tags.includes('theme') ||
+      tags.includes('tema') ||
+      tags.some((t) => t.includes('theme') || t.includes('tema'))
     )
-  ) {
-    return 'datasources'
   }
-  if (
-    tags.some(
-      (t: string) =>
-        t.toLowerCase().includes('watcher') ||
-        t.toLowerCase().includes('observador') ||
-        t.toLowerCase().includes('discord') ||
-        t.toLowerCase().includes('ai') ||
-        t.toLowerCase().includes('ocr'),
+  if (cat === 'datasources') {
+    return (
+      primaryCat === 'datasources' ||
+      tags.includes('datasource') ||
+      tags.includes('fonte') ||
+      tags.includes('redmine') ||
+      tags.includes('mock')
     )
-  ) {
-    return 'watchers'
   }
-  if (
-    tags.some(
-      (t: string) =>
-        t.toLowerCase().includes('calendar') ||
-        t.toLowerCase().includes('agenda') ||
-        t.toLowerCase().includes('calendario'),
+  if (cat === 'watchers') {
+    return (
+      primaryCat === 'watchers' ||
+      tags.includes('watcher') ||
+      tags.includes('observador') ||
+      tags.includes('discord') ||
+      tags.includes('ai') ||
+      tags.includes('ocr')
     )
-  ) {
-    return 'calendars'
   }
-  if (
-    tags.some(
-      (t: string) =>
-        t.toLowerCase().includes('punch') || t.toLowerCase().includes('ponto'),
+  if (cat === 'calendars') {
+    return (
+      primaryCat === 'calendars' ||
+      tags.includes('calendar') ||
+      tags.includes('agenda') ||
+      tags.includes('calendario')
     )
-  ) {
-    return 'punch'
   }
-  if (
-    tags.some(
-      (t: string) =>
-        t.toLowerCase().includes('theme') || t.toLowerCase().includes('tema'),
+  if (cat === 'punch') {
+    return (
+      primaryCat === 'punch' || tags.includes('punch') || tags.includes('ponto')
     )
-  ) {
-    return 'themes'
   }
-  return 'datasources'
+  return primaryCat === cat
 }
 
 function SafeAddonLogo({
@@ -212,8 +208,8 @@ export function AddonsManagerModal({
         <h2 className="mb-6 text-2xl font-bold">Addons Instalados</h2>
         <div className="space-y-8">
           {OFFICIAL_CATEGORIES.map((cat) => {
-            const addonsInCat = installedList.filter(
-              (a) => getAddonCategory(a) === cat.id.toLowerCase(),
+            const addonsInCat = installedList.filter((a) =>
+              addonMatchesCategory(a, cat.id),
             )
             if (addonsInCat.length === 0) return null
             return (
@@ -342,8 +338,8 @@ export function AddonsManagerModal({
       (c) => c.id.toLowerCase() === activeCategory?.toLowerCase(),
     )
     const categoryLabel = activeCategoryObj?.label || activeCategory
-    const addonsInCat = installedList.filter(
-      (a) => getAddonCategory(a) === activeCategory?.toLowerCase(),
+    const addonsInCat = installedList.filter((a) =>
+      activeCategory ? addonMatchesCategory(a, activeCategory) : false,
     )
     return (
       <div className="flex h-full">

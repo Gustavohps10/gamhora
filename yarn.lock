@@ -3647,8 +3647,10 @@ __metadata:
     "@metric-org/discord-for-tests": "workspace:*"
     "@metric-org/fake-watcher-for-tests": "workspace:*"
     "@metric-org/metric-ai-for-tests": "workspace:*"
+    "@metric-org/purple-theme": "workspace:*"
     "@metric-org/redmine-for-tests": "workspace:*"
     "@metric-org/shared": "workspace:*"
+    "@metric-org/supabase-theme": "workspace:*"
     "@metric-org/ui": "workspace:*"
     "@rollup/plugin-image": "npm:^3.0.3"
     "@tailwindcss/postcss": "npm:^4.1.11"
@@ -3762,6 +3764,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@metric-org/purple-theme@workspace:*, @metric-org/purple-theme@workspace:src/tests/purple-theme":
+  version: 0.0.0-use.local
+  resolution: "@metric-org/purple-theme@workspace:src/tests/purple-theme"
+  dependencies:
+    "@metric-org/sdk": "workspace:*"
+    "@types/node": "npm:^24.3.0"
+    tsup: "npm:^8.5.0"
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
 "@metric-org/redmine-for-tests@workspace:*, @metric-org/redmine-for-tests@workspace:src/tests/redmine-for-tests":
   version: 0.0.0-use.local
   resolution: "@metric-org/redmine-for-tests@workspace:src/tests/redmine-for-tests"
@@ -3803,6 +3816,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@metric-org/shared@workspace:src/packages/shared"
   dependencies:
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
+"@metric-org/supabase-theme@workspace:*, @metric-org/supabase-theme@workspace:src/tests/supabase-theme":
+  version: 0.0.0-use.local
+  resolution: "@metric-org/supabase-theme@workspace:src/tests/supabase-theme"
+  dependencies:
+    "@metric-org/sdk": "workspace:*"
+    "@types/node": "npm:^24.3.0"
+    tsup: "npm:^8.5.0"
     typescript: "npm:^5.8.3"
   languageName: unknown
   linkType: soft

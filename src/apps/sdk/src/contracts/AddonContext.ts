@@ -1,5 +1,6 @@
 import { IEventEmitter, ISystemEvents } from '@metric-org/shared/transport'
 
+import { IAddonThemesRegistry } from './AddonTheme'
 import { ICommandRegistry } from './commands/ICommandRegistry'
 import { IDataSourceRegistry } from './datasource/IDataSourceRegistry'
 import { IMenusRegistry } from './menus/IMenusRegistry'
@@ -57,6 +58,7 @@ export interface AddonContext {
   readonly commands: ICommandRegistry
   readonly menus: IMenusRegistry
   readonly dataSources: IDataSourceRegistry
+  readonly themes: IAddonThemesRegistry
   readonly events: IAddonEventsAPI
   readonly notifications: INotificationService
   readonly timer: ITimerAPI
