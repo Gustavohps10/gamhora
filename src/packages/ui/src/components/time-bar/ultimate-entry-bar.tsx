@@ -22,6 +22,10 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import type {
+  AddonTimerbarMenuItem,
+  AddonTimerbarPopoverSubItem,
+} from '@metric-org/application'
 import { differenceInSeconds, isSameDay, isValid, parseISO } from 'date-fns'
 import {
   AlertCircle,
@@ -73,7 +77,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { useClient } from '@/hooks'
+import { useOpenAPI } from '@/hooks'
 import {
   useCurrentWidgetPosition,
   useTimerSettings,
@@ -181,8 +185,12 @@ type UltimateTimeTrackerContextType = {
   setTimerError: React.Dispatch<React.SetStateAction<string | null>>
 }
 
-const UltimateTimeTrackerContext =
+export const UltimateTimeTrackerContext =
   createContext<UltimateTimeTrackerContextType | null>(null)
+
+export const useOptionalTrackerContext = () => {
+  return useContext(UltimateTimeTrackerContext)
+}
 
 export const useTrackerContext = () => {
   const context = useContext(UltimateTimeTrackerContext)
@@ -231,7 +239,7 @@ export const UltimateTimeTracker = ({
   const { timerDirection, setTimerDirection } = useTimerSettings()
   const [widgetPosition] = useCurrentWidgetPosition()
   const db = useSyncStore((s) => s.db)
-  const client = useClient()
+  const openAPI = useOpenAPI()
 
   // Carrega dinamicamente as atividades do metadata baseado na Task / Conexões ativas
   useEffect(() => {
@@ -306,14 +314,14 @@ export const UltimateTimeTracker = ({
     const handleFocusIn = (e: FocusEvent) => {
       const target = e.target as HTMLElement | null
       if (target?.matches?.('input, textarea')) {
-        client.modules.system.startKeyboardInterception?.()
+        openAPI.modules.system.startKeyboardInterception?.()
       }
     }
 
     const handleFocusOut = (e: FocusEvent) => {
       const target = e.target as HTMLElement | null
       if (target?.matches?.('input, textarea')) {
-        client.modules.system.stopKeyboardInterception?.()
+        openAPI.modules.system.stopKeyboardInterception?.()
       }
     }
 
@@ -321,7 +329,7 @@ export const UltimateTimeTracker = ({
     window.addEventListener('focusout', handleFocusOut)
 
     // Ouve os caracteres interceptados pelo C++
-    const cleanupKeyListener = client.events.on<{
+    const cleanupKeyListener = openAPI.events.on<{
       vkCode: number
       key: string
     }>('widget:raw-key-input', (data) => {
@@ -436,12 +444,19 @@ export const UltimateTimeTracker = ({
     setFreeOffsets(loadFreeOffsets())
   }, [])
 
+  const prevActiveRef = useRef(activeEntry)
+
   useEffect(() => {
     if (activeEntry) {
-      if (activeEntry.task?.id) setTaskId(activeEntry.task.id)
+      if (activeEntry.task?.id !== undefined)
+        setTaskId(activeEntry.task?.id || '')
+      if (activeEntry.taskData !== undefined)
+        setSelectedTask(activeEntry.taskData || null)
       if (activeEntry.comments !== undefined)
-        setDescription(activeEntry.comments)
+        setDescription(activeEntry.comments || '')
       if (activeEntry.activity?.id) setSelectedActivity(activeEntry.activity.id)
+      if (activeEntry.connectionInstanceId)
+        setSelectedConnectionId(activeEntry.connectionInstanceId)
       if (activeEntry.timerConfig?.mode) {
         setTimerDirection(
           activeEntry.timerConfig.mode === 'countup' ? 'up' : 'down',
@@ -450,7 +465,13 @@ export const UltimateTimeTracker = ({
       if (activeEntry.timerConfig?.manualInitialSeconds !== undefined) {
         setManualInitialSeconds(activeEntry.timerConfig.manualInitialSeconds)
       }
+    } else if (prevActiveRef.current) {
+      setTaskId('')
+      setSelectedTask(null)
+      setDescription('')
+      setManualInitialSeconds(0)
     }
+    prevActiveRef.current = activeEntry
   }, [activeEntry, setTimerDirection])
 
   const isRunning = activeEntry?.timeStatus === 'running'
@@ -476,7 +497,7 @@ export const UltimateTimeTracker = ({
       isCurrentlyIgnored = shouldIgnore
 
       // Passar sempre { forward: true } quando for ignorar para o Chromium continuar recebendo o mousemove
-      client.modules.system.setIgnoreMouseEvents({
+      openAPI.modules.system.setIgnoreMouseEvents({
         body: { ignore: shouldIgnore, forward: true },
       })
     }
@@ -686,7 +707,7 @@ export const UltimateTimeTracker = ({
       isDraggingWidgetRef.current = false
 
       if (!element.matches(':hover')) {
-        client.modules.system.setIgnoreMouseEvents({
+        openAPI.modules.system.setIgnoreMouseEvents({
           body: { ignore: true, forward: true },
         })
       }
@@ -838,15 +859,183 @@ export const UltimateTimeTracker = ({
   }, [isVertical, widgetPosition])
 
   const handleSelectTask = useCallback(
-    (task: SyncTaskRxDBDTO) => {
+    async (task: SyncTaskRxDBDTO) => {
       setSelectedTask(task)
       setTaskId(task.id)
-      if (task.connectionInstanceId) {
-        setSelectedConnectionId(task.connectionInstanceId)
+      const connId = task.connectionInstanceId || selectedConnectionId
+      if (connId) {
+        setSelectedConnectionId(connId)
+      }
+
+      if (activeEntry && db) {
+        const docId = activeEntry._id || activeEntry.id
+        let doc = await db.timeEntries.findOne(docId).exec()
+        if (!doc) {
+          doc = await db.timeEntries
+            .findOne({
+              selector: { $or: [{ _id: docId }, { id: docId }] },
+            })
+            .exec()
+        }
+        if (doc) {
+          const updated = await doc.patch({
+            task: { id: task.id },
+            taskData: task,
+            connectionInstanceId: connId,
+            dataSourceId: task.dataSourceId || activeEntry.dataSourceId,
+            updatedAt: new Date().toISOString(),
+          })
+          const updatedJson = updated.toMutableJSON()
+          useTimeEntryStore.getState().setActive(updatedJson)
+          openAPI.events?.emit?.('time-entry:sync', updatedJson)
+        }
+      } else {
+        openAPI.events?.emit?.('tracker:draft-sync', {
+          taskId: task.id,
+          selectedTask: task,
+          selectedConnectionId: connId,
+        })
       }
     },
-    [description],
+    [activeEntry, db, selectedConnectionId, openAPI],
   )
+
+  const handleTaskIdChange = useCallback(
+    async (newTaskId: string) => {
+      setTaskId(newTaskId)
+      if (activeEntry && db) {
+        const docId = activeEntry._id || activeEntry.id
+        let doc = await db.timeEntries.findOne(docId).exec()
+        if (!doc) {
+          doc = await db.timeEntries
+            .findOne({
+              selector: { $or: [{ _id: docId }, { id: docId }] },
+            })
+            .exec()
+        }
+        if (doc) {
+          const updated = await doc.patch({
+            task: { id: newTaskId },
+            updatedAt: new Date().toISOString(),
+          })
+          const updatedJson = updated.toMutableJSON()
+          useTimeEntryStore.getState().setActive(updatedJson)
+          openAPI.events?.emit?.('time-entry:sync', updatedJson)
+        }
+      } else {
+        openAPI.events?.emit?.('tracker:draft-sync', { taskId: newTaskId })
+      }
+    },
+    [activeEntry, db, openAPI],
+  )
+
+  const handleDescriptionChange = useCallback(
+    async (desc: string) => {
+      setDescription(desc)
+      if (activeEntry && db) {
+        const docId = activeEntry._id || activeEntry.id
+        let doc = await db.timeEntries.findOne(docId).exec()
+        if (!doc) {
+          doc = await db.timeEntries
+            .findOne({
+              selector: { $or: [{ _id: docId }, { id: docId }] },
+            })
+            .exec()
+        }
+        if (doc) {
+          const updated = await doc.patch({
+            comments: desc,
+            updatedAt: new Date().toISOString(),
+          })
+          const updatedJson = updated.toMutableJSON()
+          useTimeEntryStore.getState().setActive(updatedJson)
+          openAPI.events?.emit?.('time-entry:sync', updatedJson)
+        }
+      } else {
+        openAPI.events?.emit?.('tracker:draft-sync', { description: desc })
+      }
+    },
+    [activeEntry, db, openAPI],
+  )
+
+  const handleActivityChange = useCallback(
+    async (actId: string) => {
+      setSelectedActivity(actId)
+      if (activeEntry && db) {
+        const docId = activeEntry._id || activeEntry.id
+        let doc = await db.timeEntries.findOne(docId).exec()
+        if (!doc) {
+          doc = await db.timeEntries
+            .findOne({
+              selector: { $or: [{ _id: docId }, { id: docId }] },
+            })
+            .exec()
+        }
+        if (doc) {
+          const updated = await doc.patch({
+            activity: { id: actId },
+            updatedAt: new Date().toISOString(),
+          })
+          const updatedJson = updated.toMutableJSON()
+          useTimeEntryStore.getState().setActive(updatedJson)
+          openAPI.events?.emit?.('time-entry:sync', updatedJson)
+        }
+      } else {
+        openAPI.events?.emit?.('tracker:draft-sync', {
+          selectedActivity: actId,
+        })
+      }
+    },
+    [activeEntry, db, openAPI],
+  )
+
+  const handleConnectionChange = useCallback(
+    async (connId: string) => {
+      setSelectedConnectionId(connId)
+      if (activeEntry && db) {
+        const docId = activeEntry._id || activeEntry.id
+        let doc = await db.timeEntries.findOne(docId).exec()
+        if (!doc) {
+          doc = await db.timeEntries
+            .findOne({
+              selector: { $or: [{ _id: docId }, { id: docId }] },
+            })
+            .exec()
+        }
+        if (doc) {
+          const updated = await doc.patch({
+            connectionInstanceId: connId,
+            updatedAt: new Date().toISOString(),
+          })
+          const updatedJson = updated.toMutableJSON()
+          useTimeEntryStore.getState().setActive(updatedJson)
+          openAPI.events?.emit?.('time-entry:sync', updatedJson)
+        }
+      } else {
+        openAPI.events?.emit?.('tracker:draft-sync', {
+          selectedConnectionId: connId,
+        })
+      }
+    },
+    [activeEntry, db, openAPI],
+  )
+
+  useEffect(() => {
+    if (!openAPI?.events?.on) return
+
+    const unsub = openAPI.events.on<any>('tracker:draft-sync', (data) => {
+      if (!data) return
+      if (data.taskId !== undefined) setTaskId(data.taskId)
+      if (data.selectedTask !== undefined) setSelectedTask(data.selectedTask)
+      if (data.description !== undefined) setDescription(data.description)
+      if (data.selectedActivity !== undefined)
+        setSelectedActivity(data.selectedActivity)
+      if (data.selectedConnectionId !== undefined)
+        setSelectedConnectionId(data.selectedConnectionId)
+    })
+
+    return () => unsub?.()
+  }, [openAPI])
 
   const handleStart = useCallback(async () => {
     if (!db) return
@@ -959,6 +1148,8 @@ export const UltimateTimeTracker = ({
     dbTodaySeconds,
   ])
 
+  const addonBlocks = useAddonBlocks()
+
   const content = children || (
     <>
       <UltimateTimeTracker.Handle />
@@ -982,6 +1173,8 @@ export const UltimateTimeTracker = ({
         <UltimateTimeTracker.Block id="tools">
           <UltimateTimeTracker.ToolsBlock />
         </UltimateTimeTracker.Block>
+
+        {addonBlocks}
       </UltimateTimeTracker.Blocks>
       <UltimateTimeTracker.InlineInput />
       <UltimateTimeTracker.Expander />
@@ -995,7 +1188,7 @@ export const UltimateTimeTracker = ({
     setIsExpanded,
     widgetHandleRef,
     taskId,
-    setTaskId,
+    setTaskId: handleTaskIdChange as any,
     selectedTask,
     setSelectedTask,
     isTaskLookupOpen,
@@ -1003,9 +1196,9 @@ export const UltimateTimeTracker = ({
     activities,
     handleSelectTask,
     description,
-    setDescription,
+    setDescription: handleDescriptionChange as any,
     selectedActivity,
-    setSelectedActivity,
+    setSelectedActivity: handleActivityChange as any,
     manualInitialSeconds,
     setManualInitialSeconds,
     isEditingVertical,
@@ -1018,7 +1211,7 @@ export const UltimateTimeTracker = ({
     handleStop,
     handleDirectLog,
     selectedConnectionId,
-    setSelectedConnectionId,
+    setSelectedConnectionId: handleConnectionChange as any,
     syncConnections,
     dbTodaySeconds,
     timerError,
@@ -1705,6 +1898,345 @@ UltimateTimeTracker.ActionsBlock = function ActionsBlock() {
   )
 }
 
+function renderAddonIcon(
+  icon?: string,
+  fallbackIcon: React.ElementType = LucideIcons.Puzzle,
+) {
+  if (!icon) {
+    const Fallback = fallbackIcon
+    return <Fallback className="h-3.5 w-3.5 shrink-0" />
+  }
+
+  if (
+    icon.startsWith('data:image/') ||
+    icon.startsWith('http://') ||
+    icon.startsWith('https://') ||
+    icon.startsWith('metric-app://')
+  ) {
+    return (
+      <img
+        src={icon}
+        alt=""
+        className="h-3.5 w-3.5 shrink-0 rounded-sm object-contain"
+      />
+    )
+  }
+
+  const iconRecord = LucideIcons as unknown as Record<string, React.ElementType>
+  if (iconRecord[icon]) {
+    const LucideComp = iconRecord[icon]
+    return <LucideComp className="h-3.5 w-3.5 shrink-0" />
+  }
+
+  const Fallback = fallbackIcon
+  return <Fallback className="h-3.5 w-3.5 shrink-0" />
+}
+
+function SystemAddonsButton({ isVertical }: { isVertical: boolean }) {
+  const api = useOpenAPI()
+  const [timerbarMenus, setTimerbarMenus] = useState<AddonTimerbarMenuItem[]>(
+    [],
+  )
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadTimerbarMenus() {
+      try {
+        const response = await api.integrations.addons.getTimerbarMenus()
+        if (!isMounted) return
+        if (!response?.isSuccess || !Array.isArray(response.data)) return
+        setTimerbarMenus(response.data)
+      } catch (err) {
+        console.error('Erro ao carregar menus dos addons no sistema:', err)
+      }
+    }
+
+    loadTimerbarMenus()
+
+    const unsub = api.events?.on('addons:toast', (toastData: any) => {
+      console.log('🔔 [UI] Toasts event received in renderer:', toastData)
+      if (!toastData) return
+
+      if (toastData.action === 'dismiss' && toastData.toastId) {
+        toast.dismiss(toastData.toastId)
+        return
+      }
+      const type = toastData.type ?? 'info'
+      if (type === 'loading') {
+        toast.loading(toastData.message, {
+          id: toastData.toastId,
+          description: toastData.title,
+        })
+      } else if (type === 'success') {
+        toast.success(toastData.message, {
+          id: toastData.toastId,
+          description: toastData.title,
+        })
+      } else if (type === 'error') {
+        toast.error(toastData.message, {
+          id: toastData.toastId,
+          description: toastData.title,
+        })
+      } else if (type === 'warning') {
+        toast.warning(toastData.message, {
+          id: toastData.toastId,
+          description: toastData.title,
+        })
+      } else {
+        toast.info(toastData.message, {
+          id: toastData.toastId,
+          description: toastData.title,
+        })
+      }
+    })
+
+    return () => {
+      isMounted = false
+      unsub?.()
+    }
+  }, [api])
+
+  const handleCommandExecute = async (commandId: string, label: string) => {
+    try {
+      const res = await api.integrations.addons.executeCommand({
+        body: { commandId },
+      })
+      if (!res?.isSuccess) {
+        toast.error(`[Addon] Erro ao executar ${label}`)
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err)
+      toast.error(`[Addon] Erro ao executar ${label}: ${message}`)
+    }
+  }
+
+  return (
+    <Popover>
+      <TooltipProvider delayDuration={200}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 rounded-md p-0"
+                title="Addons do Sistema"
+              >
+                <LucideIcons.Puzzle className="h-3.5 w-3.5" />
+              </Button>
+            </PopoverTrigger>
+          </TooltipTrigger>
+          <TooltipContent side={isVertical ? 'right' : 'bottom'}>
+            <p>Addons (Extensões do Sistema)</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
+      <PopoverContent
+        side={isVertical ? 'right' : 'bottom'}
+        align="end"
+        className="flex w-64 flex-col gap-1 p-1.5"
+      >
+        <div className="text-muted-foreground border-border/50 mb-0.5 flex items-center gap-1.5 border-b px-2 py-1 pb-1.5 text-xs font-semibold">
+          <LucideIcons.Puzzle className="text-primary h-3.5 w-3.5 shrink-0" />
+          <span>Addons Ativos</span>
+        </div>
+
+        {timerbarMenus.length === 0 ? (
+          <div className="text-muted-foreground px-2 py-2 text-center text-xs">
+            Nenhum addon ativo no momento.
+          </div>
+        ) : (
+          timerbarMenus.map((menu) => {
+            if (menu.type === 'action') {
+              return (
+                <Button
+                  key={menu.id}
+                  variant="ghost"
+                  className="flex h-8 w-full items-center justify-between px-2 text-xs font-normal"
+                  onClick={() =>
+                    handleCommandExecute(menu.id, menu.label ?? menu.id)
+                  }
+                >
+                  <div className="mr-2 flex min-w-0 flex-1 items-center gap-2">
+                    {renderAddonIcon(menu.icon)}
+                    <span className="truncate">{menu.label ?? menu.id}</span>
+                  </div>
+                </Button>
+              )
+            }
+
+            return (
+              <div key={menu.id} className="flex flex-col gap-0.5">
+                <div className="text-muted-foreground flex items-center gap-2 px-2 pt-1 pb-0.5 text-[11px] font-medium">
+                  {renderAddonIcon(menu.icon)}
+                  <span className="truncate">{menu.tooltip ?? menu.id}</span>
+                </div>
+                {menu.items?.map((sub: AddonTimerbarPopoverSubItem) => (
+                  <Button
+                    key={sub.id}
+                    variant="ghost"
+                    className="flex h-8 w-full items-center justify-between px-2 pl-4 text-xs font-normal"
+                    onClick={() => handleCommandExecute(sub.id, sub.label)}
+                  >
+                    <div className="mr-2 flex min-w-0 flex-1 items-center gap-2">
+                      {renderAddonIcon(sub.icon)}
+                      <span className="truncate">{sub.label}</span>
+                    </div>
+                    {sub.shortcut && (
+                      <span className="text-muted-foreground shrink-0 font-mono text-[10px]">
+                        {sub.shortcut}
+                      </span>
+                    )}
+                  </Button>
+                ))}
+              </div>
+            )
+          })
+        )}
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+function AddonSingleTool({ menu }: { menu: AddonTimerbarMenuItem }) {
+  const { isVertical } = useTrackerContext()
+  const api = useOpenAPI()
+
+  const handleCommandExecute = async (commandId: string, label: string) => {
+    try {
+      const res = await api.integrations.addons.executeCommand({
+        body: { commandId },
+      })
+      if (!res?.isSuccess) {
+        toast.error(`[Addon] Erro ao executar ${label}`)
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err)
+      toast.error(`[Addon] Erro ao executar ${label}: ${message}`)
+    }
+  }
+
+  if (menu.type === 'action') {
+    return (
+      <TooltipProvider key={menu.id} delayDuration={200}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 rounded-md p-0"
+              onClick={() =>
+                handleCommandExecute(menu.id, menu.label ?? menu.id)
+              }
+            >
+              {renderAddonIcon(menu.icon)}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side={isVertical ? 'right' : 'bottom'}>
+            <p>{menu.tooltip ?? menu.label ?? menu.id}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )
+  }
+
+  if (menu.type === 'popover') {
+    return (
+      <Popover key={menu.id}>
+        <TooltipProvider delayDuration={200}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-md p-0"
+                >
+                  {renderAddonIcon(menu.icon)}
+                </Button>
+              </PopoverTrigger>
+            </TooltipTrigger>
+            <TooltipContent side={isVertical ? 'right' : 'bottom'}>
+              <p>{menu.tooltip ?? 'Opções do Addon'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <PopoverContent
+          side={isVertical ? 'right' : 'bottom'}
+          align="end"
+          className="flex w-64 flex-col gap-0.5 p-1"
+        >
+          {menu.items?.map((sub: AddonTimerbarPopoverSubItem) => {
+            return (
+              <Button
+                key={sub.id}
+                variant="ghost"
+                className="flex h-8 w-full items-center justify-between px-2 text-xs font-normal"
+                onClick={() => handleCommandExecute(sub.id, sub.label)}
+              >
+                <div className="mr-2 flex min-w-0 flex-1 items-center gap-2">
+                  {renderAddonIcon(sub.icon)}
+                  <span className="truncate">{sub.label}</span>
+                </div>
+                {sub.shortcut && (
+                  <span className="text-muted-foreground shrink-0 font-mono text-[10px]">
+                    {sub.shortcut}
+                  </span>
+                )}
+              </Button>
+            )
+          })}
+        </PopoverContent>
+      </Popover>
+    )
+  }
+
+  return null
+}
+
+export function useAddonBlocks() {
+  const api = useOpenAPI()
+  const { enabledAddonIds } = useTimerSettings()
+  const [timerbarMenus, setTimerbarMenus] = useState<AddonTimerbarMenuItem[]>(
+    [],
+  )
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadTimerbarMenus() {
+      try {
+        const response = await api.integrations.addons.getTimerbarMenus()
+        if (!isMounted) return
+        if (!response?.isSuccess || !Array.isArray(response.data)) return
+        setTimerbarMenus(response.data)
+      } catch (err) {
+        console.error('Erro ao carregar menus da timerbar:', err)
+      }
+    }
+
+    loadTimerbarMenus()
+    return () => {
+      isMounted = false
+    }
+  }, [api])
+
+  const visibleMenus = timerbarMenus.filter((menu) =>
+    (enabledAddonIds ?? []).includes(menu.id),
+  )
+
+  if (visibleMenus.length === 0) return []
+
+  return visibleMenus.map((menu) => (
+    <UltimateTimeTracker.Block key={menu.id} id={menu.id}>
+      <AddonSingleTool menu={menu} />
+    </UltimateTimeTracker.Block>
+  ))
+}
+
 UltimateTimeTracker.ToolsBlock = function ToolsBlock() {
   const { isVertical } = useTrackerContext()
   return (
@@ -1727,6 +2259,7 @@ UltimateTimeTracker.ToolsBlock = function ToolsBlock() {
       >
         <TimerHistory />
         <TimerSettings />
+        <SystemAddonsButton isVertical={isVertical} />
       </div>
     </div>
   )

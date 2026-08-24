@@ -1,5 +1,6 @@
 export * from './AddonInstallerViewModel'
 export * from './AddonManifestViewModel'
+export * from './AddonThemeViewModel'
 export * from './AuthenticationViewModel'
 export * from './ConnectionResultViewModel'
 export * from './MemberViewModel'

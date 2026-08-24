@@ -1,0 +1,169 @@
+---
+title: Criando seu Primeiro Addon
+description: Guia prático e passo a passo para criar, configurar e testar seu primeiro Addon utilizando o SDK do Metric.
+---
+
+# Criando seu Primeiro Addon
+
+Neste guia prático, você aprenderá a construir um Addon completo para o Metric do zero utilizando **TypeScript** e o pacote oficial **`@metric-org/sdk`**.
+
+---
+
+## 1. Configurando o Projeto
+
+Crie um novo diretório para o seu plugin e inicialize o projeto com suas dependências:
+
+```bash
+mkdir metric-meu-addon
+cd metric-meu-addon
+npm init -y
+npm install @metric-org/sdk
+npm install -D typescript tsup @types/node
+```
+
+Configure o arquivo `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "declaration": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+---
+
+## 2. Estrutura do Addon
+
+Todo addon do Metric exporta como `default` uma classe que implementa o contrato **`IAddon`**.
+
+Crie o arquivo `src/index.ts`:
+
+```typescript
+import type { 
+  IAddon, 
+  AddonContext, 
+  AddonSettingsField 
+} from '@metric-org/sdk'
+
+export default class MeuPrimeiroAddon implements IAddon {
+  // Metadados obrigatórios do Addon
+  public id = 'meu-primeiro-addon'
+  public name = 'Meu Primeiro Addon'
+  public version = '1.0.0'
+  public description = 'Exemplo prático de extensão para o Metric'
+  public author = 'Seu Nome ou Empresa'
+
+  private context?: AddonContext
+
+  // Formulário de preferências renderizado automaticamente na interface do Metric
+  public settingsFields: AddonSettingsField[] = [
+    {
+      key: 'servidorUrl',
+      label: 'URL do Servidor',
+      type: 'text',
+      required: true,
+      description: 'Endereço da API ou instância corporativa.',
+    },
+    {
+      key: 'apiKey',
+      label: 'Chave de Acesso / Token',
+      type: 'password',
+      required: true,
+      description: 'Token de autenticação gerado nas preferências da sua conta.',
+    },
+    {
+      key: 'notificarEventos',
+      label: 'Exibir Notificações Nativas',
+      type: 'boolean',
+      defaultValue: true,
+    },
+  ]
+
+  // Ciclo de Vida: Executado quando o plugin é ativado no Metric
+  public async onActivate(context: AddonContext): Promise<void> {
+    this.context = context
+    console.log(`[${this.name}] Addon ativado com sucesso!`)
+
+    // Lendo valores salvos com segurança no storage do Workspace
+    const servidorUrl = await context.storage.get('servidorUrl')
+    const notificar = (await context.storage.get('notificarEventos')) === 'true'
+
+    if (notificar) {
+      await context.notifications.show({
+        title: 'Addon Ativado',
+        body: `Conectado ao Metric com sucesso!`,
+      })
+    }
+
+    // Escutando eventos do cronômetro em tempo real
+    context.events.onTimerStart((data) => {
+      console.log(`[${this.name}] Timer iniciado para a tarefa:`, data.taskId)
+    })
+
+    context.events.onTimerStop((data) => {
+      console.log(`[${this.name}] Timer finalizado. Tempo registrado:`, data.durationSeconds)
+    })
+  }
+
+  // Ciclo de Vida: Executado ao desativar o plugin ou trocar de Workspace
+  public async onDeactivate(): Promise<void> {
+    console.log(`[${this.name}] Addon desativado. Limpando recursos...`)
+    this.context = undefined
+  }
+}
+```
+
+---
+
+## 3. Configurações Dinâmicas (`settingsFields`)
+
+A propriedade `settingsFields` permite que seu plugin defina formulários de configuração sem escrever uma única linha de interface gráfica (UI). O Metric gera e valida os campos nativamente.
+
+### Tipos de Campos Suportados:
+- **`text`**: Entrada de texto comum.
+- **`password`**: Campo com máscara de segurança para tokens, senhas e API keys.
+- **`boolean`**: Interruptor (Toggle) de verdadeiro/falso.
+- **`select`**: Lista suspensa de opções personalizadas com pares `{ label, value }`.
+
+---
+
+## 4. O Contexto do Addon (`AddonContext`)
+
+Ao ser ativado, o Metric injeta o objeto `AddonContext` contendo todas as APIs e ferramentas disponíveis:
+
+| Propriedade | Descrição |
+| :--- | :--- |
+| `context.storage` | Armazenamento chave-valor criptografado e isolado por Workspace. |
+| `context.events` | Eventos em tempo real do sistema (início/fim de timer, idle, troca de workspace). |
+| `context.notifications` | Emissão de notificações nativas no sistema operacional. |
+| `context.timer` | Leitura e controle do cronômetro ativo. |
+| `context.oauth` | Fluxo de autenticação OAuth 2.0 PKCE seguro sem necessidade de secrets. |
+
+---
+
+## 5. Compilando o Addon
+
+Adicione o script de build ao seu `package.json`:
+
+```json
+{
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean"
+  }
+}
+```
+
+Execute a compilação:
+
+```bash
+npm run build
+```
+
+O arquivo compilado resultante pode ser importado diretamente nas configurações de Addons do Metric.

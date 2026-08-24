@@ -1,0 +1,25 @@
+@startuml ComponentCustomExtensions
+title METRIC - SDK de Addons Multicapacidade (@metric-org/sdk)
+
+package "Metric Addon Core" {
+    interface "IAddon" as IAddon
+    interface "AddonContext" as AddonCtx
+    component [AddonLoader] as Loader
+}
+
+package "Addon Capabilities" {
+    [DataSources (IDataSource)] as DS
+    [Themes (CSS Injection)] as Themes
+    [Sidebar / Timerbar Menus] as Menus
+    [Commands (Barramento IPC)] as Cmds
+    [Watchers (Background Observers)] as Watchers
+}
+
+Loader --> AddonCtx : Cria e injeta
+IAddon --> AddonCtx : activate(context)
+AddonCtx --> DS : context.dataSources.register()
+AddonCtx --> Themes : context.themes.register()
+AddonCtx --> Menus : context.menus.register()
+AddonCtx --> Cmds : context.commands.register()
+AddonCtx --> Watchers : context.watchers.register()
+@enduml

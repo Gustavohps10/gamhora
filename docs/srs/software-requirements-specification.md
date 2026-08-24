@@ -2,9 +2,9 @@
 
 ## Sistema de Rastreamento e Visualização de Produtividade
 
-**Versão:** 1.1
+**Versão:** 1.3
 **Desenvolvedor:** Gustavo Henrique Pereira dos Santos
-**Data:** 10 de Maio de 2026
+**Data:** 24 de Agosto de 2026
 
 ---
 
@@ -15,6 +15,7 @@
 | 1.0    | Gustavo Henrique | Versão Inicial consolidada (ADR-001 + Core Sync)                                            | 07/03/2026 |
 | 1.1    | Gustavo Henrique | Arquitetura do Timer Service, Schema de TimeEntries, Journal e timerConfig                  | 10/05/2026 |
 | 1.2    | Gustavo Henrique | Revisão arquitetural: camadas Domain/Application/Main/Renderer, modelo operacional do timer | 10/05/2026 |
+| 1.3    | Gustavo Henrique | Simplificação: SDK de Addons Multicapacidade, Política Zero-Cloud, Free vs Pro e Licenciamento Local | 24/08/2026 |
 
 ---
 
@@ -22,176 +23,71 @@
 
 ## 1.1 Finalidade
 
-O **METRIC** tem como finalidade o rastreamento e a visualização de produtividade no desenvolvimento de software.
+O **METRIC** é um sistema desktop extensível e focado em produtividade para desenvolvedores e equipes de tecnologia.
 
-O sistema atua como um **hub agnóstico** que consome tarefas de **Data Sources externos** (Jira, Redmine, ERPs) e gerencia o tempo investido através de uma arquitetura de sincronização robusta e operação **offline-first**.
+O sistema atua como um **hub local e agnóstico** que se conecta diretamente a ferramentas de gestão externas (Redmine, Jira, etc.) através de um **SDK de Addons Multicapacidade**, gerenciando o tempo investido com operação **100% offline-first e privacidade absoluta (Zero-Cloud)**.
 
-## 1.2 Escopo
+## 1.2 Política de Privacidade Estrita (Zero-Cloud Data Policy)
 
-O produto utiliza o modelo **Open-Core**.
-
-**Núcleo Principal (Desktop/Local):**
-
-- Integração técnica com fontes externas
-- Operação offline
-- Conversão de padrões de dados externos
-- Sincronização de tarefas e apontamentos
-
-**Funcionalidades Proprietárias (Gestão Organizacional):**
-
-- Gestão de times
-- Controle de domínios
-- Sistema de licenciamento
-- Painel administrativo
-- Analytics avançado
-
-Essas funcionalidades são geridas por um **painel administrativo centralizado**.
+O Metric adota uma política rigorosa de **não exfiltração de dados operacionais**:
+- **Nenhum dado de tarefas, títulos de janelas, apontamentos de horas ou informações de clientes trafega para servidores em nuvem do Metric ou de terceiros.**
+- Todas as conexões com DataSources acontecem **diretamente da máquina do usuário para o servidor da empresa/ferramenta**.
+- Recursos de inteligência e automação (Window Observer, Git Tracker, OCR, Idle Resolver) executam **100% localmente** na CPU do usuário.
 
 ---
 
-# 2. Visão Geral
+# 2. Visão Geral e Modelo de Negócio
 
 ## 2.1 Público-Alvo
 
-O sistema é destinado a:
+- **Desenvolvedores Individuais (CLT / Solo):** Rastreamento de tempo ágil, sem fricção, com widget flutuante e atalhos rápidos.
+- **Desenvolvedores PJ / Freelancers / Consultores:** Gestão de múltiplos clientes/workspaces simultâneos, automação de apontamento e exportação de faturamento.
+- **Equipes de Tecnologia e Agências:** Visão de capacidade, alocação e relatórios centralizados.
 
-- Desenvolvedores individuais
-- Times de desenvolvimento
-- Empresas de pequeno, médio e grande porte
+## 2.2 Divisão de Planos (Free vs Pro)
 
-O objetivo é **centralizar o controle de orçamento de tempo** baseado em tarefas provenientes de sistemas externos.
+O Metric opera sob um modelo de licenciamento local simplificado (sem necessidade de cadastro ou login obrigatório):
 
-## 2.2 Ambiente Operacional — Requisitos Mínimos
+### 🟢 Plano FREE (Uso Individual / Básico)
+- Timer manual com precisão no Main Process.
+- Widget flutuante com suporte a *click-through* e atalhos globais.
+- 1 Conexão de DataSource ativa por vez.
+- Temas nativos da aplicação (Light & Dark padrão).
+- Armazenamento 100% local.
 
-### Sistema Operacional
-
-- Windows 10 ou superior
-- macOS
-- Linux
-
-### Hardware
-
-- 4GB de memória RAM
-
-### Armazenamento
-
-Persistência de banco de dados **local** utilizando **RxDB**.
-
-### Conectividade
-
-- Internet obrigatória para licenciamento
-- Internet obrigatória para autenticação com datasource
-- Internet obrigatória para sincronização com datasource
-
-O sistema continua funcional **offline para operações locais**.
+### 💎 Plano PRO (Automações & Multi-Workspaces)
+Ativado localmente via **Chave de Licença (License Key)**:
+- **Multi-Workspace & Múltiplas Conexões:** Conectar simultaneamente múltiplos DataSources (ex: Jira + Redmine + GitHub).
+- **Pacote de Automações & Watchers Locais:**
+  - *Window Context Observer:* Identificação de janelas ativas em primeiro plano.
+  - *Git Tracker:* Associação automática de branches/commits a tarefas.
+  - *Idle Resolver:* Detecção e tratamento inteligente de pausas e reuniões.
+  - *Sugestor Automático:* Captura de atividades (Discord, Calls) com pré-preenchimento heurístico.
+  - *Gerador de Daily:* Resumo automático do dia anterior em tópicos para reuniões diárias.
+- **Temas e Customização Visual Ilimitada:** Aplicação de temas da comunidade via Addons e injeção de CSS personalizado.
+- **Exportação de Faturamento:** Geração de relatórios consolidados em PDF e planilhas para cobrança de horas.
 
 ---
 
-# 3. Modelo de Produto
+# 3. Ecossistema e SDK de Addons
 
-O Metric segue o modelo **Open-Core**.
+O Metric possui uma arquitetura orientada a **Addons Multicapacidade**. Um único pacote de addon pode fornecer simultaneamente:
 
-### Open Source
-
-- Cliente Desktop
-- Visualização de tarefas
-- Rastreamento de tempo
-- Integração básica com Data Sources
-- Sincronização local
-
-### Pro / Enterprise
-
-- Gestão de organizações
-- Controle de membros
-- Painel administrativo
-- Analytics avançado
-- Integrações corporativas
+1. **DataSources:** Adaptadores de comunicação com APIs externas (Redmine, Jira, GitLab, Mock).
+2. **Navegação & Menus:** Injeção de itens de navegação na Sidebar e subitens.
+3. **Timerbar & Popovers:** Botões de ação rápida, atalhos de teclado e popovers interativos na barra do timer.
+4. **Comandos (Commands):** Handlers executáveis registrados no barramento de eventos local.
+5. **Temas Visuais (Themes):** Folhas de estilo completas injetadas dinamicamente no DOM da aplicação e do widget.
+6. **Watchers & Observadores:** Automações em background para monitorar eventos do sistema operacional.
 
 ---
 
-# 4. Modelo de Execução
+# 4. Ambiente Operacional
 
-O Metric possui **dois modos principais de execução**.
-
-## 4.1 Desktop Client (Modo Padrão)
-
-Aplicativo executado localmente na máquina do usuário.
-
-Disponível para:
-
-- Windows
-- Linux
-- macOS
-
-Características:
-
-- Arquitetura **offline-first**
-- Persistência local utilizando **RxDB**
-- Sincronização direta com **Data Sources externos**
-- Não depende de backend para funcionamento básico
-
-Usuários do plano **Free** podem utilizar o sistema sem autenticação.
-
-## 4.2 Self-Hosted
-
-Empresas podem executar o Metric em sua própria infraestrutura.
-
-Exemplo:
-
-https://metric.internal.company.com
-
-Motivações comuns:
-
-- Compliance
-- Políticas internas de segurança
-- Isolamento de dados
-- Controle completo da infraestrutura
-
-Nesse modo geralmente existe **uma única organização interna**.
-
-## 4.3 Infraestrutura de Controle (Metric Cloud)
-
-Além dos modos de execução, o Metric utiliza um **serviço centralizado de controle**.
-
-Esse serviço é responsável apenas por **gestão de contas, organizações e licenças**.
-
-Exemplo:
-
-https://app.metric.dev
-
-### Responsabilidades do serviço central
-
-- Autenticação via **Magic Link**
-- Gestão de **organizações**
-- Controle de **membros**
-- Gestão de **planos e licenciamento**
-- Painel administrativo
-
-### Dados que o serviço central NÃO armazena
-
-O **serviço central de controle do Metric não armazena dados operacionais da aplicação**, como:
-
-- Tarefas
-- Registros de tempo
-- Histórico de produtividade
-- Dados sincronizados das ferramentas externas
-
-Esses dados permanecem:
-
-- No **banco local do cliente (RxDB)**
-  ou
-- Nas **ferramentas externas integradas (Jira, Redmine, etc.)**
-
-## Motivo da decisão
-
-Essa arquitetura reduz:
-
-- Responsabilidade sobre dados do usuário
-- Custos de infraestrutura
-- Riscos de privacidade
-- Complexidade de sincronização
-
-O backend central atua apenas como **Control Plane**, enquanto os dados operacionais permanecem **no cliente e nas ferramentas externas**.
+### Requisitos de Sistema
+- **Sistemas Operacionais:** Windows 10/11, macOS, Linux
+- **Stack Técnica:** Electron, TypeScript, React, Tailwind CSS v4, RxDB (Persistência Local)
+- **Privacidade & Rede:** Totalmente funcional offline. Acesso à internet necessário apenas para sincronizar com os DataSources externos configurados pelo próprio usuário e para a validação pontual da Chave de Licença.
 
 ---
 
@@ -201,32 +97,31 @@ O backend central atua apenas como **Control Plane**, enquanto os dados operacio
 
 | ID    | Descrição                                         | Prioridade | Depende De |
 | ----- | ------------------------------------------------- | ---------- | ---------- |
-| RF001 | Gestão de Workspaces locais independentes         | Alta       | —          |
-| RF002 | Loja de Addons para integração com Data Sources   | Alta       | —          |
-| RF003 | Configuração de fontes externas                   | Alta       | RF002      |
-| RF004 | Motor de sincronização Pull baseado em checkpoint | Alta       | RF003      |
-| RF005 | Conversão de metadados para padrão interno        | Alta       | RF004      |
-| RF006 | Sistema de timer para tarefas                     | Alta       | —          |
-| RF007 | Lançamento manual de apontamentos                 | Alta       | —          |
-| RF008 | Replicação de apontamentos para fonte externa     | Alta       | RF004      |
-| RF009 | Timer bidirecional (countup e countdown)          | Alta       | RF006      |
-| RF010 | Tempo inicial manual configurável pelo usuário    | Alta       | RF006      |
-| RF011 | Journal de eventos do timer por apontamento       | Alta       | RF006      |
-| RF012 | Recuperação de estado do timer ao reabrir o app   | Alta       | RF006      |
-| RF013 | Painel administrativo para organizações           | Baixa      | —          |
-| RF014 | Autenticação Magic Link                           | Baixa      | RF013      |
+| ID    | Descrição                                                         | Prioridade | Depende De |
+| ----- | ----------------------------------------------------------------- | ---------- | ---------- |
+| RF001 | Gestão de Workspaces locais independentes                         | Alta       | —          |
+| RF002 | Gerenciador e SDK de Addons Multicapacidade                       | Alta       | —          |
+| RF003 | Configuração de conexões externas diretas                         | Alta       | RF002      |
+| RF004 | Motor de sincronização Pull/Push direto com DataSources           | Alta       | RF003      |
+| RF005 | Conversão de metadados para padrão interno agnóstico              | Alta       | RF004      |
+| RF006 | Sistema de timer processado em background                         | Alta       | —          |
+| RF007 | Widget flutuante com suporte a click-through e atalhos            | Alta       | RF006      |
+| RF008 | Injeção dinâmica de temas CSS via Addons                          | Alta       | RF002      |
+| RF009 | Validação de Chave de Licença PRO (License Key) offline-first     | Média      | —          |
+| RF010 | Temporização manual e recuperação de estado (Boot Recovery)       | Alta       | RF006      |
+| RF011 | Journal de eventos do timer e auditoria local                     | Alta       | RF006      |
+| RF012 | Pacote de Watchers e Automações Locais (Window/Git/Idle/Sugestor) | Média      | RF002, RF009 |
 
 ## 5.2 Requisitos Não Funcionais (RNF)
 
-| ID     | Descrição                                                                    | Categoria      | Prioridade |
-| ------ | ---------------------------------------------------------------------------- | -------------- | ---------- |
-| RNF001 | Application Layer compartilhada entre Cloud, Desktop e Self-Hosted           | Arquitetura    | Alta       |
-| RNF002 | Persistência local offline-first                                             | Arquitetura    | Alta       |
-| RNF003 | Autenticação Passwordless                                                    | Segurança      | Alta       |
-| RNF004 | Sincronização resiliente a conflitos                                         | Confiabilidade | Alta       |
-| RNF005 | Timer processado no Main Process do Electron, imune a throttling do Chromium | Performance    | Alta       |
-| RNF006 | Separação entre processamento de tempo (Main) e estado visual (Renderer)     | Arquitetura    | Alta       |
-| RNF007 | Journal e timerConfig nunca sincronizados com o servidor                     | Privacidade    | Alta       |
+| ID     | Descrição                                                                      | Categoria      | Prioridade |
+| ------ | ------------------------------------------------------------------------------ | -------------- | ---------- |
+| RNF001 | Política Estrita Zero-Cloud (Nenhum dado operacional enviado a servidores)     | Privacidade    | Crítica    |
+| RNF002 | Persistência local offline-first (RxDB / SQLite)                               | Arquitetura    | Alta       |
+| RNF003 | Timer imune a throttling do Chromium (Processado no Electron Main)             | Performance    | Alta       |
+| RNF004 | Separação estrita em camadas (Domain, Application, Main, Renderer, SDK, UI)   | Arquitetura    | Alta       |
+| RNF005 | Extensibilidade agnóstica via SDK (Zero acoplamento com ferramentas específicas)| Arquitetura    | Alta       |
+| RNF006 | Injeção de CSS tratada para compatibilidade com Tailwind v4 no Client-Side     | Compatibilidade| Alta       |
 
 ---
 
@@ -409,34 +304,17 @@ Estrutura de cores:
 # Diagrama de Classes
 
 <!--<BEGIN_CLASSES_DIAGRAM> -->
-
 ###### diagram-classes-001-tasks.puml
-
 <img src="./diagrams/puml-images/classes/diagram-classes-001-tasks.png" alt="CLASSES_DIAGRAM" />
 
 ###### diagram-classes-002-timeEntries.puml
-
 <img src="./diagrams/puml-images/classes/diagram-classes-002-timeEntries.png" alt="CLASSES_DIAGRAM" />
 
 ###### diagram-classes-003-metadata.puml
-
 <img src="./diagrams/puml-images/classes/diagram-classes-003-metadata.png" alt="CLASSES_DIAGRAM" />
 
-###### diagram-classes-004-users.puml
-
-<img src="./diagrams/puml-images/classes/diagram-classes-004-users.png" alt="CLASSES_DIAGRAM" />
-
-###### diagram-classes-005-organizations.puml
-
-<img src="./diagrams/puml-images/classes/diagram-classes-005-organizations.png" alt="CLASSES_DIAGRAM" />
-
-###### diagram-classes-006-roles.puml
-
-<img src="./diagrams/puml-images/classes/diagram-classes-006-roles.png" alt="CLASSES_DIAGRAM" />
-
-###### diagram-classes-007-license-plan.puml
-
-<img src="./diagrams/puml-images/classes/diagram-classes-007-license-plan.png" alt="CLASSES_DIAGRAM" />
+###### diagram-classes-004-license-plan.puml
+<img src="./diagrams/puml-images/classes/diagram-classes-004-license-plan.png" alt="CLASSES_DIAGRAM" />
 <!--END_CLASSES_DIAGRAM -->
 
 ---
@@ -754,58 +632,89 @@ Configurar integração com a fonte externa e sincronizar dados.
 ### Diagrama de Fluxos
 
 <!--<BEGIN_FLOW> -->
+###### diagram-flow-001-timer.puml
+<img src="./diagrams/puml-images/flow/diagram-flow-001-timer.png" alt="FLOW" />
 
-###### diagram-flow-001-login.puml
+###### diagram-flow-002-task-creation.puml
+<img src="./diagrams/puml-images/flow/diagram-flow-002-task-creation.png" alt="FLOW" />
 
-<img src="./diagrams/puml-images/flow/diagram-flow-001-login.png" alt="FLOW" />
+###### diagram-flow-003-task-edit.puml
+<img src="./diagrams/puml-images/flow/diagram-flow-003-task-edit.png" alt="FLOW" />
 
-###### diagram-flow-002-desktop-auth.puml
+###### diagram-flow-004-plugin-activation.puml
+<img src="./diagrams/puml-images/flow/diagram-flow-004-plugin-activation.png" alt="FLOW" />
 
-<img src="./diagrams/puml-images/flow/diagram-flow-002-desktop-auth.png" alt="FLOW" />
+###### diagram-flow-005-sync-success.puml
+<img src="./diagrams/puml-images/flow/diagram-flow-005-sync-success.png" alt="FLOW" />
 
-###### diagram-flow-003-selfhosted-auth.puml
+###### diagram-flow-006-sync-conflict.puml
+<img src="./diagrams/puml-images/flow/diagram-flow-006-sync-conflict.png" alt="FLOW" />
 
-<img src="./diagrams/puml-images/flow/diagram-flow-003-selfhosted-auth.png" alt="FLOW" />
+###### diagram-flow-007-payment-pro.puml
+<img src="./diagrams/puml-images/flow/diagram-flow-007-payment-pro.png" alt="FLOW" />
+<!--END_FLOW -->
 
-###### diagram-flow-004-timer.puml
+## UC002 — Rastreamento de Tempo
 
-<img src="./diagrams/puml-images/flow/diagram-flow-004-timer.png" alt="FLOW" />
+### Objetivo
 
-###### diagram-flow-005-task-creation.puml
+Permitir que o usuário registre tempo em tarefas com suporte a modos de operação distintos, tempo inicial manual e histórico auditável.
 
-<img src="./diagrams/puml-images/flow/diagram-flow-005-task-creation.png" alt="FLOW" />
+### Fluxo
 
-###### diagram-flow-006-task-edit.puml
+1. Usuário seleciona tarefa
+2. Opcionalmente define tempo inicial (ex: "já trabalhei 2h nisso")
+3. Inicia timer — renderer cria entry no RxDB com `timeStatus: running` e primeira entrada no `journal`, e aciona o processamento no Main Process via IPC
+4. Main Process passa a processar o interval e emitir `timer:tick` a cada 1s para o renderer
+5. Usuário pausa ou finaliza — renderer atualiza o RxDB, journal é registrado; no stop, `timeSpent` é consolidado localmente e o apontamento fica disponível para push ao datasource externo
 
-<img src="./diagrams/puml-images/flow/diagram-flow-006-task-edit.png" alt="FLOW" />
+### Sub-fluxos do Timer
 
-###### diagram-flow-007-plugin-activation.puml
+**UC-T01 — Iniciar Timer (padrão)**
 
-<img src="./diagrams/puml-images/flow/diagram-flow-007-plugin-activation.png" alt="FLOW" />
+```
+Usuário clica Play
+  │
+  ├─ Renderer cria entry no RxDB
+  │    startDate: now
+  │    timeStatus: running
+  │    timerConfig: { mode }
+  │    journal: [{ event: 'started', at: now, secondsAtEvent: 0 }]
+  │
+  └─ Renderer envia ao Main Process via IPC
+       timer:start({ initialSeconds: 0, mode })
+         └─ Main Process inicia interval → timer:tick a cada 1s → renderer atualiza display
+```
 
-###### diagram-flow-008-sync-success.puml
+**UC-T02 — Iniciar Timer com Tempo Manual**
 
-<img src="./diagrams/puml-images/flow/diagram-flow-008-sync-success.png" alt="FLOW" />
+```
+Usuário define "6h" e clica Play
+  │
+  ├─ Renderer calcula startDate = now - 21600
+  │
+  ├─ Renderer cria entry no RxDB
+  │    startDate: calculado retroativamente
+  │    timeStatus: running
+  │    timerConfig: { mode, manualInitialSeconds: 21600 }
+  │    journal: [{ event: 'adjusted', at: now, secondsAtEvent: 21600,
+  │               note: 'Usuário definiu 6h manualmente' }]
+  │
+  └─ Renderer envia ao Main Process: timer:start({ initialSeconds: 21600, mode })
+```
 
-###### diagram-flow-009-sync-conflict.puml
+**UC-T03 — Pausar Timer**
 
-<img src="./diagrams/puml-images/flow/diagram-flow-009-sync-conflict.png" alt="FLOW" />
+```
+Usuário clica Pause
+  │
+  ├─ Renderer envia timer:pause ao Main Process → interval interrompido
+  │
+  └─ Renderer atualiza RxDB
+       timeStatus: paused
+       journal: push { event: 'paused', at: now, secondsAtEvent }
+```
 
-###### diagram-flow-010-panel-admin-success.puml
-
-<img src="./diagrams/puml-images/flow/diagram-flow-010-panel-admin-success.png" alt="FLOW" />
-
-###### diagram-flow-011-panel-admin-error.puml
-
-<img src="./diagrams/puml-images/flow/diagram-flow-011-panel-admin-error.png" alt="FLOW" />
-
-###### diagram-flow-012-payment-pro.puml
-
-<img src="./diagrams/puml-images/flow/diagram-flow-012-payment-pro.png" alt="FLOW" />
-
-###### diagram-flow-013-invite-flow.puml
-
-<img src="./diagrams/puml-images/flow/diagram-flow-013-invite-flow.png" alt="FLOW" />
 <!--END_FLOW -->
 
 ## UC002 — Rastreamento de Tempo
@@ -937,75 +846,46 @@ App abre
 ### Diagrama de Componentes
 
 <!--<BEGIN_COMPONENT_DIAGRAM> -->
+###### diagram-component-001-custom-extensions.puml
+<img src="./diagrams/puml-images/component/diagram-component-001-custom-extensions.png" alt="COMPONENT_DIAGRAM" />
 
-###### diagram-component-001-clock-plugin.puml
+###### diagram-component-002-addons-market.puml
+<img src="./diagrams/puml-images/component/diagram-component-002-addons-market.png" alt="COMPONENT_DIAGRAM" />
 
-<img src="./diagrams/puml-images/component/diagram-component-001-clock-plugin.png" alt="COMPONENT_DIAGRAM" />
-
-###### diagram-component-002-git-plugin.puml
-
-<img src="./diagrams/puml-images/component/diagram-component-002-git-plugin.png" alt="COMPONENT_DIAGRAM" />
-
-###### diagram-component-003-custom-extensions.puml
-
-<img src="./diagrams/puml-images/component/diagram-component-003-custom-extensions.png" alt="COMPONENT_DIAGRAM" />
-
-###### diagram-component-004-addons-market.puml
-
-<img src="./diagrams/puml-images/component/diagram-component-004-addons-market.png" alt="COMPONENT_DIAGRAM" />
-
-###### diagram-component-005-shared-ui.puml
-
-<img src="./diagrams/puml-images/component/diagram-component-005-shared-ui.png" alt="COMPONENT_DIAGRAM" />
+###### diagram-component-003-shared-ui.puml
+<img src="./diagrams/puml-images/component/diagram-component-003-shared-ui.png" alt="COMPONENT_DIAGRAM" />
 <!--END_COMPONENT_DIAGRAM -->
 
-## UC003 — Ativação Pro _(Prioridade Baixa)_
+## UC003 — Ativação de Licença Pro
 
 ### Objetivo
 
-Ativar licença corporativa.
+Ativar os recursos do plano Pro localmente através de uma chave de licença (License Key).
 
 ### Fluxo
 
-1. Usuário informa código da organização
-2. Usuário informa e-mail
-3. Sistema envia Magic Link
-4. Usuário autentica
-5. Licença Pro é ativada
+1. Usuário realiza o upgrade/pagamento via Checkout Web
+2. Gateway emite a Chave de Licença (License Key)
+3. Usuário acessa as Configurações do Metric e insere a Chave
+4. Sistema valida a chave via API (1 única vez) e grava `{ isPro: true }` no `settings.json` local
+5. Recursos Pro (Automações, Watchers, Multi-Workspaces) são desbloqueados imediatamente
 
 ---
 
 # Diagrama de Infraestrutura
 
 <!--<BEGIN_INFRA_DIAGRAM> -->
-
 ###### diagram-infra-001-architecture.puml
-
 <img src="./diagrams/puml-images/infra/diagram-infra-001-architecture.png" alt="INFRA_DIAGRAM" />
 
-###### diagram-infra-002-deployment-cloud.puml
+###### diagram-infra-002-deployment-desktop.puml
+<img src="./diagrams/puml-images/infra/diagram-infra-002-deployment-desktop.png" alt="INFRA_DIAGRAM" />
 
-<img src="./diagrams/puml-images/infra/diagram-infra-002-deployment-cloud.png" alt="INFRA_DIAGRAM" />
+###### diagram-infra-003-sync-engine.puml
+<img src="./diagrams/puml-images/infra/diagram-infra-003-sync-engine.png" alt="INFRA_DIAGRAM" />
 
-###### diagram-infra-003-deployment-selfhosted.puml
-
-<img src="./diagrams/puml-images/infra/diagram-infra-003-deployment-selfhosted.png" alt="INFRA_DIAGRAM" />
-
-###### diagram-infra-004-deployment-desktop.puml
-
-<img src="./diagrams/puml-images/infra/diagram-infra-004-deployment-desktop.png" alt="INFRA_DIAGRAM" />
-
-###### diagram-infra-005-control-plane.puml
-
-<img src="./diagrams/puml-images/infra/diagram-infra-005-control-plane.png" alt="INFRA_DIAGRAM" />
-
-###### diagram-infra-006-sync-engine.puml
-
-<img src="./diagrams/puml-images/infra/diagram-infra-006-sync-engine.png" alt="INFRA_DIAGRAM" />
-
-###### diagram-infra-007-rxdb-setup.puml
-
-<img src="./diagrams/puml-images/infra/diagram-infra-007-rxdb-setup.png" alt="INFRA_DIAGRAM" />
+###### diagram-infra-004-rxdb-setup.puml
+<img src="./diagrams/puml-images/infra/diagram-infra-004-rxdb-setup.png" alt="INFRA_DIAGRAM" />
 <!--END_INFRA_DIAGRAM -->
 
 ---
@@ -1013,30 +893,20 @@ Ativar licença corporativa.
 # Diagrama de Integrações
 
 <!--<BEGIN_INTEGRATION_DIAGRAM> -->
-
 ###### diagram-integration-001-jira.puml
-
 <img src="./diagrams/puml-images/integration/diagram-integration-001-jira.png" alt="INTEGRATION_DIAGRAM" />
 
 ###### diagram-integration-002-redmine.puml
-
 <img src="./diagrams/puml-images/integration/diagram-integration-002-redmine.png" alt="INTEGRATION_DIAGRAM" />
 
 ###### diagram-integration-003-other-datasources.puml
-
 <img src="./diagrams/puml-images/integration/diagram-integration-003-other-datasources.png" alt="INTEGRATION_DIAGRAM" />
 
-###### diagram-integration-004-webhooks.puml
+###### diagram-integration-004-sync-pull.puml
+<img src="./diagrams/puml-images/integration/diagram-integration-004-sync-pull.png" alt="INTEGRATION_DIAGRAM" />
 
-<img src="./diagrams/puml-images/integration/diagram-integration-004-webhooks.png" alt="INTEGRATION_DIAGRAM" />
-
-###### diagram-integration-005-sync-pull.puml
-
-<img src="./diagrams/puml-images/integration/diagram-integration-005-sync-pull.png" alt="INTEGRATION_DIAGRAM" />
-
-###### diagram-integration-006-sync-replication.puml
-
-<img src="./diagrams/puml-images/integration/diagram-integration-006-sync-replication.png" alt="INTEGRATION_DIAGRAM" />
+###### diagram-integration-005-sync-replication.puml
+<img src="./diagrams/puml-images/integration/diagram-integration-005-sync-replication.png" alt="INTEGRATION_DIAGRAM" />
 <!--END_INTEGRATION_DIAGRAM -->
 
 ---
@@ -1044,63 +914,64 @@ Ativar licença corporativa.
 # Diagrama de UML
 
 <!--<BEGIN_UML_DIAGRAM> -->
-
 ###### diagram-uml-001-use-case-setup.puml
-
 <img src="./diagrams/puml-images/uml/diagram-uml-001-use-case-setup.png" alt="UML_DIAGRAM" />
 
 ###### diagram-uml-002-use-case-timer.puml
-
 <img src="./diagrams/puml-images/uml/diagram-uml-002-use-case-timer.png" alt="UML_DIAGRAM" />
 
-###### diagram-uml-003-use-case-panel.puml
+###### diagram-uml-003-sequence-sync.puml
+<img src="./diagrams/puml-images/uml/diagram-uml-003-sequence-sync.png" alt="UML_DIAGRAM" />
 
-<img src="./diagrams/puml-images/uml/diagram-uml-003-use-case-panel.png" alt="UML_DIAGRAM" />
+###### diagram-uml-004-sequence-payment.puml
+<img src="./diagrams/puml-images/uml/diagram-uml-004-sequence-payment.png" alt="UML_DIAGRAM" />
 
-###### diagram-uml-004-sequence-login.puml
-
-<img src="./diagrams/puml-images/uml/diagram-uml-004-sequence-login.png" alt="UML_DIAGRAM" />
-
-###### diagram-uml-005-sequence-sync.puml
-
-<img src="./diagrams/puml-images/uml/diagram-uml-005-sequence-sync.png" alt="UML_DIAGRAM" />
-
-###### diagram-uml-006-sequence-payment.puml
-
-<img src="./diagrams/puml-images/uml/diagram-uml-006-sequence-payment.png" alt="UML_DIAGRAM" />
-
-###### diagram-uml-007-component-overview.puml
-
-<img src="./diagrams/puml-images/uml/diagram-uml-007-component-overview.png" alt="UML_DIAGRAM" />
+###### diagram-uml-005-component-overview.puml
+<img src="./diagrams/puml-images/uml/diagram-uml-005-component-overview.png" alt="UML_DIAGRAM" />
 <!--END_UML_DIAGRAM -->
 
 ---
 
-# Diagrama de Infraestrutura (Mermaid)
+# Diagrama de Infraestrutura e Componentes (Mermaid)
 
 ```mermaid
 flowchart TB
-    subgraph LeftColumn [ ]
+    subgraph Client [Desktop Client — Electron]
         direction TB
-        style LeftColumn fill:none,stroke:none
+        UI[Renderer UI — React & Tailwind v4]
+        TimerService[Main Timer Service & IPC]
+        Loader[AddonLoader & Memory Registry]
+        LocalDB[(RxDB / SQLite / settings.json)]
+        Widget[Native Transparent Widget]
 
-        subgraph ControlPlane [Control Plane]
-            direction TB
-            Auth[Authentication]
-            Orgs[Organizations]
-            Lic[Licensing]
-        end
+        UI <--> TimerService
+        UI <--> LocalDB
+        TimerService <--> Widget
+        UI <--> Loader
     end
 
-    subgraph RightColumn [ ]
+    subgraph Addons [Addon Ecosystem — @metric-org/sdk]
         direction TB
-        style RightColumn fill:none,stroke:none
+        DS[DataSources — Redmine, Jira, Fake]
+        Themes[Visual Themes — CSS Injected]
+        Watchers[Watchers — Window, Git, Idle]
+        Menus[Timerbar & Sidebar Menus]
 
-        subgraph Clients [Clients]
-            direction TB
-            Desktop[Desktop Client]
-            Mobile[Mobile Client]
-            SelfHosted[Self-Hosted Server]
+        Loader --> DS
+        Loader --> Themes
+        Loader --> Watchers
+        Loader --> Menus
+    end
+
+    subgraph External [External Tools — Direct REST]
+        direction TB
+        RedmineServer[Redmine Server / On-Premise]
+        JiraServer[Jira Cloud API]
+
+        DS <--> RedmineServer
+        DS <--> JiraServer
+    end
+<img src="./diagrams/puml-images/uml/diagram-uml-007-component-overview.png" alt="UML_DIAGRAM" />
         end
 
         subgraph AppCore [Application Core]
@@ -1180,3 +1051,33 @@ flowchart TB
 - Privacidade do fluxo de trabalho interno do usuário
 - O adapter de push trabalha apenas com campos do modelo de domínio (`startDate`, `endDate`, `timeSpent`, `comments`)
 - Dados de auditoria e recálculo disponíveis localmente para futuras funcionalidades
+
+## ADR-004 — Sistema de Addons Multicapacidade desacoplado via SDK
+
+**Contexto:** Ferramentas extensíveis costumam sofrer de fragmentação ou acoplamento forte quando cada tipo de plugin (tema, conector, atalho) exige uma arquitetura isolada.
+
+**Decisão:** O Metric adota um contrato de **Addon Multicapacidade** no `@metric-org/sdk`. Um único Addon pode registrar simultaneamente DataSources, Menus de Sidebar, Botões e Popovers na Timerbar, Comandos, Watchers e Temas Visuais.
+
+**Consequências:**
+- Facilidade para a comunidade e empresas desenvolverem extensões completas.
+- O Core do Metric e a UI permanecem 100% agnósticos aos detalhes das ferramentas externas.
+
+## ADR-005 — Licenciamento Local-First por Chave (Zero Backend Auth)
+
+**Contexto:** Criar um backend SaaS de autenticação (Magic Links, senhas, banco de usuários) introduz custos de infraestrutura e aumenta o risco de vazamento de dados de compliance de clientes corporativos.
+
+**Decisão:** O licenciamento PRO opera no modelo **License Key Offline-First**. A chave adquirida no checkout é validada e persistida localmente nas configurações do app. O app opera 100% funcional localmente sem obrigatoriedade de login.
+
+**Consequências:**
+- Zero custo e manutenção de servidores de autenticação centralizados.
+- Cumprimento rigoroso da política de privacidade Zero-Cloud.
+
+## ADR-006 — Injeção Dinâmica e Tratamento de Temas CSS no Client-Side
+
+**Contexto:** O Tailwind v4 compila estilos em build-time com diretivas específicas (`@theme`, `@apply`) que o motor CSS nativo do navegador não interpreta em runtime.
+
+**Decisão:** O `AddonThemeBridge` extrai dinamicamente apenas as variáveis CSS dos blocos `:root` e `.dark` fornecidos pelo Addon, descartando diretivas de build e aplicando-as com seletores de alta especificidade (`:root:root` e `.dark:root`).
+
+**Consequências:**
+- Addons podem fornecer arquivos `.css` completos no padrão Shadcn/Tailwind sem quebrar o runtime.
+- Suporte a alternância de temas em tempo real na janela principal e no widget flutuante.

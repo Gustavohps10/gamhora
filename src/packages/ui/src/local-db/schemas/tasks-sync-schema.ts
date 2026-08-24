@@ -28,8 +28,8 @@ export interface SyncTaskRxDBDTO {
   status: { id: string; name: string }
   tracker?: { id: string }
   priority?: { id: string; name: string }
-  author?: { id: string; name: string }
-  assignedTo?: { id: string; name: string }
+  author?: { id?: string; name: string }
+  assignedTo?: { id?: string; name: string }
   createdAt: string
   updatedAt: string
   startDate?: string
@@ -91,23 +91,23 @@ export const tasksSyncSchema: RxJsonSchema<SyncTaskRxDBDTO> = {
         id: { type: 'string', maxLength: 100 },
         name: { type: 'string', maxLength: 250 },
       },
-      required: ['id', 'name'],
+      required: ['name'],
     },
     author: {
       type: 'object',
       properties: {
-        id: { type: 'string', maxLength: 100 },
+        id: { type: ['string', 'null'] },
         name: { type: 'string', maxLength: 250 },
       },
-      required: ['id', 'name'],
+      required: ['name'],
     },
     assignedTo: {
       type: 'object',
       properties: {
-        id: { type: 'string', maxLength: 100 },
+        id: { type: ['string', 'null'] },
         name: { type: 'string', maxLength: 250 },
       },
-      required: ['id', 'name'],
+      required: ['name'],
     },
     createdAt: { type: 'string', format: 'date-time', maxLength: 30 },
     updatedAt: { type: 'string', format: 'date-time', maxLength: 30 },
@@ -199,14 +199,5 @@ export const tasksSyncSchema: RxJsonSchema<SyncTaskRxDBDTO> = {
     'createdAt',
     'updatedAt',
   ],
-  indexes: [
-    'dataSourceId',
-    'status.name',
-    'priority.name',
-    'createdAt',
-    'updatedAt',
-    'title',
-    'author.id',
-    'assignedTo.id',
-  ],
+  indexes: ['dataSourceId', 'status.name', 'createdAt', 'updatedAt', 'title'],
 }

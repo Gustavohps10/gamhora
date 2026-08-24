@@ -12,7 +12,7 @@ import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
 import { Button, Input, Label } from '@/components/ui'
-import { useClient } from '@/hooks/use-client'
+import { useOpenAPI } from '@/hooks/use-open-api'
 
 export interface DataSourceInstanceFormData {
   pluginId: string
@@ -37,7 +37,7 @@ export function NewDataSourceInstanceForm({
   isSubmitting = false,
   hideSubmitButton = false,
 }: NewDataSourceInstanceFormProps) {
-  const client = useClient()
+  const openAPI = useOpenAPI()
 
   // 2. Busca dinâmica de campos baseada no pluginId
   const {
@@ -47,7 +47,7 @@ export function NewDataSourceInstanceForm({
   } = useQuery({
     queryKey: ['datasource-fields', pluginId],
     queryFn: async () => {
-      const res = await client.services.workspaces.getDataSourceFields({
+      const res = await openAPI.services.workspaces.getDataSourceFields({
         body: { pluginId },
       })
       return res // Assume que retorna { credentials: FieldGroup[], configuration: FieldGroup[] }

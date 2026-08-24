@@ -1,0 +1,23 @@
+@startuml DeploymentDesktop
+title METRIC - Deploy Desktop Client (Local-First)
+
+node "Máquina do Usuário" {
+    component "Electron Desktop App" as App
+    database "Persistência Local (RxDB / SQLite)" as RxDB
+}
+
+cloud "Ferramentas Externas" {
+    [Jira API] as Jira
+    [Redmine API] as Redmine
+}
+
+App --> RxDB : Persistência offline-first
+App --> Jira : Conexão direta REST
+App --> Redmine : Conexão direta REST
+
+note bottom of App
+  100% Offline-first & Zero-Cloud
+  Não depende de backend central
+  para operação básica
+end note
+@enduml

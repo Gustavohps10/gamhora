@@ -1,20 +1,26 @@
 export * from './AddonConfig'
+export * from './contracts'
+export type { IHttpClient, IHttpClientConfig } from './contracts/IHttpClient'
 export {
-  ConfigField,
   Context,
   DataSourceContext,
-  FieldGroup,
   IConnector,
   IDataSource,
 } from './data-source'
 export * from './utils/MarkupConverter'
+export * from './utils/pkce'
 export type {
+  AddonSidebarMenuItem,
+  AddonTimerbarActionItem,
+  AddonTimerbarMenuItem,
+  AddonTimerbarPopoverItem,
+  AddonTimerbarPopoverSubItem,
   AuthenticationDTO,
   AuthenticationResult,
-  IApplicationAPI,
   IAuthenticationStrategy,
   IMemberQuery,
   IMetadataQuery,
+  IOpenAPI,
   ITaskQuery,
   ITaskRepository,
   ITimeEntryQuery,

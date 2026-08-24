@@ -1,24 +1,31 @@
 import { AppError, Either } from '@metric-org/shared/helpers'
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios'
 
-import { IHttpClient } from '@/contracts/IHttpClient'
+import { IHttpClient, IHttpClientConfig } from '@/contracts/IHttpClient'
 
 export class HttpClient implements IHttpClient {
   private axiosInstance: AxiosInstance
   private defaultParams: Record<string, string> = {}
+  private defaultHeaders: Record<string, string> = {}
 
   constructor() {
-    this.axiosInstance = axios.create()
+    this.axiosInstance = axios.create({
+      headers: {
+        'User-Agent': 'MetricApp/1.0',
+      },
+    })
   }
 
-  public configure(config: {
-    baseURL: string
-    params?: Record<string, string>
-  }): void {
+  public configure(config: IHttpClientConfig): void {
     this.defaultParams = config.params ?? {}
+    this.defaultHeaders = config.headers ?? {}
     this.axiosInstance = axios.create({
       baseURL: config.baseURL,
-      timeout: 10000,
+      timeout: config.timeout ?? 10000,
+      headers: {
+        'User-Agent': 'MetricApp/1.0',
+        ...this.defaultHeaders,
+      },
     })
   }
 
@@ -28,6 +35,10 @@ export class HttpClient implements IHttpClient {
       params: {
         ...this.defaultParams,
         ...(config?.params ?? {}),
+      },
+      headers: {
+        ...this.defaultHeaders,
+        ...(config?.headers ?? {}),
       },
     }
   }
@@ -115,11 +126,24 @@ export class HttpClient implements IHttpClient {
 
   private handleError(error: unknown): Either<AppError, never> {
     if (error instanceof AxiosError) {
-      const appError = AppError.NotFound(error.message)
-      return Either.failure(appError)
+      const message =
+        error.response?.data?.message || error.message || 'HTTP Request Failed'
+      const status = error.response?.status
+
+      if (status === 401 || status === 403) {
+        return Either.failure(AppError.Unauthorized(message))
+      }
+      if (status === 404) {
+        return Either.failure(AppError.NotFound(message))
+      }
+      if (status === 422) {
+        return Either.failure(AppError.ValidationError(message))
+      }
+
+      return Either.failure(AppError.Internal(message))
     }
 
-    const appError = AppError.NotFound('An unknown error occurred')
+    const appError = AppError.Internal('An unknown error occurred')
     return Either.failure(appError)
   }
 }

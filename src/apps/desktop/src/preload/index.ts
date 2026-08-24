@@ -1,10 +1,9 @@
 import { electronAPI } from '@electron-toolkit/preload'
-import { IApplicationAPI } from '@metric-org/application'
+import { IOpenAPI } from '@metric-org/application'
 import { contextBridge, ipcRenderer } from 'electron'
 
 import {
   addonsInvoker,
-  discordInvoker,
   headersInvoker,
   metadataInvoker,
   sessionInvoker,
@@ -15,7 +14,7 @@ import {
   workspacesInvoker,
 } from '@/main/invokers'
 
-const api: IApplicationAPI = {
+const api: IOpenAPI = {
   services: {
     workspaces: workspacesInvoker,
     session: sessionInvoker,
@@ -29,7 +28,6 @@ const api: IApplicationAPI = {
     system: systemInvoker,
   },
   integrations: {
-    discord: discordInvoker,
     addons: addonsInvoker,
   },
   events: {
@@ -43,12 +41,51 @@ const api: IApplicationAPI = {
 
       return unsubscribe
     },
+    emit: <T = unknown>(channel: string, data?: T) => {
+      let workspaceId = 'default'
+      if (typeof window !== 'undefined') {
+        const match = window.location.hash.match(/#\/workspaces\/([^\/]+)/)
+        if (match) {
+          workspaceId = match[1]
+        }
+      }
+      ipcRenderer.send('events:broadcast', { channel, data, workspaceId })
+    },
   },
+
   timer: {
-    start: (input) => ipcRenderer.send('timer:start', input),
-    pause: () => ipcRenderer.send('timer:pause'),
-    resume: (input) => ipcRenderer.send('timer:resume', input),
-    stop: () => ipcRenderer.send('timer:stop'),
+    start: (input) => {
+      let workspaceId = 'default'
+      if (typeof window !== 'undefined') {
+        const match = window.location.hash.match(/#\/workspaces\/([^\/]+)/)
+        if (match) workspaceId = match[1]
+      }
+      ipcRenderer.send('timer:start', { ...input, workspaceId })
+    },
+    pause: () => {
+      let workspaceId = 'default'
+      if (typeof window !== 'undefined') {
+        const match = window.location.hash.match(/#\/workspaces\/([^\/]+)/)
+        if (match) workspaceId = match[1]
+      }
+      ipcRenderer.send('timer:pause', { workspaceId })
+    },
+    resume: (input) => {
+      let workspaceId = 'default'
+      if (typeof window !== 'undefined') {
+        const match = window.location.hash.match(/#\/workspaces\/([^\/]+)/)
+        if (match) workspaceId = match[1]
+      }
+      ipcRenderer.send('timer:resume', { ...input, workspaceId })
+    },
+    stop: () => {
+      let workspaceId = 'default'
+      if (typeof window !== 'undefined') {
+        const match = window.location.hash.match(/#\/workspaces\/([^\/]+)/)
+        if (match) workspaceId = match[1]
+      }
+      ipcRenderer.send('timer:stop', { workspaceId })
+    },
   },
 }
 

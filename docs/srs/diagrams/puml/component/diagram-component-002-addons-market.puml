@@ -1,0 +1,31 @@
+@startuml ComponentAddonsMarket
+title METRIC - Gerenciador de Addons e Configurações
+
+package "Desktop UI" {
+    component [Addons Manager Modal] as ManagerModal
+    component [Addon Settings Renderer] as SettingsRenderer
+    component [Addon Theme Bridge] as ThemeBridge
+}
+
+package "Addon Runtime (Main Process)" {
+    component [AddonLoader Service] as Loader
+    database [settings.json] as LocalSettings
+}
+
+package "Installed Addons" {
+    [Redmine Addon (DS + Themes + Menus)] as RedmineAddon
+    [Supabase Theme Addon] as SupabaseAddon
+    [Purple Theme Addon] as PurpleAddon
+    [Metric AI / Watcher Addon] as AIAddon
+}
+
+ManagerModal --> Loader : Listar instalados / disponíveis
+SettingsRenderer --> Loader : Ler Schema & Executar Ações
+Loader --> LocalSettings : Persistir configurações & Active Theme
+ThemeBridge <.. Loader : Evento IPC 'addons:theme-changed'
+
+Loader --> RedmineAddon : Carrega / Ativa
+Loader --> SupabaseAddon : Carrega / Ativa
+Loader --> PurpleAddon : Carrega / Ativa
+Loader --> AIAddon : Carrega / Ativa
+@enduml

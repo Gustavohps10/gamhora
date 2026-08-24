@@ -16,9 +16,9 @@ export class RedmineTimeEntryQuery
     startDate: Date,
     endDate: Date,
   ): Promise<PagedResultDTO<TimeEntryDTO>> {
-    const client = await this.getAuthenticatedClient()
+    const client = this.getHttpClient()
 
-    const response = await client.get('/time_entries.json', {
+    const response = await client.get<any>('/time_entries.json', {
       params: {
         user_id: memberId,
         from: startDate.toISOString().split('T')[0],
@@ -27,7 +27,9 @@ export class RedmineTimeEntryQuery
       },
     })
 
-    const entries: TimeEntryDTO[] = response.data.time_entries.map(
+    if (response.isFailure()) throw new Error(response.failure.messageKey)
+
+    const entries: TimeEntryDTO[] = (response.success.time_entries || []).map(
       (entry: any) => ({
         id: entry.id,
         project: { id: entry.project.id, name: entry.project.name },
@@ -44,7 +46,7 @@ export class RedmineTimeEntryQuery
 
     return {
       items: entries,
-      total: response.data.total_count ?? entries.length,
+      total: response.success.total_count ?? entries.length,
       page: 1,
       pageSize: entries.length,
     }
@@ -55,7 +57,7 @@ export class RedmineTimeEntryQuery
     checkpoint: { updatedAt: Date; id: string },
     batch: number,
   ): Promise<TimeEntryDTO[]> {
-    const client = await this.getAuthenticatedClient()
+    const client = this.getHttpClient()
 
     const newEntriesFound: TimeEntryDTO[] = []
     let offset = 0
@@ -72,7 +74,7 @@ export class RedmineTimeEntryQuery
     while (true) {
       console.log(`Buscando no Redmine... Offset: ${offset}`)
 
-      const response = await client.get('/time_entries.json', {
+      const response = await client.get<any>('/time_entries.json', {
         params: {
           user_id: memberId,
           from: fromDate.toISOString().split('T')[0],
@@ -82,7 +84,9 @@ export class RedmineTimeEntryQuery
         },
       })
 
-      const entriesFromApi: any[] = response.data.time_entries
+      if (response.isFailure()) break
+
+      const entriesFromApi: any[] = response.success?.time_entries || []
       if (entriesFromApi.length === 0) {
         console.log('API não retornou mais dados. Fim da busca.')
         break

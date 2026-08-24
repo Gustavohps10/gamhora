@@ -142,6 +142,7 @@ export function Navbar({
           {[
             { label: 'Funcionalidades', href: '#features' },
             { label: 'Integrações', href: '#integrations' },
+            { label: 'Documentação', href: '/docs' },
             { label: 'Demo', href: '#demo' },
           ].map((link) => (
             <a

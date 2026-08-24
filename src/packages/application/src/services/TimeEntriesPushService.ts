@@ -11,11 +11,9 @@ import {
   PushTimeEntriesInput,
   SyncTimeEntryDTO,
 } from '@/contracts/use-cases'
-import { SessionManager } from '@/workflow'
 
 export class TimeEntriesPushService implements ITimeEntriesPushUseCase {
   constructor(
-    private readonly sessionManager: SessionManager,
     private readonly workspacesRepository: IWorkspacesRepository,
     private readonly dataSourceResolver: IDataSourceResolver,
   ) {}
@@ -24,14 +22,6 @@ export class TimeEntriesPushService implements ITimeEntriesPushUseCase {
     input: PushTimeEntriesInput,
   ): Promise<Either<AppError, SyncTimeEntryDTO[]>> {
     try {
-      const sessionUser = this.sessionManager.getCurrentUser(
-        input.workspaceId,
-        input.connectionInstanceId,
-      )
-      if (!sessionUser) {
-        return Either.failure(AppError.Unauthorized('USUARIO_NAO_ENCONTRADO'))
-      }
-
       const workspace = await this.workspacesRepository.findById(
         input.workspaceId,
       )

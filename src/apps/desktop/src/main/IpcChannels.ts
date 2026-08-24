@@ -37,8 +37,6 @@ export const IpcChannels = {
 
   GET_CURRENT_USER: 'get-current-user',
 
-  DISCORD_LOGIN: 'login:discord',
-
   WORKSPACES_CREATE: 'workspaces:create',
   WORKSPACES_GET_ALL: 'workspaces:get-all',
   WORKSPACES_GET_BY_ID: 'workspaces:get-by-id',
@@ -61,6 +59,14 @@ export const IpcChannels = {
   ADDONS_UPDATE_LOCAL: 'addons:update-local',
   ADDONS_IMPORT: 'addons:import',
   ADDONS_INSTALL: 'addons:install',
+  ADDONS_GET_SIDEBAR_MENUS: 'addons:get-sidebar-menus',
+  ADDONS_GET_TIMERBAR_MENUS: 'addons:get-timerbar-menus',
+  ADDONS_EXECUTE_COMMAND: 'addons:execute-command',
+  ADDONS_SHOW_TOAST: 'addons:show-toast',
+  ADDONS_DISMISS_TOAST: 'addons:dismiss-toast',
+  ADDON_GET_SCHEMA: 'addon:get-schema',
+  ADDON_EXECUTE_ACTION: 'addon:execute-action',
+  ADDONS_SET_ACTIVE_WORKSPACE: 'addons:set-active-workspace',
 } as const
 
 export type IpcChannelType = keyof typeof IpcChannels

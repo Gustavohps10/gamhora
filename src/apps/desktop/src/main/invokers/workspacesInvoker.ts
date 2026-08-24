@@ -18,7 +18,7 @@ export const workspacesInvoker: IWorkspacesAPI = {
     IpcInvoker.invoke('WORKSPACES_DISCONNECT_DATASOURCE', request),
   getConnectionMember: (request) =>
     IpcInvoker.invoke('GET_CURRENT_USER', request),
-  markAsConfigured: (request) =>
+  markWorkspaceAsConfigured: (request) =>
     IpcInvoker.invoke('WORKSPACES_MARK_AS_CONFIGURED', request),
   updateIdentity: (request) =>
     IpcInvoker.invoke('WORKSPACES_UPDATE_IDENTITY', request),

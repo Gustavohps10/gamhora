@@ -1,8 +1,9 @@
-import { Outlet, useParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Outlet, useNavigate, useParams } from 'react-router-dom'
 
 import { DataSourceConnectionsProvider } from '@/contexts/DataSourceConnectionsContext'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
-import { useClient } from '@/hooks'
+import { useOpenAPI } from '@/hooks'
 import { useTimerSettings } from '@/hooks/use-timer-settings'
 import { cn } from '@/lib/utils'
 import { SyncProvider } from '@/stores/syncStore'
@@ -10,11 +11,27 @@ import { TimeEntryProvider } from '@/stores/timeEntryStore'
 
 export function WidgetLayout() {
   const { workspaceId } = useParams<{ workspaceId: string }>()
-  const { widgetPosition } = useTimerSettings()
-  const client = useClient()
+  const { widgetPosition, setSelectedWorkspaceId } = useTimerSettings()
+  const openAPI = useOpenAPI()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!openAPI?.events?.on) return
+
+    const unsub = openAPI.events.on<{ workspaceId: string }>(
+      'workspace:switched',
+      ({ workspaceId: targetId }) => {
+        if (!targetId || targetId === workspaceId) return
+        setSelectedWorkspaceId(targetId)
+        navigate(`/workspaces/${targetId}/widgets/timer`)
+      },
+    )
+
+    return () => unsub?.()
+  }, [openAPI, navigate, workspaceId, setSelectedWorkspaceId])
 
   const handleMouseEnter = () => {
-    client.modules.system.setIgnoreMouseEvents?.({
+    openAPI.modules.system.setIgnoreMouseEvents?.({
       body: {
         ignore: false,
         forward: true,
@@ -23,7 +40,7 @@ export function WidgetLayout() {
   }
 
   const handleMouseLeave = () => {
-    client.modules.system.setIgnoreMouseEvents?.({
+    openAPI.modules.system.setIgnoreMouseEvents?.({
       body: {
         ignore: true,
         forward: true,

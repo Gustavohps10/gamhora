@@ -1,0 +1,247 @@
+# Guia de Implementação: Arquitetura de Menus no SDK e Refatoração de Addon de Testes
+
+Este documento orienta a implementação da arquitetura de menus extensíveis dentro do `@metric-org/sdk` e a adequação do plugin de testes em `src/tests/redmine-for-tests/src/index.ts`.
+
+---
+
+## 1. Diretrizes Arquiteturais
+
+1. **Separação UI vs Execução:** Menus expõem apenas metadados declarativos serializáveis (`id`, `label`, `icon`, `type`, etc.). Callbacks e lógicas de execução pertencem aos comandos em Node.js ou barramentos de eventos.
+2. **Reuso de Registry Genérico:** Evitar criar classes e interfaces de registry duplicadas; padronizar com `IRegistry<T>`.
+3. **Ponto de Entrada Único do Addon:** O arquivo principal do plugin exporta uma classe que implementa `IAddon`, recebendo `AddonContext` no método `activate()`.
+
+---
+
+## 2. Passo a Passo no SDK (`src/apps/sdk/src/contracts/`)
+
+### 2.1 Contrato Genérico de Registro
+
+**Arquivo:** `src/apps/sdk/src/contracts/common/IRegistry.ts`
+
+```ts
+export interface IRegistry<T> {
+  register(item: T): void
+  unregister(id: string): void
+  getItems(): T[]
+}
+```
+
+### 2.2 Menus: Sidebar
+
+**Diretório:** `src/apps/sdk/src/contracts/menus/sidebar/`
+
+#### Arquivo: `ISidebarItem.ts`
+
+```ts
+export interface SidebarSubItem {
+  id: string
+  label: string
+  href: string
+  icon?: string
+}
+
+export interface SidebarMenuItem {
+  id: string
+  label: string
+  href?: string
+  icon?: string
+  children?: SidebarSubItem[]
+}
+```
+
+#### Arquivo: `index.ts`
+
+```ts
+export * from './ISidebarItem'
+```
+
+### 2.3 Menus: Timerbar
+
+**Diretório:** `src/apps/sdk/src/contracts/menus/timerbar/`
+
+#### Arquivo: `ITimerbarItem.ts`
+
+```ts
+export type TimerbarItemType = 'action' | 'popover'
+
+export interface TimerbarPopoverSubItem {
+  id: string
+  label: string
+  icon?: string
+  description?: string
+  shortcut?: string
+  danger?: boolean
+}
+
+export interface TimerbarActionItem {
+  id: string
+  type: 'action'
+  label?: string
+  icon: string
+  tooltip?: string
+}
+
+export interface TimerbarPopoverItem {
+  id: string
+  type: 'popover'
+  label?: string
+  icon: string
+  tooltip?: string
+  items: TimerbarPopoverSubItem[]
+}
+
+export type TimerbarMenuItem = TimerbarActionItem | TimerbarPopoverItem
+```
+
+#### Arquivo: `index.ts`
+
+```ts
+export * from './ITimerbarItem'
+```
+
+### 2.4 Registry Central de Menus
+
+**Diretório:** `src/apps/sdk/src/contracts/menus/`
+
+#### Arquivo: `IMenusRegistry.ts`
+
+```ts
+import { IRegistry } from '../common/IRegistry'
+import { SidebarMenuItem } from './sidebar'
+import { TimerbarMenuItem } from './timerbar'
+
+export interface IMenusRegistry {
+  readonly sidebar: IRegistry<SidebarMenuItem>
+  readonly timerbar: IRegistry<TimerbarMenuItem>
+}
+```
+
+#### Arquivo: `index.ts`
+
+```ts
+export * from './sidebar'
+export * from './timerbar'
+export * from './IMenusRegistry'
+```
+
+### 2.5 Atualização do `AddonContext` e `IAddon`
+
+#### Arquivo: `src/apps/sdk/src/contracts/IAddon.ts`
+
+```ts
+import { AddonContext } from './AddonContext'
+
+export interface IAddon {
+  activate(context: AddonContext): Promise<void> | void
+  deactivate?(): Promise<void> | void
+}
+```
+
+#### Arquivo: `src/apps/sdk/src/contracts/AddonContext.ts`
+
+```ts
+import { IEventEmitter, ISystemEvents } from '@metric-org/shared/transport'
+import { ICommandRegistry } from './commands/ICommandRegistry'
+import { IDataSourceRegistry } from './datasource/IDataSourceRegistry'
+import { IMenusRegistry } from './menus/IMenusRegistry'
+
+export interface AddonContext {
+  readonly addonId: string
+  readonly commands: ICommandRegistry
+  readonly menus: IMenusRegistry
+  readonly dataSources: IDataSourceRegistry
+  readonly events: IEventEmitter<ISystemEvents>
+}
+```
+
+---
+
+## 3. Adaptação do Plugin de Testes (`redmine-for-tests`)
+
+**Localização:** `src/tests/redmine-for-tests/src/index.ts`
+
+O plugin deve ser refatorado para implementar `IAddon`, registrando o conector de `DataSource`, os itens da `Sidebar` e as ações/popover da `Timerbar`:
+
+```ts
+import { AddonContext, IAddon } from '@metric-org/sdk'
+import { RedmineDataSource } from './RedmineDataSource'
+
+export default class Redmine4TestAddon implements IAddon {
+  private dataSource = new RedmineDataSource()
+
+  activate(context: AddonContext): void {
+    // 1. Registra capacidade de DataSource
+    context.dataSources.register(this.dataSource)
+
+    // 2. Registra Menus na Sidebar (Itens e Subitens de navegação)
+    context.menus.sidebar.register({
+      id: 'redmine-sidebar',
+      label: 'Redmine',
+      icon: 'Layers',
+      children: [
+        {
+          id: 'redmine-issues',
+          label: 'Minhas Tarefas',
+          href: '/addons/redmine/issues',
+          icon: 'ListTodo',
+        },
+        {
+          id: 'redmine-projects',
+          label: 'Projetos',
+          href: '/addons/redmine/projects',
+          icon: 'FolderGit2',
+        },
+      ],
+    })
+
+    // 3. Registra Ação Rápida e Popover na Timerbar
+    context.menus.timerbar.register({
+      id: 'redmine-sync-action',
+      type: 'action',
+      label: 'Sincronizar',
+      icon: 'RefreshCw',
+      tooltip: 'Sincronizar apontamentos com Redmine',
+    })
+
+    context.menus.timerbar.register({
+      id: 'redmine-timerbar-popover',
+      type: 'popover',
+      icon: 'Layers',
+      tooltip: 'Opções do Redmine',
+      items: [
+        {
+          id: 'redmine:open-current-issue',
+          label: 'Abrir Tarefa no Navegador',
+          icon: 'ExternalLink',
+          shortcut: 'Ctrl+Shift+O',
+        },
+        {
+          id: 'redmine:force-full-sync',
+          label: 'Forçar Carga Completa',
+          icon: 'DownloadCloud',
+        },
+      ],
+    })
+
+    // 4. Registra os handlers dos comandos declarados
+    context.commands.register('redmine:open-current-issue', async () => {
+      // Lógica de comando executada no Node.js
+    })
+
+    context.commands.register('redmine:force-full-sync', async () => {
+      // Disparo de rotinas ou eventos de sincronização
+    })
+  }
+
+  deactivate(): void {
+    // Limpeza de conexões ou listeners
+  }
+}
+```
+
+---
+
+## 4. Critérios de Validação
+
+1. **Tipagem Estrita:** `src/apps/sdk` deve compilar com TypeScript sem emissão de `any` implícito.
+2. **Isolamento de Contratos:** Os arquivos em `src/apps/sdk/src/contracts/menus/` não devem conter dependências de Electron (`ipcRenderer`, `BrowserWindow`) nem de React (`JSX`, `ReactNode`).

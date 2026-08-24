@@ -1,10 +1,9 @@
 import { JwtService } from '@metric-org/adapters/auth'
+import { IHttpClient } from '@metric-org/adapters/contracts'
 import { AddonsFacade } from '@metric-org/adapters/facades'
-import { HttpClient } from '@metric-org/adapters/http'
 import { FileManager } from '@metric-org/adapters/tools'
 import {
   ConnectDataSourceService,
-  ConnectionContextManager,
   CreateWorkspaceService,
   DeleteWorkspaceService,
   DisconnectDataSourceService,
@@ -23,7 +22,6 @@ import {
   ListWorkspacesService,
   MarkWorkspaceAsConfiguredService,
   MetadataPullService,
-  SessionManager,
   TaskPullService,
   TimeEntriesPullService,
   TimeEntriesPushService,
@@ -86,6 +84,7 @@ export interface PlatformDependencies {
   workspacesQuery: IWorkspacesQuery
   dataSourceResolver: IDataSourceResolver
   fileStorage: IFileStorage
+  httpClient: IHttpClient
 }
 
 /**
@@ -106,14 +105,17 @@ export class ContainerBuilder {
    * @returns A própria instância do builder para encadeamento.
    */
   public addPlatformDependencies(deps: PlatformDependencies): this {
-    this.container.register({
+    const registrations: Record<string, any> = {
       jobEmitter: asValue(deps.jobEmitter),
       credentialsStorage: asValue(deps.credentialsStorage),
       workspacesRepository: asValue(deps.workspacesRepository),
       workspacesQuery: asValue(deps.workspacesQuery),
       dataSourceResolver: asValue(deps.dataSourceResolver),
       fileStorage: asValue(deps.fileStorage),
-    })
+      httpClient: asValue(deps.httpClient),
+    }
+
+    this.container.register(registrations)
     return this
   }
 
@@ -122,8 +124,6 @@ export class ContainerBuilder {
    */
   public addApplicationServices(): this {
     this.container.register({
-      sessionManager: asClass(SessionManager).scoped(),
-      connectionContextManager: asClass(ConnectionContextManager).scoped(),
       listTasksService: asClass(ListTaskService).scoped(),
       taskPullService: asClass(TaskPullService).scoped(),
       listTimeEntriesService: asClass(ListTimeEntriesService).scoped(),
@@ -157,7 +157,6 @@ export class ContainerBuilder {
    */
   public addInfrastructure(): this {
     this.container.register({
-      httpClient: asClass(HttpClient).transient(),
       jwtService: asClass(JwtService).scoped(),
       fileManager: asClass(FileManager).scoped(),
       addonsFacade: asClass(AddonsFacade).scoped(),

@@ -9,6 +9,7 @@ import {
   AppSidebarWorkspacesFooter,
   Header,
 } from '@/components'
+import { AddonsManagerModal } from '@/components/addons-manager/addons-manager-modal'
 import { AppSidebarDefaultHeader } from '@/components/app-sidebar/app-sidebar-default-header'
 import { Footer } from '@/components/footer'
 import { UltimateTimeTracker } from '@/components/time-bar/ultimate-entry-bar'
@@ -16,12 +17,15 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { DataSourceConnectionsProvider } from '@/contexts/DataSourceConnectionsContext'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { useCurrentWidgetPosition } from '@/hooks/use-timer-settings'
+import { useAddonsModalStore } from '@/stores/addonsModalStore'
 import { SyncProvider } from '@/stores/syncStore'
 import { TimeEntryProvider } from '@/stores/timeEntryStore'
 
 export function WorkspaceLayout() {
   const { workspaceId } = useParams<{ workspaceId: string }>()
   const [widgetPosition] = useCurrentWidgetPosition()
+  const isAddonsModalOpen = useAddonsModalStore((s) => s.isOpen)
+  const closeModal = useAddonsModalStore((s) => s.closeModal)
 
   return (
     <WorkspaceProvider workspaceId={workspaceId}>
@@ -98,6 +102,13 @@ export function WorkspaceLayout() {
                   </div>
                 )}
               </main>
+
+              <AddonsManagerModal
+                open={isAddonsModalOpen}
+                onOpenChange={(open) => {
+                  if (!open) closeModal()
+                }}
+              />
             </>
           </TimeEntryProvider>
         </SyncProvider>

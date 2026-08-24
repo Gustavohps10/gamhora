@@ -12,4 +12,5 @@ export interface AddonManifestViewModel {
   installerManifestUrl?: string
   sourceUrl?: string
   tags?: string[]
+  category?: string
 }

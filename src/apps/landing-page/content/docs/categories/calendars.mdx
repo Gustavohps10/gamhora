@@ -1,0 +1,116 @@
+---
+title: Calendars
+description: Como integrar agendas externas (Google Calendar, Outlook) para sincronizar compromissos e convertê-los em tempo registrado.
+---
+
+# Calendars (Agendas & Reuniões)
+
+Os addons da categoria **Calendars** conectam o Metric a provedores de agenda como **Google Calendar**, **Microsoft Outlook / 365** e calendários baseados em **iCal**.
+
+Essa integração permite que os compromissos diários apareçam diretamente na visualização de agenda do Metric, possibilitando que o usuário transforme reuniões passadas em apontamentos de horas reais com um simples clique.
+
+---
+
+## 🎯 Estrutura de um Evento de Calendário
+
+Para alimentar a interface do Metric, o plugin de calendário normaliza os eventos externos para uma estrutura padrão:
+
+```typescript
+export interface CalendarEventDTO {
+  id: string              // Identificador único do evento no provedor externo
+  title: string           // Título ou assunto da reunião
+  description?: string    // Pauta ou descrição do evento
+  startDate: Date         // Data e hora de início
+  endDate: Date           // Data e hora de término
+  attendeesCount?: number // Quantidade de participantes
+  meetLink?: string       // Link da chamada (Google Meet, Teams, Zoom)
+  isAllDay?: boolean      // Indica se é um evento de dia inteiro
+}
+```
+
+---
+
+## 💻 Exemplo de Implementação de Calendário
+
+```typescript
+import type { IAddon, AddonContext, AddonSettingsField } from '@metric-org/sdk'
+
+export interface CalendarEventDTO {
+  id: string
+  title: string
+  startDate: Date
+  endDate: Date
+  meetLink?: string
+}
+
+export default class GoogleCalendarAddon implements IAddon {
+  public id = 'google-calendar-addon'
+  public name = 'Google Calendar Integration'
+  public version = '1.0.0'
+  public description = 'Sincroniza reuniões do Google Calendar com o Metric'
+
+  private context?: AddonContext
+
+  public settingsFields: AddonSettingsField[] = [
+    {
+      key: 'calendarId',
+      label: 'ID do Calendário',
+      type: 'text',
+      defaultValue: 'primary',
+      description: 'Identificador do calendário (use "primary" para o principal).',
+    },
+  ]
+
+  public async onActivate(context: AddonContext): Promise<void> {
+    this.context = context
+    console.log('[GoogleCalendar] Addon ativado com sucesso!')
+  }
+
+  public async onDeactivate(): Promise<void> {
+    this.context = undefined
+  }
+
+  // Busca os eventos do dia especificado
+  public async fetchDayEvents(targetDate: Date): Promise<CalendarEventDTO[]> {
+    const accessToken = await this.context?.storage.get('accessToken')
+    if (!accessToken) {
+      throw new Error('Usuário não autenticado no Google Calendar.')
+    }
+
+    const startOfDay = new Date(targetDate)
+    startOfDay.setHours(0, 0, 0, 0)
+
+    const endOfDay = new Date(targetDate)
+    endOfDay.setHours(23, 59, 59, 999)
+
+    const url = new URL('https://www.googleapis.com/calendar/v3/calendars/primary/events')
+    url.searchParams.set('timeMin', startOfDay.toISOString())
+    url.searchParams.set('timeMax', endOfDay.toISOString())
+    url.searchParams.set('singleEvents', 'true')
+    url.searchParams.set('orderBy', 'startTime')
+
+    const response = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    })
+
+    const data = await response.json()
+
+    return (data.items || []).map((item: any): CalendarEventDTO => ({
+      id: item.id,
+      title: item.summary || 'Sem título',
+      startDate: new Date(item.start.dateTime || item.start.date),
+      endDate: new Date(item.end.dateTime || item.end.date),
+      meetLink: item.hangoutLink,
+    }))
+  }
+}
+```
+
+---
+
+## 🚀 Conversão Rápida para Apontamento de Horas
+
+Quando o usuário visualiza suas reuniões no Metric:
+1. O Metric destaca reuniões já encerradas.
+2. Com o botão **"Apontar Horas"**, o Metric abre o formulário pré-preenchido com o título da reunião, as horas calculadas (`(endDate - startDate)`) e a atividade sugerida.
+3. Ao salvar, a entidade `TimeEntry` é criada e enviada para o [Motor de Sincronização](/docs/sync-engine).

@@ -1,18 +1,19 @@
+import { IHttpClient } from '@metric-org/adapters/contracts'
 import {
   DataSourceContext,
-  FieldGroup,
   ICredentialsStorage,
   IDataSourceAdapter,
   IDataSourceResolver,
   IWorkspacesRepository,
   ResolvedConnection,
 } from '@metric-org/application'
-import DataSourceFake from '@metric-org/datasource-fake'
-import Redmine4Test from '@metric-org/redmine-for-tests'
+import { FakeDataSource } from '@metric-org/datasource-fake'
 import { AppError, Either, type IDataSource } from '@metric-org/sdk'
 import { existsSync } from 'fs'
 import { resolve } from 'path'
 import { pathToFileURL } from 'url'
+
+import { AddonLoader } from '@/main/services/AddonLoader'
 
 export const FAKE_DATASOURCE_ADDON_ID = 'metric-datasource-fake'
 export const REDMINE4TEST_ADDON_ID = '@timelapse/redmine-plugin'
@@ -20,6 +21,7 @@ export const REDMINE4TEST_ADDON_ID = '@timelapse/redmine-plugin'
 export interface DataSourceResolverOptions {
   addonsBasePath: string
   isDevelopment?: boolean
+  addonLoader?: AddonLoader
 }
 
 export class DataSourceResolver implements IDataSourceResolver {
@@ -27,12 +29,13 @@ export class DataSourceResolver implements IDataSourceResolver {
     private readonly workspacesRepository: IWorkspacesRepository,
     private readonly credentialsStorage: ICredentialsStorage,
     private readonly options: DataSourceResolverOptions,
+    private readonly httpClient: IHttpClient,
   ) {}
 
   async getDataSource(
     workspaceId: string,
     connectionInstanceId: string,
-    contextOverride?: DataSourceContext,
+    contextOverride?: Partial<DataSourceContext>,
   ): Promise<IDataSourceAdapter> {
     const workspace = await this.workspacesRepository.findById(workspaceId)
     if (!workspace) {
@@ -51,6 +54,7 @@ export class DataSourceResolver implements IDataSourceResolver {
         authenticatedMemberData: contextOverride.authenticatedMemberData,
         config: contextOverride.config ?? config,
         credentials: contextOverride.credentials,
+        httpClient: contextOverride.httpClient ?? this.httpClient,
       }
     } else {
       const storageKey = `workspace-connection-${workspaceId}-${connectionInstanceId}`
@@ -67,6 +71,7 @@ export class DataSourceResolver implements IDataSourceResolver {
         authenticatedMemberData: parsed?.member,
         config,
         credentials: parsed?.credentials,
+        httpClient: this.httpClient,
       }
     }
 
@@ -118,12 +123,13 @@ export class DataSourceResolver implements IDataSourceResolver {
   }
 
   private async loadModule(pluginId: string): Promise<IDataSource> {
-    if (pluginId === FAKE_DATASOURCE_ADDON_ID) {
-      return DataSourceFake as IDataSource
+    const registeredDs = this.options.addonLoader?.getDataSource(pluginId)
+    if (registeredDs) {
+      return registeredDs
     }
 
-    if (pluginId === REDMINE4TEST_ADDON_ID) {
-      return Redmine4Test as IDataSource
+    if (pluginId === FAKE_DATASOURCE_ADDON_ID) {
+      return FakeDataSource as IDataSource
     }
 
     const addonPath = resolve(this.options.addonsBasePath, pluginId, 'index.js')

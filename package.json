@@ -7,7 +7,7 @@
   "changeset": "changeset",
   "lint-staged": {
     "*.{ts,tsx}": [
-      "eslint --ext .ts,.tsx --ignore-pattern '**/*.d.ts' --ignore-pattern 'node_modules' --ignore-pattern 'dist' --ignore-pattern 'out'",
+      "eslint",
       "yarn vitest related --run"
     ]
   },
@@ -28,8 +28,8 @@
     "build:landing-page": "turbo run build --filter=@metric-org/landing-page",
     "build:desktop": "turbo run build --filter=@metric-org/desktop",
     "build": "turbo run build",
-    "lint": "eslint --ext .ts,.tsx --ignore-pattern '**/*.d.ts' --ignore-pattern 'node_modules' --ignore-pattern 'dist' --ignore-pattern 'out'",
-    "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern '**/*.d.ts' --ignore-pattern 'node_modules' --ignore-pattern 'dist' --ignore-pattern 'out' --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "clean": "turbo run clean",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "prepare": "husky install",

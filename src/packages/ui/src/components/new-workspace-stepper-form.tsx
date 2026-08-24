@@ -52,7 +52,7 @@ import {
 import { Button, Input, Label, Progress, Textarea } from '@/components/ui'
 import { DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useWorkspace, workspaceKeys } from '@/contexts/WorkspaceContext'
-import { useClient, useDataSourceConnections } from '@/hooks'
+import { useDataSourceConnections, useOpenAPI } from '@/hooks'
 import { cn } from '@/lib'
 import { useConnectionsWithSync } from '@/stores/syncStore'
 
@@ -559,7 +559,7 @@ export function StepperForm({
   onClose,
   onModalOpenChange,
 }: StepperFormProps) {
-  const client = useClient()
+  const openAPI = useOpenAPI()
   const queryClient = useQueryClient()
   const { create, updateIdentity, isCreating, workspace } = useWorkspace()
 
@@ -727,7 +727,7 @@ export function StepperForm({
 
   async function onSubmit(data: WorkspaceFormData) {
     if (workspace?.id) {
-      await client.services.workspaces.markWorkspaceAsConfigured({
+      await openAPI.services.workspaces.markWorkspaceAsConfigured({
         body: { workspaceId: workspace.id },
       })
 

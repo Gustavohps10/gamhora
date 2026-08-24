@@ -10,14 +10,12 @@ import type {
 } from '@/contracts'
 import type { IDataSourceAdapter } from '@/contracts/resolvers/IDataSourceAdapter'
 import type { SyncTimeEntryDTO } from '@/contracts/use-cases'
-import { SessionManager } from '@/workflow'
 
 import { TimeEntriesPushService } from './TimeEntriesPushService'
 
 describe('TimeEntriesPushService', () => {
   let sut: TimeEntriesPushService
 
-  let sessionManagerMock: Mocked<SessionManager>
   let workspacesRepositoryMock: Mocked<IWorkspacesRepository>
   let dataSourceResolverMock: Mocked<IDataSourceResolver>
   let adapterMock: Mocked<IDataSourceAdapter>
@@ -26,7 +24,6 @@ describe('TimeEntriesPushService', () => {
   const fakeCurrentTime = new Date('2026-04-18T12:00:00.000Z')
   const fakeOldTime = new Date('2026-04-17T10:00:00.000Z')
 
-  const fakeSessionUser = { id: 'user-123', name: 'Jane Doe' }
   const fakeWorkspace = { id: 'workspace-123' }
 
   let fakeDomainTimeEntry: Mocked<TimeEntry>
@@ -35,10 +32,6 @@ describe('TimeEntriesPushService', () => {
     vi.clearAllMocks()
     vi.useFakeTimers()
     vi.setSystemTime(fakeCurrentTime)
-
-    sessionManagerMock = {
-      getCurrentUser: vi.fn(),
-    } as unknown as Mocked<SessionManager>
 
     workspacesRepositoryMock = {
       findById: vi.fn(),
@@ -70,12 +63,10 @@ describe('TimeEntriesPushService', () => {
     } as unknown as Mocked<TimeEntry>
 
     sut = new TimeEntriesPushService(
-      sessionManagerMock,
       workspacesRepositoryMock,
       dataSourceResolverMock,
     )
 
-    sessionManagerMock.getCurrentUser.mockReturnValue(fakeSessionUser as any)
     workspacesRepositoryMock.findById.mockResolvedValue(fakeWorkspace as any)
     dataSourceResolverMock.getDataSource.mockResolvedValue(adapterMock)
   })
@@ -85,21 +76,6 @@ describe('TimeEntriesPushService', () => {
   })
 
   describe('Main Flow Authorization', () => {
-    it('should return Unauthorized error if session user is not found', async () => {
-      sessionManagerMock.getCurrentUser.mockReturnValue(undefined)
-
-      const result = await sut.execute({
-        workspaceId: 'w-1',
-        pluginId: 'p-1',
-        connectionInstanceId: 'c-1',
-        entries: [],
-      })
-
-      expect(result.isFailure()).toBe(true)
-      expect(result.failure.statusCode).toBe(401)
-      expect(result.failure.messageKey).toBe('USUARIO_NAO_ENCONTRADO')
-    })
-
     it('should return Unauthorized error if workspace is not found', async () => {
       workspacesRepositoryMock.findById.mockResolvedValue(null as any)
 

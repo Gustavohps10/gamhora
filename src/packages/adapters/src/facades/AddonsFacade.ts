@@ -23,6 +23,7 @@ type RawManifest = {
   SourceUrl?: string
   InstallerUrl?: string
   Tags?: string[]
+  Category?: string
 }
 
 type RawPackage = {
@@ -135,6 +136,7 @@ export class AddonsFacade implements IAddonsFacade {
         logo: doc.IconUrl ?? '',
         sourceUrl: doc.SourceUrl ?? '',
         tags: doc.Tags ?? [],
+        category: doc.Category ?? '',
         installed: false,
         installerManifestUrl: doc.InstallerUrl,
         path: '',

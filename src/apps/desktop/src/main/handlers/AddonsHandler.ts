@@ -4,6 +4,7 @@ import {
   IAddonsFacade,
   IImportAddonUseCase,
 } from '@metric-org/application'
+import { AddonSettingsSchema } from '@metric-org/sdk'
 import { createResponseViewModel } from '@metric-org/shared/helpers'
 import {
   IEventEmitter,
@@ -14,6 +15,7 @@ import {
 import {
   AddonInstallerViewModel,
   AddonManifestViewModel,
+  AddonThemeViewModel,
   PaginatedViewModel,
   ViewModel,
 } from '@metric-org/shared/view-models'
@@ -37,6 +39,7 @@ const DEV_FAKE_MANIFEST: AddonManifest = {
   version: '1.0.0',
   stars: 0,
   installed: true,
+  category: 'DataSources',
   tags: ['teste', 'mock', 'desenvolvimento'],
 }
 
@@ -51,10 +54,98 @@ const DEV_REDMINE_MANIFEST: AddonManifest = {
   version: '1.0.3',
   stars: 0,
   installed: true,
-  tags: ['redmine', 'teste'],
+  category: 'DataSources',
+  tags: ['redmine', 'datasource', 'theme', 'tema', 'teste'],
 }
 
-const DEV_ADDONS: AddonManifest[] = [DEV_FAKE_MANIFEST, DEV_REDMINE_MANIFEST]
+const DEV_METRIC_AI_MANIFEST: AddonManifest = {
+  id: '@metric-org/metric-ai-for-tests',
+  name: 'Metric AI (Testes)',
+  creator: 'Metric',
+  description: 'Addon de IA para testes de OCR e análise de atividade visual.',
+  path: '',
+  logo: 'Sparkles',
+  downloads: 0,
+  version: '1.0.0',
+  stars: 0,
+  installed: true,
+  category: 'Watchers',
+  tags: ['ai', 'ocr', 'teste'],
+}
+
+const DEV_DISCORD_MANIFEST: AddonManifest = {
+  id: '@metric-org/discord-for-tests',
+  name: 'Discord Presence',
+  creator: 'Metric',
+  description: 'Sincroniza status do timer no Discord',
+  path: '',
+  logo: 'https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png',
+  downloads: 0,
+  version: '1.0.0',
+  stars: 0,
+  installed: true,
+  category: 'Watchers',
+  tags: ['discord', 'watcher', 'teste'],
+}
+
+const DEV_FAKE_WATCHER_MANIFEST: AddonManifest = {
+  id: '@metric-org/fake-watcher-for-tests',
+  name: 'Fake Watcher',
+  creator: 'Metric',
+  description: 'Watcher falso para testes',
+  path: '',
+  logo: '',
+  downloads: 0,
+  version: '1.0.0',
+  stars: 0,
+  installed: true,
+  category: 'Watchers',
+  tags: ['watcher', 'teste'],
+}
+
+const DEV_SUPABASE_THEME_MANIFEST: AddonManifest = {
+  id: '@metric-org/supabase-theme',
+  name: 'Supabase Emerald',
+  creator: 'Metric',
+  description: 'Tema verde esmeralda inspirado no Supabase.',
+  path: '',
+  logo: 'Palette',
+  downloads: 0,
+  version: '1.0.0',
+  stars: 0,
+  installed: true,
+  category: 'Themes',
+  tags: ['theme', 'tema', 'supabase', 'dark'],
+}
+
+const DEV_PURPLE_THEME_MANIFEST: AddonManifest = {
+  id: '@metric-org/purple-theme',
+  name: 'Purple Neon',
+  creator: 'Metric',
+  description: 'Tema roxo vibrante neon.',
+  path: '',
+  logo: 'Palette',
+  downloads: 0,
+  version: '1.0.0',
+  stars: 0,
+  installed: true,
+  category: 'Themes',
+  tags: ['theme', 'tema', 'purple', 'neon'],
+}
+
+const DEV_ADDONS: AddonManifest[] = [
+  DEV_FAKE_MANIFEST,
+  DEV_REDMINE_MANIFEST,
+  DEV_METRIC_AI_MANIFEST,
+  DEV_DISCORD_MANIFEST,
+  DEV_FAKE_WATCHER_MANIFEST,
+  DEV_SUPABASE_THEME_MANIFEST,
+  DEV_PURPLE_THEME_MANIFEST,
+]
+
+import { SidebarMenuItem, TimerbarMenuItem } from '@metric-org/sdk'
+
+import { AddonLoader } from '@/main/services/AddonLoader'
 
 function isDevelopment(): boolean {
   return !app.isPackaged
@@ -65,7 +156,182 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
     private readonly importAddonService: IImportAddonUseCase,
     private readonly addonsFacade: IAddonsFacade,
     private readonly jobEmitter: IEventEmitter<IJobEvents>,
+    private readonly addonLoader?: AddonLoader,
   ) {}
+
+  public async getSidebarMenus(): Promise<ViewModel<SidebarMenuItem[]>> {
+    const items = this.addonLoader ? this.addonLoader.getSidebarMenus() : []
+    return {
+      isSuccess: true,
+      statusCode: 200,
+      data: items,
+    }
+  }
+
+  public async getTimerbarMenus(): Promise<ViewModel<TimerbarMenuItem[]>> {
+    const items = this.addonLoader ? this.addonLoader.getTimerbarMenus() : []
+    return {
+      isSuccess: true,
+      statusCode: 200,
+      data: items,
+    }
+  }
+
+  public async executeCommand(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ commandId: string; args?: any[] }>,
+  ): Promise<ViewModel<any>> {
+    if (!body?.commandId) {
+      return {
+        isSuccess: false,
+        statusCode: 400,
+        error: 'COMMAND_ID_REQUIRED',
+      }
+    }
+    try {
+      const result = await this.addonLoader?.executeCommand(
+        body.commandId,
+        ...(body.args ?? []),
+      )
+      return {
+        isSuccess: true,
+        statusCode: 200,
+        data: result,
+      }
+    } catch (err: any) {
+      return {
+        isSuccess: false,
+        statusCode: 500,
+        error: err?.message ?? 'COMMAND_EXECUTION_FAILED',
+      }
+    }
+  }
+
+  public async showToast(
+    _event: IpcMainInvokeEvent,
+    {
+      body,
+    }: IRequest<{
+      type?: 'info' | 'success' | 'warning' | 'error' | 'loading'
+      message: string
+      title?: string
+      toastId?: string
+    }>,
+  ): Promise<ViewModel<string>> {
+    const id = this.addonLoader?.showToast(
+      body.type ?? 'info',
+      body.message,
+      body.title,
+      body.toastId,
+    )
+    return {
+      isSuccess: true,
+      statusCode: 200,
+      data: id ?? '',
+    }
+  }
+
+  public async dismissToast(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ toastId: string }>,
+  ): Promise<ViewModel<void>> {
+    this.addonLoader?.dismissToast(body.toastId)
+    return {
+      isSuccess: true,
+      statusCode: 200,
+    }
+  }
+
+  public async getSchema(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ addonId: string }>,
+  ): Promise<ViewModel<AddonSettingsSchema>> {
+    if (!this.addonLoader) return { isSuccess: true, data: [] }
+    try {
+      const schema = await this.addonLoader.getSettingsSchema(body.addonId)
+      return { isSuccess: true, data: schema }
+    } catch (e: unknown) {
+      return { isSuccess: false, error: (e as Error).message }
+    }
+  }
+
+  public async getSettings(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ addonId: string }>,
+  ): Promise<ViewModel<Record<string, unknown>>> {
+    if (!this.addonLoader) return { isSuccess: true, data: {} }
+    try {
+      const data = await this.addonLoader.getAddonSettings(body.addonId)
+      return { isSuccess: true, data }
+    } catch (e: unknown) {
+      return { isSuccess: false, error: (e as Error).message }
+    }
+  }
+
+  public async saveSettings(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ addonId: string; settings: Record<string, unknown> }>,
+  ): Promise<ViewModel<void>> {
+    if (!this.addonLoader)
+      return { isSuccess: false, error: 'LOADER_NOT_FOUND' }
+    try {
+      await this.addonLoader.saveAddonSettings(body.addonId, body.settings)
+      return { isSuccess: true }
+    } catch (e: unknown) {
+      return { isSuccess: false, error: (e as Error).message }
+    }
+  }
+
+  public async executeAction(
+    _event: IpcMainInvokeEvent,
+    {
+      body,
+    }: IRequest<{ addonId: string; actionId: string; payload?: unknown }>,
+  ): Promise<ViewModel<unknown>> {
+    if (!this.addonLoader)
+      return { isSuccess: false, error: 'LOADER_NOT_FOUND' }
+    try {
+      const data = await this.addonLoader.executeAction(
+        body.addonId,
+        body.actionId,
+        body.payload,
+      )
+      return { isSuccess: true, data }
+    } catch (e: unknown) {
+      return { isSuccess: false, error: (e as Error).message }
+    }
+  }
+
+  public async setActiveWorkspace(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ workspaceId: string }>,
+  ): Promise<ViewModel<void>> {
+    if (this.addonLoader && body?.workspaceId) {
+      this.addonLoader.setActiveWorkspace(body.workspaceId)
+    }
+    return { isSuccess: true }
+  }
+
+  public async getActiveTheme(): Promise<
+    ViewModel<AddonThemeViewModel | null>
+  > {
+    const theme = this.addonLoader ? this.addonLoader.getActiveTheme() : null
+    return {
+      isSuccess: true,
+      statusCode: 200,
+      data: theme,
+    }
+  }
+
+  public async setActiveTheme(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ themeId: string | null }>,
+  ): Promise<ViewModel<void>> {
+    if (this.addonLoader) {
+      this.addonLoader.setActiveTheme(body?.themeId ?? null)
+    }
+    return { isSuccess: true, statusCode: 200 }
+  }
 
   public async listAvailable(
     _event?: IpcMainInvokeEvent,

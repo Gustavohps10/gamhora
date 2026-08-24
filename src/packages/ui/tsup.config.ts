@@ -45,8 +45,16 @@ export default defineConfig({
     'react-hook-form',
     '@radix-ui/*',
     '@metric-org/application',
+    '@metric-org/shared',
+    '@tanstack/react-query',
+    '@tanstack/react-table',
+    'rxdb',
+    'rxjs',
+    'zustand',
+    'date-fns',
     'nuqs',
   ],
+
   loader: {
     '.css': 'copy',
     '.png': 'copy',

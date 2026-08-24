@@ -1,8 +1,15 @@
 import { AppError, Either } from '@metric-org/shared/helpers'
 import { AxiosRequestConfig } from 'axios'
 
+export interface IHttpClientConfig {
+  baseURL: string
+  params?: Record<string, string>
+  headers?: Record<string, string>
+  timeout?: number
+}
+
 export interface IHttpClient {
-  configure(config: { baseURL: string; params?: Record<string, string> }): void
+  configure(config: IHttpClientConfig): void
   get<T>(url: string, config?: AxiosRequestConfig): Promise<Either<AppError, T>>
   post<T>(
     url: string,

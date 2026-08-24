@@ -1,36 +1,30 @@
+import { IHttpClient } from '@metric-org/adapters/contracts'
 import type { DataSourceContext } from '@metric-org/sdk'
-import axios, { AxiosInstance } from 'axios'
 
 export abstract class RedmineBase {
-  private apiClient: AxiosInstance | null = null
-  private cachedApiKey: string | null = null
+  protected httpClient: IHttpClient
 
-  constructor(protected readonly context: DataSourceContext) {}
+  constructor(protected readonly context: DataSourceContext) {
+    this.httpClient = context.httpClient
+  }
 
-  protected getAuthenticatedClient(): AxiosInstance {
-    const apiUrl = this.context?.config?.apiUrl as string
+  protected getHttpClient(): IHttpClient {
+    const apiUrl = (this.context?.config?.apiUrl as string) || ''
+    const apiKey = (this.context?.credentials?.apiKey as string) || ''
 
-    const apiKey: string = this.context.credentials?.apiKey as string
-
-    if (this.apiClient && this.cachedApiKey === apiKey) {
-      return this.apiClient
+    if (!apiUrl) {
+      throw new Error('Nao achou API URL PARA BUSCAR DADOS NO REDMINE')
     }
 
-    if (!apiUrl || !apiKey) {
-      throw new Error('Nao achou API URL ou KEY PARA BUSCAR DADOS NO REDMINE')
-    }
-
-    const headers: Record<string, string> = {
-      'X-Redmine-API-Key': apiKey,
-    }
-
-    this.apiClient = axios.create({
+    this.httpClient.configure({
       baseURL: apiUrl,
-      headers,
+      headers: apiKey
+        ? {
+            'X-Redmine-API-Key': apiKey,
+          }
+        : undefined,
     })
 
-    this.cachedApiKey = apiKey
-
-    return this.apiClient
+    return this.httpClient
   }
 }

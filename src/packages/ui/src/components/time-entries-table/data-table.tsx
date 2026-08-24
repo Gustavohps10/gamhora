@@ -25,7 +25,8 @@ interface DataTableProps<TData> {
   data: TData[]
   expanded?: ExpandedState
   onExpandedChange?: OnChangeFn<ExpandedState>
-  getRowClassName?: (row: TData) => string
+  getRowClassName?: (row: TData, depth: number) => string
+  onRowDoubleClick?: (row: TData) => void
 }
 
 export function DataTable<TData extends { subRows?: TData[]; id: string }>({
@@ -34,6 +35,7 @@ export function DataTable<TData extends { subRows?: TData[]; id: string }>({
   expanded = {},
   onExpandedChange,
   getRowClassName,
+  onRowDoubleClick,
 }: DataTableProps<TData>) {
   const table = useReactTable({
     data,
@@ -82,11 +84,19 @@ export function DataTable<TData extends { subRows?: TData[]; id: string }>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsExpanded() ? 'expanded' : 'collapsed'}
+                onDoubleClick={() => {
+                  const isGroupMaster =
+                    (row.original.subRows?.length ?? 0) > 1 &&
+                    !row.getParentRow()
+                  if (!isGroupMaster) {
+                    onRowDoubleClick?.(row.original)
+                  }
+                }}
                 className={cn(
-                  'group transition-colors',
+                  'group transition-colors select-none',
                   row.getIsExpanded() && 'bg-muted/10',
-                  row.depth > 0 && 'bg-muted/5 italic',
-                  getRowClassName?.(row.original),
+                  row.depth > 0 && 'italic',
+                  getRowClassName?.(row.original, row.depth),
                 )}
               >
                 {row.getVisibleCells().map((cell) => (

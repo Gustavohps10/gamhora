@@ -1,5 +1,4 @@
 import { IMetadataQuery, MetadataDTO, MetadataItem } from '@metric-org/sdk'
-import { AxiosResponse } from 'axios'
 
 import { RedmineBase } from '@/RedmineBase'
 
@@ -48,22 +47,22 @@ export class RedmineMetadataQuery
   public async getMetadata(): Promise<MetadataDTO> {
     console.log('METADATA: Iniciando busca de metadados...')
     try {
-      const client = await this.getAuthenticatedClient()
+      const client = this.getHttpClient()
 
       const results = await Promise.allSettled([
-        client.get('issue_statuses.json'),
-        client.get('enumerations/issue_priorities.json'),
-        client.get('enumerations/time_entry_activities.json'),
-        client.get('trackers.json'),
+        client.get<any>('issue_statuses.json'),
+        client.get<any>('enumerations/issue_priorities.json'),
+        client.get<any>('enumerations/time_entry_activities.json'),
+        client.get<any>('trackers.json'),
       ])
 
-      const processResult = <T>(
-        result: PromiseSettledResult<AxiosResponse<T>>,
+      const processResult = (
+        result: PromiseSettledResult<any>,
         name: string,
-        dataKey: keyof T,
+        dataKey: string,
       ): any[] => {
-        if (result.status === 'fulfilled') {
-          const data = result.value.data?.[dataKey] as any[]
+        if (result.status === 'fulfilled' && result.value.isSuccess()) {
+          const data = result.value.success?.[dataKey] as any[]
           if (data) {
             console.log(
               `METADATA: Buscados ${data.length} item(s) para '${name}'.`,
@@ -71,16 +70,11 @@ export class RedmineMetadataQuery
             return data
           }
           console.warn(
-            `METADATA: Resposta para '${name}' não continha a chave esperada '${String(
-              dataKey,
-            )}'.`,
+            `METADATA: Resposta para '${name}' não continha a chave esperada '${dataKey}'.`,
           )
           return []
         } else {
-          console.error(
-            `METADATA: Falha ao buscar metadados para '${name}'. Razão:`,
-            result.reason,
-          )
+          console.error(`METADATA: Falha ao buscar metadados para '${name}'.`)
           return []
         }
       }

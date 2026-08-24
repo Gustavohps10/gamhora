@@ -14,6 +14,7 @@ interface TimerSettingsState {
   antiBurnout: boolean
   activeWindowTracking: boolean
   hiddenBlocks: string[]
+  enabledAddonIds: string[]
   startMinimized: boolean
   mainWindowWidgetPosition: WidgetPosition
 
@@ -28,6 +29,7 @@ interface TimerSettingsState {
   setActiveWindowTracking: (val: boolean) => void
   setStartMinimized: (val: boolean) => void
   toggleHiddenBlock: (id: string) => void
+  toggleAddonVisibility: (id: string) => void
 }
 
 export const useTimerSettings = create<TimerSettingsState>()(
@@ -42,6 +44,7 @@ export const useTimerSettings = create<TimerSettingsState>()(
       antiBurnout: true,
       activeWindowTracking: false,
       hiddenBlocks: [],
+      enabledAddonIds: [],
       startMinimized: false,
       mainWindowWidgetPosition: 'bottom',
 
@@ -63,7 +66,15 @@ export const useTimerSettings = create<TimerSettingsState>()(
             ? state.hiddenBlocks.filter((b) => b !== id)
             : [...state.hiddenBlocks, id],
         })),
+
+      toggleAddonVisibility: (id) =>
+        set((state) => ({
+          enabledAddonIds: (state.enabledAddonIds ?? []).includes(id)
+            ? (state.enabledAddonIds ?? []).filter((b) => b !== id)
+            : [...(state.enabledAddonIds ?? []), id],
+        })),
     }),
+
     {
       name: 'metric-timer-preferences',
     },

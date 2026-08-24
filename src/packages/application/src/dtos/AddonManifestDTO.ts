@@ -12,4 +12,5 @@ export interface AddonManifestDTO {
   installerManifestUrl?: string
   sourceUrl?: string
   tags?: string[]
+  category?: string
 }

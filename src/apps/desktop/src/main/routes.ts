@@ -15,7 +15,6 @@ import {
   TokenHandler,
 } from '@/main/handlers'
 import { AddonsHandler } from '@/main/handlers/AddonsHandler'
-import { handleDiscordLogin } from '@/main/handlers/discord-handler'
 import { MetadataHandler } from '@/main/handlers/MetadataHandler'
 import { WorkspacesHandler } from '@/main/handlers/WorkspacesHandler'
 import { getSettings, saveSettings } from '@/main/settings'
@@ -59,9 +58,6 @@ export function openIpcRoutes(
   IpcHandler.register('SYSTEM_GET_ENVIRONMENT', () =>
     Promise.resolve({ isDevelopment: !app.isPackaged }),
   )
-
-  // --- AUTH / DISCORD ---
-  IpcHandler.register('DISCORD_LOGIN', () => handleDiscordLogin())
 
   // --- TOKEN STORAGE ---
   IpcHandler.register('SAVE_TOKEN', (e, req) => tokenHandler.saveToken(e, req))
@@ -154,6 +150,42 @@ export function openIpcRoutes(
   )
   IpcHandler.register('ADDONS_INSTALL', (e, req) =>
     addonsHandler.install(e, req),
+  )
+  IpcHandler.register('ADDONS_GET_SIDEBAR_MENUS', () =>
+    addonsHandler.getSidebarMenus(),
+  )
+  IpcHandler.register('ADDONS_GET_TIMERBAR_MENUS', () =>
+    addonsHandler.getTimerbarMenus(),
+  )
+  IpcHandler.register('ADDONS_EXECUTE_COMMAND', (e, req) =>
+    addonsHandler.executeCommand(e, req),
+  )
+  IpcHandler.register('ADDONS_SHOW_TOAST', (e, req) =>
+    addonsHandler.showToast(e, req),
+  )
+  IpcHandler.register('ADDONS_DISMISS_TOAST', (e, req) =>
+    addonsHandler.dismissToast(e, req),
+  )
+  IpcHandler.register('ADDON_GET_SCHEMA', (e, req) =>
+    addonsHandler.getSchema(e, req),
+  )
+  IpcHandler.register('ADDON_GET_SETTINGS', (e, req) =>
+    addonsHandler.getSettings(e, req),
+  )
+  IpcHandler.register('ADDON_SAVE_SETTINGS', (e, req) =>
+    addonsHandler.saveSettings(e, req),
+  )
+  IpcHandler.register('ADDON_EXECUTE_ACTION', (e, req) =>
+    addonsHandler.executeAction(e, req),
+  )
+  IpcHandler.register('ADDONS_SET_ACTIVE_WORKSPACE', (e, req) =>
+    addonsHandler.setActiveWorkspace(e, req),
+  )
+  IpcHandler.register('ADDONS_GET_ACTIVE_THEME', () =>
+    addonsHandler.getActiveTheme(),
+  )
+  IpcHandler.register('ADDONS_SET_ACTIVE_THEME', (e, req) =>
+    addonsHandler.setActiveTheme(e, req),
   )
 
   // --- WIDGET / MOUSE EVENTS ---

@@ -177,33 +177,32 @@ function buildTasks(): TaskDTO[] {
   const rng = seeded(42)
   let globalNum = 1
   const now = new Date()
+  const TOTAL_TARGET_TASKS = 1000
 
-  for (const key of PROJECT_KEYS) {
-    const count = 12 + Math.floor(rng() * 15)
-    for (let n = 1; n <= count; n++) {
-      const id = `${key}-${globalNum}`
-      const status = pick(TASK_STATUSES, rng)
-      const priority = pick(TASK_PRIORITIES, rng)
-      const tracker = pick(TRACKERS, rng)
-      const daysAgo = Math.floor(rng() * 90)
-      const created = new Date(now)
-      created.setDate(created.getDate() - daysAgo)
-      const updated = new Date(created)
-      updated.setDate(updated.getDate() + Math.floor(rng() * 14))
+  for (let i = 1; i <= TOTAL_TARGET_TASKS; i++) {
+    const key = pick(PROJECT_KEYS, rng)
+    const id = `${key}-${globalNum}`
+    const status = pick(TASK_STATUSES, rng)
+    const priority = pick(TASK_PRIORITIES, rng)
+    const tracker = pick(TRACKERS, rng)
+    const daysAgo = Math.floor(rng() * 180)
+    const created = new Date(now)
+    created.setDate(created.getDate() - daysAgo)
+    const updated = new Date(created)
+    updated.setDate(updated.getDate() + Math.floor(rng() * 14))
 
-      tasks.push({
-        id,
-        title: pick(TASK_TITLES, rng) + ` (${id})`,
-        description: `Descrição do item ${id} para cenários de teste.`,
-        createdAt: created,
-        updatedAt: updated,
-        status: { id: status.id, name: status.name },
-        priority: { id: priority.id, name: priority.name },
-        tracker: { id: tracker.id },
-        projectName: `Project ${key}`,
-      })
-      globalNum++
-    }
+    tasks.push({
+      id,
+      title: pick(TASK_TITLES, rng) + ` (${id})`,
+      description: `Descrição do item ${id} para cenários de teste de carga.`,
+      createdAt: created,
+      updatedAt: updated,
+      status: { id: status.id, name: status.name },
+      priority: { id: priority.id, name: priority.name },
+      tracker: { id: tracker.id },
+      projectName: `Projeto ${key}`,
+    })
+    globalNum++
   }
 
   return tasks.sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime())

@@ -8,6 +8,8 @@ import { NavLink } from 'react-router-dom'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useOpenAPI } from '@/hooks'
+import { useTimerSettings } from '@/hooks/use-timer-settings'
 import { cn } from '@/lib'
 
 const sidebarButtonVariants = cva(
@@ -69,6 +71,8 @@ export function AppRail({
   onNewWorkspaceClick: () => void
 }) {
   const { workspaces } = useWorkspace()
+  const openAPI = useOpenAPI()
+  const { setSelectedWorkspaceId } = useTimerSettings()
   const [hoveredId, setHoveredId] = useState<string | null>(null)
 
   return (
@@ -106,6 +110,12 @@ export function AppRail({
             <NavLink
               key={workspace.id}
               to={`/workspaces/${workspace.id}`}
+              onClick={() => {
+                setSelectedWorkspaceId(workspace.id)
+                openAPI.events?.emit?.('workspace:switched', {
+                  workspaceId: workspace.id,
+                })
+              }}
               onMouseEnter={() => setHoveredId(workspace.id)}
               className={({ isActive }) =>
                 cn(

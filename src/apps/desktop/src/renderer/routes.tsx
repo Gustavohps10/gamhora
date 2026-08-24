@@ -1,5 +1,6 @@
 import {
   ActivitiesLayout,
+  AddonsLayout,
   AppLayout,
   HomeLayout,
   WidgetLayout,
@@ -8,6 +9,8 @@ import {
 import {
   Activities,
   AddonsPage,
+  AddonsSettingsPage,
+  AddonsStorePage,
   Backlog,
   Error,
   Metrics,
@@ -89,7 +92,41 @@ export const router = createHashRouter([
                     ],
                   },
                   { path: 'settings', element: <WorkspaceSettings /> },
-                  { path: 'addons', element: <AddonsPage /> },
+                  {
+                    path: 'addons',
+                    element: <AddonsLayout />,
+                    children: [
+                      {
+                        errorElement: <Error />,
+                        children: [
+                          {
+                            index: true,
+                            element: <Navigate to="store" replace />,
+                          },
+                          { path: 'store', element: <AddonsStorePage /> },
+                          {
+                            path: 'store/available',
+                            element: <AddonsStorePage />,
+                          },
+                          {
+                            path: 'settings/:capability',
+                            element: <AddonsSettingsPage />,
+                          },
+                          {
+                            path: 'settings',
+                            element: (
+                              <Navigate to="settings/data-sources" replace />
+                            ),
+                          },
+                          { path: ':category', element: <AddonsPage /> },
+                          {
+                            path: ':category/available',
+                            element: <AddonsPage />,
+                          },
+                        ],
+                      },
+                    ],
+                  },
                   { path: '*', element: <NotFound /> },
                 ],
               },

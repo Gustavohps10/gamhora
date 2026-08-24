@@ -69,10 +69,11 @@ export class RedmineMemberQuery extends RedmineBase implements IMemberQuery {
   }
 
   public async findById(id: string): Promise<MemberDTO> {
-    const client = await this.getAuthenticatedClient()
+    const client = this.getHttpClient()
     const response = await client.get<RedmineUserResponse>(`/users/${id}.json`)
+    if (response.isFailure()) throw new Error(response.failure.messageKey)
 
-    const redmineUser = response.data.user
+    const redmineUser = response.success.user
 
     const member: MemberDTO = {
       id: redmineUser.id,

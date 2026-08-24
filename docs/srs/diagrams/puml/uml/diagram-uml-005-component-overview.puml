@@ -1,0 +1,42 @@
+@startuml ComponentOverview
+title METRIC - Visão Geral de Componentes (Local-First)
+
+package "Desktop Client (Electron)" {
+    [Shared UI (React / Tailwind v4)] as SharedUI
+    [Main Timer & IPC Handlers] as MainTimer
+    [AddonLoader Service] as AddonLoader
+    database "Persistência Local (RxDB / SQLite)" as LocalDB
+}
+
+package "Addon Ecosystem (@metric-org/sdk)" {
+    package "Data Sources" {
+        [Redmine Adapter] as Redmine
+        [Jira Adapter] as Jira
+        [Mock / Fake Adapter] as MockDS
+    }
+    package "Extensões & Automações" {
+        [Themes Engine (CSS)] as Themes
+        [Watchers (Window, Git, Idle)] as Watchers
+        [Timerbar & Sidebar Menus] as Menus
+    }
+}
+
+package "External Tools" {
+    [Redmine Server] as ExtRedmine
+    [Jira Cloud] as ExtJira
+}
+
+SharedUI <--> MainTimer : IPC Ticks
+SharedUI <--> LocalDB : Leitura / Escrita
+SharedUI <--> AddonLoader : Gerenciamento de Addons
+
+AddonLoader --> Redmine : Carrega
+AddonLoader --> Jira : Carrega
+AddonLoader --> MockDS : Carrega
+AddonLoader --> Themes : Injeta
+AddonLoader --> Watchers : Monitora
+AddonLoader --> Menus : Registra
+
+Redmine <--> ExtRedmine : REST API Direta
+Jira <--> ExtJira : REST API Direta
+@enduml

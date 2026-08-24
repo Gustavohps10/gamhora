@@ -1,0 +1,167 @@
+---
+title: DataSources
+description: Como criar integrações robustas para consulta de tarefas e envio de apontamentos de horas.
+---
+
+# DataSources (Provedores de Dados)
+
+Um **DataSource** é o tipo de Addon responsável por integrar o Metric a ferramentas de gerenciamento de tarefas e projetos (como Jira, Redmine, YouTrack, GitHub Issues ou Azure DevOps).
+
+Ele atua como a ponte de comunicação que o [Motor de Sincronização](/docs/sync-engine) utiliza para executar as fases de **Pull** (download de tarefas e metadados) e **Push** (upload de apontamentos de horas).
+
+---
+
+## 🏗️ Responsabilidades de um DataSource
+
+Para fornecer uma integração completa, o DataSource deve suportar três operações fundamentais:
+
+1. **Autenticação e Identificação**: Retornar os dados do membro conectado (`id`, `name`, `login`, `avatarUrl`).
+2. **Consulta de Tarefas e Metadados (Pull)**:
+   - Fornecer as tarefas atribuídas ao usuário utilizando `checkpoint` e `batch`.
+   - Listar as atividades/categorias permitidas (ex: "Desenvolvimento", "Bugfix", "Reunião").
+3. **Persistência de Apontamentos (Push)**:
+   - Criar, atualizar ou excluir lançamentos de horas no sistema remoto.
+
+---
+
+## 💻 Exemplo Prático de Implementação
+
+Abaixo está um exemplo completo de um DataSource de integração com uma API REST:
+
+```typescript
+import type { 
+  IAddon, 
+  AddonContext, 
+  AddonSettingsField,
+  TaskDTO,
+  TimeEntryDTO,
+  SyncTimeEntryDTO
+} from '@metric-org/sdk'
+
+export default class ExemploDataSourceAddon implements IAddon {
+  public id = 'exemplo-datasource'
+  public name = 'Exemplo DataSource'
+  public version = '1.0.0'
+  public description = 'Integração de tarefas e apontamentos com API Exemplo'
+
+  private context?: AddonContext
+
+  public settingsFields: AddonSettingsField[] = [
+    {
+      key: 'apiUrl',
+      label: 'URL da API',
+      type: 'text',
+      required: true,
+      description: 'Endereço base da API externa (ex: https://api.empresa.com)',
+    },
+    {
+      key: 'apiToken',
+      label: 'Token de Autenticação',
+      type: 'password',
+      required: true,
+    },
+  ]
+
+  public async onActivate(context: AddonContext): Promise<void> {
+    this.context = context
+    console.log('[DataSource] Ativado com sucesso!')
+  }
+
+  public async onDeactivate(): Promise<void> {
+    this.context = undefined
+  }
+
+  // 1. Identificação do Usuário Conectado
+  public async getAuthenticatedMember(): Promise<{ id: string; name: string; login: string }> {
+    const apiUrl = await this.context?.storage.get('apiUrl')
+    const token = await this.context?.storage.get('apiToken')
+
+    const response = await fetch(`${apiUrl}/user/me`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    if (!response.ok) throw new Error('Falha ao autenticar no servidor.')
+    const data = await response.json()
+
+    return {
+      id: String(data.id),
+      name: data.full_name,
+      login: data.username,
+    }
+  }
+
+  // 2. Fase de Pull: Buscar Tarefas com Checkpoint
+  public async pullTasks(memberId: string, checkpoint?: string, batch: number = 50): Promise<TaskDTO[]> {
+    const apiUrl = await this.context?.storage.get('apiUrl')
+    const token = await this.context?.storage.get('apiToken')
+
+    const url = new URL(`${apiUrl}/tasks`)
+    url.searchParams.set('assigned_to', memberId)
+    url.searchParams.set('limit', String(batch))
+    if (checkpoint) url.searchParams.set('updated_since', checkpoint)
+
+    const response = await fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    const items = await response.json()
+    return items.map((task: any): TaskDTO => ({
+      id: String(task.id),
+      title: task.title,
+      description: task.description || '',
+      externalId: String(task.id),
+      externalType: 'exemplo-task',
+      updatedAt: new Date(task.updated_at),
+    }))
+  }
+
+  // 3. Fase de Push: Enviar Lançamentos de Tempo
+  public async pushTimeEntry(entry: SyncTimeEntryDTO): Promise<void> {
+    const apiUrl = await this.context?.storage.get('apiUrl')
+    const token = await this.context?.storage.get('apiToken')
+
+    // Trata exclusão
+    if (entry._deleted) {
+      await fetch(`${apiUrl}/time_entries/${entry.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      return
+    }
+
+    const payload = {
+      task_id: entry.task.id,
+      activity_id: entry.activity.id,
+      spent_seconds: entry.timeSpent,
+      start_date: entry.startDate?.toISOString(),
+      end_date: entry.endDate?.toISOString(),
+      comments: entry.comments,
+    }
+
+    // Se já existe, atualiza; caso contrário, cria
+    const method = entry.id ? 'PUT' : 'POST'
+    const endpoint = entry.id ? `${apiUrl}/time_entries/${entry.id}` : `${apiUrl}/time_entries`
+
+    const response = await fetch(endpoint, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Erro ao enviar apontamento: HTTP ${response.status}`)
+    }
+  }
+}
+```
+
+---
+
+## 💡 Melhores Práticas para DataSources
+
+- **Respeito a Checkpoints**: Sempre utilize filtros de data de modificação (`updated_since` ou equivalente) para minimizar o tráfego de dados.
+- **Tratamento de Exclusões**: Sempre verifique o campo `entry._deleted` para propagar a deleção ao servidor remoto.
+- **Segurança**: Nunca guarde credenciais em arquivos locais desprotegidos — utilize sempre o `context.storage` que persiste dados com criptografia nativa.

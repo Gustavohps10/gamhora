@@ -9,7 +9,7 @@
     },
     "types": ["vitest/globals", "node"]
   },
-  "include": ["src"],
+  "include": ["src", "src/utils/credentials-storage-keys.ts"],
   "exclude": ["dist", "node_modules"],
   "references": [
     { "path": "../domain" },

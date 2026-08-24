@@ -1,16 +1,17 @@
-'use client'
-
+import type { SidebarMenuItem as AddonSidebarMenuItem } from '@metric-org/sdk'
 import {
   Brain,
+  CalendarDays,
   ChartColumnBig,
   ChevronRight,
-  FileEditIcon,
-  FileText,
+  FolderGit2,
+  Layers,
   LayoutDashboard,
+  ListTodo,
   ListTodoIcon,
   Lock,
+  LucideIcon,
   PuzzleIcon,
-  ReceiptIcon,
   Scale,
   SettingsIcon,
   Terminal,
@@ -18,6 +19,7 @@ import {
   User,
   WaypointsIcon,
 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { AiOutlineCloudSync } from 'react-icons/ai'
 import { NavLink, useParams } from 'react-router-dom'
 
@@ -41,6 +43,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { useAddonsModalStore } from '@/stores/addonsModalStore'
 
 interface NavItem {
   title: string
@@ -49,47 +52,31 @@ interface NavItem {
   isPro?: boolean
   isBlocked?: boolean
   blockedReason?: string
+  onClick?: () => void
 }
 
-const workItems: NavItem[] = [
+const personalItems: NavItem[] = [
   {
-    title: 'Tarefas',
+    title: 'Minhas Tarefas',
     path: 'activities',
     icon: ListTodoIcon,
     isBlocked: true,
     blockedReason: 'Em breve',
   },
   {
-    title: 'Apontamentos',
+    title: 'Meus Apontamentos',
     path: 'time-entries',
     icon: Timer,
   },
-  {
-    title: 'Anotações',
-    path: 'notes',
-    icon: FileEditIcon,
-    isBlocked: true,
-    blockedReason: 'Em breve',
-  },
-]
-
-const personalItems: NavItem[] = [
   {
     title: 'Métricas',
     path: 'my-metrics',
     icon: ChartColumnBig,
   },
   {
-    title: 'Relatórios',
-    path: 'my-reports',
-    icon: FileText,
-    isBlocked: true,
-    blockedReason: 'Em breve',
-  },
-  {
-    title: 'Hábitos',
-    path: 'habits',
-    icon: ChartColumnBig,
+    title: 'Calendário',
+    path: 'calendar',
+    icon: CalendarDays,
     isBlocked: true,
     blockedReason: 'Em breve',
   },
@@ -122,21 +109,12 @@ const teamItems: NavItem[] = [
   },
 ]
 
-const financialItems: NavItem[] = [
-  {
-    title: 'Valores',
-    path: 'billing',
-    icon: ReceiptIcon,
-    isBlocked: true,
-    blockedReason: 'Em breve',
-  },
-]
-
 const integrationItems: NavItem[] = [
   {
     title: 'Addons',
-    path: 'addons',
+    path: '',
     icon: PuzzleIcon,
+    onClick: () => useAddonsModalStore.getState().openModal(),
   },
 ]
 
@@ -176,6 +154,27 @@ function SidebarNavItem({
 }: SidebarNavItemProps) {
   if (item.isBlocked) {
     return <SidebarBlockedNavItem item={item} />
+  }
+
+  if (item.onClick) {
+    return (
+      <SidebarMenuItem className={nested ? 'ml-2' : undefined}>
+        <SidebarMenuButton
+          size={nested ? 'sm' : 'default'}
+          onClick={item.onClick}
+          className="flex w-full cursor-pointer items-center justify-between"
+        >
+          <div className="flex items-center gap-2">
+            <item.icon
+              size={nested ? 16 : 18}
+              className={nested ? 'text-foreground/60' : 'text-foreground/70'}
+            />
+            <span>{item.title}</span>
+          </div>
+          {item.isPro && <ProBadge />}
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    )
   }
 
   return (
@@ -343,6 +342,120 @@ function SidebarSyncMenu({ workspaceId }: SidebarSyncMenuProps) {
   )
 }
 
+import { useOpenAPI } from '@/hooks'
+
+const iconMap: Record<string, LucideIcon> = {
+  Layers,
+  ListTodo,
+  FolderGit2,
+  Puzzle: PuzzleIcon,
+}
+
+function resolveIcon(name?: string): LucideIcon {
+  if (name && iconMap[name]) {
+    return iconMap[name]
+  }
+  return PuzzleIcon
+}
+
+function SidebarAddonSection({
+  workspaceId,
+}: {
+  workspaceId: string | undefined
+}) {
+  const api = useOpenAPI()
+  const [addonMenus, setAddonMenus] = useState<AddonSidebarMenuItem[]>([])
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadAddonMenus() {
+      try {
+        const response = await api.integrations.addons.getSidebarMenus()
+        if (!isMounted) return
+        if (!response?.isSuccess || !Array.isArray(response.data)) return
+        setAddonMenus(response.data)
+      } catch (err) {
+        console.error('Erro ao carregar menus dos addons:', err)
+      }
+    }
+
+    loadAddonMenus()
+    return () => {
+      isMounted = false
+    }
+  }, [api])
+
+  if (addonMenus.length === 0) return null
+
+  return (
+    <SidebarSection title="Addons Registrados">
+      <SidebarMenu>
+        {addonMenus.map((menu) => {
+          const Icon = resolveIcon(menu.icon)
+
+          if (menu.children && menu.children.length > 0) {
+            return (
+              <Collapsible
+                key={menu.id}
+                defaultOpen
+                className="group/addon-menu"
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton>
+                      <Icon size={18} className="text-foreground/70" />
+                      <span>{menu.label}</span>
+                      <ChevronRight className="ml-auto size-4 transition-transform group-data-[state=open]/addon-menu:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="mt-1 flex flex-col space-y-1">
+                      {menu.children.map((sub) => {
+                        const SubIcon = resolveIcon(sub.icon)
+                        return (
+                          <SidebarMenuItem key={sub.id} className="ml-2">
+                            <SidebarMenuButton asChild size="sm">
+                              <NavLink
+                                to={`/workspaces/${workspaceId}${sub.href}`}
+                                className="flex items-center gap-2 rounded-md transition-colors [&.active]:bg-zinc-100 dark:[&.active]:bg-zinc-800"
+                              >
+                                <SubIcon
+                                  size={16}
+                                  className="text-foreground/60"
+                                />
+                                <span>{sub.label}</span>
+                              </NavLink>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        )
+                      })}
+                    </div>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            )
+          }
+
+          return (
+            <SidebarMenuItem key={menu.id}>
+              <SidebarMenuButton asChild>
+                <NavLink
+                  to={`/workspaces/${workspaceId}${menu.href ?? ''}`}
+                  className="flex items-center gap-2 rounded-md transition-colors [&.active]:bg-zinc-100 dark:[&.active]:bg-zinc-800"
+                >
+                  <Icon size={18} className="text-foreground/70" />
+                  <span>{menu.label}</span>
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )
+        })}
+      </SidebarMenu>
+    </SidebarSection>
+  )
+}
+
 export function AppSidebarWorkspacesContent() {
   const { workspaceId } = useParams<{
     workspaceId: string
@@ -350,10 +463,6 @@ export function AppSidebarWorkspacesContent() {
 
   return (
     <>
-      <SidebarSection title="Trabalho">
-        <SidebarNavItems items={workItems} workspaceId={workspaceId} />
-      </SidebarSection>
-
       <SidebarSection title="Controle Pessoal">
         <SidebarNavItems items={personalItems} workspaceId={workspaceId} />
       </SidebarSection>
@@ -362,13 +471,11 @@ export function AppSidebarWorkspacesContent() {
         <SidebarNavItems items={teamItems} workspaceId={workspaceId} />
       </SidebarSection>
 
-      <SidebarSection title="Financeiro">
-        <SidebarNavItems items={financialItems} workspaceId={workspaceId} />
-      </SidebarSection>
-
       <SidebarSection title="Integrações">
         <SidebarNavItems items={integrationItems} workspaceId={workspaceId} />
       </SidebarSection>
+
+      <SidebarAddonSection workspaceId={workspaceId} />
 
       <SidebarSection title="Workspace">
         <SidebarNavItems items={workspaceItems} workspaceId={workspaceId} />

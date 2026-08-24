@@ -23,4 +23,21 @@ export const addonsInvoker: IAddonsAPI = {
       { downloadUrl: string } & { onProgress?: (progress: number) => void }
     >,
   ) => IpcInvoker.invoke('ADDONS_INSTALL', payload),
+
+  getSidebarMenus: () => IpcInvoker.invoke('ADDONS_GET_SIDEBAR_MENUS'),
+  getTimerbarMenus: () => IpcInvoker.invoke('ADDONS_GET_TIMERBAR_MENUS'),
+  executeCommand: (payload: IRequest<{ commandId: string; args?: any[] }>) =>
+    IpcInvoker.invoke('ADDONS_EXECUTE_COMMAND', payload),
+  showToast: (payload) => IpcInvoker.invoke('ADDONS_SHOW_TOAST', payload),
+  dismissToast: (payload) => IpcInvoker.invoke('ADDONS_DISMISS_TOAST', payload),
+  getSchema: (payload) => IpcInvoker.invoke('ADDON_GET_SCHEMA', payload),
+  getSettings: (payload) => IpcInvoker.invoke('ADDON_GET_SETTINGS', payload),
+  saveSettings: (payload) => IpcInvoker.invoke('ADDON_SAVE_SETTINGS', payload),
+  executeAction: (payload) =>
+    IpcInvoker.invoke('ADDON_EXECUTE_ACTION', payload),
+  setActiveWorkspace: (payload) =>
+    IpcInvoker.invoke('ADDONS_SET_ACTIVE_WORKSPACE', payload),
+  getActiveTheme: () => IpcInvoker.invoke('ADDONS_GET_ACTIVE_THEME'),
+  setActiveTheme: (payload) =>
+    IpcInvoker.invoke('ADDONS_SET_ACTIVE_THEME', payload),
 }
