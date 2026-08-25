@@ -2,7 +2,7 @@
   "private": true,
   "name": "@metric-org/desktop",
   "productName": "metric",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Metric Desktop App.",
   "main": "./out/main/index.js",
   "type": "module",

@@ -1,7 +1,7 @@
 {
   "name": "@metric-org/supabase-theme",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Supabase Dark Emerald theme addon for tests.",
   "author": "Metric",
   "license": "MIT",

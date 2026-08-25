@@ -1,7 +1,7 @@
 {
   "name": "@metric-org/purple-theme",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Purple Neon theme addon for tests.",
   "author": "Metric",
   "license": "MIT",

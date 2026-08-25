@@ -1,7 +1,7 @@
 {
   "name": "@metric-org/fake-watcher-for-tests",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fake Watcher & Automations Addon para simulação de captura de reuniões e eventos",
   "author": "Gustavo <gustavoh.santos735@gmail.com>",
   "license": "MIT",

@@ -1,7 +1,7 @@
 {
   "name": "@metric-org/redmine-for-tests",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Redmine datasource para testes.",
   "author": "Gustavo gustavoh.santos735@gmail.com>",
   "license": "MIT",
