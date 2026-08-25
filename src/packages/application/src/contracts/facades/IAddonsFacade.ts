@@ -24,4 +24,9 @@ export interface IAddonsFacade {
     downloadUrl: string,
     onProgress?: (event: IJobEvent) => void,
   ): Promise<Either<AppError, Uint8Array>>
+
+  uninstallAddon(
+    addonId: string,
+    version?: string,
+  ): Promise<Either<AppError, void>>
 }

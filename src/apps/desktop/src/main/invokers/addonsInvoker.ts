@@ -24,7 +24,11 @@ export const addonsInvoker: IAddonsAPI = {
     >,
   ) => IpcInvoker.invoke('ADDONS_INSTALL', payload),
 
+  uninstall: (payload: IRequest<{ addonId: string; version?: string }>) =>
+    IpcInvoker.invoke('ADDONS_UNINSTALL', payload),
+
   getSidebarMenus: () => IpcInvoker.invoke('ADDONS_GET_SIDEBAR_MENUS'),
+
   getTimerbarMenus: () => IpcInvoker.invoke('ADDONS_GET_TIMERBAR_MENUS'),
   executeCommand: (payload: IRequest<{ commandId: string; args?: any[] }>) =>
     IpcInvoker.invoke('ADDONS_EXECUTE_COMMAND', payload),

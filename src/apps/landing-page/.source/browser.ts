@@ -16,10 +16,6 @@ const browserCollections = {
       import('../content/docs/quickstart.mdx?collection=docs'),
     'sync-engine.mdx': () =>
       import('../content/docs/sync-engine.mdx?collection=docs'),
-    'apis/oauth-pkce.mdx': () =>
-      import('../content/docs/apis/oauth-pkce.mdx?collection=docs'),
-    'apis/storage-and-events.mdx': () =>
-      import('../content/docs/apis/storage-and-events.mdx?collection=docs'),
     'categories/calendars.mdx': () =>
       import('../content/docs/categories/calendars.mdx?collection=docs'),
     'categories/datasources.mdx': () =>
@@ -32,6 +28,10 @@ const browserCollections = {
       import('../content/docs/categories/themes.mdx?collection=docs'),
     'categories/watchers.mdx': () =>
       import('../content/docs/categories/watchers.mdx?collection=docs'),
+    'apis/oauth-pkce.mdx': () =>
+      import('../content/docs/apis/oauth-pkce.mdx?collection=docs'),
+    'apis/storage-and-events.mdx': () =>
+      import('../content/docs/apis/storage-and-events.mdx?collection=docs'),
   }),
 }
 export default browserCollections

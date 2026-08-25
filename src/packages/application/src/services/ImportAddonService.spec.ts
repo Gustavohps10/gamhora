@@ -75,11 +75,11 @@ describe('ImportAddonService', () => {
     )
 
     expect(fileStorageMock.write).toHaveBeenCalledWith(
-      `./addons/datasource/${fakeAddonId}/manifest.yaml`,
+      `./addons/${fakeAddonId}/1.0.0/manifest.yaml`,
       extractedFiles[0].content,
     )
     expect(fileStorageMock.write).toHaveBeenCalledWith(
-      `./addons/datasource/${fakeAddonId}/index.js`,
+      `./addons/${fakeAddonId}/1.0.0/index.js`,
       extractedFiles[1].content,
     )
   })

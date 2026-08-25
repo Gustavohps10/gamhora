@@ -48,20 +48,22 @@ export class ImportAddonService implements IImportAddonUseCase {
       }
 
       const addonId = manifestContentResult.success.id
+      const version = manifestContentResult.success.version || '1.0.0'
+
       if (!addonId) {
         return Either.failure(AppError.NotFound('ADDONID_NAO_ENCONTRADO'))
       }
 
       onProgress?.({
         status: 'data',
-        data: `Instalando arquivos em /addons/${addonId}...`,
+        data: `Instalando arquivos em /addons/${addonId}/${version}...`,
       })
 
       const totalFiles = extractedFiles.length
 
       for (let i = 0; i < totalFiles; i++) {
         const file = extractedFiles[i]
-        const finalPath = `./addons/datasource/${addonId}/${file.name}`
+        const finalPath = `./addons/${addonId}/${version}/${file.name}`
 
         await this.fileStorage.write(finalPath, file.content)
 

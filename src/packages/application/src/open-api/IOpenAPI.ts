@@ -354,6 +354,10 @@ export interface IAddonsAPI {
     payload: IRequest<{ downloadUrl: string }>,
   ): Promise<ViewModel<IJobResult>>
 
+  uninstall(
+    payload: IRequest<{ addonId: string; version?: string }>,
+  ): Promise<ViewModel<void>>
+
   getSidebarMenus(): Promise<ViewModel<AddonSidebarMenuItem[]>>
 
   getTimerbarMenus(): Promise<ViewModel<AddonTimerbarMenuItem[]>>

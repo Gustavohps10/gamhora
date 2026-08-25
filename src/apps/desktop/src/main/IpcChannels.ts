@@ -59,7 +59,9 @@ export const IpcChannels = {
   ADDONS_UPDATE_LOCAL: 'addons:update-local',
   ADDONS_IMPORT: 'addons:import',
   ADDONS_INSTALL: 'addons:install',
+  ADDONS_UNINSTALL: 'addons:uninstall',
   ADDONS_GET_SIDEBAR_MENUS: 'addons:get-sidebar-menus',
+
   ADDONS_GET_TIMERBAR_MENUS: 'addons:get-timerbar-menus',
   ADDONS_EXECUTE_COMMAND: 'addons:execute-command',
   ADDONS_SHOW_TOAST: 'addons:show-toast',

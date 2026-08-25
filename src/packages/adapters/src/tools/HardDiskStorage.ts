@@ -10,7 +10,11 @@ export class HardDiskStorage implements IFileStorage {
     this.rootPath = resolve(rootPath)
     this.urlPrefix = urlPrefix
   }
-  private getAbsolutePath(filePath: string): string {
+  public getRootPath(): string {
+    return this.rootPath
+  }
+
+  public getAbsolutePath(filePath: string): string {
     return path.join(this.rootPath, filePath)
   }
 

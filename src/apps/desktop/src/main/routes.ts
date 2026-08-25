@@ -151,6 +151,9 @@ export function openIpcRoutes(
   IpcHandler.register('ADDONS_INSTALL', (e, req) =>
     addonsHandler.install(e, req),
   )
+  IpcHandler.register('ADDONS_UNINSTALL', (e, req) =>
+    addonsHandler.uninstall(e, req),
+  )
   IpcHandler.register('ADDONS_GET_SIDEBAR_MENUS', () =>
     addonsHandler.getSidebarMenus(),
   )

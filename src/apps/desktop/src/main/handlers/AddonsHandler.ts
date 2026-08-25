@@ -359,33 +359,55 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
     _event?: IpcMainInvokeEvent,
     _req?: IRequest,
   ): Promise<PaginatedViewModel<AddonManifestViewModel[]>> {
-    if (isDevelopment() || true) {
+    const result = await this.addonsFacade.listInstalled()
+
+    if (result.isFailure()) {
+      return createResponseViewModel(result.forwardFailure())
+    }
+
+    let installedItems = result.success
+
+    // Em modo de desenvolvimento, mescla os DEV_ADDONS caso ainda não existam no disco
+    if (isDevelopment()) {
+      const existingIds = new Set(installedItems.map((item) => item.id))
+      const extraDevAddons = DEV_ADDONS.filter(
+        (dev) => !existingIds.has(dev.id),
+      )
+      installedItems = [...installedItems, ...extraDevAddons]
+    }
+
+    const viewModels = installedItems.map((item) => ({
+      ...item,
+      installed: true,
+    }))
+
+    return {
+      isSuccess: true,
+      statusCode: 200,
+      data: viewModels,
+      totalItems: viewModels.length,
+      totalPages: 1,
+      currentPage: 1,
+    }
+  }
+
+  public async uninstall(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ addonId: string; version?: string }>,
+  ): Promise<ViewModel<void>> {
+    if (!body?.addonId) {
       return {
-        isSuccess: true,
-        statusCode: 200,
-        data: [...DEV_ADDONS],
-        totalItems: DEV_ADDONS.length,
-        totalPages: 1,
-        currentPage: 1,
+        isSuccess: false,
+        statusCode: 400,
+        error: 'ADDON_ID_REQUIRED',
       }
     }
 
-    const result = await this.addonsFacade.listInstalled()
-
-    const mappedResult = result.map((items) => {
-      const viewModels = items.map((item) => ({
-        ...item,
-      }))
-
-      return {
-        data: viewModels,
-        totalItems: items.length,
-        totalPages: 1,
-        currentPage: 1,
-      }
-    })
-
-    return createResponseViewModel(mappedResult)
+    const result = await this.addonsFacade.uninstallAddon(
+      body.addonId,
+      body.version,
+    )
+    return createResponseViewModel(result)
   }
 
   public async getInstalledById(
