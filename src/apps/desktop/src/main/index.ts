@@ -14,6 +14,7 @@ import {
   JSONWorkspacesQuery,
   JSONWorkspacesRepository,
 } from '@metric-org/adapters/data'
+import { AddonsFacade } from '@metric-org/adapters/facades'
 import { HardDiskStorage, KeytarTokenStorage } from '@metric-org/adapters/tools'
 import { ContainerBuilder, PlatformDependencies } from '@metric-org/IoC'
 import {
@@ -414,6 +415,23 @@ if (!gotTheLock) {
     const eventEmitter = new ElectronJobEventEmitter(() => mainWindow)
     const nodeFileStorage = new HardDiskStorage(userDataPath, 'metric-app://')
     const electronHttpClient = new ElectronHttpClient()
+
+    // Carrega e ativa todos os addons instalados no disco
+    try {
+      const addonsFacade = new AddonsFacade(nodeFileStorage)
+      const installedResult = await addonsFacade.listInstalled()
+      if (installedResult.isSuccess() && installedResult.success.length > 0) {
+        await addonLoader.loadInstalledAddons(installedResult.success)
+        console.log(
+          `🧩 [Metric Core] ${installedResult.success.length} addon(s) instalado(s) carregado(s) no boot.`,
+        )
+      }
+    } catch (err) {
+      console.error(
+        '❌ [Metric Core] Erro ao carregar addons instalados no boot:',
+        err,
+      )
+    }
 
     const localDataSourceResolver = new DataSourceResolver(
       workspacesRepository,

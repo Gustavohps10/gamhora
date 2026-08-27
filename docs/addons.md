@@ -131,3 +131,88 @@ export default class MeuAddon implements IAddon {
 │ **Calendars**   │ Traz reuniões do dia da agenda e converte em apontamentos.      │
 │ **Punch**       │ Registra o ponto eletrônico e verifica o saldo de jornada.       │
 └─────────────────┴──────────────────────────────────────────────────────────────────┘
+
+---
+
+## 5. Empacotamento e Distribuição (Padrão da Indústria com `tsup`)
+
+### ⚡ Por que o `tsup` é o padrão da indústria?
+O **`tsup`** (baseado no **`esbuild`**) é o bundler padrão moderno adotado por grandes ecossistemas (como *Raycast*, *Nuxt*, *Vite SSR*, *tRPC* e extensões Desktop):
+1. **Zero-Config TypeScript:** Compila TS para JS e gera arquivos de tipagem `.d.ts` instantaneamente.
+2. **Alta Performance:** Construído em Go (esbuild), empacota bundles complexos em milissegundos.
+3. **Distribuição Standalone:** Permite embutir todas as dependências de terceiros no arquivo final, eliminando a necessidade de pastas `node_modules` no computador do usuário final.
+
+---
+
+### 📦 Configuração Oficial Recomendada (`tsup.config.ts`)
+
+Todo Addon do Metric deve conter o seguinte `tsup.config.ts` na raiz do seu projeto:
+
+```typescript
+import { cpSync } from 'node:fs'
+import { defineConfig } from 'tsup'
+
+export default defineConfig({
+  entry: ['src/index.ts'],
+  format: ['esm'],
+  platform: 'node',
+  target: 'node18',
+  banner: {
+    // Compatibilidade nativa para bibliotecas dependentes de require() em ambiente ESM
+    js: `import { createRequire as __createRequire } from 'node:module';\nconst require = __createRequire(import.meta.url);`,
+  },
+  dts: { resolve: true },
+  clean: true,
+  sourcemap: true,
+  splitting: false,
+  noExternal: [/.*/], // 👈 EMBUTE TODAS AS DEPENDÊNCIAS NO BUNDLE FINAL
+  tsconfig: './tsconfig.build.json',
+  onSuccess: async () => {
+    // Garante que o ícone oficial acompanhe o pacote
+    try {
+      cpSync('src/icon.png', 'dist/icon.png')
+    } catch {}
+  },
+})
+```
+
+---
+
+### ⚠️ Diagnóstico e Solução de Problemas Comuns
+
+#### 1. Erro: `Cannot find package '@metric-org/sdk' imported from ...`
+* **Causa:** O bundler gerou um arquivo JS com `import { ... } from 'xyz'` externo. Como o Metric apenas descompacta o `.tladdon` sem rodar `npm install` no cliente, o Node não encontra o pacote.
+* **Solução:** Adicione `noExternal: [/.*/]` no `tsup.config.ts`. Isso força o bundler a inliner todo o código necessário dentro do `dist/index.js`.
+
+#### 2. Erro: `Dynamic require of "util" (ou outro módulo) is not supported`
+* **Causa:** Alguma dependência embutida (ex: parsers XML, Markdown, HTTP) usa `require('util')` internamente. No padrão ESM do Node.js, a variável global `require` não existe por padrão.
+* **Solução:** Defina `platform: 'node'` e injete o banner `createRequire` no topo do bundle:
+  ```typescript
+  banner: {
+    js: `import { createRequire as __createRequire } from 'node:module';\nconst require = __createRequire(import.meta.url);`,
+  }
+  ```
+
+#### 3. Erro: `YAML anchors &ref_0` ou quebras de linha `>-` no `manifest.yaml`
+* **Causa:** O serializador YAML padrão pode tentar reutilizar referências de memória quando campos como `packages` ou `changelog` possuem arrays idênticos.
+* **Solução:** Execute o script `yarn sync:manifest` que utiliza `js-yaml` com as opções `{ lineWidth: -1, noRefs: true }`.
+
+---
+
+### 🚀 Fluxo de Publicação do Pacote (`.tladdon`)
+
+```bash
+# 1. Compilar o bundle standalone
+yarn build
+
+# 2. Empacotar o Addon e atualizar o manifesto
+yarn metric pkg ./ --download-url "https://github.com/usuario/meu-addon/releases/download/v0.1.0/meu-addon-0.1.0.tladdon"
+
+# 3. Sincronizar formatação e screenshots
+yarn sync:manifest
+
+# 4. Publicar Release via Tag Git
+git tag v0.1.0
+git push origin main --tags
+```
+

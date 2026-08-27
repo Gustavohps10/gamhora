@@ -1,3 +1,7 @@
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
+
 import { ICredentialsStorage } from '@metric-org/application'
 import {
   AddonContext,
@@ -20,7 +24,6 @@ import {
   IRegistry,
   ITimeEntriesAPI,
   ITimerAPI,
-  MemoryRegistry,
   OAuthAuthorizeOptions,
   OAuthResult,
   SidebarMenuItem,
@@ -757,6 +760,82 @@ export class AddonLoader {
       await item.instance.deactivate()
     }
     this.activeAddons.delete(addonId)
+  }
+
+  public hasActiveAddon(addonId: string): boolean {
+    return this.activeAddons.has(addonId)
+  }
+
+  public async loadAndActivateFromDisk(
+    addonId: string,
+    addonFolderPath: string,
+  ): Promise<boolean> {
+    try {
+      if (this.hasActiveAddon(addonId)) {
+        return true
+      }
+
+      const possibleEntries = [
+        join(addonFolderPath, 'dist', 'index.js'),
+        join(addonFolderPath, 'dist', 'index.mjs'),
+        join(addonFolderPath, 'index.js'),
+      ]
+
+      let targetEntry: string | null = null
+      for (const entry of possibleEntries) {
+        if (existsSync(entry)) {
+          targetEntry = entry
+          break
+        }
+      }
+
+      if (!targetEntry) {
+        console.warn(
+          `⚠️ [AddonLoader] Ponto de entrada JS não encontrado para o addon "${addonId}" em: ${addonFolderPath}`,
+        )
+        return false
+      }
+
+      const fileUrl = pathToFileURL(targetEntry).href
+      const module = await import(fileUrl)
+      const AddonClass = module.default || module
+
+      if (typeof AddonClass === 'function') {
+        const addonInstance: IAddon = new AddonClass()
+        await this.activateAddon(addonId, addonInstance)
+        return true
+      } else if (typeof AddonClass === 'object' && AddonClass !== null) {
+        await this.activateAddon(addonId, AddonClass as IAddon)
+        return true
+      } else {
+        console.warn(
+          `⚠️ [AddonLoader] Exportação padrão inválida para o addon "${addonId}" em: ${targetEntry}`,
+        )
+        return false
+      }
+    } catch (err: any) {
+      console.error(
+        `❌ [AddonLoader] Erro ao carregar addon "${addonId}" do disco (${addonFolderPath}):`,
+        err?.message || err,
+      )
+      return false
+    }
+  }
+
+  public async loadInstalledAddons(
+    addons: Array<{ id: string; path: string }>,
+  ): Promise<void> {
+    for (const addon of addons) {
+      if (!addon.id || !addon.path) continue
+      try {
+        await this.loadAndActivateFromDisk(addon.id, addon.path)
+      } catch (err: any) {
+        console.error(
+          `❌ [AddonLoader] Falha ao inicializar addon instalado "${addon.id}":`,
+          err?.message || err,
+        )
+      }
+    }
   }
 
   public async getSettingsSchema(

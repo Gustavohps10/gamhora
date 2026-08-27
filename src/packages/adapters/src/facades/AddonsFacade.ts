@@ -114,10 +114,9 @@ export class AddonsFacade implements IAddonsFacade {
 
   public async listAvailable(): Promise<Either<AppError, AddonManifestDTO[]>> {
     try {
-      const primaryUrl =
-        'https://metric-org.github.io/addons-manifest/index.json'
+      const primaryUrl = 'https://gamhora.github.io/addons-manifest/index.json'
       const fallbackUrl =
-        'https://metric-org.github.io/addons-manifest/addonDatabase/index.json'
+        'https://gamhora.github.io/addons-manifest/addonDatabase/index.json'
 
       let response
       try {
@@ -147,7 +146,7 @@ export class AddonsFacade implements IAddonsFacade {
           const yamlFiles = data as string[]
           const addons: AddonManifestDTO[] = await Promise.all(
             yamlFiles.map(async (filename) => {
-              const yamlUrl = `https://metric-org.github.io/addons-manifest/addonDatabase/dataSource/${filename}`
+              const yamlUrl = `https://gamhora.github.io/addons-manifest/addonDatabase/dataSource/${filename}`
               const { data: rawYaml } = await axios.get(yamlUrl)
               const parsed = await this.parseManifest(rawYaml)
               if (parsed.isFailure()) throw parsed.failure

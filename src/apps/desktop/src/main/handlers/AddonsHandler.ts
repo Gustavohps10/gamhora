@@ -248,6 +248,18 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
   ): Promise<ViewModel<AddonSettingsSchema>> {
     if (!this.addonLoader) return { isSuccess: true, data: [] }
     try {
+      if (body?.addonId && !this.addonLoader.hasActiveAddon(body.addonId)) {
+        const installedResult = await this.addonsFacade.getInstalledById(
+          body.addonId,
+        )
+        if (installedResult.isSuccess() && installedResult.success.path) {
+          await this.addonLoader.loadAndActivateFromDisk(
+            body.addonId,
+            installedResult.success.path,
+          )
+        }
+      }
+
       const schema = await this.addonLoader.getSettingsSchema(body.addonId)
       return { isSuccess: true, data: schema }
     } catch (e: unknown) {
@@ -291,6 +303,18 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
     if (!this.addonLoader)
       return { isSuccess: false, error: 'LOADER_NOT_FOUND' }
     try {
+      if (body?.addonId && !this.addonLoader.hasActiveAddon(body.addonId)) {
+        const installedResult = await this.addonsFacade.getInstalledById(
+          body.addonId,
+        )
+        if (installedResult.isSuccess() && installedResult.success.path) {
+          await this.addonLoader.loadAndActivateFromDisk(
+            body.addonId,
+            installedResult.success.path,
+          )
+        }
+      }
+
       const data = await this.addonLoader.executeAction(
         body.addonId,
         body.actionId,
@@ -533,6 +557,29 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
           error: result.failure.messageKey,
         })
         return
+      }
+
+      // Ativação imediata em memória do addon recém-instalado
+      try {
+        const installedList = await this.addonsFacade.listInstalled()
+        if (installedList.isSuccess() && this.addonLoader) {
+          for (const installed of installedList.success) {
+            if (
+              !this.addonLoader.hasActiveAddon(installed.id) &&
+              installed.path
+            ) {
+              await this.addonLoader.loadAndActivateFromDisk(
+                installed.id,
+                installed.path,
+              )
+            }
+          }
+        }
+      } catch (activationErr) {
+        console.warn(
+          '⚠️ [AddonsHandler] Aviso ao auto-ativar addon pós-instalação:',
+          activationErr,
+        )
       }
 
       this.jobEmitter.emit(jobId, { status: 'progress', value: 100 })
