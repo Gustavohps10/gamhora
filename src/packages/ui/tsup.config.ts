@@ -9,7 +9,6 @@ const allDeps = [
 
 export default defineConfig({
   entry: [
-    'src/components/ui/**/*.tsx',
     'src/components/index.ts',
     'src/hooks/index.ts',
     'src/lib/index.ts',
@@ -22,7 +21,7 @@ export default defineConfig({
   format: ['esm'],
   dts: true,
   clean: true,
-  splitting: true,
+  splitting: false,
   treeshake: true,
   minify: false,
 
