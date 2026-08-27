@@ -15,7 +15,7 @@ function OAuthCallbackContent() {
     const errorDescription = searchParams.get('error_description')
 
     const query = searchParams.toString()
-    const targetUrl = `metric-app://oauth/callback${query ? `?${query}` : ''}`
+    const targetUrl = `gamhora-app://oauth/callback${query ? `?${query}` : ''}`
     setDeepLinkUrl(targetUrl)
 
     if (error) {
@@ -62,15 +62,15 @@ function OAuthCallbackContent() {
               Autenticação Concluída
             </h1>
             <p className="text-muted-foreground mb-6 text-sm">
-              Retornando ao aplicativo Metric Desktop. Se o aplicativo não abrir
-              automaticamente, clique no botão abaixo.
+              Retornando ao aplicativo Gamhora Desktop. Se o aplicativo não
+              abrir automaticamente, clique no botão abaixo.
             </p>
             {deepLinkUrl && (
               <a
                 href={deepLinkUrl}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium shadow-sm transition-colors"
               >
-                Abrir no Metric Desktop
+                Abrir no Gamhora Desktop
               </a>
             )}
           </>

@@ -1,9 +1,9 @@
-import {
+﻿import {
   AppError,
   AuthenticationResult,
   Either,
   IAuthenticationStrategy,
-} from '@metric-org/sdk'
+} from '@gamhora/sdk'
 
 import { FAKE_MEMBER } from './fakeData'
 

@@ -1,4 +1,4 @@
-import { IWorkspacesAPI } from '@metric-org/application'
+﻿import { IWorkspacesAPI } from '@gamhora/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

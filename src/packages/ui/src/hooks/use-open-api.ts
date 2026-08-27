@@ -1,4 +1,4 @@
-import { IOpenAPI } from '@metric-org/sdk'
+﻿import { IOpenAPI } from '@gamhora/sdk'
 import { useContext } from 'react'
 
 import { OpenAPIContext } from '@/contexts/OpenAPIContext'

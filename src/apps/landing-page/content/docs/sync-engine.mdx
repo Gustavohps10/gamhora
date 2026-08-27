@@ -5,17 +5,17 @@ description: Como funciona o motor de replicação HTTP (Pull & Push), gestão d
 
 # Motor de Sincronização & Domínio
 
-O **Metric** utiliza um motor de sincronização agnóstico baseado em **HTTP Replication (Pull & Push de Deltas)**. Em vez de abrir conexões contínuas em tempo real (como WebSockets persistentes) ou fazer polling agressivo contra APIs de terceiros, o Metric sincroniza dados de forma estruturada, eficiente e resiliente a falhas de rede.
+O **Gamhora** utiliza um motor de sincronização agnóstico baseado em **HTTP Replication (Pull & Push de Deltas)**. Em vez de abrir conexões contínuas em tempo real (como WebSockets persistentes) ou fazer polling agressivo contra APIs de terceiros, o Gamhora sincroniza dados de forma estruturada, eficiente e resiliente a falhas de rede.
 
 ---
 
 ## 🔄 Como Funciona a Replicação HTTP
 
-A sincronização entre o Metric e qualquer servidor ou ferramenta de gestão (Redmine, Jira, YouTrack, etc.) é dividida em dois ciclos bem definidos: **Fase de Pull** e **Fase de Push**.
+A sincronização entre o Gamhora e qualquer servidor ou ferramenta de gestão (Redmine, Jira, YouTrack, etc.) é dividida em dois ciclos bem definidos: **Fase de Pull** e **Fase de Push**.
 
 ```text
        ┌──────────────────────────────┐
-       │     Banco Local (Metric)     │
+       │     Banco Local (Gamhora)     │
        └──────┬────────────────▲──────┘
               │                │
        [1] Pull (Download)     │ [2] Push (Upload)
@@ -35,20 +35,23 @@ A sincronização entre o Metric e qualquer servidor ou ferramenta de gestão (R
 A fase de Pull traz do servidor remoto apenas os dados que foram criados ou atualizados desde a última sincronização.
 
 ### Serviços Executores:
+
 - **`TaskPullService`**: Baixa a lista de tarefas/issues atribuídas ao membro autenticado.
 - **`TimeEntriesPullService`**: Baixa os lançamentos de horas já registrados no servidor.
 - **`MetadataPullService`**: Baixa metadados essenciais como atividades permitidas, categorias e projetos.
 
 ### O Conceito de `checkpoint` e `batch`:
+
 Para não sobrecarregar as APIs externas nem baixar todo o histórico repetidamente:
-- O Metric envia um parâmetro `checkpoint` (que pode ser um timestamp ISO 8601 ou cursor).
+
+- O Gamhora envia um parâmetro `checkpoint` (que pode ser um timestamp ISO 8601 ou cursor).
 - A API do DataSource responde com as alterações posteriores ao `checkpoint` limitadas pelo tamanho do `batch` (ex: 50 itens por página).
-- Quando o lote é processado com sucesso, o Metric armazena o novo `checkpoint` localmente.
+- Quando o lote é processado com sucesso, o Gamhora armazena o novo `checkpoint` localmente.
 
 ```typescript
 // Exemplo conceitual do método pull na interface de consulta
 public async pull(memberId: string, checkpoint?: string, batch: number = 50): Promise<TaskDTO[]> {
-  const url = checkpoint 
+  const url = checkpoint
     ? `/api/tasks?updated_after=${checkpoint}&limit=${batch}`
     : `/api/tasks?limit=${batch}`
 
@@ -70,9 +73,9 @@ Cada item do lote (`SyncTimeEntryDTO`) passa por uma pipeline rigorosa:
 1. **Validação de Documento**:
    - O documento deve possuir `id` e `updatedAt` válidos.
 2. **Tratamento de Exclusão (`_deleted: true`)**:
-   - Se o apontamento foi excluído no Metric local, ele chama `timeEntryRepository.delete(id)` no servidor remoto e marca como sincronizado (`syncedAt: new Date()`).
+   - Se o apontamento foi excluído no Gamhora local, ele chama `timeEntryRepository.delete(id)` no servidor remoto e marca como sincronizado (`syncedAt: new Date()`).
 3. **Detecção de Conflitos (Optimistic Concurrency Control)**:
-   - Se o registro já existe no servidor remoto, o Metric compara o `updatedAt` do servidor com o `assumedMasterState.updatedAt` enviado pelo cliente local.
+   - Se o registro já existe no servidor remoto, o Gamhora compara o `updatedAt` do servidor com o `assumedMasterState.updatedAt` enviado pelo cliente local.
    - **Sem Conflito:** Se forem compatíveis, os horários e comentários são atualizados remotamente e confirmados com `syncedAt`.
    - **Com Conflito:** Se o registro remoto tiver sido modificado no servidor por outra pessoa após a última leitura local, o item é marcado como `conflicted: true` contendo `{ server: existing, local: entry }` para resolução segura sem perda de dados.
 4. **Criação de Novos Apontamentos**:
@@ -82,21 +85,24 @@ Cada item do lote (`SyncTimeEntryDTO`) passa por uma pipeline rigorosa:
 
 ## 🏢 Workspaces & Conexões de DataSources
 
-No Metric, todo o contexto de dados pertence a um **Workspace** (espaço de trabalho).
+No Gamhora, todo o contexto de dados pertence a um **Workspace** (espaço de trabalho).
 
 ### O Papel do Workspace:
-- O Workspace atua como o isolamento de *tenant* (ex: "Empresa A", "Empresa B", "Consultoria Freelance").
+
+- O Workspace atua como o isolamento de _tenant_ (ex: "Empresa A", "Empresa B", "Consultoria Freelance").
 - Cada Workspace possui seu próprio conjunto de tarefas, histórico de apontamentos e configurações de preferências.
 
 ### Estrutura de Conexões (`DataSourceConnection`):
+
 Um mesmo Workspace pode possuir múltiplas conexões com ferramentas externas:
 
 ```typescript
 type DataSourceConnection = {
-  id: string                     // Identificador da conexão (ex: "conn-jira-prod")
-  dataSourceId: string           // ID do plugin (ex: "jira-datasource")
+  id: string // Identificador da conexão (ex: "conn-jira-prod")
+  dataSourceId: string // ID do plugin (ex: "jira-datasource")
   status: 'connected' | 'disabled' | 'disconnected'
-  member?: {                     // Dados do usuário autenticado nessa ferramenta
+  member?: {
+    // Dados do usuário autenticado nessa ferramenta
     id: string
     name: string
     login: string
@@ -112,14 +118,17 @@ O **`IDataSourceResolver`** é o serviço responsável por receber o `workspaceI
 
 ## ⏱️ Entidades de Domínio: Apontamentos e Tarefas
 
-A camada `@metric-org/domain` garante a consistência absoluta dos dados de tempo:
+A camada `@gamhora-org/domain` garante a consistência absoluta dos dados de tempo:
 
 ### Entidade `TimeEntry` (Apontamento de Horas)
+
 Regras de validação obrigatórias:
+
 - **Cálculo de Horas (`timeSpent`)**: Se `startDate` e `endDate` forem fornecidos, o tempo em segundos é validado contra o intervalo real das datas. Não são permitidas datas de término anteriores ao início.
 - **Comentários**: Campo opcional limitado a 255 caracteres com sanitização de espaços em branco.
 - **Atividade & Tarefa**: Todo apontamento exige um vínculo com uma tarefa e uma atividade (categoria de trabalho, ex: "Desenvolvimento", "Reunião", "Code Review").
 
 ### Entidade `Task` (Tarefa)
+
 - Possui título (mínimo de 3 caracteres), descrição, `workspaceId` e referências opcionais a IDs externos (`externalId`, `externalType`).
-- **Tarefa de Contingência (`createFallback`)**: Quando o usuário inicia o cronômetro sem selecionar uma tarefa previamente, o Metric cria automaticamente uma *General Task* de contingência para que nenhum segundo trabalhado seja perdido.
+- **Tarefa de Contingência (`createFallback`)**: Quando o usuário inicia o cronômetro sem selecionar uma tarefa previamente, o Gamhora cria automaticamente uma _General Task_ de contingência para que nenhum segundo trabalhado seja perdido.

@@ -1,5 +1,5 @@
-import { IHeadersAPI } from '@metric-org/application'
-import { IHeaders } from '@metric-org/shared/transport'
+﻿import { IHeadersAPI } from '@gamhora/application'
+import { IHeaders } from '@gamhora/shared/transport'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

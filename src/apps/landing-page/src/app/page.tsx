@@ -1,4 +1,4 @@
-import {
+﻿import {
   Badge,
   Button,
   Separator,
@@ -6,7 +6,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '@metric-org/ui/components'
+} from '@gamhora/ui/components'
 import {
   Activity,
   ArrowRight,
@@ -94,7 +94,7 @@ const FEATURES = [
     problem: 'Seus dados ficam presos em silos de ferramentas',
     title: 'Uma camada de sync entre todos os seus trackers',
     description:
-      'Conecte Redmine, Jira ou YouTrack. O Metric actua como bridge — os dados fluem nos dois sentidos sem conflito.',
+      'Conecte Redmine, Jira ou YouTrack. O Gamhora actua como bridge — os dados fluem nos dois sentidos sem conflito.',
     tag: 'Integração',
     border: 'hover:border-sky-500/40',
     glow: 'group-hover:shadow-sky-500/10',
@@ -250,7 +250,7 @@ export function Navbar() {
           <div className="flex min-w-0 flex-col leading-tight">
             <Image
               src="/logo-text.svg"
-              alt="Metric"
+              alt="Gamhora"
               width={72}
               height={16}
               className="object-contain dark:invert"
@@ -298,13 +298,13 @@ export function Navbar() {
           <Separator orientation="vertical" className="mx-2 h-4" />
 
           <a
-            href="https://github.com/gustavohps10/metric"
+            href="https://github.com/gustavohps10/gamhora"
             target="_blank"
             rel="noreferrer"
             className="group text-muted-foreground hover:text-foreground flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium transition-all"
           >
             <Github className="size-4" />
-            <span className="text-foreground/90">gustavohps10/metric</span>
+            <span className="text-foreground/90">gustavohps10/gamhora</span>
             <div className="ml-0.5 flex items-center gap-1">
               <Star className="size-3.5 transition-transform duration-200 group-hover:scale-110" />
               <span className="text-xs tabular-nums opacity-80">120</span>
@@ -373,7 +373,7 @@ export function HeroSection() {
 
         {/* Subheadline */}
         <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-base leading-relaxed sm:text-lg">
-          Metric &eacute; um engine de produtividade local-first para devs e
+          Gamhora &eacute; um engine de produtividade local-first para devs e
           times t&eacute;cnicos. Funciona offline, sincroniza com Jira, Redmine
           e GitHub &mdash; e seus dados nunca saem da sua m&aacute;quina sem sua
           permiss&atilde;o.
@@ -539,7 +539,7 @@ function IntegrationsSection() {
             </h3>
 
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400 md:text-base">
-              O Metric é open-source e focado em privacidade. Sinta-se em casa
+              O Gamhora é open-source e focado em privacidade. Sinta-se em casa
               para contribuir com código ou sugerir as ferramentas que faltam no
               seu workflow.
             </p>
@@ -576,7 +576,7 @@ function IntegrationsSection() {
                 {/* Seção de Botões */}
                 <div className="flex flex-col items-center gap-4 sm:flex-row">
                   <a
-                    href="https://github.com/gustavohps10/metric"
+                    href="https://github.com/gustavohps10/gamhora"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group inline-flex h-10 items-center justify-center gap-2 rounded-full bg-zinc-100 px-6 text-sm font-medium text-zinc-950 transition-all hover:bg-zinc-200 active:scale-95"
@@ -586,7 +586,7 @@ function IntegrationsSection() {
                   </a>
 
                   <a
-                    href="https://github.com/gustavohps10/metric/issues/new"
+                    href="https://github.com/gustavohps10/gamhora/issues/new"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/40 px-6 text-sm font-medium text-zinc-400 transition-all hover:border-zinc-700 hover:bg-zinc-900 hover:text-zinc-100 active:scale-95"
@@ -687,7 +687,7 @@ function OfflineArchitectureSection() {
             Seu engine de produtividade não depende de nenhum servidor externo.
           </h2>
           <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-sm leading-relaxed">
-            Enquanto outros SaaS ficam fora do ar, o Metric continua rodando.
+            Enquanto outros SaaS ficam fora do ar, o Gamhora continua rodando.
             Offline é o padrão, não o fallback.
           </p>
         </div>
@@ -1125,7 +1125,7 @@ function Footer() {
               <div className="flex min-w-0 flex-col leading-tight">
                 <Image
                   src="/logo-text.svg"
-                  alt="Metric"
+                  alt="Gamhora"
                   width={72}
                   height={16}
                   className="object-contain dark:invert"
@@ -1194,7 +1194,7 @@ function Footer() {
         <Separator className="my-8 opacity-40" />
 
         <div className="text-muted-foreground/50 flex flex-col items-center justify-between gap-3 text-[11px] sm:flex-row">
-          <p>© 2026 Metric. Todos os direitos reservados.</p>
+          <p>© 2026 Gamhora. Todos os direitos reservados.</p>
           <div className="flex items-center gap-1.5">
             <span className="size-1.5 animate-pulse rounded-full bg-emerald-400/70" />
             Todos os sistemas operacionais

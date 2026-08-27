@@ -1,6 +1,6 @@
 'use client'
 
-import type { FieldGroup } from '@metric-org/application'
+import type { AddonSettingsField, AddonSettingsGroup } from '@gamhora/sdk'
 import { AlertCircle, CheckCircle, ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 
@@ -138,7 +138,10 @@ interface AddConnectionDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   addon: AddonItem | null
-  dynamicFields: { credentials: FieldGroup[]; configuration: FieldGroup[] }
+  dynamicFields: {
+    credentials: AddonSettingsGroup[]
+    configuration: AddonSettingsGroup[]
+  }
   onSave: (addon: AddonItem, data: ConnectionFormData) => void
   isSaving?: boolean
   isTesting?: boolean
@@ -202,7 +205,7 @@ export function AddConnectionDialog({
             {dynamicFields.configuration.map((group) => (
               <div key={group.id} className="space-y-2">
                 <Label className="text-xs">{group.label}</Label>
-                {group.fields.map((field) => (
+                {group.fields.map((field: AddonSettingsField) => (
                   <Input
                     key={field.id}
                     type={field.type === 'password' ? 'password' : 'text'}
@@ -223,7 +226,7 @@ export function AddConnectionDialog({
               {dynamicFields.credentials.map((group) => (
                 <div key={group.id} className="space-y-2">
                   <Label className="text-xs">{group.label}</Label>
-                  {group.fields.map((field) => (
+                  {group.fields.map((field: AddonSettingsField) => (
                     <Input
                       key={field.id}
                       type={field.type === 'password' ? 'password' : 'text'}

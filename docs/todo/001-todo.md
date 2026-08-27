@@ -1,4 +1,4 @@
-# 001 — Plugin DataSource Fake (dados locais para testes e validação de envio)
+﻿# 001 — Plugin DataSource Fake (dados locais para testes e validação de envio)
 
 Guia para o desenvolvedor: como implementar o plugin fake, onde mexer e o que deixar intocado.
 
@@ -34,7 +34,7 @@ Resumo: o trabalho é **só dentro de um novo addon**. O resto do monorepo conti
 
 Arquivos que você **vai criar** (todos dentro de `src/tests/datasource-fake`):
 
-- `manifest.yaml` — Type: DataSource, id único (ex.: `metric-datasource-fake`), displayName ex.: "DataSource Fake (Testes)".
+- `manifest.yaml` — Type: DataSource, id único (ex.: `Gamhora-datasource-fake`), displayName ex.: "DataSource Fake (Testes)".
 - `package.json` / `tsconfig` / build (ex.: tsup) — espelhando o addon-for-tests para o addon ser buildável.
 - `src/index.ts` — export default de um objeto que implementa `IDataSource` (id, dataSourceType, displayName, configFields, getAuthenticationStrategy, getTaskQuery, getTimeEntryQuery, getTimeEntryRepository, getMemberQuery, getTaskRepository, getMetadataQuery).
 - `src/FakeAuthenticationStrategy.ts` — implementa `IAuthenticationStrategy`; `authenticate()` sempre sucesso (ex.: credenciais fixas ou qualquer login/senha).
@@ -80,3 +80,4 @@ Nenhuma alteração nesses fluxos é necessária; só a existência do novo plug
 - **Mexer:** apenas em `src/tests/datasource-fake` (novo addon completo).
 - **Não mexer:** domain, application, SDK, container, ADRs; no máximo configurar onde o desktop carrega addons para incluir o fake.
 - **Entregável:** um DataSource fake com 1000 tarefas, 1000 apontamentos, usuário fake e metadata fixa, implementando todo o `IDataSource`, para testes e validação de envio de dados sem dependência de APIs externas.
+

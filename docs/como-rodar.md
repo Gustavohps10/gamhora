@@ -1,4 +1,4 @@
-# Como rodar o projeto
+﻿# Como rodar o projeto
 
 Siga os passos **na ordem**. Cada um depende do anterior.
 
@@ -102,7 +102,7 @@ yarn --version
 
 **4.2 — Atualizar para Yarn 4 (só com Yarn, sem Corepack)**
 
-Na **raiz do repositório** (pasta do Metric), rode:
+Na **raiz do repositório** (pasta do Gamhora), rode:
 
 ```bash
 yarn set version 4
@@ -156,3 +156,4 @@ yarn dev
 - Esse comando sobe o que estiver configurado em paralelo no Turbo (por exemplo, o app desktop). A aplicação abre e você pode desenvolver e testar. Para parar, use Ctrl+C no terminal.
 
 **Resumo da ordem:** `yarn install` → `yarn build` → `yarn dev`. Se algo falhar, confira os passos 1 a 4 (Node, Yarn instalado via npm, política de execução no PowerShell, Yarn 4).
+

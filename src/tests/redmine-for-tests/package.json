@@ -1,5 +1,5 @@
 {
-  "name": "@metric-org/redmine-for-tests",
+  "name": "@gamhora/redmine-for-tests",
   "private": true,
   "version": "1.0.4",
   "description": "Redmine datasource para testes.",
@@ -20,11 +20,11 @@
   "scripts": {
     "build": "tsup --format esm,cjs --dts",
     "clean": "rimraf dist",
-    "manifest": "metric manifest ./ --config ./metric.json",
-    "pkg": "metric pkg ./dist --config ./metric.json"
+    "manifest": "gamhora manifest ./ --config ./gamhora.json",
+    "pkg": "gamhora pkg ./dist --config ./gamhora.json"
   },
   "dependencies": {
-    "@metric-org/sdk": "workspace:*",
+    "@gamhora/sdk": "workspace:*",
     "axios": "^1.7.9"
   },
   "devDependencies": {

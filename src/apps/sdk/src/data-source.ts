@@ -1,4 +1,5 @@
 import type {
+  DataSourceContext,
   IAuthenticationStrategy,
   IMemberQuery,
   IMetadataQuery,
@@ -6,16 +7,11 @@ import type {
   ITaskRepository,
   ITimeEntryQuery,
   ITimeEntryRepository,
-} from '@metric-org/application'
+} from '@gamhora/application'
 
 import { AddonSettingsGroup } from './contracts/IAddon'
-import type { IHttpClient } from './contracts/IHttpClient'
 
-export interface DataSourceContext {
-  httpClient: IHttpClient
-  credentials?: Record<string, unknown>
-  config?: Record<string, unknown>
-}
+export type { DataSourceContext }
 
 export interface IDataSource {
   readonly id: string

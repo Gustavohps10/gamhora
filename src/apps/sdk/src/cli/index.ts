@@ -8,8 +8,8 @@ import { printPrSnippet } from './prSnippet'
 import { runValidationCommand } from './validate'
 
 program
-  .name('metric')
-  .description('CLI do Metric SDK para criar, validar e empacotar plugins')
+  .name('gamhora')
+  .description('CLI do Gamhora SDK para criar, validar e empacotar plugins')
   .version(__SDK_VERSION__)
 
 program

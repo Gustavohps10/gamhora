@@ -1,4 +1,4 @@
-import { ITaskAPI } from '@metric-org/application'
+﻿import { ITaskAPI } from '@gamhora/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

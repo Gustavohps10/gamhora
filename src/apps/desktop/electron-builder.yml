@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: metric
+productName: gamhora
 directories:
   buildResources: build
 files:
@@ -20,11 +20,11 @@ extraResources:
 asarUnpack:
   - resources/**
 protocols:
-  name: Metric Auth Protocol
+  name: Gamhora Auth Protocol
   schemes:
-    - metric
+    - gamhora
 win:
-  executableName: metric
+  executableName: gamhora
 nsis:
   artifactName: ${productName}-${version}-setup.${ext}
   shortcutName: ${productName}

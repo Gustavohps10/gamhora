@@ -1,5 +1,5 @@
-import { IWorkspacesRepository } from '@metric-org/application'
-import { Workspace } from '@metric-org/domain'
+import { IWorkspacesRepository } from '@gamhora/application'
+import { DataSourceConnection, Workspace } from '@gamhora/domain'
 import { promises as fs } from 'fs'
 import path from 'path'
 
@@ -50,7 +50,13 @@ export class JSONWorkspacesRepository implements IWorkspacesRepository {
         }),
       )
     } catch (err) {
-      console.log(err)
+      const isNotFound =
+        err instanceof Error &&
+        'code' in err &&
+        (err as { code: string }).code === 'ENOENT'
+      if (!isNotFound) {
+        console.log(err)
+      }
       return []
     }
   }
@@ -62,17 +68,20 @@ export class JSONWorkspacesRepository implements IWorkspacesRepository {
       avatarUrl: ws.avatarUrl,
       status: ws.status,
       description: ws.description,
-      dataSourceConnections: ws.dataSourceConnections.map((c) => ({
-        id: c.id,
-        status: c.status,
-        dataSourceId: c.dataSourceId,
-        config: c.config,
-        member: c.member,
-      })),
+      dataSourceConnections: ws.dataSourceConnections.map(
+        (c: DataSourceConnection) => ({
+          id: c.id,
+          status: c.status,
+          dataSourceId: c.dataSourceId,
+          config: c.config,
+          member: c.member,
+        }),
+      ),
       createdAt: ws.createdAt.toISOString(),
       updatedAt: ws.updatedAt.toISOString(),
     }))
 
+    await fs.mkdir(path.dirname(this.filePath), { recursive: true })
     await fs.writeFile(this.filePath, JSON.stringify(plain, null, 2))
   }
 

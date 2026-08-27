@@ -1,5 +1,5 @@
 {
-  "name": "@metric-org/fake-watcher-for-tests",
+  "name": "@gamhora/fake-watcher-for-tests",
   "private": true,
   "version": "1.0.1",
   "description": "Fake Watcher & Automations Addon para simulação de captura de reuniões e eventos",
@@ -22,7 +22,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@metric-org/sdk": "workspace:*"
+    "@gamhora/sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

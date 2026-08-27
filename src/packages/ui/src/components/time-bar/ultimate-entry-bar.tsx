@@ -25,7 +25,7 @@ import { CSS } from '@dnd-kit/utilities'
 import type {
   AddonTimerbarMenuItem,
   AddonTimerbarPopoverSubItem,
-} from '@metric-org/application'
+} from '@gamhora/application'
 import { differenceInSeconds, isSameDay, isValid, parseISO } from 'date-fns'
 import {
   AlertCircle,
@@ -104,8 +104,8 @@ const mockActivities: Array<{
   { id: 'break', name: 'Break', icon: Coffee },
 ]
 
-const STORAGE_KEY = 'metric:widget:block-order'
-const FREE_DRAG_STORAGE_KEY = 'metric:widget:free-offset'
+const STORAGE_KEY = 'gamhora:widget:block-order'
+const FREE_DRAG_STORAGE_KEY = 'gamhora:widget:free-offset'
 
 type WidgetPosition = 'top' | 'bottom' | 'left' | 'right'
 type FreeOffset = { x: number; y: number }
@@ -240,6 +240,7 @@ export const UltimateTimeTracker = ({
   const [widgetPosition] = useCurrentWidgetPosition()
   const db = useSyncStore((s) => s.db)
   const openAPI = useOpenAPI()
+  const setActive = useTimeEntryStore((s) => s.setActive)
 
   // Carrega dinamicamente as atividades do metadata baseado na Task / Conexões ativas
   useEffect(() => {
@@ -334,9 +335,7 @@ export const UltimateTimeTracker = ({
       key: string
     }>('widget:raw-key-input', (data) => {
       const activeEl = document.activeElement as
-        | HTMLInputElement
-        | HTMLTextAreaElement
-        | null
+        HTMLInputElement | HTMLTextAreaElement | null
       if (!activeEl || !['INPUT', 'TEXTAREA'].includes(activeEl.tagName)) return
 
       if (data.vkCode === 8) {
@@ -886,7 +885,7 @@ export const UltimateTimeTracker = ({
             updatedAt: new Date().toISOString(),
           })
           const updatedJson = updated.toMutableJSON()
-          useTimeEntryStore.getState().setActive(updatedJson)
+          setActive(updatedJson)
           openAPI.events?.emit?.('time-entry:sync', updatedJson)
         }
       } else {
@@ -897,7 +896,7 @@ export const UltimateTimeTracker = ({
         })
       }
     },
-    [activeEntry, db, selectedConnectionId, openAPI],
+    [activeEntry, db, selectedConnectionId, openAPI, setActive],
   )
 
   const handleTaskIdChange = useCallback(
@@ -919,14 +918,14 @@ export const UltimateTimeTracker = ({
             updatedAt: new Date().toISOString(),
           })
           const updatedJson = updated.toMutableJSON()
-          useTimeEntryStore.getState().setActive(updatedJson)
+          setActive(updatedJson)
           openAPI.events?.emit?.('time-entry:sync', updatedJson)
         }
       } else {
         openAPI.events?.emit?.('tracker:draft-sync', { taskId: newTaskId })
       }
     },
-    [activeEntry, db, openAPI],
+    [activeEntry, db, openAPI, setActive],
   )
 
   const handleDescriptionChange = useCallback(
@@ -948,14 +947,14 @@ export const UltimateTimeTracker = ({
             updatedAt: new Date().toISOString(),
           })
           const updatedJson = updated.toMutableJSON()
-          useTimeEntryStore.getState().setActive(updatedJson)
+          setActive(updatedJson)
           openAPI.events?.emit?.('time-entry:sync', updatedJson)
         }
       } else {
         openAPI.events?.emit?.('tracker:draft-sync', { description: desc })
       }
     },
-    [activeEntry, db, openAPI],
+    [activeEntry, db, openAPI, setActive],
   )
 
   const handleActivityChange = useCallback(
@@ -977,7 +976,7 @@ export const UltimateTimeTracker = ({
             updatedAt: new Date().toISOString(),
           })
           const updatedJson = updated.toMutableJSON()
-          useTimeEntryStore.getState().setActive(updatedJson)
+          setActive(updatedJson)
           openAPI.events?.emit?.('time-entry:sync', updatedJson)
         }
       } else {
@@ -986,7 +985,7 @@ export const UltimateTimeTracker = ({
         })
       }
     },
-    [activeEntry, db, openAPI],
+    [activeEntry, db, openAPI, setActive],
   )
 
   const handleConnectionChange = useCallback(
@@ -1008,7 +1007,7 @@ export const UltimateTimeTracker = ({
             updatedAt: new Date().toISOString(),
           })
           const updatedJson = updated.toMutableJSON()
-          useTimeEntryStore.getState().setActive(updatedJson)
+          setActive(updatedJson)
           openAPI.events?.emit?.('time-entry:sync', updatedJson)
         }
       } else {
@@ -1017,7 +1016,7 @@ export const UltimateTimeTracker = ({
         })
       }
     },
-    [activeEntry, db, openAPI],
+    [activeEntry, db, openAPI, setActive],
   )
 
   useEffect(() => {
@@ -1234,7 +1233,7 @@ export const UltimateTimeTracker = ({
           className={cn(
             'flex w-full transition-all',
             isVertical
-              ? 'h-full min-h-0 flex-col items-center justify-start gap-3 overflow-x-hidden overflow-y-auto px-0 pt-2 pb-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'
+              ? 'h-full min-h-0 [scrollbar-width:none] flex-col items-center justify-start gap-3 overflow-x-hidden overflow-y-auto px-0 pt-2 pb-8 [&::-webkit-scrollbar]:hidden'
               : 'flex-row items-center gap-2 py-2 pl-1',
           )}
         >
@@ -1911,7 +1910,7 @@ function renderAddonIcon(
     icon.startsWith('data:image/') ||
     icon.startsWith('http://') ||
     icon.startsWith('https://') ||
-    icon.startsWith('metric-app://')
+    icon.startsWith('gamhora-app://')
   ) {
     return (
       <img

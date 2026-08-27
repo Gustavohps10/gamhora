@@ -1,8 +1,8 @@
-# @metric-org/metric-ai-for-tests
+﻿# @gamhora/gamhora-ai-for-tests
 
 ## 1.0.1
 
 ### Patch Changes
 
 - Updated dependencies
-  - @metric-org/sdk@0.1.0
+  - @gamhora/sdk@0.1.0

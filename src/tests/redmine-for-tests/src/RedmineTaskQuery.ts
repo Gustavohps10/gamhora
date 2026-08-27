@@ -1,10 +1,10 @@
-import { IHttpClient } from '@metric-org/adapters/contracts'
+﻿import { IHttpClient } from '@gamhora/adapters/contracts'
 import {
   ITaskQuery,
   PagedResultDTO,
   PaginationOptionsDTO,
   TaskDTO,
-} from '@metric-org/sdk'
+} from '@gamhora/sdk'
 
 import { RedmineBase } from '@/RedmineBase'
 

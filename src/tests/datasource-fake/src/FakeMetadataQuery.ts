@@ -1,4 +1,4 @@
-import type { DataSourceContext, MetadataDTO } from '@metric-org/sdk'
+﻿import type { DataSourceContext, MetadataDTO } from '@gamhora/sdk'
 
 import { FAKE_METADATA } from './fakeData'
 

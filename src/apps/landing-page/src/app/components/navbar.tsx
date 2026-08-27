@@ -44,8 +44,8 @@ export function Navbar({
         {/* Logo */}
         <a href="#" className="group flex items-center gap-2.5">
           <img
-            src="/logo_metric_icone_sem_fundo.svg"
-            alt="Metric"
+            src="/logo_gamhora_icone_sem_fundo.svg"
+            alt="Gamhora"
             className="h-9 w-9 transition-transform duration-300 group-hover:scale-110"
           />
           <span
@@ -54,7 +54,7 @@ export function Navbar({
               color: lightScrolled ? 'oklch(1 0 0)' : 'var(--foreground)',
             }}
           >
-            Metric
+            Gamhora
           </span>
         </a>
 

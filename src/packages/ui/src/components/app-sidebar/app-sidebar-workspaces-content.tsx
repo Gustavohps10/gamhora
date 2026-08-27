@@ -1,4 +1,4 @@
-import type { SidebarMenuItem as AddonSidebarMenuItem } from '@metric-org/sdk'
+﻿import type { SidebarMenuItem as AddonSidebarMenuItem } from '@gamhora/sdk'
 import {
   Brain,
   CalendarDays,
@@ -70,7 +70,7 @@ const personalItems: NavItem[] = [
   },
   {
     title: 'Métricas',
-    path: 'my-metrics',
+    path: 'my-metric',
     icon: ChartColumnBig,
   },
   {

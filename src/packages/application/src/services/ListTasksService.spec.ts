@@ -1,4 +1,4 @@
-import { AppError, Either } from '@metric-org/shared/helpers'
+﻿import { AppError, Either } from '@gamhora/shared/helpers'
 import type { Mocked } from 'vitest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -38,7 +38,7 @@ describe('ListTasksService', () => {
         title: 'Fix login bug',
         description: 'Bug is preventing users from logging in via Google',
         url: 'https://tracker.example.com/issues/1',
-        projectName: 'Metric Auth App',
+        projectName: 'Gamhora Auth App',
         status: {
           id: 'status-2',
           name: 'In Progress',

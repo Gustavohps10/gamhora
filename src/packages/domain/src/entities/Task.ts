@@ -1,4 +1,4 @@
-import { AppError, Either, FieldErrors } from '@metric-org/shared/helpers'
+﻿import { AppError, Either, FieldErrors } from '@gamhora/shared/helpers'
 import z from 'zod'
 
 import { Entity } from '@/entities/Entity'

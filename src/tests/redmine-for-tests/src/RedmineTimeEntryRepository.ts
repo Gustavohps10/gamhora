@@ -1,4 +1,4 @@
-import { ITimeEntryRepository, TimeEntry } from '@metric-org/sdk'
+﻿import { ITimeEntryRepository, TimeEntry } from '@gamhora/sdk'
 
 import { RedmineBase } from './RedmineBase'
 

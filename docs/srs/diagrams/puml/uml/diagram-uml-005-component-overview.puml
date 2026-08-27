@@ -1,5 +1,5 @@
 @startuml ComponentOverview
-title METRIC - Visão Geral de Componentes (Local-First)
+title GAMHORA - Visão Geral de Componentes (Local-First)
 
 package "Desktop Client (Electron)" {
     [Shared UI (React / Tailwind v4)] as SharedUI
@@ -8,7 +8,7 @@ package "Desktop Client (Electron)" {
     database "Persistência Local (RxDB / SQLite)" as LocalDB
 }
 
-package "Addon Ecosystem (@metric-org/sdk)" {
+package "Addon Ecosystem (@gamhora-org/sdk)" {
     package "Data Sources" {
         [Redmine Adapter] as Redmine
         [Jira Adapter] as Jira

@@ -1,45 +1,45 @@
-import { AddonContext, IAddon } from '@metric-org/sdk'
+﻿import { AddonContext, IAddon } from '@gamhora/sdk'
 
-export default class MetricAI4TestAddon implements IAddon {
+export default class GamhoraAI4TestAddon implements IAddon {
   public metadata = {
-    name: 'Metric AI',
+    name: 'Gamhora AI',
     iconUrl:
       'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%238B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>',
   }
   activate(context: AddonContext): void {
-    console.log('🤖 [MetricAI4TestAddon] Ativando addon de testes de IA...')
+    console.log('🤖 [GamhoraAI4TestAddon] Ativando addon de testes de IA...')
 
     context.menus.timerbar.register({
-      id: 'metric-ai-timerbar-popover',
+      id: 'gamhora-ai-timerbar-popover',
       type: 'popover',
       icon: 'Sparkles',
-      tooltip: 'Metric AI (OCR & Processamento)',
+      tooltip: 'Gamhora AI (OCR & Processamento)',
       items: [
         {
-          id: 'metric-ai:ocr-tesseract',
+          id: 'gamhora-ai:ocr-tesseract',
           label: 'Executar OCR (Tesseract)',
           icon: 'ScanText',
           shortcut: 'Ctrl+Shift+O',
         },
         {
-          id: 'metric-ai:analyze-screen',
+          id: 'gamhora-ai:analyze-screen',
           label: 'Analisar Atividade Visual',
           icon: 'Eye',
           shortcut: 'Ctrl+Shift+V',
         },
         {
-          id: 'metric-ai:auto-categorize',
+          id: 'gamhora-ai:auto-categorize',
           label: 'Sugerir Categoria por IA',
           icon: 'Brain',
         },
       ],
     })
 
-    context.commands.register('metric-ai:ocr-tesseract', async () => {
+    context.commands.register('gamhora-ai:ocr-tesseract', async () => {
       console.log('DISPARADO OCR TESSERACT')
       await context.notifications.loading(
         '📷 Capturando imagem da tela...',
-        'Metric AI - OCR',
+        'Gamhora AI - OCR',
       )
       console.log('APOS MENSAGEM')
 
@@ -47,7 +47,7 @@ export default class MetricAI4TestAddon implements IAddon {
 
       await context.notifications.loading(
         '⚙️ Processando Engine Tesseract (Modelo LSTM)...',
-        'Metric AI - OCR',
+        'Gamhora AI - OCR',
       )
 
       await new Promise((r) => setTimeout(r, 1200))
@@ -63,17 +63,17 @@ export default class MetricAI4TestAddon implements IAddon {
       }
     })
 
-    context.commands.register('metric-ai:analyze-screen', async () => {
+    context.commands.register('gamhora-ai:analyze-screen', async () => {
       await context.notifications.loading(
         '🔍 Analisando hierarquia de janelas...',
-        'Metric AI - Visão Computacional',
+        'Gamhora AI - Visão Computacional',
       )
 
       await new Promise((r) => setTimeout(r, 1000))
 
       await context.notifications.loading(
         '🧠 Modelo ResNet-50 identificando aplicativo...',
-        'Metric AI - Visão Computacional',
+        'Gamhora AI - Visão Computacional',
       )
 
       await new Promise((r) => setTimeout(r, 1000))
@@ -89,10 +89,10 @@ export default class MetricAI4TestAddon implements IAddon {
       }
     })
 
-    context.commands.register('metric-ai:auto-categorize', async () => {
+    context.commands.register('gamhora-ai:auto-categorize', async () => {
       await context.notifications.loading(
         '📊 Consultando vetores e embeddings de tarefas...',
-        'Metric AI - Categorização',
+        'Gamhora AI - Categorização',
       )
 
       await new Promise((r) => setTimeout(r, 800))
@@ -110,6 +110,6 @@ export default class MetricAI4TestAddon implements IAddon {
   }
 
   deactivate(): void {
-    console.log('🤖 [MetricAI4TestAddon] Desativando addon de testes de IA.')
+    console.log('🤖 [GamhoraAI4TestAddon] Desativando addon de testes de IA.')
   }
 }

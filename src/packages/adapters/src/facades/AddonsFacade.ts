@@ -3,9 +3,9 @@ import {
   AddonManifestDTO,
   IAddonsFacade,
   IFileStorage,
-} from '@metric-org/application'
-import { AppError, Either } from '@metric-org/shared/helpers'
-import { IJobEvent } from '@metric-org/shared/transport'
+} from '@gamhora/application'
+import { AppError, Either } from '@gamhora/shared/helpers'
+import { IJobEvent } from '@gamhora/shared/transport'
 import axios from 'axios'
 import { promises as fs } from 'fs'
 import yaml from 'js-yaml'
@@ -215,7 +215,7 @@ export class AddonsFacade implements IAddonsFacade {
     const result = await this.listInstalled()
     if (result.isFailure()) return result.forwardFailure()
 
-    const addon = result.success.find((a) => a.id === addonId)
+    const addon = result.success.find((a: AddonManifestDTO) => a.id === addonId)
     if (!addon)
       return Either.failure(AppError.NotFound('LOCAL_ADDON_NOT_FOUND'))
 
@@ -407,7 +407,7 @@ export class AddonsFacade implements IAddonsFacade {
         maxRedirects: 10,
         headers: {
           'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) MetricApp/1.0.0',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) GamhoraApp/1.0.0',
           Accept: 'application/octet-stream, application/zip, */*',
         },
         onDownloadProgress: (progressEvent) => {

@@ -1,6 +1,6 @@
-import { ElectronAPI } from '@electron-toolkit/preload'
+﻿import { ElectronAPI } from '@electron-toolkit/preload'
 
-import type { IOpenAPI } from '@metric-org/application'
+import type { IOpenAPI } from '@gamhora/application'
 
 declare global {
   interface Window {
@@ -8,3 +8,4 @@ declare global {
     api: IOpenAPI
   }
 }
+

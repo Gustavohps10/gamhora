@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { WorkspaceConnectionDTO } from '@metric-org/application'
+import { WorkspaceConnectionDTO } from '@gamhora/application'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import {
@@ -521,7 +521,7 @@ export function TaskLookup({
           {/* Virtual Task List */}
           <div
             ref={setScrollElement}
-            className="scrollbar-thin scrollbar-thumb-muted/50 flex-1 overflow-y-auto"
+            className="scrollbar-thumb-muted/50 flex-1 scrollbar-thin overflow-y-auto"
             style={{ height: '288px' }}
           >
             {allTasks.length > 0 ? (

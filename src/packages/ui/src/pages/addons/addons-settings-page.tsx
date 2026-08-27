@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 
 import type {
   AddonManifest,
   WorkspaceConnectionDTO,
   WorkspaceDTO,
-} from '@metric-org/application'
+} from '@gamhora/application'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Database,
@@ -307,7 +307,7 @@ export function AddonsSettingsPage() {
             </h2>
             <p className="text-muted-foreground text-xs">
               Personalize esquemas de cores e estilos visuais instalados no
-              Metric.
+              Gamhora.
             </p>
           </div>
         )}

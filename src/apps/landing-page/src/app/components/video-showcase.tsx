@@ -20,7 +20,7 @@ export function VideoShowcase() {
             Demo
           </span>
           <h2 className="text-foreground mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Veja o Metric em ação
+            Veja o Gamhora em ação
           </h2>
           <p className="text-muted-foreground mt-4 text-lg leading-relaxed">
             Descubra como é simples gerenciar o tempo do seu time.
@@ -78,7 +78,7 @@ function DashboardMockup() {
           className="bg-card text-muted-foreground ml-4 flex-1 rounded px-3 py-1 text-xs"
           style={{ maxWidth: '300px' }}
         >
-          app.metric.io/dashboard
+          app.gamhora.io/dashboard
         </div>
       </div>
       <div className="flex flex-1">

@@ -1,7 +1,7 @@
 @startuml ComponentCustomExtensions
-title METRIC - SDK de Addons Multicapacidade (@metric-org/sdk)
+title GAMHORA - SDK de Addons Multicapacidade (@gamhora-org/sdk)
 
-package "Metric Addon Core" {
+package "Gamhora Addon Core" {
     interface "IAddon" as IAddon
     interface "AddonContext" as AddonCtx
     component [AddonLoader] as Loader

@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 
-import { AddonInstaller, AddonManifest } from '@metric-org/application'
-import { IJobEvent } from '@metric-org/shared/transport'
+import { AddonInstaller, AddonManifest } from '@gamhora/application'
+import { IJobEvent } from '@gamhora/shared/transport'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
@@ -414,7 +414,7 @@ export function DataSourceList({
               <span>Instalar {activePlugin?.name}</span>
             </DialogTitle>
             <DialogDescription>
-              Selecione a versão compatível com seu Metric App.
+              Selecione a versão compatível com seu Gamhora App.
             </DialogDescription>
           </DialogHeader>
 

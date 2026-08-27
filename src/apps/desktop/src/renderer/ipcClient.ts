@@ -1,4 +1,4 @@
-import { IOpenAPI } from '@metric-org/application'
+﻿import { IOpenAPI } from '@gamhora/application'
 
 const ipcClient: IOpenAPI = {
   timer: window.api.timer,

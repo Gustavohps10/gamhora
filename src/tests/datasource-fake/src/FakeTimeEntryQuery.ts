@@ -1,9 +1,9 @@
-import type {
+﻿import type {
   DataSourceContext,
   PagedResultDTO,
   PaginationOptionsDTO,
   TimeEntryDTO,
-} from '@metric-org/sdk'
+} from '@gamhora/sdk'
 
 import { FAKE_TIME_ENTRIES } from './fakeData'
 

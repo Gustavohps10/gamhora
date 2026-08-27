@@ -1,11 +1,13 @@
 {
-  "name": "@metric-org/adapters",
+  "name": "@gamhora/adapters",
   "version": "1.0.0",
   "private": true,
-  "description": "Pacote de infraestrutura consolidado para o Metric, contendo implementações concretas de recursos externos",
+  "description": "Pacote de infraestrutura consolidado para o Gamhora, contendo implementações concretas de recursos externos",
   "type": "module",
   "scripts": {
-    "build": "tsup --format esm,cjs --dts",
+    "build": "tsup",
+    "dev": "tsup --watch --no-dts",
+    "typecheck": "tsc --noEmit",
     "clean": "rimraf dist .turbo"
   },
   "exports": {
@@ -43,9 +45,9 @@
     }
   },
   "dependencies": {
-    "@metric-org/application": "workspace:*",
-    "@metric-org/domain": "workspace:*",
-    "@metric-org/shared": "workspace:*",
+    "@gamhora/application": "workspace:*",
+    "@gamhora/domain": "workspace:*",
+    "@gamhora/shared": "workspace:*",
     "ajv": "^8.17.1",
     "archiver": "^7.0.1",
     "axios": "^1.7.9",

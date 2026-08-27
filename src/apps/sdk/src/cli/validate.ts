@@ -1,11 +1,8 @@
 import fs from 'fs'
 import path from 'path'
 
-import {
-  AddonCategory,
-  IAddonManifest,
-  VALID_ADDON_CATEGORIES,
-} from '../contracts/manifest'
+import { AddonConfig } from '../AddonConfig'
+import { AddonCategory, VALID_ADDON_CATEGORIES } from '../contracts/manifest'
 import { readYaml } from '../utils/yaml'
 
 export interface ValidationResult {
@@ -28,16 +25,7 @@ export function validateAddon(addonDir: string): ValidationResult {
     }
   }
 
-  const manifest = readYaml(manifestPath) as Partial<IAddonManifest> & {
-    AddonId?: string
-    Name?: string
-    Version?: string
-    Category?: string
-    Categories?: AddonCategory[]
-    Author?: string
-    ShortDescription?: string
-    Description?: string
-  }
+  const manifest: AddonConfig = readYaml(manifestPath)
 
   const id = manifest.id || manifest.AddonId
   if (!id || typeof id !== 'string' || !id.trim()) {

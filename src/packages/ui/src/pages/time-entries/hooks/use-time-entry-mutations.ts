@@ -237,8 +237,7 @@ export function useTimeEntryMutations(
         const id = crypto.randomUUID()
         const now = new Date().toISOString()
         const resolvedTaskData = (changes.taskData || draft.taskData) as
-          | SyncTaskRxDBDTO
-          | undefined
+          SyncTaskRxDBDTO | undefined
         const connId =
           changes.connectionInstanceId ||
           resolvedTaskData?.connectionInstanceId ||

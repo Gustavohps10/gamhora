@@ -1,5 +1,5 @@
-import { AppError, Either } from '@metric-org/shared/helpers'
-import { IJobEvent } from '@metric-org/shared/transport'
+﻿import { AppError, Either } from '@gamhora/shared/helpers'
+import { IJobEvent } from '@gamhora/shared/transport'
 
 import { FileData } from '@/contracts/infra'
 

@@ -1,5 +1,5 @@
-import { Workspace } from '@metric-org/domain'
-import { AppError } from '@metric-org/shared/helpers'
+﻿import { Workspace } from '@gamhora/domain'
+import { AppError } from '@gamhora/shared/helpers'
 import type { Mocked } from 'vitest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 

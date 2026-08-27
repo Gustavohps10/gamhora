@@ -59,7 +59,7 @@ export function Error() {
         </div>
 
         <p className="text-muted-foreground/60 mt-10 text-[11px]">
-          Se o problema persistir, entre em contato com o suporte do Metric.
+          Se o problema persistir, entre em contato com o suporte do Gamhora.
         </p>
       </div>
     </div>

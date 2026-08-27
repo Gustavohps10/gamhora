@@ -1,4 +1,4 @@
-import { IMetadataAPI } from '@metric-org/application'
+﻿import { IMetadataAPI } from '@gamhora/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

@@ -9,23 +9,21 @@ import {
   IGetWorkspaceUseCase,
   ILinkDataSourceUseCase,
   IListWorkspacesUseCase,
+  IMarkWorkspaceAsConfiguredUseCase,
   IUnlinkDataSourceUseCase,
   IUpdateWorkspaceIdentityUseCase,
-  UpdateWorkspaceIdentityInput,
-} from '@metric-org/application'
-import {
-  IMarkWorkspaceAsConfiguredUseCase,
   MarkWorkspaceAsConfiguredInput,
-} from '@metric-org/application/contracts/use-cases/IMarkWorkspaceAsConfiguredUseCase'
-import { createResponseViewModel } from '@metric-org/shared/helpers'
-import { IRequest } from '@metric-org/shared/transport'
+  UpdateWorkspaceIdentityInput,
+} from '@gamhora/application'
+import { createResponseViewModel } from '@gamhora/shared/helpers'
+import { IRequest } from '@gamhora/shared/transport'
 import {
   ConnectionResultViewModel,
   MemberViewModel,
   PaginatedViewModel,
   ViewModel,
   WorkspaceViewModel,
-} from '@metric-org/shared/view-models'
+} from '@gamhora/shared/view-models'
 import { IpcMainInvokeEvent } from 'electron'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'

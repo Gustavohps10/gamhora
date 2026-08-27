@@ -1,4 +1,4 @@
-import axios from 'axios'
+﻿import axios from 'axios'
 import { describe, expect, it, vi } from 'vitest'
 
 import { AddonsFacade } from './AddonsFacade'
@@ -9,16 +9,16 @@ describe('AddonsFacade', () => {
   it('should parse unified manifest YAML correctly', async () => {
     const facade = new AddonsFacade()
     const yamlContent = `
-id: metric-datasource-redmine
+id: gamhora-datasource-redmine
 name: Redmine Integration
 version: 1.0.0
 categories:
   - dataSource
-author: Metric Community
+author: Gamhora Community
 shortDescription: Integração com Redmine
 description: Plugin completo do Redmine
 iconUrl: https://example.com/icon.png
-sourceUrl: https://github.com/metric-org/addon-redmine
+sourceUrl: https://github.com/gamhora/addon-redmine
 screenshots:
   - url: https://example.com/screen1.png
     caption: Tela 1
@@ -32,7 +32,7 @@ changelog:
 
     expect(result.isSuccess()).toBe(true)
     if (result.isSuccess()) {
-      expect(result.success.id).toBe('metric-datasource-redmine')
+      expect(result.success.id).toBe('gamhora-datasource-redmine')
       expect(result.success.name).toBe('Redmine Integration')
       expect(result.success.categories).toEqual(['dataSource'])
       expect(result.success.screenshots).toHaveLength(1)
@@ -46,7 +46,7 @@ changelog:
   it('should maintain backward compatibility with legacy PascalCase manifests', async () => {
     const facade = new AddonsFacade()
     const legacyYaml = `
-AddonId: metric-legacy
+AddonId: gamhora-legacy
 Name: Legacy Addon
 Version: 0.9.0
 Author: Legacy Dev
@@ -58,7 +58,7 @@ IconUrl: https://example.com/legacy.png
 
     expect(result.isSuccess()).toBe(true)
     if (result.isSuccess()) {
-      expect(result.success.id).toBe('metric-legacy')
+      expect(result.success.id).toBe('gamhora-legacy')
       expect(result.success.name).toBe('Legacy Addon')
       expect(result.success.version).toBe('0.9.0')
       expect(result.success.creator).toBe('Legacy Dev')
@@ -71,7 +71,7 @@ IconUrl: https://example.com/legacy.png
     const facade = new AddonsFacade()
     const mockConsolidatedCatalog = [
       {
-        id: 'metric-datasource-redmine',
+        id: 'gamhora-datasource-redmine',
         name: 'Redmine',
         version: '1.0.0',
         categories: ['dataSource'],
@@ -80,11 +80,11 @@ IconUrl: https://example.com/legacy.png
         downloadUrl: 'https://example.com/redmine.tladdon',
       },
       {
-        id: 'metric-watcher-discord',
+        id: 'gamhora-watcher-discord',
         name: 'Discord Presence',
         version: '1.0.0',
         categories: ['watcher'],
-        author: 'Metric',
+        author: 'Gamhora',
         description: 'Discord watcher',
         downloadUrl: 'https://example.com/discord.tladdon',
       },
@@ -100,11 +100,11 @@ IconUrl: https://example.com/legacy.png
     expect(axios.get).toHaveBeenCalledTimes(1)
     if (result.isSuccess()) {
       expect(result.success).toHaveLength(2)
-      expect(result.success[0].id).toBe('metric-datasource-redmine')
+      expect(result.success[0].id).toBe('gamhora-datasource-redmine')
       expect(result.success[0].downloadUrl).toBe(
         'https://example.com/redmine.tladdon',
       )
-      expect(result.success[1].id).toBe('metric-watcher-discord')
+      expect(result.success[1].id).toBe('gamhora-watcher-discord')
     }
   })
 })

@@ -1,9 +1,9 @@
-import {
+﻿import {
   ITimeEntryQuery,
   PagedResultDTO,
   PaginationOptionsDTO,
   TimeEntryDTO,
-} from '@metric-org/sdk'
+} from '@gamhora/sdk'
 
 import { RedmineBase } from './RedmineBase'
 

@@ -2,10 +2,10 @@ import fs from 'fs'
 import inquirer from 'inquirer'
 import path from 'path'
 
+import { AddonConfig } from '../AddonConfig'
 import {
   AddonCategory,
   AddonScreenshot,
-  IAddonManifest,
   VALID_ADDON_CATEGORIES,
 } from '../contracts/manifest'
 import { readPackageJson } from '../utils/packageJsonData'
@@ -18,23 +18,9 @@ function sanitizeAddonId(addonId: string) {
 export async function runManifestWizard(addonDir: string) {
   const rootDir = path.resolve(addonDir)
   const manifestPath = path.join(rootDir, 'manifest.yaml')
-  const existingManifest = (
-    fs.existsSync(manifestPath) ? readYaml(manifestPath) : {}
-  ) as Partial<IAddonManifest> & {
-    AddonId?: string
-    Name?: string
-    Version?: string
-    Author?: string
-    ShortDescription?: string
-    Description?: string
-    Tags?: string[]
-    Category?: string
-    Categories?: AddonCategory[]
-    IconUrl?: string
-    SourceUrl?: string
-    Homepage?: string
-    DownloadUrl?: string
-  }
+  const existingManifest: AddonConfig = fs.existsSync(manifestPath)
+    ? readYaml(manifestPath)
+    : {}
 
   const pkg = readPackageJson(rootDir)
 
@@ -57,7 +43,7 @@ export async function runManifestWizard(addonDir: string) {
     existingManifest.author ||
     existingManifest.Author ||
     pkg.author ||
-    'Metric Community'
+    'Gamhora Community'
   const defaultShortDesc =
     existingManifest.shortDescription ||
     existingManifest.ShortDescription ||
@@ -69,7 +55,7 @@ export async function runManifestWizard(addonDir: string) {
     pkg.description ||
     ''
   const defaultTags = existingManifest.tags ||
-    existingManifest.Tags || ['metric']
+    existingManifest.Tags || ['gamhora']
 
   const existingCategories: AddonCategory[] =
     existingManifest.categories ||

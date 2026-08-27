@@ -1,8 +1,5 @@
 export type FileData =
-  | Uint8Array
-  | Buffer
-  | NodeJS.ReadableStream
-  | ReadableStream<Uint8Array>
+  Uint8Array | Buffer | NodeJS.ReadableStream | ReadableStream<Uint8Array>
 
 export interface IFileStorage {
   write(filePath: string, data: FileData): Promise<void>

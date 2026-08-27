@@ -18,10 +18,7 @@ export interface IJobDoneEvent {
 }
 
 export type IJobEvent<T = unknown> =
-  | IJobProgressEvent
-  | IJobDataEvent<T>
-  | IJobErrorEvent
-  | IJobDoneEvent
+  IJobProgressEvent | IJobDataEvent<T> | IJobErrorEvent | IJobDoneEvent
 
 export interface IJobEvents<T = unknown> {
   [jobId: string]: IJobEvent<T>

@@ -1,6 +1,6 @@
 ﻿# Guia de Manutenção de Diagramas PlantUML (PUML)
 
-Este documento serve como guia de instrução para **desenvolvedores e IAs** sobre como criar, editar, organizar e sincronizar os diagramas de arquitetura e requisitos do projeto Metric.
+Este documento serve como guia de instrução para **desenvolvedores e IAs** sobre como criar, editar, organizar e sincronizar os diagramas de arquitetura e requisitos do projeto Gamhora.
 
 ---
 
@@ -89,3 +89,4 @@ Quando o usuário pedir para alterar, adicionar ou remover diagramas:
    yarn puml
    ```
 5. **Verifique o output:** Certifique-se de que o script finalizou com `✨ Todos os diagramas processados e Markdown atualizado!`.
+

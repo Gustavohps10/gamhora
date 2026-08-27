@@ -1,5 +1,5 @@
-import { electronAPI } from '@electron-toolkit/preload'
-import { IOpenAPI } from '@metric-org/application'
+﻿import { electronAPI } from '@electron-toolkit/preload'
+import { IOpenAPI } from '@gamhora/application'
 import { contextBridge, ipcRenderer } from 'electron'
 
 import {

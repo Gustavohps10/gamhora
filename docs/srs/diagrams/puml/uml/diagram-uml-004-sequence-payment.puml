@@ -1,5 +1,5 @@
 @startuml SequencePayment
-title METRIC - Sequência: Ativação Pro via License Key (UC003)
+title GAMHORA - Sequência: Ativação Pro via License Key (UC003)
 actor User
 participant DesktopApp
 participant GatewayCheckout

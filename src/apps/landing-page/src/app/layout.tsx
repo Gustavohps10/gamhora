@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Metric — Apontamento de Horas Inteligente',
+  title: 'Gamhora — Apontamento de Horas Inteligente',
   description:
     'Controle cada minuto do seu time com integrações poderosas. Jira, Redmine, Trello, Slack, GitHub e Asana em um só lugar.',
 }

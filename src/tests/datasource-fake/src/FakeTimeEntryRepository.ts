@@ -1,4 +1,4 @@
-import type { TimeEntry } from '@metric-org/sdk'
+﻿import type { TimeEntry } from '@gamhora/sdk'
 
 const store = new Map<string, TimeEntry>()
 

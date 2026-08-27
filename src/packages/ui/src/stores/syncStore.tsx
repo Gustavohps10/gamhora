@@ -1,10 +1,7 @@
-'use client'
+﻿'use client'
 
-import { IOpenAPI } from '@metric-org/application'
-import {
-  TaskViewModel,
-  TimeEntryViewModel,
-} from '@metric-org/shared/view-models'
+import { IOpenAPI } from '@gamhora/application'
+import { TaskViewModel, TimeEntryViewModel } from '@gamhora/shared/view-models'
 import {
   createContext,
   ReactNode,

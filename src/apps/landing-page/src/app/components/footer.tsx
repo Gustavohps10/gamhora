@@ -32,11 +32,11 @@ export function Footer() {
           <div className="lg:col-span-1">
             <a href="#" className="flex items-center gap-2.5">
               <img
-                src="/logo_metric_icone_sem_fundo.svg"
-                alt="Metric"
+                src="/logo_gamhora_icone_sem_fundo.svg"
+                alt="Gamhora"
                 className="h-8 w-8"
               />
-              <span className="text-foreground text-lg font-bold">Metric</span>
+              <span className="text-foreground text-lg font-bold">Gamhora</span>
             </a>
             <p className="text-muted-foreground mt-4 max-w-xs text-sm leading-relaxed">
               Plataforma inteligente de apontamento de horas. Gerencie tempo,
@@ -101,7 +101,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="border-border mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row">
           <p className="text-muted-foreground text-sm">
-            © 2026 Metric. Todos os direitos reservados.
+            © 2026 Gamhora. Todos os direitos reservados.
           </p>
           <p className="text-muted-foreground text-sm">
             Feito com 💜 para times produtivos.

@@ -1,4 +1,4 @@
-import { IJWTService } from '@metric-org/application'
+﻿import { IJWTService } from '@gamhora/application'
 import jwt from 'jsonwebtoken'
 
 export class JwtService implements IJWTService {

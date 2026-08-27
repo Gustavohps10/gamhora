@@ -1,4 +1,4 @@
-import { ITokenStorageAPI } from '@metric-org/application'
+﻿import { ITokenStorageAPI } from '@gamhora/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

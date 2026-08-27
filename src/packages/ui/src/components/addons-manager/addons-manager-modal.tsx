@@ -1,4 +1,4 @@
-import { AddonManifestViewModel } from '@metric-org/sdk'
+﻿import { AddonManifestViewModel } from '@gamhora/sdk'
 import { useQuery } from '@tanstack/react-query'
 import {
   Calendar,

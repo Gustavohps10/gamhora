@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { Button } from '@metric-org/ui/components'
+import { Button } from '@gamhora/ui/components'
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import * as React from 'react'

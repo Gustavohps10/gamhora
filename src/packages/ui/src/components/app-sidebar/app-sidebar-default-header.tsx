@@ -15,7 +15,7 @@ export function AppSidebarDefaultHeader() {
             <img
               src={logoIcon}
               className="h-4.5 w-4.5 opacity-90 dark:opacity-100 dark:invert"
-              alt="Logo Metric"
+              alt="Logo Gamhora"
             />
           </div>
 
@@ -23,7 +23,7 @@ export function AppSidebarDefaultHeader() {
             <img
               src={logoText}
               className="h-3 w-auto self-start opacity-95 dark:opacity-100 dark:invert"
-              alt="Metric"
+              alt="Gamhora"
             />
 
             {/* Linha de Metadados: Open Core + GitHub Stars */}
@@ -35,7 +35,7 @@ export function AppSidebarDefaultHeader() {
               <div className="h-2 w-[1px] bg-zinc-200 dark:bg-zinc-800" />
 
               <a
-                href="https://github.com/gustavohps10/metric"
+                href="https://github.com/gustavohps10/gamhora"
                 target="_blank"
                 rel="noreferrer"
                 className="group flex items-center gap-1 opacity-70 transition-opacity hover:opacity-100"

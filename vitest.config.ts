@@ -6,7 +6,7 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     alias: {
-      '@metric-org/sdk': path.resolve(__dirname, './src/apps/sdk/src'),
+      '@gamhora-org/sdk': path.resolve(__dirname, './src/apps/sdk/src'),
     },
   },
   test: {

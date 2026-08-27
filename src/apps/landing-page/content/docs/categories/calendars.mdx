@@ -5,26 +5,26 @@ description: Como integrar agendas externas (Google Calendar, Outlook) para sinc
 
 # Calendars (Agendas & Reuniões)
 
-Os addons da categoria **Calendars** conectam o Metric a provedores de agenda como **Google Calendar**, **Microsoft Outlook / 365** e calendários baseados em **iCal**.
+Os addons da categoria **Calendars** conectam o Gamhora a provedores de agenda como **Google Calendar**, **Microsoft Outlook / 365** e calendários baseados em **iCal**.
 
-Essa integração permite que os compromissos diários apareçam diretamente na visualização de agenda do Metric, possibilitando que o usuário transforme reuniões passadas em apontamentos de horas reais com um simples clique.
+Essa integração permite que os compromissos diários apareçam diretamente na visualização de agenda do Gamhora, possibilitando que o usuário transforme reuniões passadas em apontamentos de horas reais com um simples clique.
 
 ---
 
 ## 🎯 Estrutura de um Evento de Calendário
 
-Para alimentar a interface do Metric, o plugin de calendário normaliza os eventos externos para uma estrutura padrão:
+Para alimentar a interface do Gamhora, o plugin de calendário normaliza os eventos externos para uma estrutura padrão:
 
 ```typescript
 export interface CalendarEventDTO {
-  id: string              // Identificador único do evento no provedor externo
-  title: string           // Título ou assunto da reunião
-  description?: string    // Pauta ou descrição do evento
-  startDate: Date         // Data e hora de início
-  endDate: Date           // Data e hora de término
+  id: string // Identificador único do evento no provedor externo
+  title: string // Título ou assunto da reunião
+  description?: string // Pauta ou descrição do evento
+  startDate: Date // Data e hora de início
+  endDate: Date // Data e hora de término
   attendeesCount?: number // Quantidade de participantes
-  meetLink?: string       // Link da chamada (Google Meet, Teams, Zoom)
-  isAllDay?: boolean      // Indica se é um evento de dia inteiro
+  meetLink?: string // Link da chamada (Google Meet, Teams, Zoom)
+  isAllDay?: boolean // Indica se é um evento de dia inteiro
 }
 ```
 
@@ -33,7 +33,7 @@ export interface CalendarEventDTO {
 ## 💻 Exemplo de Implementação de Calendário
 
 ```typescript
-import type { IAddon, AddonContext, AddonSettingsField } from '@metric-org/sdk'
+import type { IAddon, AddonContext, AddonSettingsField } from '@gamhora-org/sdk'
 
 export interface CalendarEventDTO {
   id: string
@@ -47,7 +47,7 @@ export default class GoogleCalendarAddon implements IAddon {
   public id = 'google-calendar-addon'
   public name = 'Google Calendar Integration'
   public version = '1.0.0'
-  public description = 'Sincroniza reuniões do Google Calendar com o Metric'
+  public description = 'Sincroniza reuniões do Google Calendar com o Gamhora'
 
   private context?: AddonContext
 
@@ -57,7 +57,8 @@ export default class GoogleCalendarAddon implements IAddon {
       label: 'ID do Calendário',
       type: 'text',
       defaultValue: 'primary',
-      description: 'Identificador do calendário (use "primary" para o principal).',
+      description:
+        'Identificador do calendário (use "primary" para o principal).',
     },
   ]
 
@@ -83,14 +84,16 @@ export default class GoogleCalendarAddon implements IAddon {
     const endOfDay = new Date(targetDate)
     endOfDay.setHours(23, 59, 59, 999)
 
-    const url = new URL('https://www.googleapis.com/calendar/v3/calendars/primary/events')
+    const url = new URL(
+      'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+    )
     url.searchParams.set('timeMin', startOfDay.toISOString())
     url.searchParams.set('timeMax', endOfDay.toISOString())
     url.searchParams.set('singleEvents', 'true')
     url.searchParams.set('orderBy', 'startTime')
 
     const response = await fetch(url.toString(), {
-      headers: { Authorization: `Bearer ${accessToken}` }
+      headers: { Authorization: `Bearer ${accessToken}` },
     })
 
     const data = await response.json()
@@ -110,7 +113,8 @@ export default class GoogleCalendarAddon implements IAddon {
 
 ## 🚀 Conversão Rápida para Apontamento de Horas
 
-Quando o usuário visualiza suas reuniões no Metric:
-1. O Metric destaca reuniões já encerradas.
-2. Com o botão **"Apontar Horas"**, o Metric abre o formulário pré-preenchido com o título da reunião, as horas calculadas (`(endDate - startDate)`) e a atividade sugerida.
+Quando o usuário visualiza suas reuniões no Gamhora:
+
+1. O Gamhora destaca reuniões já encerradas.
+2. Com o botão **"Apontar Horas"**, o Gamhora abre o formulário pré-preenchido com o título da reunião, as horas calculadas (`(endDate - startDate)`) e a atividade sugerida.
 3. Ao salvar, a entidade `TimeEntry` é criada e enviada para o [Motor de Sincronização](/docs/sync-engine).

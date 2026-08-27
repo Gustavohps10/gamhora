@@ -1,15 +1,15 @@
-import {
+﻿import {
   IListTasksUseCase,
   ITaskPullUseCase,
   TaskDTO,
-} from '@metric-org/application'
-import { createResponseViewModel } from '@metric-org/shared/helpers'
-import { IRequest } from '@metric-org/shared/transport'
+} from '@gamhora/application'
+import { createResponseViewModel } from '@gamhora/shared/helpers'
+import { IRequest } from '@gamhora/shared/transport'
 import {
   PaginatedViewModel,
   TaskViewModel,
   ViewModel,
-} from '@metric-org/shared/view-models'
+} from '@gamhora/shared/view-models'
 import { IpcMainInvokeEvent } from 'electron'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'

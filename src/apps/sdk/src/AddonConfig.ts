@@ -18,6 +18,7 @@ export type AddonConfig = {
   description?: string
   Description?: string
   categories?: AddonCategory[]
+  Categories?: AddonCategory[]
   category?: string
   Category?: string
   tags?: string[]

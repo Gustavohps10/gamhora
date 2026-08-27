@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { WorkspaceViewModel } from '@metric-org/shared/view-models'
+import { WorkspaceViewModel } from '@gamhora/shared/view-models'
 import {
   useMutation,
   useQueryClient,

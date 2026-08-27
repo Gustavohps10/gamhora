@@ -1,4 +1,4 @@
-import logoMetric from './logo-metric.png'
+import logoGamhora from './logo-gamhora.png'
 import timerIcon from './timer-icon.png'
 
-export { logoMetric, timerIcon }
+export { logoGamhora, timerIcon }

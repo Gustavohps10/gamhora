@@ -1,4 +1,4 @@
-import { DataSourceContext, IDataSource } from '@metric-org/sdk'
+﻿import { DataSourceContext, IDataSource } from '@gamhora/sdk'
 
 import { configurationFieldGroups, credentialFieldGroups } from './configFields'
 import { RedmineAuthenticationStrategy } from './RedmineAuthenticationStrategy'

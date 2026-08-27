@@ -1,12 +1,16 @@
-import { cpSync } from 'fs'
+import { cpSync, readFileSync } from 'fs'
 import { defineConfig } from 'tsup'
 
+const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'))
+const allDeps = [
+  ...Object.keys(pkg.dependencies || {}),
+  ...Object.keys(pkg.peerDependencies || {}),
+]
+
 export default defineConfig({
-  // 1. Mudamos o entry para ser um glob (mapeamento automático)
-  // Isso vai gerar dist/components/ui/button.js, dist/components/ui/card.js, etc.
   entry: [
-    'src/components/ui/**/*.tsx', // Pega todos os componentes atômicos (Shadcn)
-    'src/components/index.ts', // Mantém o barrel file para quem quiser usar
+    'src/components/ui/**/*.tsx',
+    'src/components/index.ts',
     'src/hooks/index.ts',
     'src/lib/index.ts',
     'src/layouts/index.ts',
@@ -22,7 +26,6 @@ export default defineConfig({
   treeshake: true,
   minify: false,
 
-  // Mantemos o banner agressivo para os chunks não quebrarem o Next
   banner: {
     js: '"use client";',
   },
@@ -39,20 +42,25 @@ export default defineConfig({
   },
 
   external: [
+    ...allDeps,
     'react',
     'react-dom',
-    'lucide-react',
-    'react-hook-form',
-    '@radix-ui/*',
-    '@metric-org/application',
-    '@metric-org/shared',
-    '@tanstack/react-query',
-    '@tanstack/react-table',
-    'rxdb',
-    'rxjs',
-    'zustand',
-    'date-fns',
-    'nuqs',
+    'react/jsx-runtime',
+    'react/jsx-dev-runtime',
+    /^@radix-ui\//,
+    /^@dnd-kit\//,
+    /^@atlaskit\//,
+    /^@tanstack\//,
+    /^@tiptap\//,
+    /^@hookform\//,
+    /^@maskito\//,
+    /^@faker-js\//,
+    /^@stepperize\//,
+    /^nuqs\//,
+    /^rxdb\//,
+    /^date-fns\//,
+    /^zustand\//,
+    /^react-icons\//,
   ],
 
   loader: {

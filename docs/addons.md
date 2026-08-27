@@ -1,16 +1,16 @@
-# METRIC — Arquitetura de Extensibilidade e Plugins (Addons)
+﻿# GAMHORA — Arquitetura de Extensibilidade e Plugins (Addons)
 
-Este documento consolida a arquitetura oficial de extensibilidade do **METRIC**, definindo os **4 Pilares Principais de Addons**, o ciclo de vida e a integração nativa com o **`@metric-org/sdk`**.
+Este documento consolida a arquitetura oficial de extensibilidade do **GAMHORA**, definindo os **4 Pilares Principais de Addons**, o ciclo de vida e a integração nativa com o **`@gamhora/sdk`**.
 
 ---
 
 ## 1. Visão Geral da Arquitetura
 
-O METRIC opera com uma arquitetura **Local-First** desacoplada. Os plugins são organizados estritamente em torno de **4 Pilares Principais**:
+O GAMHORA opera com uma arquitetura **Local-First** desacoplada. Os plugins são organizados estritamente em torno de **4 Pilares Principais**:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           METRIC CORE (RxDB)                            │
+│                          GAMHORA CORE (RxDB)                            │
 │  • Gerenciador de Apontamentos (Time Entries)                           │
 │  • Motor de Sugestões de Apontamento (Timeline)                         │
 │  • Timer Runtime (Ao vivo, Pausado, Sincronizado)                       │
@@ -38,11 +38,11 @@ O METRIC opera com uma arquitetura **Local-First** desacoplada. Os plugins são 
 ## 2. Os 4 Pilares de Addons
 
 ### A. 📦 DataSources (Fontes de Dados & Tarefas)
-* **Objetivo**: Conecta o Metric às plataformas oficiais de gestão de projetos.
+* **Objetivo**: Conecta o Gamhora às plataformas oficiais de gestão de projetos.
 * **Exemplos**: Jira, Redmine, YouTrack, GitHub Issues, Trello, Linear.
 * **Responsabilidades**:
   - Listar e buscar tarefas atribuídas ao usuário no workspace ativo (`fetchTasks`).
-  - Sincronizar e enviar os apontamentos de horas concluídos no Metric (`logTime`).
+  - Sincronizar e enviar os apontamentos de horas concluídos no Gamhora (`logTime`).
 
 ---
 
@@ -50,7 +50,7 @@ O METRIC opera com uma arquitetura **Local-First** desacoplada. Os plugins são 
 * **Objetivo**: Observadores em segundo plano que monitoram o ambiente de trabalho do usuário ou escutam eventos nativos (`context.events`) para sugerir blocos de tempo ou atualizar status de presença externamente.
 * **Exemplos**:
   - **Discord Voice**: Detecta saída de chamadas de voz e gera sugestão de tempo.
-  - **Discord Rich Presence**: Atualiza o status do Discord quando o timer do Metric inicia ou pausa.
+  - **Discord Rich Presence**: Atualiza o status do Discord quando o timer do Gamhora inicia ou pausa.
   - **Git & IDE Watcher**: Detecta tempo ativo em repositórios locais ou no VS Code.
 * **Responsabilidades**:
   - Escutar eventos locais ou do sistema (`timer:start`, `timer:stop`, `system:idle`).
@@ -78,10 +78,10 @@ O METRIC opera com uma arquitetura **Local-First** desacoplada. Os plugins são 
 
 ## 3. Manifesto e Configurações Dinâmicas (`settingsFields`)
 
-Cada Addon declara suas opções de preferência no atributo `settingsFields`. O Metric renderiza automaticamente o formulário de configurações do addon na interface do aplicativo Desktop:
+Cada Addon declara suas opções de preferência no atributo `settingsFields`. O Gamhora renderiza automaticamente o formulário de configurações do addon na interface do aplicativo Desktop:
 
 ```typescript
-import type { IAddon, AddonContext, AddonSettingsField } from '@metric-org/sdk'
+import type { IAddon, AddonContext, AddonSettingsField } from '@gamhora/sdk'
 
 export default class MeuAddon implements IAddon {
   public id = 'meu-addon'
@@ -124,7 +124,7 @@ export default class MeuAddon implements IAddon {
 ## 4. Tabela Resumo dos Pilares
 
 ┌─────────────────┬──────────────────────────────────────────────────────────────────┐
-│ Pilar           │ O que faz no METRIC?                                             │
+│ Pilar           │ O que faz no Gamhora?                                             │
 ├─────────────────┼──────────────────────────────────────────────────────────────────┤
 │ **DataSources** │ Puxa tarefas de plataformas externas e envia os logs de tempo.   │
 │ **Watchers**    │ Monitora apps/eventos e sugere blocos de tempo na timeline.     │
@@ -146,7 +146,7 @@ O **`tsup`** (baseado no **`esbuild`**) é o bundler padrão moderno adotado por
 
 ### 📦 Configuração Oficial Recomendada (`tsup.config.ts`)
 
-Todo Addon do Metric deve conter o seguinte `tsup.config.ts` na raiz do seu projeto:
+Todo Addon do Gamhora deve conter o seguinte `tsup.config.ts` na raiz do seu projeto:
 
 ```typescript
 import { cpSync } from 'node:fs'
@@ -180,8 +180,8 @@ export default defineConfig({
 
 ### ⚠️ Diagnóstico e Solução de Problemas Comuns
 
-#### 1. Erro: `Cannot find package '@metric-org/sdk' imported from ...`
-* **Causa:** O bundler gerou um arquivo JS com `import { ... } from 'xyz'` externo. Como o Metric apenas descompacta o `.tladdon` sem rodar `npm install` no cliente, o Node não encontra o pacote.
+#### 1. Erro: `Cannot find package '@gamhora/sdk' imported from ...`
+* **Causa:** O bundler gerou um arquivo JS com `import { ... } from 'xyz'` externo. Como o Gamhora apenas descompacta o `.tladdon` sem rodar `npm install` no cliente, o Node não encontra o pacote.
 * **Solução:** Adicione `noExternal: [/.*/]` no `tsup.config.ts`. Isso força o bundler a inliner todo o código necessário dentro do `dist/index.js`.
 
 #### 2. Erro: `Dynamic require of "util" (ou outro módulo) is not supported`
@@ -206,7 +206,7 @@ export default defineConfig({
 yarn build
 
 # 2. Empacotar o Addon e atualizar o manifesto
-yarn metric pkg ./ --download-url "https://github.com/usuario/meu-addon/releases/download/v0.1.0/meu-addon-0.1.0.tladdon"
+yarn Gamhora pkg ./ --download-url "https://github.com/usuario/meu-addon/releases/download/v0.1.0/meu-addon-0.1.0.tladdon"
 
 # 3. Sincronizar formatação e screenshots
 yarn sync:manifest
@@ -215,4 +215,6 @@ yarn sync:manifest
 git tag v0.1.0
 git push origin main --tags
 ```
+
+
 

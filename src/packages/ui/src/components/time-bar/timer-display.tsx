@@ -10,7 +10,8 @@ import { useTimeEntryStore } from '@/stores/timeEntryStore'
 import { formatTime, parseTimeInput, TimerMode } from './timer-engine'
 import { TimerInput } from './timer-input'
 
-export type TimerStatus = 'idle' | 'running' | 'paused' | 'finished'
+export type TimerStatus =
+  'idle' | 'running' | 'paused' | 'finished' | 'suggestion'
 
 export interface TimerDisplayProps {
   editable?: boolean

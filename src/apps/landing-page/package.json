@@ -1,17 +1,18 @@
 {
-  "name": "@metric-org/landing-page",
+  "name": "@gamhora/landing-page",
   "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "typecheck": "tsc --noEmit",
     "clean": "rimraf .next dist .turbo",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
-    "@metric-org/application": "workspace:*",
-    "@metric-org/ui": "workspace:*",
+    "@gamhora/application": "workspace:*",
+    "@gamhora/ui": "workspace:*",
     "@tailwindcss/typography": "^0.5.16",
     "fumadocs-core": "^16.15.0",
     "fumadocs-mdx": "^15.3.1",

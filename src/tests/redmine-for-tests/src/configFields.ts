@@ -1,4 +1,4 @@
-import { AddonSettingsGroup, AddonSettingsTab } from '@metric-org/sdk'
+﻿import { AddonSettingsGroup, AddonSettingsTab } from '@gamhora/sdk'
 
 export const credentialFieldGroups: AddonSettingsGroup[] = [
   {

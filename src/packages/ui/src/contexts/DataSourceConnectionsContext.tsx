@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import {
   AddonManifestViewModel,
@@ -6,7 +6,7 @@ import {
   ViewModel,
   WorkspaceConnectionViewModel,
   WorkspaceViewModel,
-} from '@metric-org/sdk'
+} from '@gamhora/sdk'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import React, {
   createContext,

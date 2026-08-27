@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import {
   Button,
@@ -6,7 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@metric-org/ui/components'
+} from '@gamhora/ui/components'
 import { ChevronDown } from 'lucide-react'
 import type { ComponentProps } from 'react'
 import React from 'react'

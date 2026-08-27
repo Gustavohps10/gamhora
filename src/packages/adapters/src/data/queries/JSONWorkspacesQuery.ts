@@ -1,9 +1,9 @@
-import {
+﻿import {
   IQueryBase,
   PagedResultDTO,
   PaginationOptionsDTO,
   WorkspaceDTO,
-} from '@metric-org/application'
+} from '@gamhora/application'
 import { promises as fs } from 'fs'
 import path from 'path'
 

@@ -1,4 +1,4 @@
-import { ISessionAPI } from '@metric-org/application'
+﻿import { ISessionAPI } from '@gamhora/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

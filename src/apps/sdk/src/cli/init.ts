@@ -1,4 +1,4 @@
-import fs from 'fs'
+﻿import fs from 'fs'
 import inquirer from 'inquirer'
 import path from 'path'
 
@@ -6,14 +6,14 @@ import { VALID_ADDON_CATEGORIES } from '../contracts/manifest'
 import { writeYaml } from '../utils/yaml'
 
 export async function runInitWizard(targetDirName?: string) {
-  console.log('\n🚀 Bem-vindo ao inicializador de plugins do Metric!\n')
+  console.log('\n🚀 Bem-vindo ao inicializador de plugins do Gamhora!\n')
 
   const answers = await inquirer.prompt([
     {
       type: 'input',
       name: 'id',
-      message: 'ID único do plugin (ex: metric-datasource-redmine):',
-      default: targetDirName || 'metric-plugin-sample',
+      message: 'ID único do plugin (ex: gamhora-datasource-redmine):',
+      default: targetDirName || 'gamhora-plugin-sample',
       validate: (input: string) => {
         if (!input.trim()) return 'O ID não pode ser vazio.'
         if (!/^[a-z0-9-_@/]+$/i.test(input.trim())) {
@@ -26,7 +26,7 @@ export async function runInitWizard(targetDirName?: string) {
       type: 'input',
       name: 'name',
       message: 'Nome legível do plugin (ex: Redmine Integration):',
-      default: 'Meu Plugin Metric',
+      default: 'Meu Plugin Gamhora',
     },
     {
       type: 'checkbox',
@@ -48,19 +48,19 @@ export async function runInitWizard(targetDirName?: string) {
       type: 'input',
       name: 'author',
       message: 'Autor ou organização:',
-      default: 'Metric Community',
+      default: 'Gamhora Community',
     },
     {
       type: 'input',
       name: 'shortDescription',
       message: 'Descrição curta (1 linha):',
-      default: 'Integração oficial para o Metric',
+      default: 'Integração oficial para o Gamhora',
     },
     {
       type: 'input',
       name: 'description',
       message: 'Descrição detalhada:',
-      default: 'Extensão para integração e sincronização com o Metric.',
+      default: 'Extensão para integração e sincronização com o Gamhora.',
     },
   ])
 
@@ -86,12 +86,12 @@ export async function runInitWizard(targetDirName?: string) {
     types: './dist/index.d.ts',
     scripts: {
       build: 'tsup src/index.ts --format esm,cjs --dts --clean',
-      manifest: 'metric manifest .',
-      validate: 'metric validate .',
-      pack: 'metric pack .',
+      manifest: 'gamhora manifest .',
+      validate: 'gamhora validate .',
+      pack: 'gamhora pack .',
     },
     devDependencies: {
-      '@metric-org/sdk': '^1.1.0',
+      '@gamhora/sdk': '^1.1.0',
       tsup: '^8.5.0',
       typescript: '^5.8.0',
     },
@@ -129,7 +129,7 @@ export async function runInitWizard(targetDirName?: string) {
     author: answers.author,
     shortDescription: answers.shortDescription,
     description: answers.description,
-    tags: [answers.categories[0], 'metric'],
+    tags: [answers.categories[0], 'gamhora'],
     screenshots: [],
     requiredApiVersion: '>=1.0.0',
     releaseDate: new Date().toISOString().split('T')[0],
@@ -139,7 +139,7 @@ export async function runInitWizard(targetDirName?: string) {
 
   // 4. src/index.ts boilerplate
   const isDataSource = answers.categories.includes('dataSource')
-  const indexTsContent = `import { AddonContext, IAddon } from '@metric-org/sdk'
+  const indexTsContent = `import { AddonContext, IAddon } from '@gamhora/sdk'
 
 export default class ${toPascalCase(answers.name)}Plugin implements IAddon {
   public async activate(context: AddonContext): Promise<void> {

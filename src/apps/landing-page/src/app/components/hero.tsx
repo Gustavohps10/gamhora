@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { Button } from '@metric-org/ui/components'
+import { Button } from '@gamhora/ui/components'
 
 export function Hero() {
   return (

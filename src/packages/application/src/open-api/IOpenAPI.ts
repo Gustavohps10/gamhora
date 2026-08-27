@@ -1,4 +1,4 @@
-import { IHeaders, IJobResult, IRequest } from '@metric-org/shared/transport'
+import { IHeaders, IJobResult, IRequest } from '@gamhora/shared/transport'
 import {
   AddonInstallerViewModel,
   AddonManifestViewModel,
@@ -11,7 +11,7 @@ import {
   TimeEntryViewModel,
   ViewModel,
   WorkspaceViewModel,
-} from '@metric-org/shared/view-models'
+} from '@gamhora/shared/view-models'
 
 import { FileData } from '@/contracts/infra'
 import {
@@ -195,12 +195,7 @@ export interface AddonManifest {
   sourceUrl?: string
   tags?: string[]
   category?:
-    | 'DataSources'
-    | 'Watchers'
-    | 'Calendars'
-    | 'Punch'
-    | 'Themes'
-    | string
+    'DataSources' | 'Watchers' | 'Calendars' | 'Punch' | 'Themes' | string
 }
 
 export interface AddonInstaller {
@@ -254,8 +249,7 @@ export interface AddonTimerbarPopoverItem {
 }
 
 export type AddonTimerbarMenuItem =
-  | AddonTimerbarActionItem
-  | AddonTimerbarPopoverItem
+  AddonTimerbarActionItem | AddonTimerbarPopoverItem
 
 export type AddonSettingsFieldType =
   | 'text'
@@ -278,18 +272,14 @@ export interface AddonSettingsField {
   id: string
   type: AddonSettingsFieldType
   label: string
+  required?: boolean
   defaultValue?: any
   description?: string
   placeholder?: string
   options?: AddonSettingsOption[] // For select
   actionId?: string // For button
   variant?:
-    | 'default'
-    | 'destructive'
-    | 'outline'
-    | 'secondary'
-    | 'ghost'
-    | 'link'
+    'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
   display?: {
     title?: string
     message?: string
@@ -374,6 +364,12 @@ export interface IAddonsAPI {
       toastId?: string
     }>,
   ): Promise<ViewModel<string>>
+
+  dismissToast(
+    payload: IRequest<{
+      toastId: string
+    }>,
+  ): Promise<ViewModel<void>>
 
   getSchema(
     payload: IRequest<{ addonId: string }>,

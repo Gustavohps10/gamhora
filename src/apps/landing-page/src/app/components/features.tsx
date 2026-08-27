@@ -39,7 +39,7 @@ const features = [
     ),
     title: 'Sincronize com suas ferramentas',
     description:
-      'Conecte o Metric ao Redmine, Jira ou YouTrack em segundos. Importe suas tarefas e gerencie seu tempo sem sair do fluxo de trabalho que você já domina.',
+      'Conecte o Gamhora ao Redmine, Jira ou YouTrack em segundos. Importe suas tarefas e gerencie seu tempo sem sair do fluxo de trabalho que você já domina.',
     tag: 'Conectividade',
     image: '/images/feature_conectividade.jpeg',
   },

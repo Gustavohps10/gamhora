@@ -1,11 +1,11 @@
 ---
 title: Autenticação OAuth 2.0 PKCE
-description: Como autenticar usuários com segurança usando PKCE (RFC 7636), State criptográfico e Deep Linking (metric-app://).
+description: Como autenticar usuários com segurança usando PKCE (RFC 7636), State criptográfico e Deep Linking (gamhora-app://).
 ---
 
 # Autenticação OAuth 2.0 PKCE
 
-O Metric fornece uma API nativa e padronizada de **OAuth 2.0 com PKCE (Proof Key for Code Exchange — RFC 7636)** através de `context.oauth`.
+O Gamhora fornece uma API nativa e padronizada de **OAuth 2.0 com PKCE (Proof Key for Code Exchange — RFC 7636)** através de `context.oauth`.
 
 Esse fluxo elimina totalmente a necessidade de embutir `CLIENT_SECRET` nos addons e dispensa a abertura de servidores HTTP locais na máquina do usuário.
 
@@ -24,11 +24,11 @@ Esse fluxo elimina totalmente a necessidade de embutir `CLIENT_SECRET` nos addon
    ▼
 3. Redirecionamento Web
    │ Provedor redireciona para a Landing Page:
-   │ https://metricapp.com.br/oauth/callback?code=AUTH_CODE&state=STATE
+   │ https://gamhoraapp.com.br/oauth/callback?code=AUTH_CODE&state=STATE
    ▼
 4. Deep Link do Sistema Operacional
    │ A Landing Page executa o protocolo seguro:
-   │ metric-app://oauth/callback?code=AUTH_CODE&state=STATE
+   │ gamhora-app://oauth/callback?code=AUTH_CODE&state=STATE
    ▼
 5. Addon (Desktop)
    │ AddonLoader valida o state, remove replay e resolve o authorization code
@@ -41,15 +41,15 @@ Esse fluxo elimina totalmente a necessidade de embutir `CLIENT_SECRET` nos addon
 ## 🛡️ Por que PKCE é 100% Seguro em Apps Desktop?
 
 1. **Sem Segredos Expostos**: Como o código do addon roda no dispositivo do usuário, qualquer `CLIENT_SECRET` embutido poderia ser extraído. O PKCE substitui o segredo por um desafio criptográfico único gerado em tempo de execução (`code_challenge` / `code_verifier`).
-2. **Proteção Contra Interceptação de Deep Link**: Mesmo que um aplicativo malicioso no sistema operacional capture o Deep Link contendo o `code` e o `state`, ele **não conseguirá** obter o token de acesso porque não possui o `code_verifier` (que permanece restrito à memória segura do Metric).
-3. **Prevenção Contra CSRF e Replay**: O `state` é gerado via `crypto.randomUUID()`, validado estritamente no callback e consumido em modo *single-use* (qualquer repetição é imediatamente rejeitada).
+2. **Proteção Contra Interceptação de Deep Link**: Mesmo que um aplicativo malicioso no sistema operacional capture o Deep Link contendo o `code` e o `state`, ele **não conseguirá** obter o token de acesso porque não possui o `code_verifier` (que permanece restrito à memória segura do Gamhora).
+3. **Prevenção Contra CSRF e Replay**: O `state` é gerado via `crypto.randomUUID()`, validado estritamente no callback e consumido em modo _single-use_ (qualquer repetição é imediatamente rejeitada).
 
 ---
 
 ## 💻 Exemplo Completo de Implementação
 
 ```typescript
-import type { IAddon, AddonContext } from '@metric-org/sdk'
+import type { IAddon, AddonContext } from '@gamhora-org/sdk'
 
 export default class DiscordOAuthAddon implements IAddon {
   public id = 'discord-oauth'
@@ -63,8 +63,8 @@ export default class DiscordOAuthAddon implements IAddon {
 
     const CLIENT_ID = '1372352088457220126' // Client ID Público
     const REDIRECT_URI =
-      process.env.METRIC_OAUTH_REDIRECT_URI ||
-      'http://localhost:3000/oauth/callback' // Em produção: https://metricapp.com.br/oauth/callback
+      process.env.GAMHORA_OAUTH_REDIRECT_URI ||
+      'http://localhost:3000/oauth/callback' // Em produção: https://gamhoraapp.com.br/oauth/callback
 
     const authUrl =
       `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}` +
@@ -128,7 +128,9 @@ export default class DiscordOAuthAddon implements IAddon {
     await context.storage.set('tokenData', JSON.stringify(storedToken))
     await context.storage.set('accessToken', storedToken.accessToken)
 
-    console.log('[OAuth] Autenticação concluída e token armazenado com sucesso!')
+    console.log(
+      '[OAuth] Autenticação concluída e token armazenado com sucesso!',
+    )
   }
 }
 ```

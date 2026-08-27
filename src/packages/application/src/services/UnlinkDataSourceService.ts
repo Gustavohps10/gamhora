@@ -1,4 +1,4 @@
-import { AppError, Either } from '@metric-org/shared/helpers'
+﻿import { AppError, Either } from '@gamhora/shared/helpers'
 
 import {
   ICredentialsStorage,
@@ -66,9 +66,9 @@ export class UnlinkDataSourceService implements IUnlinkDataSourceUseCase {
     connectionInstanceId: string,
   ): Promise<void> {
     const sessionKey = `workspace-session-${workspaceId}-${connectionInstanceId}`
-    await this.credentialsStorage.deleteToken('metric', sessionKey)
+    await this.credentialsStorage.deleteToken('gamhora', sessionKey)
     await this.credentialsStorage.deleteToken(
-      'metric',
+      'gamhora',
       getMemberStorageKey(workspaceId, connectionInstanceId),
     )
   }

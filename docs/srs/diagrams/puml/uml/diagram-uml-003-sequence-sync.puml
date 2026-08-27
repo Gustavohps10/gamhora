@@ -1,5 +1,5 @@
 @startuml SequenceSync
-title METRIC - Sequência: Sincronização Completa (UC001 - RF004, RF008)
+title GAMHORA - Sequência: Sincronização Completa (UC001 - RF004, RF008)
 actor User
 participant UI
 participant SyncEngine

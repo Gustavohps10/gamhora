@@ -1,4 +1,4 @@
-<h2 align="center">
+﻿<h2 align="center">
   <div align="center">
     <img height="70" src="./src/packages/ui/src/assets/logo.svg#gh-light-mode-only" />
     <img height="70" src="./src/packages/ui/src/assets/logo-light.svg#gh-dark-mode-only" />
@@ -9,11 +9,11 @@ Engine de produtividade local-first para devs e times técnicos. Seus dados. Sua
 </h2>
 
 <p align="center">
-    <img src="https://img.shields.io/github/languages/top/Gustavohps10/metric?label=TypeScript&color=4f94ee&style=flat-square&logoColor=ffffff&logo=typescript"/>
+    <img src="https://img.shields.io/github/languages/top/Gustavohps10/Gamhora?label=TypeScript&color=4f94ee&style=flat-square&logoColor=ffffff&logo=typescript"/>
     <img src="https://img.shields.io/website?url=https://teste-atak.vercel.app&label=Website&color=4f94ee&style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAABxklEQVR4nK3Uz25NURTH8fsApa2GxJ9QNFFD5h5B2oG0JBriTxFXpCGoO6PUvTyDqUTiCWqmCAN/54Qn6KidkI8sWTfZ9+Rwb8JJVrL2b6/9PXuvvfZqNPp8GMbBtOF+8bUfxtDCZ/zEl7TwP+E2tgwKO473OIcXOIr5tKnUzmfMbD/YLazE3xO4nPpvYPptnM1TrODmn2Cz2MB9jONt91gV4FjOjWfsBmaqsNHMzdaYxEus4Qk6eJrWSW0tY2ZyTawdKYGt7g5y3MRVHMq8PU6bSi3mmkX8hbioEngDQ8X4BCaK8ZGwYjwRMcV4KBiNyo52YA6n0r+Ey9iJkziN7aldSX+u0Jsl8BouYhWv0o9FCwnu6vN53Ot5zFW8Tn2hBO7DdzzAoyziXdiLb3kZndR3Y3/Gt/Ew9T3Vm17GgXxidwo9SmMy5+7WxE9iqQr775fSipzUlM1hTBdlM51aXdkslsCRfyjsbbm2txPl5Dru5bN6E89sgKe3jmM9sEoun2FzNoB2DTBu9UyCn0cJ1cIKaDSJd5mXaFXx3LrtK3IYtRd1Gu2rtyn8BRrtaxEf8QNf08L/kG1udCBYDTyOH7UWtqnfgl8Icmgv6bleHgAAAABJRU5ErkJggg==">
-    <img src="https://img.shields.io/github/commit-activity/w/Gustavohps10/metric?label=Commits&color=4f94ee&style=flat-square&logo=git&logoColor=ffffff"/>
-    <img src="https://img.shields.io/github/created-at/gustavohps10/metric?label=Created%20At&color=4f94ee&style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8%2F9hAAABuklEQVR4AZSTz0sVURTHv%2BfeeVLQIgqpVbyWEdiyB9GiVUJUWwlC2gQtWhYE7d4yIlq1a9Eit24EBRFcibgR%2FwBFNyqCuBF17r1z%2FJ7R%2Bxx9s%2FExn3fPOd9zvjN3fjg0frEKs2RJVX2jXIesjaQqrFKfrgvnf47CKLlP7rH2kvSA8hFzqw0ICGMKPKH%2BltptYtqoSxpWksbtCuEdxQNykuDHrNbEwT2mlsgeeyfPtLBysQWVSS94pYIXUH3PxsuH6oRpXvQ1VD5kcWBgl5cUC6KYozhOrh7j1GaSyqL1ZjEb7AK6SXbIPrG4DdOshxo4A9QGKpgo3Ej3OtiMXUVtYEFGVe9GjW%2BChmeMB3qpZY88zX15HTTkQqpSnzfxI%2Fe7GKvYt3pM5X%2FHvZNvljcZMvDOf65E%2BwKssbFD4F31XRV%2FLL7KkAEbbvJMv3mnH8BhnjlEbqzb2kabwWHhOj2e8a9T%2FGwbataGDCqN9r4vi%2BATBP%2BazW3xkIGT4jkf0RcvxUMvnR95qHDFLy%2Fpa87zWhsIhB%2FGUVf1qAsc3ykQt7jesjzDXPiClTkXzphJbcDHNpW02LgONmMGpwAAAP%2F%2FjxwNAQAAAAZJREFUAwBNXh4wS6bnRwAAAABJRU5ErkJggg%3D%3D"/>
-    <img src="https://img.shields.io/github/license/gustavohps10/metric?label=License&color=4f94ee&style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHxSURBVEiJtZS/axVREIW/ScQuKhJELIyKqNjYGYKxsLKwsbAICNHWztikkyAi2BhLG0HwBwoWafIHiBqCpcQmxELBIDbhmcqQ5LPIRJ+buy/7RA8sc3dn7pwzM3sv/GdEnUMN4CJwrEGeLxHxpCtmddLuMNktQUt9pvZuEzfRiaSnw95dwHxErDXUNAlcr5Ls6LDhAzDfIHEr7cO0YyoRMdZQGKhH1O+Vns+lb0BdKszkSrECdRA4C6wDMxExCywCt4G9baFzABHxST0FXAL2pW8cOFxNvFudLiiZVvc0Lncjl+pEtYLnwDngBhv97AWuAneBp8CF3HwUOFTIu5oVr5QYh5J1y2DUsfSdzvevHc7CtboKhtI+Kih7DNzLmHfAcKcKqh+rQy5dHTvT9gBExAKwUIgrYpPgTdpR4H4lZjTtawB1BBgo5FoHXkTE5yKTOqWuZM/71QPquPpDnWqLm6vp/2qS/zGDdoK+DsPra9qSKsGvGUTEsgobv+Rmy4aByxGx3A1BO0p30UJEPEgl+9tUnQFuUn9BrgO3IuLtdgSo/X8lt4ASwXHgfa5fbX5MZee7JSiVO1KzbgT1ZC5bJeeauqieyGdRXUvfSP6KTbCkHoStLRoFZiPiYyYdBgbTNwPc4ffJrsM34GXtgfvX+AkvyO4YoQp6EQAAAABJRU5ErkJggg=="/>
+    <img src="https://img.shields.io/github/commit-activity/w/Gustavohps10/Gamhora?label=Commits&color=4f94ee&style=flat-square&logo=git&logoColor=ffffff"/>
+    <img src="https://img.shields.io/github/created-at/gustavohps10/Gamhora?label=Created%20At&color=4f94ee&style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8%2F9hAAABuklEQVR4AZSTz0sVURTHv%2BfeeVLQIgqpVbyWEdiyB9GiVUJUWwlC2gQtWhYE7d4yIlq1a9Eit24EBRFcibgR%2FwBFNyqCuBF17r1z%2FJ7R%2Bxx9s%2FExn3fPOd9zvjN3fjg0frEKs2RJVX2jXIesjaQqrFKfrgvnf47CKLlP7rH2kvSA8hFzqw0ICGMKPKH%2BltptYtqoSxpWksbtCuEdxQNykuDHrNbEwT2mlsgeeyfPtLBysQWVSS94pYIXUH3PxsuH6oRpXvQ1VD5kcWBgl5cUC6KYozhOrh7j1GaSyqL1ZjEb7AK6SXbIPrG4DdOshxo4A9QGKpgo3Ej3OtiMXUVtYEFGVe9GjW%2BChmeMB3qpZY88zX15HTTkQqpSnzfxI%2Fe7GKvYt3pM5X%2FHvZNvljcZMvDOf65E%2BwKssbFD4F31XRV%2FLL7KkAEbbvJMv3mnH8BhnjlEbqzb2kabwWHhOj2e8a9T%2FGwbataGDCqN9r4vi%2BATBP%2BazW3xkIGT4jkf0RcvxUMvnR95qHDFLy%2Fpa87zWhsIhB%2FGUVf1qAsc3ykQt7jesjzDXPiClTkXzphJbcDHNpW02LgONmMGpwAAAP%2F%2FjxwNAQAAAAZJREFUAwBNXh4wS6bnRwAAAABJRU5ErkJggg%3D%3D"/>
+    <img src="https://img.shields.io/github/license/gustavohps10/Gamhora?label=License&color=4f94ee&style=flat-square&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHxSURBVEiJtZS/axVREIW/ScQuKhJELIyKqNjYGYKxsLKwsbAICNHWztikkyAi2BhLG0HwBwoWafIHiBqCpcQmxELBIDbhmcqQ5LPIRJ+buy/7RA8sc3dn7pwzM3sv/GdEnUMN4CJwrEGeLxHxpCtmddLuMNktQUt9pvZuEzfRiaSnw95dwHxErDXUNAlcr5Ls6LDhAzDfIHEr7cO0YyoRMdZQGKhH1O+Vns+lb0BdKszkSrECdRA4C6wDMxExCywCt4G9baFzABHxST0FXAL2pW8cOFxNvFudLiiZVvc0Lncjl+pEtYLnwDngBhv97AWuAneBp8CF3HwUOFTIu5oVr5QYh5J1y2DUsfSdzvevHc7CtboKhtI+Kih7DNzLmHfAcKcKqh+rQy5dHTvT9gBExAKwUIgrYpPgTdpR4H4lZjTtawB1BBgo5FoHXkTE5yKTOqWuZM/71QPquPpDnWqLm6vp/2qS/zGDdoK+DsPra9qSKsGvGUTEsgobv+Rmy4aByxGx3A1BO0p30UJEPEgl+9tUnQFuUn9BrgO3IuLtdgSo/X8lt4ASwXHgfa5fbX5MZee7JSiVO1KzbgT1ZC5bJeeauqieyGdRXUvfSP6KTbCkHoStLRoFZiPiYyYdBgbTNwPc4ffJrsM34GXtgfvX+AkvyO4YoQp6EQAAAABJRU5ErkJggg=="/>
 </p>
 
 <p width="100%">
@@ -28,7 +28,7 @@ Engine de produtividade local-first para devs e times técnicos. Seus dados. Sua
   <img src="./docs/diagram-dark.png#gh-light-mode-only" width="100%" />
 </p>
 
-O **Metric** é uma plataforma de **apontamento de horas Local-First** projetada para oferecer:
+O **Gamhora** é uma plataforma de **apontamento de horas Local-First** projetada para oferecer:
 
 - performance instantânea
 - operação offline
@@ -59,17 +59,17 @@ O projeto é guiado pelos seguintes pilares:
 
 # 🏗️ Modelo de Execução
 
-O Metric opera em **três modos** (ver **ADR-001**):
+O Gamhora opera em **três modos** (ver **ADR-001**):
 
 - **Desktop** — cliente na máquina do usuário (Windows / Linux / macOS); modo padrão; dados locais (RxDB), sync com datasources via plugins.
-- **Cloud SaaS** — backend hospedado pelo Metric (ex.: app.metric.dev); autenticação, painel admin, organizações, planos.
-- **Self-Hosted** — empresas rodam em sua própria infraestrutura (ex.: metric.internal.company.com); compliance, dados internos, isolamento.
+- **Cloud SaaS** — backend hospedado pelo Gamhora (ex.: app.Gamhora.dev); autenticação, painel admin, organizações, planos.
+- **Self-Hosted** — empresas rodam em sua própria infraestrutura (ex.: Gamhora.internal.company.com); compliance, dados internos, isolamento.
 
 ---
 
-# ☁️ Metric Control Plane
+# ☁️ Gamhora Control Plane
 
-O Metric possui um serviço central opcional chamado **Control Plane**.
+O Gamhora possui um serviço central opcional chamado **Control Plane**.
 
 Ele **não armazena dados operacionais** da aplicação.
 
@@ -169,7 +169,7 @@ Ele fornece:
 
 # 🔄 Sincronização
 
-A sincronização ocorre entre o **banco local (RxDB)** e as **APIs externas**, via **plugins** (datasources). Cada (workspace, conexão) tem seu próprio motor de sync e checkpoint — ver **ADR-002**. O backend Metric **não participa da sincronização operacional** (tarefas/apontamentos ficam no cliente ou nas ferramentas integradas).
+A sincronização ocorre entre o **banco local (RxDB)** e as **APIs externas**, via **plugins** (datasources). Cada (workspace, conexão) tem seu próprio motor de sync e checkpoint — ver **ADR-002**. O backend Gamhora **não participa da sincronização operacional** (tarefas/apontamentos ficam no cliente ou nas ferramentas integradas).
 
 ---
 
@@ -296,3 +296,4 @@ Extensões recomendadas:
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
+

@@ -21,18 +21,14 @@ export interface AddonSettingsField {
   id: string
   type: AddonSettingsFieldType
   label: string
+  required?: boolean
   defaultValue?: any
   description?: string
   placeholder?: string
   options?: AddonSettingsOption[] // For select
   actionId?: string // For button
   variant?:
-    | 'default'
-    | 'destructive'
-    | 'outline'
-    | 'secondary'
-    | 'ghost'
-    | 'link'
+    'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
   display?: {
     title?: string
     message?: string

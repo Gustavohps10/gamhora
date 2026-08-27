@@ -1,14 +1,37 @@
-export interface IHttpClient {
-  get<T = unknown>(url: string, config?: unknown): Promise<T>
-  post<T = unknown>(url: string, data?: unknown, config?: unknown): Promise<T>
-  put<T = unknown>(url: string, data?: unknown, config?: unknown): Promise<T>
-  delete<T = unknown>(url: string, config?: unknown): Promise<T>
-}
+import { AppError, Either } from '@gamhora/shared/helpers'
 
 import { MemberDTO } from '@/dtos'
 
 import type { AddonSettingsGroup } from '../../open-api/IOpenAPI'
 import { IDataSourceAdapter } from './IDataSourceAdapter'
+
+export interface IHttpClientConfig {
+  baseURL: string
+  params?: Record<string, string>
+  headers?: Record<string, string>
+  timeout?: number
+}
+
+export interface IHttpClient {
+  configure(config: IHttpClientConfig): void
+  get<T>(url: string, config?: unknown): Promise<Either<AppError, T>>
+  post<T>(
+    url: string,
+    data?: unknown,
+    config?: unknown,
+  ): Promise<Either<AppError, T>>
+  put<T>(
+    url: string,
+    data?: unknown,
+    config?: unknown,
+  ): Promise<Either<AppError, T>>
+  patch<T>(
+    url: string,
+    data?: unknown,
+    config?: unknown,
+  ): Promise<Either<AppError, T>>
+  delete<T>(url: string, config?: unknown): Promise<Either<AppError, T>>
+}
 
 export interface DataSourceContext {
   httpClient: IHttpClient

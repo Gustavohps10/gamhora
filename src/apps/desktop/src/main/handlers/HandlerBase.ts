@@ -1,4 +1,4 @@
-import { PaginatedViewModel, ViewModel } from '@metric-org/shared/view-models'
+﻿import { PaginatedViewModel, ViewModel } from '@gamhora/shared/view-models'
 
 export type HandlerBase<T> = {
   [K in keyof T]: T[K] extends (...args: any[]) => any

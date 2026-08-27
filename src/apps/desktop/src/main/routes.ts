@@ -1,9 +1,9 @@
-import {
+﻿import {
   AppSettings,
   IDataSourceResolver,
   IServiceProvider,
-} from '@metric-org/application'
-import { IRequest } from '@metric-org/shared/transport'
+} from '@gamhora/application'
+import { IRequest } from '@gamhora/shared/transport'
 import { app, BrowserWindow, screen } from 'electron'
 
 import { NativeOverlay } from '@/main'

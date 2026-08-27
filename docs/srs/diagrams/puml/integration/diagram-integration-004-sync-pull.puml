@@ -1,5 +1,5 @@
 @startuml IntegrationSyncPull
-title METRIC - Sincronização Pull (RF004, RF005 - UC001)
+title GAMHORA - Sincronização Pull (RF004, RF005 - UC001)
 participant UI
 participant SyncEngine
 participant CheckpointStore

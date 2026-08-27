@@ -1,4 +1,4 @@
-import { IMetadataQuery, MetadataDTO, MetadataItem } from '@metric-org/sdk'
+﻿import { IMetadataQuery, MetadataDTO, MetadataItem } from '@gamhora/sdk'
 
 import { RedmineBase } from '@/RedmineBase'
 

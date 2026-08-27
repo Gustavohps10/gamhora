@@ -1,4 +1,4 @@
-import { createMDX } from 'fumadocs-mdx/next'
+﻿import { createMDX } from 'fumadocs-mdx/next'
 import type { NextConfig } from 'next'
 
 const withMDX = createMDX()
@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
 
   reactCompiler: true,
 
-  transpilePackages: ['@metric-org/ui', '@metric-org/application'],
+  transpilePackages: ['@gamhora/ui', '@gamhora/application'],
 
   images: {
     remotePatterns: [

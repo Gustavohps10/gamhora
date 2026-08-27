@@ -1,5 +1,5 @@
-import { IHttpClient } from '@metric-org/adapters/contracts'
-import type { DataSourceContext } from '@metric-org/sdk'
+﻿import { IHttpClient } from '@gamhora/adapters/contracts'
+import type { DataSourceContext } from '@gamhora/sdk'
 
 export abstract class RedmineBase {
   protected httpClient: IHttpClient

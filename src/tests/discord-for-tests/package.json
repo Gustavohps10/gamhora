@@ -1,9 +1,9 @@
 {
-  "name": "@metric-org/discord-for-tests",
+  "name": "@gamhora/discord-for-tests",
   "private": true,
   "version": "1.0.1",
   "description": "Discord addon for tests.",
-  "author": "Metric",
+  "author": "Gamhora",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -22,7 +22,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@metric-org/sdk": "workspace:*",
+    "@gamhora/sdk": "workspace:*",
     "axios": "^1.7.9"
   },
   "devDependencies": {

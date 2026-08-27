@@ -1,4 +1,4 @@
-# METRIC
+﻿# Gamhora
 
 ## Sistema de Rastreamento e Visualização de Produtividade
 
@@ -23,14 +23,14 @@
 
 ## 1.1 Finalidade
 
-O **METRIC** é um sistema desktop extensível e focado em produtividade para desenvolvedores e equipes de tecnologia.
+O **Gamhora** é um sistema desktop extensível e focado em produtividade para desenvolvedores e equipes de tecnologia.
 
 O sistema atua como um **hub local e agnóstico** que se conecta diretamente a ferramentas de gestão externas (Redmine, Jira, etc.) através de um **SDK de Addons Multicapacidade**, gerenciando o tempo investido com operação **100% offline-first e privacidade absoluta (Zero-Cloud)**.
 
 ## 1.2 Política de Privacidade Estrita (Zero-Cloud Data Policy)
 
-O Metric adota uma política rigorosa de **não exfiltração de dados operacionais**:
-- **Nenhum dado de tarefas, títulos de janelas, apontamentos de horas ou informações de clientes trafega para servidores em nuvem do Metric ou de terceiros.**
+O Gamhora adota uma política rigorosa de **não exfiltração de dados operacionais**:
+- **Nenhum dado de tarefas, títulos de janelas, apontamentos de horas ou informações de clientes trafega para servidores em nuvem do Gamhora ou de terceiros.**
 - Todas as conexões com DataSources acontecem **diretamente da máquina do usuário para o servidor da empresa/ferramenta**.
 - Recursos de inteligência e automação (Window Observer, Git Tracker, OCR, Idle Resolver) executam **100% localmente** na CPU do usuário.
 
@@ -46,7 +46,7 @@ O Metric adota uma política rigorosa de **não exfiltração de dados operacion
 
 ## 2.2 Divisão de Planos (Free vs Pro)
 
-O Metric opera sob um modelo de licenciamento local simplificado (sem necessidade de cadastro ou login obrigatório):
+O Gamhora opera sob um modelo de licenciamento local simplificado (sem necessidade de cadastro ou login obrigatório):
 
 ### 🟢 Plano FREE (Uso Individual / Básico)
 - Timer manual com precisão no Main Process.
@@ -71,7 +71,7 @@ Ativado localmente via **Chave de Licença (License Key)**:
 
 # 3. Ecossistema e SDK de Addons
 
-O Metric possui uma arquitetura orientada a **Addons Multicapacidade**. Um único pacote de addon pode fornecer simultaneamente:
+O Gamhora possui uma arquitetura orientada a **Addons Multicapacidade**. Um único pacote de addon pode fornecer simultaneamente:
 
 1. **DataSources:** Adaptadores de comunicação com APIs externas (Redmine, Jira, GitLab, Mock).
 2. **Navegação & Menus:** Injeção de itens de navegação na Sidebar e subitens.
@@ -321,7 +321,7 @@ Estrutura de cores:
 
 # 7. Arquitetura em Camadas
 
-O Metric é estruturado em quatro camadas com responsabilidades bem delimitadas, consistentes com os princípios de DDD e com o modelo desktop offline-first.
+O Gamhora é estruturado em quatro camadas com responsabilidades bem delimitadas, consistentes com os princípios de DDD e com o modelo desktop offline-first.
 
 ## 7.1 Domain
 
@@ -866,7 +866,7 @@ Ativar os recursos do plano Pro localmente através de uma chave de licença (Li
 
 1. Usuário realiza o upgrade/pagamento via Checkout Web
 2. Gateway emite a Chave de Licença (License Key)
-3. Usuário acessa as Configurações do Metric e insere a Chave
+3. Usuário acessa as Configurações do Gamhora e insere a Chave
 4. Sistema valida a chave via API (1 única vez) e grava `{ isPro: true }` no `settings.json` local
 5. Recursos Pro (Automações, Watchers, Multi-Workspaces) são desbloqueados imediatamente
 
@@ -950,7 +950,7 @@ flowchart TB
         UI <--> Loader
     end
 
-    subgraph Addons [Addon Ecosystem — @metric-org/sdk]
+    subgraph Addons [Addon Ecosystem — @gamhora/sdk]
         direction TB
         DS[DataSources — Redmine, Jira, Fake]
         Themes[Visual Themes — CSS Injected]
@@ -1056,11 +1056,11 @@ flowchart TB
 
 **Contexto:** Ferramentas extensíveis costumam sofrer de fragmentação ou acoplamento forte quando cada tipo de plugin (tema, conector, atalho) exige uma arquitetura isolada.
 
-**Decisão:** O Metric adota um contrato de **Addon Multicapacidade** no `@metric-org/sdk`. Um único Addon pode registrar simultaneamente DataSources, Menus de Sidebar, Botões e Popovers na Timerbar, Comandos, Watchers e Temas Visuais.
+**Decisão:** O Gamhora adota um contrato de **Addon Multicapacidade** no `@gamhora/sdk`. Um único Addon pode registrar simultaneamente DataSources, Menus de Sidebar, Botões e Popovers na Timerbar, Comandos, Watchers e Temas Visuais.
 
 **Consequências:**
 - Facilidade para a comunidade e empresas desenvolverem extensões completas.
-- O Core do Metric e a UI permanecem 100% agnósticos aos detalhes das ferramentas externas.
+- O Core do Gamhora e a UI permanecem 100% agnósticos aos detalhes das ferramentas externas.
 
 ## ADR-005 — Licenciamento Local-First por Chave (Zero Backend Auth)
 
@@ -1081,3 +1081,5 @@ flowchart TB
 **Consequências:**
 - Addons podem fornecer arquivos `.css` completos no padrão Shadcn/Tailwind sem quebrar o runtime.
 - Suporte a alternância de temas em tempo real na janela principal e no widget flutuante.
+
+

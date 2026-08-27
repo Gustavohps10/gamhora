@@ -1,4 +1,4 @@
-import { IHeaders, IRequest } from '@metric-org/shared/transport'
+﻿import { IHeaders, IRequest } from '@gamhora/shared/transport'
 import { ipcRenderer } from 'electron'
 
 import { IpcChannels } from '@/main/IpcChannels'

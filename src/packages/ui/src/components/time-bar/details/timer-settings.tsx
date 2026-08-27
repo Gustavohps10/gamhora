@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { AddonTimerbarMenuItem, DisplayInfo } from '@metric-org/application'
+import { AddonTimerbarMenuItem, DisplayInfo } from '@gamhora/application'
 import {
   Clock3,
   ClockArrowDown,

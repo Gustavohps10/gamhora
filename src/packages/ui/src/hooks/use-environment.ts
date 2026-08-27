@@ -1,4 +1,4 @@
-import type { EnvironmentInfo } from '@metric-org/application'
+﻿import type { EnvironmentInfo } from '@gamhora/application'
 import { useContext } from 'react'
 
 import { EnvironmentContext } from '@/contexts/EnvironmentContext'

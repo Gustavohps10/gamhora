@@ -1,4 +1,4 @@
-import fs from 'fs'
+﻿import fs from 'fs'
 import yaml from 'js-yaml'
 import path from 'path'
 
@@ -19,7 +19,7 @@ export function printPrSnippet(addonDir: string) {
   const targetPath = `addons/${filename}`
 
   console.log(`\n======================================================`)
-  console.log(`  📄 YAML PARA PULL REQUEST EM: metric-org/addons-manifest`)
+  console.log(`  📄 YAML PARA PULL REQUEST EM: gamhora/addons-manifest`)
   console.log(`  Destino: ${targetPath}`)
   console.log(`======================================================\n`)
 

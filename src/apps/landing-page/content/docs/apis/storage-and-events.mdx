@@ -5,7 +5,7 @@ description: Conheça as APIs nativas disponíveis no AddonContext (Storage crip
 
 # Storage, Eventos & APIs do Contexto
 
-Quando um Addon é ativado através do método `onActivate(context: AddonContext)`, ele recebe acesso a um conjunto poderoso de ferramentas para interagir com o Core do Metric.
+Quando um Addon é ativado através do método `onActivate(context: AddonContext)`, ele recebe acesso a um conjunto poderoso de ferramentas para interagir com o Core do Gamhora.
 
 ---
 
@@ -81,7 +81,9 @@ Permite ler o estado atual do cronômetro ou disparar ações de início e pausa
 // Consultar status atual
 const activeTimer = await context.timer.getActive()
 if (activeTimer) {
-  console.log(`Cronômetro rodando na tarefa ${activeTimer.taskId} há ${activeTimer.elapsedSeconds}s`)
+  console.log(
+    `Cronômetro rodando na tarefa ${activeTimer.taskId} há ${activeTimer.elapsedSeconds}s`,
+  )
 }
 
 // Iniciar cronômetro para uma tarefa
@@ -98,7 +100,7 @@ await context.timer.stop()
 
 ## 📝 5. Criação Direta de Apontamentos (`context.timeEntries`)
 
-Permite criar lançamentos de tempo diretamente no repositório local do Metric sem passar pela interface gráfica:
+Permite criar lançamentos de tempo diretamente no repositório local do Gamhora sem passar pela interface gráfica:
 
 ```typescript
 await context.timeEntries.create({

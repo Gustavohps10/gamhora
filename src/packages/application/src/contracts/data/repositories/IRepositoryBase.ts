@@ -1,4 +1,4 @@
-import { Entity } from '@metric-org/domain'
+﻿import { Entity } from '@gamhora/domain'
 
 export interface IRepositoryBase<T extends Entity> {
   create(entity: T): Promise<void>

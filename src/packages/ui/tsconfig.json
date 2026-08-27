@@ -19,7 +19,7 @@
   },
   "include": [
     "src"
-, "src/components/app-sidebar-home-content/.tsx"  ],
+  ],
   "exclude": ["dist", "node_modules"],
   "references": [
     { "path": "../shared" }

@@ -1,4 +1,4 @@
-import type { Task } from '@metric-org/sdk'
+﻿import type { Task } from '@gamhora/sdk'
 
 const store = new Map<string, Task>()
 

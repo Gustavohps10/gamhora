@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 
-import { AddonPackageViewModel } from '@metric-org/sdk'
-import { IJobEvent } from '@metric-org/shared/transport'
+import { AddonPackageViewModel } from '@gamhora/sdk'
+import { IJobEvent } from '@gamhora/shared/transport'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   Check,

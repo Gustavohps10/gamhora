@@ -1,5 +1,5 @@
 @startuml TaskEditFlow
-title METRIC - Edição de Tarefa (UC006 - SRS)
+title GAMHORA - Edição de Tarefa (UC006 - SRS)
 actor User
 participant UI
 participant RxDB

@@ -4,7 +4,7 @@ import { Workspace } from './Workspace'
 
 describe('Workspace Entity', () => {
   const LOCAL_AVATAR_URL =
-    'metric-app://C:\\Users\\Gustavo\\AppData\\Roaming\\metric\\workspaces\\avatars\\ws-9ef4bd92-e595-478f-b150-976d5c38372a.png'
+    'gamhora-app://C:\\Users\\Gustavo\\AppData\\Roaming\\gamhora\\workspaces\\avatars\\ws-9ef4bd92-e595-478f-b150-976d5c38372a.png'
 
   const BLOB_URL = 'blob:http://localhost:3000/mock-uuid'
 
@@ -34,7 +34,7 @@ describe('Workspace Entity', () => {
       vi.setSystemTime(now)
 
       const result = Workspace.create({
-        name: 'My Metric Workspace',
+        name: 'My Gamhora Workspace',
         description: 'desc',
         avatarUrl: 'https://avatar.com/img.png',
       })
@@ -44,7 +44,7 @@ describe('Workspace Entity', () => {
       const workspace = result.success
 
       expect(workspace.id).toBe('ws-mock-uuid-1234')
-      expect(workspace.name).toBe('My Metric Workspace')
+      expect(workspace.name).toBe('My Gamhora Workspace')
       expect(workspace.description).toBe('desc')
       expect(workspace.avatarUrl).toBe('https://avatar.com/img.png')
       expect(workspace.status).toBe('draft')
