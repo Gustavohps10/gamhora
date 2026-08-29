@@ -1,1 +1,1 @@
-export type { IHttpClient, IHttpClientConfig } from '@gamhora/application'
+export type { IHttpClient, IHttpClientConfig } from '@pandhora/application'

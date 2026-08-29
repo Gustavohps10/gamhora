@@ -1,7 +1,7 @@
-﻿import { JwtService } from '@gamhora/adapters/auth'
-import { IHttpClient } from '@gamhora/adapters/contracts'
-import { AddonsFacade } from '@gamhora/adapters/facades'
-import { FileManager } from '@gamhora/adapters/tools'
+﻿import { JwtService } from '@pandhora/adapters/auth'
+import { IHttpClient } from '@pandhora/adapters/contracts'
+import { AddonsFacade } from '@pandhora/adapters/facades'
+import { FileManager } from '@pandhora/adapters/tools'
 import {
   ConnectDataSourceService,
   CreateWorkspaceService,
@@ -27,8 +27,8 @@ import {
   TimeEntriesPushService,
   UnlinkDataSourceService,
   UpdateWorkspaceIdentityService,
-} from '@gamhora/application'
-import { IEventEmitter, IJobEvents } from '@gamhora/shared/transport'
+} from '@pandhora/application'
+import { IEventEmitter, IJobEvents } from '@pandhora/shared/transport'
 import {
   asClass,
   asValue,

@@ -1,5 +1,5 @@
 @startuml Architecture
-title GAMHORA - Arquitetura Local-First e Addons SDK
+title PANDHORA - Arquitetura Local-First e Addons SDK
 
 node "Client Desktop (Electron)" {
     component "Renderer UI (React / Tailwind v4)" as UI
@@ -9,7 +9,7 @@ node "Client Desktop (Electron)" {
     component "Native Floating Widget" as Widget
 }
 
-node "Addon Ecosystem (@gamhora-org/sdk)" {
+node "Addon Ecosystem (@pandhora/sdk)" {
     [DataSources (Redmine, Jira...)] as DS
     [Themes (CSS Injected)] as Themes
     [Watchers (Window, Git, Idle)] as Watchers

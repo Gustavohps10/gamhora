@@ -1,13 +1,13 @@
 ---
 title: Themes
-description: Como criar temas visuais personalizados, paletas de cores e estilos para a interface do Gamhora.
+description: Como criar temas visuais personalizados, paletas de cores e estilos para a interface do Pandhora.
 ---
 
 # Themes (Temas & Customização Visual)
 
-Os addons da categoria **Themes** permitem personalizar completamente a estética visual do Gamhora — definindo paletas de cores para modos Claro (Light) e Escuro (Dark), contrastes, bordas e tipografia.
+Os addons da categoria **Themes** permitem personalizar completamente a estética visual do Pandhora — definindo paletas de cores para modos Claro (Light) e Escuro (Dark), contrastes, bordas e tipografia.
 
-O Gamhora adota o padrão de design system baseado em **Tokens CSS** (compatível com Tailwind CSS e shadcn/ui), tornando a criação de novos temas simples e declarativa.
+O Pandhora adota o padrão de design system baseado em **Tokens CSS** (compatível com Tailwind CSS e shadcn/ui), tornando a criação de novos temas simples e declarativa.
 
 ---
 
@@ -34,7 +34,7 @@ export interface ThemeDefinition {
 ## 💻 Exemplo de Implementação de Tema
 
 ```typescript
-import type { IAddon, AddonContext } from '@gamhora-org/sdk'
+import type { IAddon, AddonContext } from '@pandhora/sdk'
 
 export default class CyberpunkThemeAddon implements IAddon {
   public id = 'cyberpunk-theme'
@@ -79,7 +79,7 @@ export default class CyberpunkThemeAddon implements IAddon {
 
 ---
 
-## ⚙️ Como o Gamhora Aplica os Temas
+## ⚙️ Como o Pandhora Aplica os Temas
 
-1. Quando o usuário seleciona o tema nas preferências do Gamhora, o Core injeta dinamicamente as variáveis CSS na raiz do DOM (`:root` ou classe `.dark`).
+1. Quando o usuário seleciona o tema nas preferências do Pandhora, o Core injeta dinamicamente as variáveis CSS na raiz do DOM (`:root` ou classe `.dark`).
 2. Todos os componentes da interface (Time Bar, Listas de Tarefas, Modais e Menus) atualizam suas cores instantaneamente sem necessidade de recarregar a janela.

@@ -1,4 +1,4 @@
-﻿import { IWorkspacesAPI } from '@gamhora/application'
+﻿import { IWorkspacesAPI } from '@pandhora/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

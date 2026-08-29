@@ -1,4 +1,4 @@
-﻿import { AppError, Either } from '@gamhora/shared/helpers'
+﻿import { AppError, Either } from '@pandhora/shared/helpers'
 
 import { ConnectionResultDTO } from '@/dtos/ConnectionResultDTO'
 

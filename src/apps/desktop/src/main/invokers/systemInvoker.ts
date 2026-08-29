@@ -1,4 +1,4 @@
-﻿import { AppSettings, ISystemAPI } from '@gamhora/application'
+﻿import { AppSettings, ISystemAPI } from '@pandhora/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

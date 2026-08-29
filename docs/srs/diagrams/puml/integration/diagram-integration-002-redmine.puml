@@ -1,16 +1,16 @@
 @startuml IntegrationRedmine
-title GAMHORA - Integração Redmine (RF003, RF004)
-participant Gamhora
+title PANDHORA - Integração Redmine (RF003, RF004)
+participant Pandhora
 participant RedmineAdapter
 participant RedmineAPI
 
-Gamhora -> RedmineAdapter: Request Sync (lastCheckpoint)
+Pandhora -> RedmineAdapter: Request Sync (lastCheckpoint)
 RedmineAdapter -> RedmineAPI: GET /issues.json?updated_on=>checkpoint
 RedmineAPI -> RedmineAdapter: JSON (issues)
 
-RedmineAdapter -> RedmineAdapter: Map RedmineIssue -> GamhoraTask
+RedmineAdapter -> RedmineAdapter: Map RedmineIssue -> PandhoraTask
 RedmineAdapter -> RedmineAdapter: Map status, tracker, priority
-RedmineAdapter -> Gamhora: Return Normalized Data
+RedmineAdapter -> Pandhora: Return Normalized Data
 
 note over RedmineAdapter
   Conversão de metadados

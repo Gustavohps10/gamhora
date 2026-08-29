@@ -1,12 +1,12 @@
 ﻿@startuml IntegrationJira
 title Jira Integration Flow
-participant Gamhora
+participant Pandhora
 participant JiraAdapter
 participant JiraAPI
 
-Gamhora -> JiraAdapter: Request Sync (LastCheckpoint)
+Pandhora -> JiraAdapter: Request Sync (LastCheckpoint)
 JiraAdapter -> JiraAPI: GET /rest/api/2/search?jql=updated > Checkpoint
 JiraAPI -> JiraAdapter: Return JSON (Issues)
-JiraAdapter -> JiraAdapter: Map JiraIssue -> GamhoraTask
-JiraAdapter -> Gamhora: Return Normalized Data
+JiraAdapter -> JiraAdapter: Map JiraIssue -> PandhoraTask
+JiraAdapter -> Pandhora: Return Normalized Data
 @enduml

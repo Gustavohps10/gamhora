@@ -1,6 +1,6 @@
 ﻿import { EventEmitter } from 'node:events'
 
-import { IEventEmitter, IJobEvents } from '@gamhora/shared/transport'
+import { IEventEmitter, IJobEvents } from '@pandhora/shared/transport'
 import { BrowserWindow } from 'electron'
 
 export class ElectronJobEventEmitter implements IEventEmitter<IJobEvents> {

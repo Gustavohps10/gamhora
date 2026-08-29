@@ -34,8 +34,8 @@ export type {
   TaskDTO,
   TimeEntryDTO,
   WorkspaceDTO,
-} from '@gamhora/application'
-export { Member, Task, TimeEntry, Workspace } from '@gamhora/domain'
-export { AppError, Either } from '@gamhora/shared/helpers'
-export type { IHeaders, IRequest } from '@gamhora/shared/transport'
-export * from '@gamhora/shared/view-models'
+} from '@pandhora/application'
+export { Member, Task, TimeEntry, Workspace } from '@pandhora/domain'
+export { AppError, Either } from '@pandhora/shared/helpers'
+export type { IHeaders, IRequest } from '@pandhora/shared/transport'
+export * from '@pandhora/shared/view-models'

@@ -1,7 +1,7 @@
 @startuml ComponentCustomExtensions
-title GAMHORA - SDK de Addons Multicapacidade (@gamhora-org/sdk)
+title PANDHORA - SDK de Addons Multicapacidade (@pandhora/sdk)
 
-package "Gamhora Addon Core" {
+package "Pandhora Addon Core" {
     interface "IAddon" as IAddon
     interface "AddonContext" as AddonCtx
     component [AddonLoader] as Loader

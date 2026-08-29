@@ -1,4 +1,4 @@
-﻿import type { EnvironmentInfo } from '@gamhora/application'
+﻿import type { EnvironmentInfo } from '@pandhora/application'
 import { createContext, type ReactNode } from 'react'
 
 export const EnvironmentContext = createContext<EnvironmentInfo | null>(null)

@@ -1,5 +1,5 @@
-﻿import { AppError, Either } from '@gamhora/shared/helpers'
-import { IJobEvent } from '@gamhora/shared/transport'
+﻿import { AppError, Either } from '@pandhora/shared/helpers'
+import { IJobEvent } from '@pandhora/shared/transport'
 
 import { AddonInstallerDTO } from '@/dtos/AddonInstallerDTO'
 import { AddonManifestDTO } from '@/dtos/AddonManifestDTO'

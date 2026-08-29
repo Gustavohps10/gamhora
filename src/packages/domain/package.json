@@ -1,8 +1,8 @@
 {
-  "name": "@gamhora/domain",
+  "name": "@pandhora/domain",
   "version": "1.0.0",
   "private": true,
-  "description": "Contém as entidades, interfaces e regras de negócio principais do ecossistema Gamhora.",
+  "description": "Contém as entidades, interfaces e regras de negócio principais do ecossistema Pandhora.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,7 +19,7 @@
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {
-    "@gamhora/shared": "workspace:*",
+    "@pandhora/shared": "workspace:*",
     "zod": "^3.24.2"
   },
   "devDependencies": {

@@ -14,7 +14,7 @@ O objetivo de um Watcher é emitir **Sugestões Inteligentes de Apontamento** pa
 ## 🎧 Casos de Uso Comuns
 
 - **Monitor de Reuniões**: Detecta entrada e saída de chamadas de voz no Discord, Google Meet ou Slack e sugere o apontamento da reunião com a duração exata.
-- **Detector de Inatividade (Idle)**: Escuta o evento `onIdleDetected` do Gamhora e sugere pausar o cronômetro ou alocar o tempo ausente.
+- **Detector de Inatividade (Idle)**: Escuta o evento `onIdleDetected` do Pandhora e sugere pausar o cronômetro ou alocar o tempo ausente.
 - **Monitor de Git / IDE**: Observa branches de desenvolvimento e sugere apontamentos vinculados aos tickets das branches trabalhadas no dia.
 
 ---
@@ -22,7 +22,7 @@ O objetivo de um Watcher é emitir **Sugestões Inteligentes de Apontamento** pa
 ## 💻 Exemplo Prático de um Watcher
 
 ```typescript
-import type { IAddon, AddonContext, AddonSettingsField } from '@gamhora-org/sdk'
+import type { IAddon, AddonContext, AddonSettingsField } from '@pandhora/sdk'
 
 export default class ReuniõesWatcherAddon implements IAddon {
   public id = 'reunioes-watcher'
@@ -55,7 +55,7 @@ export default class ReuniõesWatcherAddon implements IAddon {
     this.context = undefined
   }
 
-  // Emite a sugestão para a interface do Gamhora
+  // Emite a sugestão para a interface do Pandhora
   public async emitirSugestaoDeApontamento(
     titulo: string,
     duracaoSegundos: number,
@@ -77,5 +77,5 @@ export default class ReuniõesWatcherAddon implements IAddon {
 ## ⚡ Como a Interface Processa as Sugestões
 
 1. O Watcher identifica o término de uma atividade contextual e dispara uma notificação ou evento.
-2. O Gamhora exibe um **card de sugestão contextual** na tela de _Time Entries_.
+2. O Pandhora exibe um **card de sugestão contextual** na tela de _Time Entries_.
 3. O usuário pode clicar em **Aceitar** (salvando o apontamento imediatamente com os dados sugeridos) ou **Descartar**.

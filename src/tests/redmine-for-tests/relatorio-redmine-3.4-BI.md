@@ -2,7 +2,7 @@
 
 ## **Diagnóstico da Plataforma e Desafios de Integração**
 
-A construção de um módulo analítico de relatórios de equipe no aplicativo Gamhora utilizando o Redmine 3.4.x como fonte de dados primária apresenta desafios estruturais no ecossistema de dados1. O Redmine 3.4.x, estruturado originalmente sobre a arquitetura Ruby on Rails 4.2, possui restrições severas na sua interface de programação de aplicações (API REST) no que tange ao processamento analítico de grande volume1. A API REST nativa foi concebida para operações transacionais e operacionais do tipo CRUD em itens individuais, carecendo de primitivas para processamento analítico online (OLAP), agregação no lado do servidor ou execução de funções de agrupamento de banco de dados1.  
+A construção de um módulo analítico de relatórios de equipe no aplicativo Pandhora utilizando o Redmine 3.4.x como fonte de dados primária apresenta desafios estruturais no ecossistema de dados1. O Redmine 3.4.x, estruturado originalmente sobre a arquitetura Ruby on Rails 4.2, possui restrições severas na sua interface de programação de aplicações (API REST) no que tange ao processamento analítico de grande volume1. A API REST nativa foi concebida para operações transacionais e operacionais do tipo CRUD em itens individuais, carecendo de primitivas para processamento analítico online (OLAP), agregação no lado do servidor ou execução de funções de agrupamento de banco de dados1.  
 Para atender equipes compostas por 50 a 100 usuários — cujas métricas consolidadas exigem a extração de dezenas de milhares de registros de horas lançadas (time\_entries) e chamados (issues) —, o consumo síncrono da API REST legada ocasiona gargalos severos de latência, alto consumo de largura de banda e sobrecarga computacional no servidor de produção do cliente1.  
 Este relatório apresenta uma análise exaustiva das alternativas de integração com o Redmine 3.4.x. A investigação abrange os endpoints REST oficiais e internos, o motor nativo de relatórios, o ecossistema de plugins, a viabilidade de GraphQL, conexões diretas em banco de dados relacional e estratégias de sincronização incremental.
 
@@ -29,7 +29,7 @@ Uma limitação crítica da versão 3.4.x é a **ausência do endpoint isolado d
 
 ### **Conclusão Explícita: REST API Oficial**
 
-> **A REST API oficial do Redmine 3.4 NÃO consegue responder consultas agregadas de equipe sem que o cliente baixe a totalidade dos registros brutos.** O servidor transfere a carga de processamento das agregações e cálculos estatísticos para o cliente, forçando o aplicativo Gamhora a consumir milhares de arquivos JSON individuais e executar em memória local as operações de consolidação por usuário, projeto e atividade1.
+> **A REST API oficial do Redmine 3.4 NÃO consegue responder consultas agregadas de equipe sem que o cliente baixe a totalidade dos registros brutos.** O servidor transfere a carga de processamento das agregações e cálculos estatísticos para o cliente, forçando o aplicativo Pandhora a consumir milhares de arquivos JSON individuais e executar em memória local as operações de consolidação por usuário, projeto e atividade1.
 
 ## **2\. Análise do Motor de Relatórios Nativos e Endpoints Internos**
 
@@ -78,7 +78,7 @@ A investigação avaliou se a adoção de um plugin GraphQL (como as gemas e pro
 
 ### **Conclusão Explícita: GraphQL**
 
-> **O GraphQL NÃO resolve o problema de volume de requisições nem o gargalo de processamento no servidor de origem.** A tecnologia apenas altera a forma de consultar os dados (permitindo a seleção de campos e a eliminação do problema de over-fetching), mas **continua retornando a lista inteira de registros individuais**, transferindo para o aplicativo Gamhora a responsabilidade de calcular as somatórias das equipes.
+> **O GraphQL NÃO resolve o problema de volume de requisições nem o gargalo de processamento no servidor de origem.** A tecnologia apenas altera a forma de consultar os dados (permitindo a seleção de campos e a eliminação do problema de over-fetching), mas **continua retornando a lista inteira de registros individuais**, transferindo para o aplicativo Pandhora a responsabilidade de calcular as somatórias das equipes.
 
 ## **5\. Arquitetura de Acesso Direto ao Banco de Dados (Read-Only)**
 
@@ -86,7 +86,7 @@ O acesso direto em modo de leitura ao Banco de Dados Relacional do Redmine (Post
 
 ### **Mapeamento do Schema Relacional (Redmine 3.4)**
 
-Para a construção do modelo analítico do Gamhora, o banco de dados do Redmine 3.4 organiza-se através das tabelas centrais detalhadas abaixo:
+Para a construção do modelo analítico do Pandhora, o banco de dados do Redmine 3.4 organiza-se através das tabelas centrais detalhadas abaixo:
 
 - time\_entries: Contém os lançamentos de horas (hours), data (spent\_on), usuário (user\_id), projeto (project\_id), chamado (issue\_id) e atividade (activity\_id).
 - issues: Armazena a estrutura de chamados (id, subject, status\_id, assigned\_to\_id, author\_id, created\_on, updated\_on, closed\_on, estimated\_hours).
@@ -255,9 +255,9 @@ WHERE i.closed\_on IS NOT NULL;
 Executar consultas analíticas complexas com junções de tabelas históricas (journals e journal\_details) diretamente no banco de dados de produção pode provocar contenção de bloqueios e consumo elevado de I/O de disco, impactando os usuários operacionais do Redmine.  
 Para mitigar esses riscos, é indispensável adotar as seguintes práticas de infraestrutura:
 
-- **Criação de Usuário Read-Only**: O acesso deve ser limitado por permissões explícitas no SGBD (exemplo no PostgreSQL: CREATE USER gamhora\_ro WITH PASSWORD '...'; GRANT CONNECT ON DATABASE redmine TO gamhora\_ro; GRANT SELECT ON ALL TABLES IN SCHEMA public TO gamhora\_ro;).
+- **Criação de Usuário Read-Only**: O acesso deve ser limitado por permissões explícitas no SGBD (exemplo no PostgreSQL: CREATE USER pandhora\_ro WITH PASSWORD '...'; GRANT CONNECT ON DATABASE redmine TO pandhora\_ro; GRANT SELECT ON ALL TABLES IN SCHEMA public TO pandhora\_ro;).
 - **Criação de Índices Específicos**: É recomendável criar índices cobrindo as colunas time\_entries(spent\_on, user\_id, project\_id), issues(assigned\_to\_id, status\_id, closed\_on) e journal\_details(journal\_id, prop\_key).
-- **Utilização de Réplica de Leitura (Read Replica)**: Em ambientes corporativos, a conexão do Gamhora deve ser apontada para uma instância secundária do banco de dados sincronizada de forma assíncrona. Isso isola completamente a carga analítica da aplicação principal.
+- **Utilização de Réplica de Leitura (Read Replica)**: Em ambientes corporativos, a conexão do Pandhora deve ser apontada para uma instância secundária do banco de dados sincronizada de forma assíncrona. Isso isola completamente a carga analítica da aplicação principal.
 - **Estabilidade do Schema**: O modelo relacional do Redmine possui estabilidade histórica. Atualizações entre as versões 3.4.x, 4.x e 5.x mantêm a integridade dessas tabelas primárias, minimizando os riscos de quebra de compatibilidade em atualizações do sistema.
 
 ## **6\. Padrões de Integração Utilizados por Ferramentas de BI em Escala**
@@ -276,11 +276,11 @@ A API REST é descartada nesses cenários devido às limitações de paginação
 
 ## **7\. Estrutura de Sincronização Incremental via REST API**
 
-Caso o Gamhora seja submetido à restrição de utilizar exclusivamente a API REST oficial do Redmine 3.4.x, a arquitetura deve obrigatoriamente implementar um mecanismo de **Sincronização Incremental com Armazenamento Local**.
+Caso o Pandhora seja submetido à restrição de utilizar exclusivamente a API REST oficial do Redmine 3.4.x, a arquitetura deve obrigatoriamente implementar um mecanismo de **Sincronização Incremental com Armazenamento Local**.
 
 ### **Lógica de Captura de Mudanças (CDC) e Limitações**
 
-A sincronização incremental baseia-se na filtragem por carimbo de data/hora (updated\_on) no endpoint /issues.json, gravando no Gamhora o momento da última sincronização1.  
+A sincronização incremental baseia-se na filtragem por carimbo de data/hora (updated\_on) no endpoint /issues.json, gravando no Pandhora o momento da última sincronização1.  
 Entretanto, o endpoint /time\_entries.json na versão 3.4.x não possui um filtro confiável de updated\_on em todas as revisões de código. A estratégia alternativa consiste em filtrar o endpoint /time\_entries.json utilizando a data de lançamento (spent\_on) sobre janelas de tempo deslizantes3.  
 Além disso, a API REST do Redmine **não disponibiliza registros de exclusão (tombstones)**. Se um usuário apagar um lançamento de horas ou um chamado no Redmine, essa exclusão não é reportada por filtros modais. Dessa forma, uma sincronização puramente incremental acumulará divergências e exigirá uma rotina periódica (exemplo: semanal) de varredura completa dos IDs para reconciliação do banco local.
 
@@ -311,22 +311,22 @@ Para cenários onde o acesso direto ao banco é restrito e a extração REST bru
 
 ### **Consumo Automatizado da Exportação CSV Nativa**
 
-O aplicativo Gamhora pode realizar chamadas via código para o relatório nativo do Redmine (/time\_entries/report.csv)5. Essa requisição passa os parâmetros de agrupamento desejados e a chave de API do usuário1. O Redmine executa as agregações e devolve um arquivo CSV pré-calculado contendo os totais por usuário, projeto e atividade6.
+O aplicativo Pandhora pode realizar chamadas via código para o relatório nativo do Redmine (/time\_entries/report.csv)5. Essa requisição passa os parâmetros de agrupamento desejados e a chave de API do usuário1. O Redmine executa as agregações e devolve um arquivo CSV pré-calculado contendo os totais por usuário, projeto e atividade6.
 
 - **Vantagens**: Processamento das agregações diretamente no banco de dados do Redmine6, transferência de payloads reduzidos e dispensa da instalação de plugins5.
 - **Limitações**: Não fornece o histórico detalhado de mudanças de status necessário para o cálculo preciso de Lead Time e Cycle Time.
 
 ### **Consultas Salvas (queries)**
 
-O administrador configura pesquisas públicas personalizadas no Redmine contendo as colunas e filtros exigidos pela equipe4. O Gamhora consome /queries.json para obter os identificadores e faz a requisição em /issues.json?query\_id=X4. Embora simplifique a passagem de filtros, essa alternativa continua retornando dados brutos e paginados, sem agregar os valores1.
+O administrador configura pesquisas públicas personalizadas no Redmine contendo as colunas e filtros exigidos pela equipe4. O Pandhora consome /queries.json para obter os identificadores e faz a requisição em /issues.json?query\_id=X4. Embora simplifique a passagem de filtros, essa alternativa continua retornando dados brutos e paginados, sem agregar os valores1.
 
 ### **Plugins de Webhooks**
 
-A instalação de um plugin leve de eventos (como o redmine\_webhook) envia requisições HTTP POST para o Gamhora sempre que um chamado ou apontamento for alterado. O Gamhora processa essas mensagens e atualiza seu repositório local em tempo real, eliminando a necessidade de varreduras periódicas.
+A instalação de um plugin leve de eventos (como o redmine\_webhook) envia requisições HTTP POST para o Pandhora sempre que um chamado ou apontamento for alterado. O Pandhora processa essas mensagens e atualiza seu repositório local em tempo real, eliminando a necessidade de varreduras periódicas.
 
-## **9\. Matriz Comparativa de Arquiteturas para o Gamhora**
+## **9\. Matriz Comparativa de Arquiteturas para o Pandhora**
 
-As abordagens arquiteturais avaliadas para a sustentação do módulo de relatórios de equipe do aplicativo Gamhora foram comparadas segundo seus critérios técnicos.
+As abordagens arquiteturais avaliadas para a sustentação do módulo de relatórios de equipe do aplicativo Pandhora foram comparadas segundo seus critérios técnicos.
 
 | Critério de Comparação              | A: REST Direto       | B: REST \+ Cache Local     | C: Read-Only DB / Replica  | D: Plugin Analítico Customizado | E: ETL Externo \+ Data Warehouse |
 | :---------------------------------- | :------------------- | :------------------------- | :------------------------- | :------------------------------ | :------------------------------- |
@@ -364,25 +364,25 @@ As abordagens arquiteturais avaliadas para a sustentação do módulo de relató
 
 ### **Pergunta 4**
 
-**Para o Gamhora, qual é a arquitetura mais recomendada considerando as restrições impostas (Redmine 3.4, sem modificar código, permissão para solicitar plugin existente ou DB read-only, suporte a \~100 usuários)?**
+**Para o Pandhora, qual é a arquitetura mais recomendada considerando as restrições impostas (Redmine 3.4, sem modificar código, permissão para solicitar plugin existente ou DB read-only, suporte a \~100 usuários)?**
 
 > **Resposta:**  
 > A arquitetura mais recomendada é a **Conexão Direta ao Banco de Dados Read-Only ou Réplica de Leitura (Arquitetura C)**.  
-> Essa abordagem permite que o Gamhora execute consultas SQL contendo cláusulas GROUP BY, SUM e tabelas temporárias para métricas de fluxo (Lead Time e Cycle Time) diretamente no SGBD. Essa solução atinge tempos de resposta inferiores a 100ms, possui impacto zero no servidor web Rails e dispensa alterações de código ou instalação de plugins.
+> Essa abordagem permite que o Pandhora execute consultas SQL contendo cláusulas GROUP BY, SUM e tabelas temporárias para métricas de fluxo (Lead Time e Cycle Time) diretamente no SGBD. Essa solução atinge tempos de resposta inferiores a 100ms, possui impacto zero no servidor web Rails e dispensa alterações de código ou instalação de plugins.
 
 ### **Pergunta 5**
 
 **Se o administrador não permitir plugin e não fornecer acesso ao banco, qual é a melhor arquitetura possível usando exclusivamente REST?**
 
 > **Resposta:**  
-> A solução ideal sob restrição total é uma **Arquitetura Híbrida (Sincronização Incremental em Background com Caching Local no Gamhora \+ Extração do CSV Nativo)**:
+> A solução ideal sob restrição total é uma **Arquitetura Híbrida (Sincronização Incremental em Background com Caching Local no Pandhora \+ Extração do CSV Nativo)**:
 
-1. **Para a matriz de horas (Usuário / Projeto / Atividade / Mês)**: O Gamhora consome programmaticamente a rota do relatório nativo em CSV (GET /time\_entries/report.csv?criteria\[\]=user&...)5.
-2. **Para métricas de fluxo (Throughput, Lead Time e Cycle Time)**: O Gamhora executa uma rotina assíncrona em segundo plano para sincronizar os chamados via REST API (/issues.json?updated\_on=\>=... e /issues/{id}.json?include=journals), armazenando o histórico em um banco SQLite interno no cliente1. O relatório da equipe é lido do banco local.
+1. **Para a matriz de horas (Usuário / Projeto / Atividade / Mês)**: O Pandhora consome programmaticamente a rota do relatório nativo em CSV (GET /time\_entries/report.csv?criteria\[\]=user&...)5.
+2. **Para métricas de fluxo (Throughput, Lead Time e Cycle Time)**: O Pandhora executa uma rotina assíncrona em segundo plano para sincronizar os chamados via REST API (/issues.json?updated\_on=\>=... e /issues/{id}.json?include=journals), armazenando o histórico em um banco SQLite interno no cliente1. O relatório da equipe é lido do banco local.
 
 ## **11\. Recomendação Arquitetural e Ranking Estratégico**
 
-Para orientar a decisão de engenharia do aplicativo Gamhora, a tabela abaixo apresenta o ranking consolidado das estratégias técnicas investigadas.
+Para orientar a decisão de engenharia do aplicativo Pandhora, a tabela abaixo apresenta o ranking consolidado das estratégias técnicas investigadas.
 
 | Posição no Ranking            | Abordagem Arquitetural                                 | Mecanismo de Execução                                                     | Justificativa Técnica                                                                                                                             |
 | :---------------------------- | :----------------------------------------------------- | :------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------ |

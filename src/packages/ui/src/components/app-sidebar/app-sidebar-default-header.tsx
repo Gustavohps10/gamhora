@@ -10,20 +10,20 @@ export function AppSidebarDefaultHeader() {
     <SidebarHeader className="z-40">
       <div className="relative flex items-center justify-between gap-3 rounded-lg p-2 transition-all duration-200 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
         {/* Lado Esquerdo: Identidade Visual */}
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)] ring-1 ring-zinc-200 dark:bg-zinc-950 dark:ring-zinc-800">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <div className="flex h-8 w-7 shrink-0 items-center justify-center">
             <img
               src={logoIcon}
-              className="h-4.5 w-4.5 opacity-90 dark:opacity-100 dark:invert"
-              alt="Logo Gamhora"
+              className="h-full w-auto object-contain dark:invert"
+              alt="Logo Pandhora"
             />
           </div>
 
           <div className="flex min-w-0 flex-col">
             <img
               src={logoText}
-              className="h-3 w-auto self-start opacity-95 dark:opacity-100 dark:invert"
-              alt="Gamhora"
+              className="w-[100px] self-start dark:invert"
+              alt="Pandhora"
             />
 
             {/* Linha de Metadados: Open Core + GitHub Stars */}
@@ -35,7 +35,7 @@ export function AppSidebarDefaultHeader() {
               <div className="h-2 w-[1px] bg-zinc-200 dark:bg-zinc-800" />
 
               <a
-                href="https://github.com/gustavohps10/gamhora"
+                href="https://github.com/gustavohps10/pandhora"
                 target="_blank"
                 rel="noreferrer"
                 className="group flex items-center gap-1 opacity-70 transition-opacity hover:opacity-100"

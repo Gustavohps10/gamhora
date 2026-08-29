@@ -1,12 +1,12 @@
-﻿import { IGetCurrentUserUseCase } from '@gamhora/application'
-import { MemberDTO } from '@gamhora/application'
+﻿import { IGetCurrentUserUseCase } from '@pandhora/application'
+import { MemberDTO } from '@pandhora/application'
 import {
   AppError,
   createResponseViewModel,
   Either,
-} from '@gamhora/shared/helpers'
-import { IRequest } from '@gamhora/shared/transport'
-import { MemberViewModel, ViewModel } from '@gamhora/shared/view-models'
+} from '@pandhora/shared/helpers'
+import { IRequest } from '@pandhora/shared/transport'
+import { MemberViewModel, ViewModel } from '@pandhora/shared/view-models'
 import { IpcMainInvokeEvent } from 'electron'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'

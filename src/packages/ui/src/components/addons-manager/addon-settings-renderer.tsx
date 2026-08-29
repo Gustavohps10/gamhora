@@ -1,4 +1,4 @@
-﻿import { AddonSettingsField, AddonSettingsTab } from '@gamhora/application'
+﻿import { AddonSettingsField, AddonSettingsTab } from '@pandhora/application'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Folder, Loader2 } from 'lucide-react'
 import { Plus } from 'lucide-react'
@@ -412,7 +412,7 @@ function FieldRenderer({
   const [actionState, setActionState] = useState<{
     isOpen: boolean
     isLoading: boolean
-    result?: import('@gamhora/application').AddonActionResponse
+    result?: import('@pandhora/application').AddonActionResponse
   }>({ isOpen: false, isLoading: false })
 
   if (field.type === 'button') {

@@ -1,7 +1,7 @@
 ﻿'use client'
 
-import { IOpenAPI } from '@gamhora/application'
-import { TaskViewModel, TimeEntryViewModel } from '@gamhora/shared/view-models'
+import { IOpenAPI } from '@pandhora/application'
+import { TaskViewModel, TimeEntryViewModel } from '@pandhora/shared/view-models'
 import {
   createContext,
   ReactNode,

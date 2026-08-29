@@ -1,6 +1,6 @@
 # Guia de Publicação e Versionamento com Changesets
 
-Este documento explica o fluxo simples e passo a passo para versionar e publicar pacotes do monorepo Gamhora no **NPM** usando o **Changesets**.
+Este documento explica o fluxo simples e passo a passo para versionar e publicar pacotes do monorepo Pandhora no **NPM** usando o **Changesets**.
 
 ---
 
@@ -8,13 +8,13 @@ Este documento explica o fluxo simples e passo a passo para versionar e publicar
 
 ### 1. Criar um Registro de Mudança (Changeset)
 
-Após fazer alterações no código (ex: no `@gamhora-org/sdk`), rode na raiz:
+Após fazer alterações no código (ex: no `@pandhora/sdk`), rode na raiz:
 
 ```bash
 yarn changeset
 ```
 
-1. **Selecione os pacotes alterados**: Use as setas do teclado e a barra de espaço para marcar (ex: `[x] @gamhora-org/sdk`) e aperte `Enter`.
+1. **Selecione os pacotes alterados**: Use as setas do teclado e a barra de espaço para marcar (ex: `[x] @pandhora/sdk`) e aperte `Enter`.
 2. **Escolha o tipo de versão**:
    - `patch` (correções de bugs / melhorias internas).
    - `minor` (novas funcionalidades compatíveis).
@@ -75,10 +75,10 @@ Se precisar gerar um novo token de publicação:
 1. Acesse: [npmjs.com/settings/tokens](https://www.npmjs.com/settings/tokens)
 2. Clique em **Generate New Token** ➔ **Granular Access Token**.
 3. Preencha os campos:
-   - **Token name**: `gamhora-publisher`
+   - **Token name**: `pandhora-publisher`
    - **Packages and scopes**:
      - **Permissions**: `Read and write`
-     - **Select packages**: `All packages` (ou escopo `@gamhora-org`)
+     - **Select packages**: `All packages` (ou escopo `@pandhora`)
    - **Organizations**:
      - **Permissions**: `Read and write`
    - **Expiration Date**: Escolha a data de expiração desejada.

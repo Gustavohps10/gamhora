@@ -7,7 +7,7 @@ import type {
   ITaskRepository,
   ITimeEntryQuery,
   ITimeEntryRepository,
-} from '@gamhora/application'
+} from '@pandhora/application'
 
 import { AddonSettingsGroup } from './contracts/IAddon'
 

@@ -27,7 +27,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  storageKey = 'gamhora-theme',
+  storageKey = 'pandhora-theme',
   ...props
 }: ThemeProviderProps) {
   const openAPI = useOpenAPI()

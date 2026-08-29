@@ -1,5 +1,5 @@
 @startuml IntegrationSyncPull
-title GAMHORA - Sincronização Pull (RF004, RF005 - UC001)
+title PANDHORA - Sincronização Pull (RF004, RF005 - UC001)
 participant UI
 participant SyncEngine
 participant CheckpointStore

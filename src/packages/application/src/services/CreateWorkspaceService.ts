@@ -1,5 +1,5 @@
-﻿import { Workspace } from '@gamhora/domain'
-import { AppError, Either } from '@gamhora/shared/helpers'
+﻿import { Workspace } from '@pandhora/domain'
+import { AppError, Either } from '@pandhora/shared/helpers'
 
 import {
   CreateWorkspaceInput,

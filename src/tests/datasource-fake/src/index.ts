@@ -4,7 +4,7 @@
   AddonSettingsSchema,
   IAddon,
   IDataSource,
-} from '@gamhora/sdk'
+} from '@pandhora/sdk'
 
 import { FakeAuthenticationStrategy } from './FakeAuthenticationStrategy'
 import { FakeMemberQuery } from './FakeMemberQuery'
@@ -29,8 +29,8 @@ const configFields: {
           id: 'serverUrl',
           type: 'text',
           label: 'URL do Servidor',
-          placeholder: 'https://fake.gamhora-app.local',
-          defaultValue: 'https://fake.gamhora-app.local',
+          placeholder: 'https://fake.pandhora-app.local',
+          defaultValue: 'https://fake.pandhora-app.local',
         },
         {
           id: 'username',
@@ -68,7 +68,7 @@ const configFields: {
 }
 
 export const FakeDataSource: IDataSource = {
-  id: 'gamhora-datasource-fake',
+  id: 'pandhora-datasource-fake',
   dataSourceType: 'fake',
   displayName: 'DataSource Fake (Testes)',
   configFields,

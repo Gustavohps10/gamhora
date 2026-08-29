@@ -5,9 +5,9 @@ description: Integração com sistemas de controle de ponto corporativo para reg
 
 # Punch (Ponto Eletrônico & Jornada)
 
-Os addons da categoria **Punch** integram o Gamhora a sistemas formais de **Bate-Ponto e Controle de Ponto Eletrônico** (como Pontomais, Ahgora, Factorial, Secullum e Kairos).
+Os addons da categoria **Punch** integram o Pandhora a sistemas formais de **Bate-Ponto e Controle de Ponto Eletrônico** (como Pontomais, Ahgora, Factorial, Secullum e Kairos).
 
-A finalidade do Punch é permitir que o usuário bata o ponto diretamente pelo Gamhora e realize a **conferência automática de jornada** — comparando o saldo de horas trabalhadas do dia com o total de horas alocadas em tarefas e projetos.
+A finalidade do Punch é permitir que o usuário bata o ponto diretamente pelo Pandhora e realize a **conferência automática de jornada** — comparando o saldo de horas trabalhadas do dia com o total de horas alocadas em tarefas e projetos.
 
 ---
 
@@ -15,14 +15,14 @@ A finalidade do Punch é permitir que o usuário bata o ponto diretamente pelo G
 
 - **Batida de Ponto Rápida**: Botão de 1 clique no menu de contexto ou atalho de teclado para registrar Entrada, Intervalo e Saída.
 - **Auditoria de Horas (Jornada vs. Apontamentos)**: Exibe a diferença entre o tempo formal de trabalho e o tempo apontado em tarefas no DataSource, evitando inconsistências ao final do mês.
-- **Histórico e Espelho de Ponto**: Visualização do extrato diário de batidas diretamente no Gamhora.
+- **Histórico e Espelho de Ponto**: Visualização do extrato diário de batidas diretamente no Pandhora.
 
 ---
 
 ## 💻 Exemplo de Implementação de Punch
 
 ```typescript
-import type { IAddon, AddonContext, AddonSettingsField } from '@gamhora-org/sdk'
+import type { IAddon, AddonContext, AddonSettingsField } from '@pandhora/sdk'
 
 export interface PunchRecordDTO {
   id: string
@@ -100,7 +100,7 @@ export default class PontoCorporativoAddon implements IAddon {
       id: data.id,
       timestamp: new Date(data.timestamp),
       type,
-      source: 'Gamhora Desktop',
+      source: 'Pandhora Desktop',
     }
   }
 }

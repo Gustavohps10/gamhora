@@ -1,4 +1,4 @@
-﻿import { Task } from '@gamhora/domain'
+﻿import { Task } from '@pandhora/domain'
 
 import { IRepositoryBase } from '@/contracts/data'
 

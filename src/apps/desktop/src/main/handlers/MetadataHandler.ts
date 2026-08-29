@@ -2,14 +2,14 @@ import {
   IMetadataPullUseCase,
   MetadataDTO,
   PullMetadataInput,
-} from '@gamhora/application'
+} from '@pandhora/application'
 import {
   AppError,
   createResponseViewModel,
   Either,
-} from '@gamhora/shared/helpers'
-import { IRequest } from '@gamhora/shared/transport'
-import { MetadataViewModel, ViewModel } from '@gamhora/shared/view-models'
+} from '@pandhora/shared/helpers'
+import { IRequest } from '@pandhora/shared/transport'
+import { MetadataViewModel, ViewModel } from '@pandhora/shared/view-models'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'
 

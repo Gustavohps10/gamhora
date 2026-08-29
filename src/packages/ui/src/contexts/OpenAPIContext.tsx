@@ -1,4 +1,4 @@
-﻿import { IOpenAPI } from '@gamhora/application'
+﻿import { IOpenAPI } from '@pandhora/application'
 import React from 'react'
 import { createContext } from 'react'
 

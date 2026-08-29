@@ -3,7 +3,7 @@
   AuthenticationResult,
   Either,
   IAuthenticationStrategy,
-} from '@gamhora/sdk'
+} from '@pandhora/sdk'
 
 import { FAKE_MEMBER } from './fakeData'
 

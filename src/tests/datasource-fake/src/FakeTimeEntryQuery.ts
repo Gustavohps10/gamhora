@@ -3,7 +3,7 @@
   PagedResultDTO,
   PaginationOptionsDTO,
   TimeEntryDTO,
-} from '@gamhora/sdk'
+} from '@pandhora/sdk'
 
 import { FAKE_TIME_ENTRIES } from './fakeData'
 

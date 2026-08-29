@@ -1,6 +1,6 @@
 'use client'
 
-import type { AddonSettingsField, AddonSettingsGroup } from '@gamhora/sdk'
+import type { AddonSettingsField, AddonSettingsGroup } from '@pandhora/sdk'
 import { AlertCircle, CheckCircle, ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 

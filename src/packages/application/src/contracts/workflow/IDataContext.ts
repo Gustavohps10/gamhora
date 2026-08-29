@@ -1,4 +1,4 @@
-﻿import { Entity } from '@gamhora/domain'
+﻿import { Entity } from '@pandhora/domain'
 
 import { IQueryBase } from '@/contracts/data'
 import { IRepositoryBase } from '@/contracts/data'

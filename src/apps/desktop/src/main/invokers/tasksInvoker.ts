@@ -1,4 +1,4 @@
-﻿import { ITaskAPI } from '@gamhora/application'
+﻿import { ITaskAPI } from '@pandhora/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

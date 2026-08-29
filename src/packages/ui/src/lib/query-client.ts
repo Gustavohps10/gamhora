@@ -1,4 +1,4 @@
-﻿import { ViewModel } from '@gamhora/shared/view-models'
+﻿import { ViewModel } from '@pandhora/shared/view-models'
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
 
 export const queryClient = new QueryClient({

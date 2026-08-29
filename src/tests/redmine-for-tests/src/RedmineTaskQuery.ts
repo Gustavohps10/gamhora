@@ -1,10 +1,10 @@
-﻿import { IHttpClient } from '@gamhora/adapters/contracts'
+﻿import { IHttpClient } from '@pandhora/adapters/contracts'
 import {
   ITaskQuery,
   PagedResultDTO,
   PaginationOptionsDTO,
   TaskDTO,
-} from '@gamhora/sdk'
+} from '@pandhora/sdk'
 
 import { RedmineBase } from '@/RedmineBase'
 

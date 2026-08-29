@@ -3,22 +3,22 @@ import {
   FileData,
   IAddonsFacade,
   IImportAddonUseCase,
-} from '@gamhora/application'
-import { AddonSettingsSchema } from '@gamhora/sdk'
-import { createResponseViewModel } from '@gamhora/shared/helpers'
+} from '@pandhora/application'
+import { AddonSettingsSchema } from '@pandhora/sdk'
+import { createResponseViewModel } from '@pandhora/shared/helpers'
 import {
   IEventEmitter,
   IJobEvents,
   IJobResult,
   IRequest,
-} from '@gamhora/shared/transport'
+} from '@pandhora/shared/transport'
 import {
   AddonInstallerViewModel,
   AddonManifestViewModel,
   AddonThemeViewModel,
   PaginatedViewModel,
   ViewModel,
-} from '@gamhora/shared/view-models'
+} from '@pandhora/shared/view-models'
 import { app, type IpcMainInvokeEvent } from 'electron'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'
@@ -30,7 +30,7 @@ import {
 const DEV_FAKE_MANIFEST: AddonManifest = {
   id: FAKE_DATASOURCE_ADDON_ID,
   name: 'DataSource Fake (Testes)',
-  creator: 'Gamhora',
+  creator: 'Pandhora',
   description:
     'Datasource mock com 1000 tarefas e 1000 apontamentos locais para testes e validação de envio de dados.',
   path: '',
@@ -46,7 +46,7 @@ const DEV_FAKE_MANIFEST: AddonManifest = {
 const DEV_REDMINE_MANIFEST: AddonManifest = {
   id: REDMINE4TEST_ADDON_ID,
   name: 'Redmine (Oficial)',
-  creator: 'Gamhora',
+  creator: 'Pandhora',
   description: 'Conector Redmine para testes.',
   path: '',
   logo: 'https://raw.githubusercontent.com/Gustavohps10/redmine-plugin/main/src/icon.png',
@@ -58,10 +58,10 @@ const DEV_REDMINE_MANIFEST: AddonManifest = {
   tags: ['redmine', 'datasource', 'theme', 'tema', 'teste'],
 }
 
-const DEV_GAMHORA_AI_MANIFEST: AddonManifest = {
-  id: '@gamhora/gamhora-ai-for-tests',
-  name: 'Gamhora AI (Testes)',
-  creator: 'Gamhora',
+const DEV_PANDHORA_AI_MANIFEST: AddonManifest = {
+  id: '@pandhora/pandhora-ai-for-tests',
+  name: 'Pandhora AI (Testes)',
+  creator: 'Pandhora',
   description: 'Addon de IA para testes de OCR e análise de atividade visual.',
   path: '',
   logo: 'Sparkles',
@@ -74,9 +74,9 @@ const DEV_GAMHORA_AI_MANIFEST: AddonManifest = {
 }
 
 const DEV_DISCORD_MANIFEST: AddonManifest = {
-  id: '@gamhora/discord-for-tests',
+  id: '@pandhora/discord-for-tests',
   name: 'Discord Presence',
-  creator: 'Gamhora',
+  creator: 'Pandhora',
   description: 'Sincroniza status do timer no Discord',
   path: '',
   logo: 'https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png',
@@ -89,9 +89,9 @@ const DEV_DISCORD_MANIFEST: AddonManifest = {
 }
 
 const DEV_FAKE_WATCHER_MANIFEST: AddonManifest = {
-  id: '@gamhora/fake-watcher-for-tests',
+  id: '@pandhora/fake-watcher-for-tests',
   name: 'Fake Watcher',
-  creator: 'Gamhora',
+  creator: 'Pandhora',
   description: 'Watcher falso para testes',
   path: '',
   logo: '',
@@ -104,9 +104,9 @@ const DEV_FAKE_WATCHER_MANIFEST: AddonManifest = {
 }
 
 const DEV_SUPABASE_THEME_MANIFEST: AddonManifest = {
-  id: '@gamhora/supabase-theme',
+  id: '@pandhora/supabase-theme',
   name: 'Supabase Emerald',
-  creator: 'Gamhora',
+  creator: 'Pandhora',
   description: 'Tema verde esmeralda inspirado no Supabase.',
   path: '',
   logo: 'Palette',
@@ -119,9 +119,9 @@ const DEV_SUPABASE_THEME_MANIFEST: AddonManifest = {
 }
 
 const DEV_PURPLE_THEME_MANIFEST: AddonManifest = {
-  id: '@gamhora/purple-theme',
+  id: '@pandhora/purple-theme',
   name: 'Purple Neon',
-  creator: 'Gamhora',
+  creator: 'Pandhora',
   description: 'Tema roxo vibrante neon.',
   path: '',
   logo: 'Palette',
@@ -136,14 +136,14 @@ const DEV_PURPLE_THEME_MANIFEST: AddonManifest = {
 const DEV_ADDONS: AddonManifest[] = [
   DEV_FAKE_MANIFEST,
   DEV_REDMINE_MANIFEST,
-  DEV_GAMHORA_AI_MANIFEST,
+  DEV_PANDHORA_AI_MANIFEST,
   DEV_DISCORD_MANIFEST,
   DEV_FAKE_WATCHER_MANIFEST,
   DEV_SUPABASE_THEME_MANIFEST,
   DEV_PURPLE_THEME_MANIFEST,
 ]
 
-import { SidebarMenuItem, TimerbarMenuItem } from '@gamhora/sdk'
+import { SidebarMenuItem, TimerbarMenuItem } from '@pandhora/sdk'
 
 import { AddonLoader } from '@/main/services/AddonLoader'
 

@@ -1,5 +1,5 @@
-﻿import { AppError, Either } from '@gamhora/shared/helpers'
-import { IJobEvent } from '@gamhora/shared/transport'
+﻿import { AppError, Either } from '@pandhora/shared/helpers'
+import { IJobEvent } from '@pandhora/shared/transport'
 
 import { FileData, IFileManager, IFileStorage } from '@/contracts'
 import { IAddonsFacade } from '@/contracts/facades'

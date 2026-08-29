@@ -1,45 +1,45 @@
-﻿import { AddonContext, IAddon } from '@gamhora/sdk'
+﻿import { AddonContext, IAddon } from '@pandhora/sdk'
 
-export default class GamhoraAI4TestAddon implements IAddon {
+export default class PandhoraAI4TestAddon implements IAddon {
   public metadata = {
-    name: 'Gamhora AI',
+    name: 'Pandhora AI',
     iconUrl:
       'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%238B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>',
   }
   activate(context: AddonContext): void {
-    console.log('🤖 [GamhoraAI4TestAddon] Ativando addon de testes de IA...')
+    console.log('🤖 [PandhoraAI4TestAddon] Ativando addon de testes de IA...')
 
     context.menus.timerbar.register({
-      id: 'gamhora-ai-timerbar-popover',
+      id: 'pandhora-ai-timerbar-popover',
       type: 'popover',
       icon: 'Sparkles',
-      tooltip: 'Gamhora AI (OCR & Processamento)',
+      tooltip: 'Pandhora AI (OCR & Processamento)',
       items: [
         {
-          id: 'gamhora-ai:ocr-tesseract',
+          id: 'pandhora-ai:ocr-tesseract',
           label: 'Executar OCR (Tesseract)',
           icon: 'ScanText',
           shortcut: 'Ctrl+Shift+O',
         },
         {
-          id: 'gamhora-ai:analyze-screen',
+          id: 'pandhora-ai:analyze-screen',
           label: 'Analisar Atividade Visual',
           icon: 'Eye',
           shortcut: 'Ctrl+Shift+V',
         },
         {
-          id: 'gamhora-ai:auto-categorize',
+          id: 'pandhora-ai:auto-categorize',
           label: 'Sugerir Categoria por IA',
           icon: 'Brain',
         },
       ],
     })
 
-    context.commands.register('gamhora-ai:ocr-tesseract', async () => {
+    context.commands.register('pandhora-ai:ocr-tesseract', async () => {
       console.log('DISPARADO OCR TESSERACT')
       await context.notifications.loading(
         '📷 Capturando imagem da tela...',
-        'Gamhora AI - OCR',
+        'Pandhora AI - OCR',
       )
       console.log('APOS MENSAGEM')
 
@@ -47,7 +47,7 @@ export default class GamhoraAI4TestAddon implements IAddon {
 
       await context.notifications.loading(
         '⚙️ Processando Engine Tesseract (Modelo LSTM)...',
-        'Gamhora AI - OCR',
+        'Pandhora AI - OCR',
       )
 
       await new Promise((r) => setTimeout(r, 1200))
@@ -63,17 +63,17 @@ export default class GamhoraAI4TestAddon implements IAddon {
       }
     })
 
-    context.commands.register('gamhora-ai:analyze-screen', async () => {
+    context.commands.register('pandhora-ai:analyze-screen', async () => {
       await context.notifications.loading(
         '🔍 Analisando hierarquia de janelas...',
-        'Gamhora AI - Visão Computacional',
+        'Pandhora AI - Visão Computacional',
       )
 
       await new Promise((r) => setTimeout(r, 1000))
 
       await context.notifications.loading(
         '🧠 Modelo ResNet-50 identificando aplicativo...',
-        'Gamhora AI - Visão Computacional',
+        'Pandhora AI - Visão Computacional',
       )
 
       await new Promise((r) => setTimeout(r, 1000))
@@ -89,10 +89,10 @@ export default class GamhoraAI4TestAddon implements IAddon {
       }
     })
 
-    context.commands.register('gamhora-ai:auto-categorize', async () => {
+    context.commands.register('pandhora-ai:auto-categorize', async () => {
       await context.notifications.loading(
         '📊 Consultando vetores e embeddings de tarefas...',
-        'Gamhora AI - Categorização',
+        'Pandhora AI - Categorização',
       )
 
       await new Promise((r) => setTimeout(r, 800))
@@ -110,6 +110,6 @@ export default class GamhoraAI4TestAddon implements IAddon {
   }
 
   deactivate(): void {
-    console.log('🤖 [GamhoraAI4TestAddon] Desativando addon de testes de IA.')
+    console.log('🤖 [PandhoraAI4TestAddon] Desativando addon de testes de IA.')
   }
 }

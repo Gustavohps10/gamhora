@@ -1,154 +1,266 @@
 'use client'
 
-const integrations = [
+import { ArrowRight, Github, MessageSquarePlus, Terminal } from 'lucide-react'
+import Image from 'next/image'
+import * as React from 'react'
+
+export interface IntegrationItem {
+  name: string
+  desc: string
+  status: 'live' | 'soon'
+  accentBg: string
+  accentBorder: string
+  darkInvert?: boolean
+  logoUrl: string
+}
+
+const INTEGRATIONS: IntegrationItem[] = [
   {
     name: 'Jira',
-    description:
-      'Sincronize sprints, épicos e tarefas diretamente com seu time tracking.',
-    color: '#0052CC',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-8 w-8" fill="#0052CC">
-        <path d="M11.571 11.513H0a5.218 5.218 0 0 0 5.232 5.215h2.13v2.057A5.215 5.215 0 0 0 12.594 24V12.518a1.005 1.005 0 0 0-1.023-1.005zM5.024 5.236H16.59a5.217 5.217 0 0 1-5.228 5.212h-2.13v2.06A5.218 5.218 0 0 1 3.999 17.72V6.241a1.005 1.005 0 0 1 1.025-1.005zM11.571 0h11.571a5.217 5.217 0 0 1-5.228 5.215h-2.134v2.057A5.215 5.215 0 0 1 10.547 12.484V1.005A1.005 1.005 0 0 1 11.571 0z" />
-      </svg>
-    ),
+    desc: 'Crie tickets, atualize status e registre horas diretamente nos issues sem abrir nenhuma aba extra.',
+    status: 'live',
+    accentBg: 'bg-[#0052CC]/10',
+    accentBorder: 'border-[#0052CC]/25',
+    darkInvert: false,
+    logoUrl:
+      'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/jira.svg',
   },
   {
     name: 'Redmine',
-    description: 'Importe projetos, issues e logs de tempo do seu Redmine.',
-    color: '#B32024',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-8 w-8" fill="#B32024">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9V7h2v6zm4 4h-2v-2h2v2zm0-4h-2V7h2v6z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Trello',
-    description: 'Conecte boards e cards para tracking automático de tarefas.',
-    color: '#0079BF',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-8 w-8" fill="#0079BF">
-        <path d="M21 0H3C1.34 0 0 1.34 0 3v18c0 1.66 1.34 3 3 3h18c1.66 0 3-1.34 3-3V3c0-1.66-1.34-3-3-3zM10.44 18.18c0 .62-.5 1.12-1.12 1.12H5.12C4.5 19.3 4 18.8 4 18.18V5.12C4 4.5 4.5 4 5.12 4h4.2c.62 0 1.12.5 1.12 1.12v13.06zM20 13.18c0 .62-.5 1.12-1.12 1.12h-4.2c-.62 0-1.12-.5-1.12-1.12V5.12c0-.62.5-1.12 1.12-1.12h4.2c.62 0 1.12.5 1.12 1.12v8.06z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Slack',
-    description:
-      'Receba notificações em tempo real e registre horas via comandos.',
-    color: '#4A154B',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-8 w-8" fill="#E01E5A">
-        <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zm1.271 0a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zm0 1.271a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zm10.122 2.521a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zm-1.268 0a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zm-2.523 10.122a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zm0-1.268a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" />
-      </svg>
-    ),
+    desc: 'Sincroniza time entries, atividades personalizadas e percentuais de avanço via REST API oficial.',
+    status: 'live',
+    accentBg: 'bg-red-600/10',
+    accentBorder: 'border-red-600/25',
+    darkInvert: false,
+    logoUrl:
+      'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/redmine.svg',
   },
   {
     name: 'GitHub',
-    description: 'Rastreie tempo por commits, pull requests e issues.',
-    color: '#ffffff',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-8 w-8" fill="white">
-        <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
-      </svg>
-    ),
+    desc: 'Vincule commits e pull requests com suas sessões de trabalho para rastrear tempo por issue.',
+    status: 'live',
+    accentBg: 'bg-muted/40',
+    accentBorder: 'border-border/60',
+    darkInvert: true,
+    logoUrl:
+      'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/github.svg',
   },
   {
-    name: 'Asana',
-    description:
-      'Gerencie tarefas, projetos e portfolios com tracking integrado.',
-    color: '#F06A6A',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-8 w-8" fill="#F06A6A">
-        <path d="M18.78 12.653c-2.882 0-5.22 2.337-5.22 5.218S15.898 23.09 18.78 23.09 24 20.752 24 17.87s-2.338-5.218-5.22-5.218zm-13.56 0c-2.882 0-5.22 2.337-5.22 5.218S2.338 23.09 5.22 23.09s5.22-2.337 5.22-5.218-2.338-5.218-5.22-5.218zM17.22 5.218C17.22 2.337 14.882 0 12 0S6.78 2.337 6.78 5.218 9.118 10.436 12 10.436s5.22-2.337 5.22-5.218z" />
-      </svg>
-    ),
+    name: 'YouTrack',
+    desc: 'Gerencie work items, sprints e time tracking nativo compatível com instâncias Cloud e On-premise.',
+    status: 'live',
+    accentBg: 'bg-amber-500/10',
+    accentBorder: 'border-amber-500/25',
+    darkInvert: false,
+    logoUrl:
+      'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/jetbrains-youtrack.svg',
+  },
+  {
+    name: 'Linear',
+    desc: 'Sincronização de cycles, issues e estados com resolução automática de workflows.',
+    status: 'soon',
+    accentBg: 'bg-violet-500/10',
+    accentBorder: 'border-violet-500/25',
+    darkInvert: true,
+    logoUrl:
+      'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/linear.svg',
+  },
+  {
+    name: 'GitLab',
+    desc: 'Rastreie Merge Requests, pipelines e logs de tempo nativos com a API v4 do GitLab.',
+    status: 'soon',
+    accentBg: 'bg-orange-500/10',
+    accentBorder: 'border-orange-500/25',
+    darkInvert: false,
+    logoUrl:
+      'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/gitlab.svg',
+  },
+]
+
+const TECH_STACK = [
+  {
+    name: 'TypeScript',
+    url: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/typescript.svg',
+  },
+  {
+    name: 'Node.js',
+    url: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/nodejs-alt.svg',
+  },
+  {
+    name: 'React',
+    url: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/reactjs.svg',
+  },
+  {
+    name: 'Next.js',
+    url: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/nextjs-light.svg',
+    invert: false,
+  },
+  {
+    name: 'Tailwind',
+    url: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/tailwind.svg',
+  },
+  {
+    name: 'Electron',
+    url: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/electron.svg',
+  },
+  {
+    name: 'Turbopack',
+    url: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/turbopack-light.svg',
   },
 ]
 
 export function Integrations() {
   return (
-    <section id="integrations" className="bg-card relative py-24 lg:py-32">
-      {/* Subtle top glow */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px"
-        style={{
-          background:
-            'linear-gradient(90deg, transparent 0%, oklch(0.6635 0.1517 255.9445 / 0.3) 50%, transparent 100%)',
-        }}
-      />
-
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        {/* Section header */}
-        <div className="mx-auto max-w-2xl text-center">
-          <span className="text-primary inline-block text-sm font-semibold tracking-widest uppercase">
-            Integrações
-          </span>
-          <h2 className="text-foreground mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-            Ecossistema de
-            <span className="text-primary"> Integrações</span>
+    <section id="integrations" className="pb-20">
+      <div className="container mx-auto px-6">
+        <div className="mb-12 text-center">
+          <p className="text-muted-foreground mb-3 text-xs font-semibold tracking-widest uppercase">
+            Ecossistema conectado
+          </p>
+          <h2 className="mx-auto max-w-xl text-3xl leading-tight font-bold tracking-tight sm:text-4xl">
+            Sincroniza com as ferramentas que seu time já usa.
           </h2>
-          <p className="text-muted-foreground mt-6 text-lg leading-relaxed">
-            Conecte suas ferramentas favoritas e automatize o apontamento de
-            horas. Tudo sincronizado em tempo real.
+          <p className="text-muted-foreground mx-auto mt-3 max-w-sm text-sm leading-relaxed">
+            Apontamentos fluem nos dois sentidos — sem copiar e colar, sem
+            duplicação, sem atrito.
           </p>
         </div>
 
-        {/* Ecosystem grid */}
-        <div className="relative mt-16">
-          {/* Center connector lines */}
-          <div className="pointer-events-none absolute inset-0 hidden items-center justify-center lg:flex">
-            <div className="border-primary h-48 w-48 rounded-full border opacity-20" />
-            <div className="border-primary absolute h-80 w-80 rounded-full border opacity-10" />
-          </div>
-
-          <div className="relative grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {integrations.map((integration, index) => (
-              <div
-                key={integration.name}
-                className={`lp-card group lp-animate-fade-in-up cursor-pointer p-6 lp-delay-${(index + 1) * 100}`}
-              >
-                {/* Icon + Name row */}
-                <div className="flex items-center gap-4">
-                  <div
-                    className="flex h-14 w-14 items-center justify-center rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
-                    style={{
-                      background: `${integration.color}15`,
-                      boxShadow: `0 0 0 1px ${integration.color}20`,
-                    }}
-                  >
-                    {integration.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-foreground text-lg font-bold">
-                      {integration.name}
-                    </h3>
-                    <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-                      Integrado
-                    </span>
-                  </div>
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {INTEGRATIONS.map((app) => (
+            <div
+              key={app.name}
+              className="group border-border/40 bg-background hover:border-border relative rounded-lg border p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm"
+            >
+              {/* Top */}
+              <div className="flex items-start justify-between">
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-lg border ${app.accentBg} ${app.accentBorder} overflow-hidden`}
+                >
+                  <Image
+                    src={app.logoUrl}
+                    alt={`${app.name} logo`}
+                    width={22}
+                    height={22}
+                    className={`object-contain ${app.darkInvert ? 'dark:invert' : ''}`}
+                  />
                 </div>
 
-                {/* Description */}
-                <p className="text-muted-foreground mt-4 text-sm leading-relaxed">
-                  {integration.description}
-                </p>
-
-                {/* Bottom accent line */}
-                <div
-                  className="mt-5 h-0.5 w-0 rounded-full transition-all duration-500 group-hover:w-full"
-                  style={{ background: integration.color }}
-                />
+                <span
+                  className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-[10px] font-medium ${
+                    app.status === 'live'
+                      ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-500'
+                      : 'border-amber-500/20 bg-amber-500/10 text-amber-500'
+                  }`}
+                >
+                  <span
+                    className={`size-1.5 rounded-full ${
+                      app.status === 'live' ? 'bg-emerald-500' : 'bg-amber-400'
+                    }`}
+                  />
+                  {app.status === 'live' ? 'Disponível' : 'Em breve'}
+                </span>
               </div>
-            ))}
-          </div>
+
+              {/* Nome */}
+              <div className="mt-5">
+                <h3 className="text-base font-semibold tracking-tight">
+                  {app.name}
+                </h3>
+              </div>
+
+              {/* Descrição */}
+              <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                {app.desc}
+              </p>
+
+              {/* Footer */}
+              <div className="mt-6 flex items-center justify-between">
+                <span className="text-muted-foreground/50 text-[11px] font-medium tracking-wider uppercase">
+                  {app.status === 'live'
+                    ? 'Sync bidirecional'
+                    : 'Em desenvolvimento'}
+                </span>
+
+                <div className="text-muted-foreground/40 group-hover:text-muted-foreground flex items-center gap-1 transition-all">
+                  <span className="text-xs">Ver detalhes</span>
+                  <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Bottom CTA */}
-        <div className="mt-16 text-center">
-          <p className="text-muted-foreground text-sm">
-            E mais integrações em breve...
-          </p>
+        {/* Card original: Built by developers, for developers */}
+        <div className="relative mt-8 overflow-hidden rounded-lg border border-dashed border-zinc-700 bg-[#0a0a0a] p-8 md:p-12">
+          {/* Background Decorativo */}
+          <div className="pointer-events-none absolute top-1/2 -right-6 -translate-y-1/2 text-zinc-500 opacity-10 select-none">
+            <Terminal size={240} strokeWidth={1} />
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <h3 className="text-2xl font-semibold tracking-tight text-zinc-100 md:text-3xl">
+              Built by developers, for developers.
+            </h3>
+
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400 md:text-base">
+              O Pandhora é open-source e focado em privacidade. Sinta-se em casa
+              para contribuir com código ou sugerir as ferramentas que faltam no
+              seu workflow.
+            </p>
+
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="mt-10 flex flex-col items-center gap-8">
+                {/* Stack Badges - Minimalistas */}
+                <div className="flex flex-wrap items-center justify-center gap-6 opacity-40 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0">
+                  {TECH_STACK.map((tech) => (
+                    <div
+                      key={tech.name}
+                      className="group relative flex items-center justify-center"
+                    >
+                      <Image
+                        src={tech.url}
+                        alt={tech.name}
+                        width={20}
+                        height={20}
+                        className={`h-5 w-auto transition-transform duration-300 group-hover:scale-110 ${tech.invert ? 'dark:invert' : ''}`}
+                      />
+                      {/* Tooltip opcional (Estilo Linear) */}
+                      <span className="absolute -top-8 scale-0 rounded bg-zinc-800 px-2 py-1 text-[10px] text-zinc-200 transition-all group-hover:scale-100">
+                        {tech.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Divisória sutil */}
+                <div className="h-px w-12 bg-zinc-800" />
+
+                {/* Seção de Botões */}
+                <div className="flex flex-col items-center gap-4 sm:flex-row">
+                  <a
+                    href="https://github.com/gustavohps10/pandhora"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-zinc-100 px-6 text-sm font-medium text-zinc-950 transition-all hover:bg-zinc-200 active:scale-95"
+                  >
+                    <Github className="size-4 transition-transform group-hover:rotate-12" />
+                    Contribuir no GitHub
+                  </a>
+
+                  <a
+                    href="https://github.com/gustavohps10/pandhora/issues/new"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/40 px-6 text-sm font-medium text-zinc-400 transition-all hover:border-zinc-700 hover:bg-zinc-900 hover:text-zinc-100 active:scale-95"
+                  >
+                    <MessageSquarePlus className="size-4" />
+                    Sugerir Integração
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

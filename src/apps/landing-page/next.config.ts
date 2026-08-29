@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
 
   reactCompiler: true,
 
-  transpilePackages: ['@gamhora/ui', '@gamhora/application'],
+  transpilePackages: ['@pandhora/ui', '@pandhora/application'],
 
   images: {
     remotePatterns: [

@@ -1,4 +1,4 @@
-﻿import { AppError, Either } from '@gamhora/shared/helpers'
+﻿import { AppError, Either } from '@pandhora/shared/helpers'
 
 import {
   ConnectDataSourceInput,
@@ -54,7 +54,7 @@ export class ConnectDataSourceService implements IConnectDataSourceUseCase {
       const { member, credentials } = authResult.success
 
       await this.credentialsStorage.saveToken(
-        'gamhora',
+        'pandhora',
         storageKey,
         JSON.stringify({
           member,
@@ -74,7 +74,7 @@ export class ConnectDataSourceService implements IConnectDataSourceUseCase {
       )
 
       if (connectResult.isFailure()) {
-        await this.credentialsStorage.deleteToken('gamhora', storageKey)
+        await this.credentialsStorage.deleteToken('pandhora', storageKey)
         return connectResult.forwardFailure()
       }
 
@@ -84,7 +84,7 @@ export class ConnectDataSourceService implements IConnectDataSourceUseCase {
         member,
       })
     } catch {
-      await this.credentialsStorage.deleteToken('gamhora', storageKey)
+      await this.credentialsStorage.deleteToken('pandhora', storageKey)
 
       return Either.failure(AppError.Internal('ERRO_AO_CONECTAR_DATA_SOURCE'))
     }

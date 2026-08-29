@@ -1,4 +1,4 @@
-﻿import { AppError, Either, FieldErrors } from '@gamhora/shared/helpers'
+﻿import { AppError, Either, FieldErrors } from '@pandhora/shared/helpers'
 import z from 'zod'
 
 import { Entity } from '@/entities/Entity'
@@ -35,7 +35,7 @@ const avatarUrlSchema = z
 
       const hasValidExtension = /\.(png|jpg|jpeg|gif|svg)(\?.*)?$/i.test(val)
 
-      if (val.startsWith('gamhora-app://')) {
+      if (val.startsWith('pandhora-app://')) {
         return hasValidExtension
       }
 
@@ -52,7 +52,7 @@ const avatarUrlSchema = z
     },
     {
       message:
-        'Avatar deve ser uma URL válida (http/https) ou gamhora-app:// e apontar para uma imagem (png, jpg, jpeg, gif, svg)',
+        'Avatar deve ser uma URL válida (http/https) ou pandhora-app:// e apontar para uma imagem (png, jpg, jpeg, gif, svg)',
     },
   )
 

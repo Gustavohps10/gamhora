@@ -3,15 +3,13 @@ import {
   AddonManifestDTO,
   IAddonsFacade,
   IFileStorage,
-} from '@gamhora/application'
-import { AppError, Either } from '@gamhora/shared/helpers'
-import { IJobEvent } from '@gamhora/shared/transport'
+} from '@pandhora/application'
+import { AppError, Either } from '@pandhora/shared/helpers'
+import { IJobEvent } from '@pandhora/shared/transport'
 import axios from 'axios'
 import { promises as fs } from 'fs'
 import yaml from 'js-yaml'
 import { join, resolve } from 'path'
-
-const LOCAL_ADDONS_PATH = './addons'
 
 type RawPackage = {
   version?: string
@@ -114,9 +112,10 @@ export class AddonsFacade implements IAddonsFacade {
 
   public async listAvailable(): Promise<Either<AppError, AddonManifestDTO[]>> {
     try {
-      const primaryUrl = 'https://gamhora.github.io/addons-manifest/index.json'
+      const primaryUrl =
+        'https://pandhora-community.github.io/addons-manifest//index.json'
       const fallbackUrl =
-        'https://gamhora.github.io/addons-manifest/addonDatabase/index.json'
+        'https://pandhora-community.github.io/addons-manifest//addonDatabase/index.json'
 
       let response
       try {
@@ -146,7 +145,7 @@ export class AddonsFacade implements IAddonsFacade {
           const yamlFiles = data as string[]
           const addons: AddonManifestDTO[] = await Promise.all(
             yamlFiles.map(async (filename) => {
-              const yamlUrl = `https://gamhora.github.io/addons-manifest/addonDatabase/dataSource/${filename}`
+              const yamlUrl = `https://pandhora.github.io/addons-manifest/addonDatabase/dataSource/${filename}`
               const { data: rawYaml } = await axios.get(yamlUrl)
               const parsed = await this.parseManifest(rawYaml)
               if (parsed.isFailure()) throw parsed.failure
@@ -407,7 +406,7 @@ export class AddonsFacade implements IAddonsFacade {
         maxRedirects: 10,
         headers: {
           'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) GamhoraApp/1.0.0',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) PandhoraApp/1.0.0',
           Accept: 'application/octet-stream, application/zip, */*',
         },
         onDownloadProgress: (progressEvent) => {

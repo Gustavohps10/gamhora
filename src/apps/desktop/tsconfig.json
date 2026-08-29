@@ -6,11 +6,11 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@gamhora/IoC": ["../../packages/IoC.ts"],
-      "@gamhora/application/*": ["../../packages/application/src/*"],
-      "@gamhora/shared/*": ["../../packages/shared/src/*"],
-      "@gamhora/adapters/*": ["../../packages/adapters/src/*"],
-      "@gamhora/ui/*": ["../../packages/ui/src/*"]
+      "@pandhora/IoC": ["../../packages/IoC.ts"],
+      "@pandhora/application/*": ["../../packages/application/src/*"],
+      "@pandhora/shared/*": ["../../packages/shared/src/*"],
+      "@pandhora/adapters/*": ["../../packages/adapters/src/*"],
+      "@pandhora/ui/*": ["../../packages/ui/src/*"]
     },
     "types": ["electron-vite/node", "node"]
   },

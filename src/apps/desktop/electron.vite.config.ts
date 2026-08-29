@@ -10,7 +10,7 @@ const uiSubpaths = readdirSync(resolve(__dirname, '../../packages/ui/src'), {
   withFileTypes: true,
 })
   .filter((dirent) => dirent.isDirectory())
-  .map((dirent) => `@gamhora/ui/${dirent.name}`)
+  .map((dirent) => `@pandhora/ui/${dirent.name}`)
 
 export default defineConfig({
   main: {
@@ -27,7 +27,7 @@ export default defineConfig({
     ],
     resolve: {
       alias: {
-        '@gamhora/IoC': resolve(__dirname, '../../packages/IoC.ts'),
+        '@pandhora/IoC': resolve(__dirname, '../../packages/IoC.ts'),
         '@': resolve(__dirname, 'src'),
       },
     },
@@ -65,7 +65,7 @@ export default defineConfig({
       ],
     },
     optimizeDeps: {
-      exclude: ['@gamhora/ui', ...uiSubpaths],
+      exclude: ['@pandhora/ui', ...uiSubpaths],
     },
     plugins: [react(), tailwindcss(), image()],
     build: {

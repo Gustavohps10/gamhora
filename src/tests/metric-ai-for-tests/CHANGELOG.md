@@ -1,8 +1,8 @@
-﻿# @gamhora/gamhora-ai-for-tests
+﻿# @pandhora/pandhora-ai-for-tests
 
 ## 1.0.1
 
 ### Patch Changes
 
 - Updated dependencies
-  - @gamhora/sdk@0.1.0
+  - @pandhora/sdk@0.1.0

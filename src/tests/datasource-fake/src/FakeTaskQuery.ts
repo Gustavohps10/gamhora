@@ -3,7 +3,7 @@
   PagedResultDTO,
   PaginationOptionsDTO,
   TaskDTO,
-} from '@gamhora/sdk'
+} from '@pandhora/sdk'
 
 import { FAKE_TASKS } from './fakeData'
 

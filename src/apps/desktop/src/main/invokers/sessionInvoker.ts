@@ -1,4 +1,4 @@
-﻿import { ISessionAPI } from '@gamhora/application'
+﻿import { ISessionAPI } from '@pandhora/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

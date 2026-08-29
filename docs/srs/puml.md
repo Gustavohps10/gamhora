@@ -1,6 +1,6 @@
 ﻿# Guia de Manutenção de Diagramas PlantUML (PUML)
 
-Este documento serve como guia de instrução para **desenvolvedores e IAs** sobre como criar, editar, organizar e sincronizar os diagramas de arquitetura e requisitos do projeto Gamhora.
+Este documento serve como guia de instrução para **desenvolvedores e IAs** sobre como criar, editar, organizar e sincronizar os diagramas de arquitetura e requisitos do projeto Pandhora.
 
 ---
 
@@ -13,6 +13,7 @@ yarn puml
 ```
 
 ### O que o script faz:
+
 1. Varre recursivamente a pasta `docs/srs/diagrams/puml/`.
 2. Comprime e envia o código PlantUML para a API oficial do PlantUML.
 3. Baixa e salva os PNGs correspondentes em `docs/srs/diagrams/puml-images/<categoria>/`.
@@ -22,14 +23,14 @@ yarn puml
 
 ## 📁 2. Estrutura de Diretórios e Mapeamento de Blocos
 
-| Pasta em `docs/srs/diagrams/puml/` | Tag de Início no Markdown | Tag de Fim no Markdown |
-| :--- | :--- | :--- |
-| `classes/` | `<!--<BEGIN_CLASSES_DIAGRAM> -->` | `<!--END_CLASSES_DIAGRAM -->` |
-| `component/` | `<!--<BEGIN_COMPONENT_DIAGRAM> -->` | `<!--END_COMPONENT_DIAGRAM -->` |
-| `flow/` | `<!--<BEGIN_FLOW> -->` | `<!--END_FLOW -->` |
-| `infra/` | `<!--<BEGIN_INFRA_DIAGRAM> -->` | `<!--END_INFRA_DIAGRAM -->` |
-| `integration/` | `<!--<BEGIN_INTEGRATION_DIAGRAM> -->` | `<!--END_INTEGRATION_DIAGRAM -->` |
-| `uml/` | `<!--<BEGIN_UML_DIAGRAM> -->` | `<!--END_UML_DIAGRAM -->` |
+| Pasta em `docs/srs/diagrams/puml/` | Tag de Início no Markdown             | Tag de Fim no Markdown            |
+| :--------------------------------- | :------------------------------------ | :-------------------------------- |
+| `classes/`                         | `<!--<BEGIN_CLASSES_DIAGRAM> -->`     | `<!--END_CLASSES_DIAGRAM -->`     |
+| `component/`                       | `<!--<BEGIN_COMPONENT_DIAGRAM> -->`   | `<!--END_COMPONENT_DIAGRAM -->`   |
+| `flow/`                            | `<!--<BEGIN_FLOW> -->`                | `<!--END_FLOW -->`                |
+| `infra/`                           | `<!--<BEGIN_INFRA_DIAGRAM> -->`       | `<!--END_INFRA_DIAGRAM -->`       |
+| `integration/`                     | `<!--<BEGIN_INTEGRATION_DIAGRAM> -->` | `<!--END_INTEGRATION_DIAGRAM -->` |
+| `uml/`                             | `<!--<BEGIN_UML_DIAGRAM> -->`         | `<!--END_UML_DIAGRAM -->`         |
 
 ---
 
@@ -42,13 +43,15 @@ diagram-<categoria>-<numero_3_digitos>-<nome-descritivo>.puml
 ```
 
 ### Exemplos:
+
 - `docs/srs/diagrams/puml/classes/diagram-classes-001-tasks.puml`
 - `docs/srs/diagrams/puml/classes/diagram-classes-002-timeEntries.puml`
 - `docs/srs/diagrams/puml/flow/diagram-flow-001-timer.puml`
 
 ### ⚠️ Regra Crítica para IAs e Devs:
-* **Sem buracos na numeração:** Se um diagrama for excluído, os diagramas subsequentes daquela pasta **devem ser renumerados** para manter a sequência `001`, `002`, `003`, etc.
-* **Remoção de imagens órfãs:** Se deletar um arquivo `.puml`, lembre-se de deletar o `.png` antigo correspondente em `puml-images/` para evitar referências quebradas.
+
+- **Sem buracos na numeração:** Se um diagrama for excluído, os diagramas subsequentes daquela pasta **devem ser renumerados** para manter a sequência `001`, `002`, `003`, etc.
+- **Remoção de imagens órfãs:** Se deletar um arquivo `.puml`, lembre-se de deletar o `.png` antigo correspondente em `puml-images/` para evitar referências quebradas.
 
 ---
 
@@ -58,13 +61,13 @@ diagram-<categoria>-<numero_3_digitos>-<nome-descritivo>.puml
    Todo arquivo deve começar com `@startuml <NomeDiagrama>` e terminar com `@enduml`.
 
 2. **Cuidado com Aninhamento de Componentes:**
-   * ❌ **Incorreto:**
+   - ❌ **Incorreto:**
      ```plantuml
      component [MeuComponente] {
          [subItem]
      }
      ```
-   * ✅ **Correto:**
+   - ✅ **Correto:**
      ```plantuml
      component "MeuComponente" as Comp {
          component "SubItem" as Sub
@@ -72,7 +75,7 @@ diagram-<categoria>-<numero_3_digitos>-<nome-descritivo>.puml
      ```
 
 3. **Notas e Comentários:**
-   * Sempre aponte notas para um componente específico:
+   - Sempre aponte notas para um componente específico:
      `note bottom of MeuComponente` ou `note right of App` (nunca `note right of node` solto).
 
 ---
@@ -89,4 +92,3 @@ Quando o usuário pedir para alterar, adicionar ou remover diagramas:
    yarn puml
    ```
 5. **Verifique o output:** Certifique-se de que o script finalizou com `✨ Todos os diagramas processados e Markdown atualizado!`.
-

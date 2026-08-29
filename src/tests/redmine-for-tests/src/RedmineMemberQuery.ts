@@ -4,7 +4,7 @@
   MemberDTO,
   PagedResultDTO,
   PaginationOptionsDTO,
-} from '@gamhora/sdk'
+} from '@pandhora/sdk'
 
 import { RedmineBase } from '@/RedmineBase'
 

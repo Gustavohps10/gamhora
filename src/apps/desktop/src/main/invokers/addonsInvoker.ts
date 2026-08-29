@@ -1,5 +1,5 @@
-import { FileData, IAddonsAPI } from '@gamhora/application'
-import { IRequest } from '@gamhora/shared/transport'
+import { FileData, IAddonsAPI } from '@pandhora/application'
+import { IRequest } from '@pandhora/shared/transport'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

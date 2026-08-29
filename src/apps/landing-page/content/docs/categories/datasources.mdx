@@ -5,7 +5,7 @@ description: Como criar integrações robustas para consulta de tarefas e envio 
 
 # DataSources (Provedores de Dados)
 
-Um **DataSource** é o tipo de Addon responsável por integrar o Gamhora a ferramentas de gerenciamento de tarefas e projetos (como Jira, Redmine, YouTrack, GitHub Issues ou Azure DevOps).
+Um **DataSource** é o tipo de Addon responsável por integrar o Pandhora a ferramentas de gerenciamento de tarefas e projetos (como Jira, Redmine, YouTrack, GitHub Issues ou Azure DevOps).
 
 Ele atua como a ponte de comunicação que o [Motor de Sincronização](/docs/sync-engine) utiliza para executar as fases de **Pull** (download de tarefas e metadados) e **Push** (upload de apontamentos de horas).
 
@@ -36,7 +36,7 @@ import type {
   TaskDTO,
   TimeEntryDTO,
   SyncTimeEntryDTO,
-} from '@gamhora-org/sdk'
+} from '@pandhora/sdk'
 
 export default class ExemploDataSourceAddon implements IAddon {
   public id = 'exemplo-datasource'

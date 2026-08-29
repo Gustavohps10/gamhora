@@ -5,7 +5,7 @@
   HomeLayout,
   WidgetLayout,
   WorkspaceLayout,
-} from '@gamhora/ui/layouts'
+} from '@pandhora/ui/layouts'
 import {
   Activities,
   AddonsPage,
@@ -19,7 +19,7 @@ import {
   TimeEntries,
   TimerWidget,
   WorkspaceSettings,
-} from '@gamhora/ui/pages'
+} from '@pandhora/ui/pages'
 import { createHashRouter, Navigate } from 'react-router-dom'
 
 export const router = createHashRouter([

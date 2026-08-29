@@ -1,5 +1,5 @@
 {
-  "name": "@gamhora/redmine-for-tests",
+  "name": "@pandhora/redmine-for-tests",
   "private": true,
   "version": "1.0.4",
   "description": "Redmine datasource para testes.",
@@ -20,11 +20,11 @@
   "scripts": {
     "build": "tsup --format esm,cjs --dts",
     "clean": "rimraf dist",
-    "manifest": "gamhora manifest ./ --config ./gamhora.json",
-    "pkg": "gamhora pkg ./dist --config ./gamhora.json"
+    "manifest": "pandhora manifest ./ --config ./pandhora.json",
+    "pkg": "pandhora pkg ./dist --config ./pandhora.json"
   },
   "dependencies": {
-    "@gamhora/sdk": "workspace:*",
+    "@pandhora/sdk": "workspace:*",
     "axios": "^1.7.9"
   },
   "devDependencies": {

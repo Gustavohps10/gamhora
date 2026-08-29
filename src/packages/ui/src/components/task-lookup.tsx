@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { WorkspaceConnectionDTO } from '@gamhora/application'
+import { WorkspaceConnectionDTO } from '@pandhora/application'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import {

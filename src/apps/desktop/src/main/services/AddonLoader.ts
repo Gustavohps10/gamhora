@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-import { ICredentialsStorage } from '@gamhora/application'
+import { ICredentialsStorage } from '@pandhora/application'
 import {
   AddonContext,
   AddonSettingsField,
@@ -28,8 +28,8 @@ import {
   OAuthResult,
   SidebarMenuItem,
   TimerbarMenuItem,
-} from '@gamhora/sdk'
-import { IEventEmitter, ISystemEvents } from '@gamhora/shared/transport'
+} from '@pandhora/sdk'
+import { IEventEmitter, ISystemEvents } from '@pandhora/shared/transport'
 import { BrowserWindow, shell } from 'electron'
 
 import { getSettings, saveSettings } from '@/main/settings'
@@ -667,13 +667,13 @@ export class AddonLoader {
         return false
       }
 
-      if (!rawUrl.startsWith('gamhora-app://')) {
+      if (!rawUrl.startsWith('pandhora-app://')) {
         return false
       }
 
       let parsed: URL
       try {
-        parsed = new URL(rawUrl.replace('gamhora-app://', 'http://localhost/'))
+        parsed = new URL(rawUrl.replace('pandhora-app://', 'http://localhost/'))
       } catch {
         return false
       }
@@ -952,7 +952,7 @@ export class AddonLoader {
 
   public async initializeDevAddons(): Promise<void> {
     try {
-      const redmineModule = await import('@gamhora/redmine-for-tests')
+      const redmineModule = await import('@pandhora/redmine-for-tests')
       const Redmine4Test = redmineModule.default
       if (Redmine4Test && typeof Redmine4Test === 'function') {
         const addonInstance = new (Redmine4Test as new () => IAddon)()
@@ -966,26 +966,29 @@ export class AddonLoader {
     }
 
     try {
-      const aiModule = await import('@gamhora/gamhora-ai-for-tests')
-      const GamhoraAI4Test = aiModule.default
-      if (GamhoraAI4Test && typeof GamhoraAI4Test === 'function') {
-        const addonInstance = new (GamhoraAI4Test as new () => IAddon)()
-        await this.activateAddon('@gamhora/gamhora-ai-for-tests', addonInstance)
+      const aiModule = await import('@pandhora/pandhora-ai-for-tests')
+      const PandhoraAI4Test = aiModule.default
+      if (PandhoraAI4Test && typeof PandhoraAI4Test === 'function') {
+        const addonInstance = new (PandhoraAI4Test as new () => IAddon)()
+        await this.activateAddon(
+          '@pandhora/pandhora-ai-for-tests',
+          addonInstance,
+        )
       }
     } catch (err) {
       console.error(
-        '❌ [AddonLoader] Erro ao carregar addon GamhoraAI4Test:',
+        '❌ [AddonLoader] Erro ao carregar addon PandhoraAI4Test:',
         err,
       )
     }
 
     try {
-      const watcherModule = await import('@gamhora/fake-watcher-for-tests')
+      const watcherModule = await import('@pandhora/fake-watcher-for-tests')
       const FakeWatcherAddon = watcherModule.default
       if (FakeWatcherAddon && typeof FakeWatcherAddon === 'function') {
         const addonInstance = new (FakeWatcherAddon as new () => IAddon)()
         await this.activateAddon(
-          '@gamhora/fake-watcher-for-tests',
+          '@pandhora/fake-watcher-for-tests',
           addonInstance,
         )
       }
@@ -997,11 +1000,11 @@ export class AddonLoader {
     }
 
     try {
-      const discordModule = await import('@gamhora/discord-for-tests')
+      const discordModule = await import('@pandhora/discord-for-tests')
       const DiscordAddon = discordModule.default
       if (DiscordAddon && typeof DiscordAddon === 'function') {
         const addonInstance = new (DiscordAddon as new () => IAddon)()
-        await this.activateAddon('@gamhora/discord-for-tests', addonInstance)
+        await this.activateAddon('@pandhora/discord-for-tests', addonInstance)
       }
     } catch (err) {
       console.error(
@@ -1017,11 +1020,11 @@ export class AddonLoader {
     })
 
     try {
-      const fakeDsModule = await import('@gamhora/datasource-fake')
+      const fakeDsModule = await import('@pandhora/datasource-fake')
       const FakeDataSourceAddon = fakeDsModule.default
       if (FakeDataSourceAddon && typeof FakeDataSourceAddon === 'function') {
         const addonInstance = new (FakeDataSourceAddon as new () => IAddon)()
-        await this.activateAddon('gamhora-datasource-fake', addonInstance)
+        await this.activateAddon('pandhora-datasource-fake', addonInstance)
       }
     } catch (err) {
       console.error(
@@ -1031,11 +1034,11 @@ export class AddonLoader {
     }
 
     try {
-      const supabaseModule = await import('@gamhora/supabase-theme')
+      const supabaseModule = await import('@pandhora/supabase-theme')
       const SupabaseThemeAddon = supabaseModule.default
       if (SupabaseThemeAddon && typeof SupabaseThemeAddon === 'function') {
         const addonInstance = new (SupabaseThemeAddon as new () => IAddon)()
-        await this.activateAddon('@gamhora/supabase-theme', addonInstance)
+        await this.activateAddon('@pandhora/supabase-theme', addonInstance)
       }
     } catch (err) {
       console.error(
@@ -1045,11 +1048,11 @@ export class AddonLoader {
     }
 
     try {
-      const purpleModule = await import('@gamhora/purple-theme')
+      const purpleModule = await import('@pandhora/purple-theme')
       const PurpleThemeAddon = purpleModule.default
       if (PurpleThemeAddon && typeof PurpleThemeAddon === 'function') {
         const addonInstance = new (PurpleThemeAddon as new () => IAddon)()
-        await this.activateAddon('@gamhora/purple-theme', addonInstance)
+        await this.activateAddon('@pandhora/purple-theme', addonInstance)
       }
     } catch (err) {
       console.error('❌ [AddonLoader] Erro ao carregar addon PurpleTheme:', err)

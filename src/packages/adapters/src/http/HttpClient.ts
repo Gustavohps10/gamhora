@@ -1,4 +1,4 @@
-﻿import { AppError, Either } from '@gamhora/shared/helpers'
+﻿import { AppError, Either } from '@pandhora/shared/helpers'
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios'
 
 import { IHttpClient, IHttpClientConfig } from '@/contracts/IHttpClient'
@@ -11,7 +11,7 @@ export class HttpClient implements IHttpClient {
   constructor() {
     this.axiosInstance = axios.create({
       headers: {
-        'User-Agent': 'GamhoraApp/1.0',
+        'User-Agent': 'PandhoraApp/1.0',
       },
     })
   }
@@ -23,7 +23,7 @@ export class HttpClient implements IHttpClient {
       baseURL: config.baseURL,
       timeout: config.timeout ?? 10000,
       headers: {
-        'User-Agent': 'GamhoraApp/1.0',
+        'User-Agent': 'PandhoraApp/1.0',
         ...this.defaultHeaders,
       },
     })

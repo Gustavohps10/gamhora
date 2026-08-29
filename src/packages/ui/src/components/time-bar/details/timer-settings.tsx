@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { AddonTimerbarMenuItem, DisplayInfo } from '@gamhora/application'
+import { AddonTimerbarMenuItem, DisplayInfo } from '@pandhora/application'
 import {
   Clock3,
   ClockArrowDown,

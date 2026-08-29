@@ -3,7 +3,7 @@
   PagedResultDTO,
   PaginationOptionsDTO,
   WorkspaceDTO,
-} from '@gamhora/application'
+} from '@pandhora/application'
 import { promises as fs } from 'fs'
 import path from 'path'
 

@@ -6,7 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@gamhora/ui/components'
+} from '@pandhora/ui/components'
 import { ChevronDown } from 'lucide-react'
 import type { ComponentProps } from 'react'
 import React from 'react'

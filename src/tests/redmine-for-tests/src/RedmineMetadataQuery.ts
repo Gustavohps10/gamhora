@@ -1,4 +1,4 @@
-﻿import { IMetadataQuery, MetadataDTO, MetadataItem } from '@gamhora/sdk'
+﻿import { IMetadataQuery, MetadataDTO, MetadataItem } from '@pandhora/sdk'
 
 import { RedmineBase } from '@/RedmineBase'
 

@@ -1,4 +1,4 @@
-import { IHeaders, IJobResult, IRequest } from '@gamhora/shared/transport'
+import { IHeaders, IJobResult, IRequest } from '@pandhora/shared/transport'
 import {
   AddonInstallerViewModel,
   AddonManifestViewModel,
@@ -11,7 +11,7 @@ import {
   TimeEntryViewModel,
   ViewModel,
   WorkspaceViewModel,
-} from '@gamhora/shared/view-models'
+} from '@pandhora/shared/view-models'
 
 import { FileData } from '@/contracts/infra'
 import {

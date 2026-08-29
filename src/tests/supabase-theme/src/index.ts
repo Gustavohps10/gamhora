@@ -3,7 +3,7 @@
   AddonSettingsSchema,
   AddonTheme,
   IAddon,
-} from '@gamhora/sdk'
+} from '@pandhora/sdk'
 
 import { SUPABASE_CSS } from './supabaseCss.js'
 
@@ -81,7 +81,7 @@ export default class SupabaseThemeAddon implements IAddon {
         isSuccess: true,
         display: {
           title: 'Tema Padrão Restaurado!',
-          message: 'A interface retornou ao estilo nativo do Gamhora.',
+          message: 'A interface retornou ao estilo nativo do Pandhora.',
         },
       }
     }

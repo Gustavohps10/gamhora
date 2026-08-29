@@ -1,4 +1,4 @@
-﻿import { FileData, IFileStorage } from '@gamhora/application'
+﻿import { FileData, IFileStorage } from '@pandhora/application'
 import fs from 'fs'
 import path, { dirname, resolve } from 'path'
 

@@ -1,5 +1,5 @@
-﻿import { FileData, IFileManager } from '@gamhora/application'
-import { AppError, Either } from '@gamhora/shared/helpers'
+﻿import { FileData, IFileManager } from '@pandhora/application'
+import { AppError, Either } from '@pandhora/shared/helpers'
 import archiver from 'archiver'
 import { fileTypeFromBuffer } from 'file-type'
 import unzipper from 'unzipper'

@@ -3,23 +3,23 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@gamhora/application": ["src/packages/application/src"],
-      "@gamhora/application/*": ["src/packages/application/src/*"],
+      "@pandhora/application": ["src/packages/application/src"],
+      "@pandhora/application/*": ["src/packages/application/src/*"],
 
-      "@gamhora/adapters": ["src/packages/adapters/src"],
-      "@gamhora/adapters/*": ["src/packages/adapters/src/*"],
+      "@pandhora/adapters": ["src/packages/adapters/src"],
+      "@pandhora/adapters/*": ["src/packages/adapters/src/*"],
 
-      "@gamhora/shared": ["src/packages/shared/src"],
-      "@gamhora/shared/*": ["src/packages/shared/src/*"],
+      "@pandhora/shared": ["src/packages/shared/src"],
+      "@pandhora/shared/*": ["src/packages/shared/src/*"],
 
-      "@gamhora/domain": ["src/packages/domain/src"],
-      "@gamhora/domain/*": ["src/packages/domain/src/*"],
+      "@pandhora/domain": ["src/packages/domain/src"],
+      "@pandhora/domain/*": ["src/packages/domain/src/*"],
 
-      "@gamhora/sdk": ["src/apps/sdk/src"],
-      "@gamhora/sdk/*": ["src/apps/sdk/src/*"],
+      "@pandhora/sdk": ["src/apps/sdk/src"],
+      "@pandhora/sdk/*": ["src/apps/sdk/src/*"],
 
-      "@gamhora/ui": ["src/packages/ui/src"],
-      "@gamhora/ui/*": ["src/packages/ui/src/*"]
+      "@pandhora/ui": ["src/packages/ui/src"],
+      "@pandhora/ui/*": ["src/packages/ui/src/*"]
     }
   },
   "include": [

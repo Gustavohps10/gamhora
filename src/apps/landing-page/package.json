@@ -1,5 +1,5 @@
 {
-  "name": "@gamhora/landing-page",
+  "name": "@pandhora/landing-page",
   "version": "0.1.1",
   "private": true,
   "scripts": {
@@ -12,8 +12,8 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@gamhora/application": "workspace:*",
-    "@gamhora/ui": "workspace:*",
+    "@pandhora/application": "workspace:*",
+    "@pandhora/ui": "workspace:*",
     "@tailwindcss/typography": "^0.5.16",
     "fumadocs-core": "^16.15.0",
     "fumadocs-mdx": "^15.3.1",

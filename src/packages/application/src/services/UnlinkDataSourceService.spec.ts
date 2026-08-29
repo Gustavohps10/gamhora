@@ -1,5 +1,5 @@
-﻿import { Workspace } from '@gamhora/domain'
-import { AppError, Either } from '@gamhora/shared/helpers'
+﻿import { Workspace } from '@pandhora/domain'
+import { AppError, Either } from '@pandhora/shared/helpers'
 import type { Mocked } from 'vitest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -46,7 +46,7 @@ describe('UnlinkDataSourceService', () => {
 
     fakeWorkspace = {
       id: 'workspace-123',
-      name: 'Gamhora Workspace',
+      name: 'Pandhora Workspace',
       status: 'configured',
       dataSourceConnections: [
         { id: 'conn-1', dataSourceId: 'plugin-x' },
@@ -85,11 +85,11 @@ describe('UnlinkDataSourceService', () => {
 
     expect(credentialsStorageMock.deleteToken).toHaveBeenCalledTimes(2)
     expect(credentialsStorageMock.deleteToken).toHaveBeenCalledWith(
-      'gamhora',
+      'pandhora',
       expectedSessionKey,
     )
     expect(credentialsStorageMock.deleteToken).toHaveBeenCalledWith(
-      'gamhora',
+      'pandhora',
       expectedMemberKey,
     )
 
@@ -123,20 +123,20 @@ describe('UnlinkDataSourceService', () => {
     expect(credentialsStorageMock.deleteToken).toHaveBeenCalledTimes(4)
 
     expect(credentialsStorageMock.deleteToken).toHaveBeenCalledWith(
-      'gamhora',
+      'pandhora',
       `workspace-session-${input.workspaceId}-conn-1`,
     )
     expect(credentialsStorageMock.deleteToken).toHaveBeenCalledWith(
-      'gamhora',
+      'pandhora',
       getMemberStorageKey(input.workspaceId, 'conn-1'),
     )
 
     expect(credentialsStorageMock.deleteToken).toHaveBeenCalledWith(
-      'gamhora',
+      'pandhora',
       `workspace-session-${input.workspaceId}-conn-2`,
     )
     expect(credentialsStorageMock.deleteToken).toHaveBeenCalledWith(
-      'gamhora',
+      'pandhora',
       getMemberStorageKey(input.workspaceId, 'conn-2'),
     )
 

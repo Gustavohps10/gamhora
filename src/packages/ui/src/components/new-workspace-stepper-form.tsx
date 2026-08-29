@@ -1,8 +1,8 @@
 ﻿'use client'
 
-import { AddonManifest } from '@gamhora/application'
-import { WorkspaceConnectionViewModel, WorkspaceViewModel } from '@gamhora/sdk'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { AddonManifest } from '@pandhora/application'
+import { WorkspaceConnectionViewModel, WorkspaceViewModel } from '@pandhora/sdk'
 import { defineStepper } from '@stepperize/react'
 import { useStepItemContext } from '@stepperize/react/primitives'
 import { useQueryClient } from '@tanstack/react-query'

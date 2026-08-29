@@ -1,4 +1,4 @@
-﻿import type { Task } from '@gamhora/sdk'
+﻿import type { Task } from '@pandhora/sdk'
 
 const store = new Map<string, Task>()
 

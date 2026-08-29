@@ -2664,345 +2664,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gamhora/adapters@workspace:*, @gamhora/adapters@workspace:src/packages/adapters":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/adapters@workspace:src/packages/adapters"
-  dependencies:
-    "@gamhora/application": "workspace:*"
-    "@gamhora/domain": "workspace:*"
-    "@gamhora/shared": "workspace:*"
-    "@types/archiver": "npm:^6.0.3"
-    "@types/jsonwebtoken": "npm:^9.0.6"
-    "@types/unzipper": "npm:^0"
-    ajv: "npm:^8.17.1"
-    archiver: "npm:^7.0.1"
-    axios: "npm:^1.7.9"
-    file-type: "npm:^22.0.1"
-    js-yaml: "npm:^4.1.0"
-    jsonwebtoken: "npm:^9.0.2"
-    keytar: "npm:^7.9.0"
-    rxjs: "npm:^7.8.2"
-    typescript: "npm:^5.8.3"
-    unzipper: "npm:^0.12.3"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/application@workspace:*, @gamhora/application@workspace:src/packages/application":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/application@workspace:src/packages/application"
-  dependencies:
-    "@gamhora/domain": "workspace:*"
-    "@gamhora/shared": "workspace:*"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/datasource-fake@workspace:*, @gamhora/datasource-fake@workspace:src/tests/datasource-fake":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/datasource-fake@workspace:src/tests/datasource-fake"
-  dependencies:
-    "@gamhora/sdk": "workspace:*"
-    tsup: "npm:^8.5.0"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/desktop@workspace:src/apps/desktop":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/desktop@workspace:src/apps/desktop"
-  dependencies:
-    "@electron-toolkit/preload": "npm:^3.0.1"
-    "@electron-toolkit/tsconfig": "npm:^1.0.1"
-    "@electron-toolkit/utils": "npm:^3.0.0"
-    "@gamhora/adapters": "workspace:*"
-    "@gamhora/application": "workspace:*"
-    "@gamhora/datasource-fake": "workspace:*"
-    "@gamhora/discord-for-tests": "workspace:*"
-    "@gamhora/fake-watcher-for-tests": "workspace:*"
-    "@gamhora/gamhora-ai-for-tests": "workspace:*"
-    "@gamhora/purple-theme": "workspace:*"
-    "@gamhora/redmine-for-tests": "workspace:*"
-    "@gamhora/shared": "workspace:*"
-    "@gamhora/supabase-theme": "workspace:*"
-    "@gamhora/ui": "workspace:*"
-    "@rollup/plugin-image": "npm:^3.0.3"
-    "@tailwindcss/postcss": "npm:^4.1.11"
-    "@tailwindcss/typography": "npm:^0.5.16"
-    "@tailwindcss/vite": "npm:^4.0.6"
-    "@timelapse/redmine-plugin": "npm:^1.0.0"
-    "@types/better-sqlite3": "npm:^7.6.13"
-    "@types/lokijs": "npm:^1"
-    "@types/node": "npm:^20.17.18"
-    "@types/react": "npm:^19.1.0"
-    "@types/react-dom": "npm:^19.1.0"
-    "@vitejs/plugin-react": "npm:^4.3.1"
-    "@welldone-software/why-did-you-render": "npm:^10.0.1"
-    better-sqlite3: "npm:^12.6.2"
-    electron: "npm:31.0.2"
-    electron-builder: "npm:26.0.12"
-    electron-devtools-installer: "npm:^4.0.0"
-    electron-updater: "npm:^6.1.7"
-    electron-vite: "npm:^3.1.0"
-    fake-indexeddb: "npm:^6.2.5"
-    keytar: "npm:^7.9.0"
-    lokijs: "npm:^1.5.12"
-    node-addon-api: "npm:^8.9.2"
-    node-gyp: "npm:^13.0.1"
-    nuqs: "npm:^2.7.2"
-    postcss: "npm:^8.5.6"
-    prebuildify: "npm:^6.0.1"
-    react: "npm:^19.1.0"
-    react-dom: "npm:^19.1.0"
-    react-router-dom: "npm:^6.29.0"
-    rxdb: "npm:^16.21.1"
-    sqlite3: "npm:^5.1.7"
-    tailwind-merge: "npm:^3.0.1"
-    tailwindcss: "npm:^4.1.11"
-    tailwindcss-animate: "npm:^1.0.7"
-    typescript: "npm:^5.8.3"
-    vite: "npm:^6.3.5"
-    vite-plugin-static-copy: "npm:^3.2.0"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/discord-for-tests@workspace:*, @gamhora/discord-for-tests@workspace:src/tests/discord-for-tests":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/discord-for-tests@workspace:src/tests/discord-for-tests"
-  dependencies:
-    "@gamhora/sdk": "workspace:*"
-    "@types/node": "npm:^24.3.0"
-    axios: "npm:^1.7.9"
-    tsup: "npm:^8.5.0"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/domain@workspace:*, @gamhora/domain@workspace:src/packages/domain":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/domain@workspace:src/packages/domain"
-  dependencies:
-    "@gamhora/shared": "workspace:*"
-    tsup: "npm:^8.2.3"
-    typescript: "npm:^5.8.3"
-    zod: "npm:^3.24.2"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/fake-watcher-for-tests@workspace:*, @gamhora/fake-watcher-for-tests@workspace:src/tests/fake-watcher-for-tests":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/fake-watcher-for-tests@workspace:src/tests/fake-watcher-for-tests"
-  dependencies:
-    "@gamhora/sdk": "workspace:*"
-    "@types/node": "npm:^24.3.0"
-    tsup: "npm:^8.5.0"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/gamhora-ai-for-tests@workspace:*, @gamhora/gamhora-ai-for-tests@workspace:src/tests/metric-ai-for-tests":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/gamhora-ai-for-tests@workspace:src/tests/metric-ai-for-tests"
-  dependencies:
-    "@gamhora/sdk": "workspace:*"
-    "@types/node": "npm:^24.3.0"
-    tsup: "npm:^8.5.0"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/landing-page@workspace:src/apps/landing-page":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/landing-page@workspace:src/apps/landing-page"
-  dependencies:
-    "@gamhora/application": "workspace:*"
-    "@gamhora/ui": "workspace:*"
-    "@tailwindcss/postcss": "npm:^4"
-    "@tailwindcss/typography": "npm:^0.5.16"
-    "@types/node": "npm:^20"
-    "@types/react": "npm:^19"
-    "@types/react-dom": "npm:^19"
-    babel-plugin-react-compiler: "npm:1.0.0"
-    eslint: "npm:^9"
-    eslint-config-next: "npm:16.2.1"
-    fumadocs-core: "npm:^16.15.0"
-    fumadocs-mdx: "npm:^15.3.1"
-    fumadocs-ui: "npm:^16.15.0"
-    next: "npm:16.2.1"
-    next-themes: "npm:^0.4.6"
-    react: "npm:19.2.4"
-    react-dom: "npm:19.2.4"
-    react-hook-form: "npm:^7.54.2"
-    tailwind-merge: "npm:^3.0.1"
-    tailwindcss: "npm:^4"
-    tailwindcss-animate: "npm:^1.0.7"
-    typescript: "npm:^5"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/purple-theme@workspace:*, @gamhora/purple-theme@workspace:src/tests/purple-theme":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/purple-theme@workspace:src/tests/purple-theme"
-  dependencies:
-    "@gamhora/sdk": "workspace:*"
-    "@types/node": "npm:^24.3.0"
-    tsup: "npm:^8.5.0"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/redmine-for-tests@workspace:*, @gamhora/redmine-for-tests@workspace:src/tests/redmine-for-tests":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/redmine-for-tests@workspace:src/tests/redmine-for-tests"
-  dependencies:
-    "@changesets/cli": "npm:^2.29.6"
-    "@gamhora/sdk": "workspace:*"
-    "@types/node": "npm:^24.3.0"
-    axios: "npm:^1.7.9"
-    tsup: "npm:^8.5.0"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/sdk@workspace:*, @gamhora/sdk@workspace:src/apps/sdk":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/sdk@workspace:src/apps/sdk"
-  dependencies:
-    "@gamhora/application": "workspace:*"
-    "@gamhora/domain": "workspace:*"
-    "@gamhora/shared": "workspace:*"
-    "@types/adm-zip": "npm:^0"
-    "@types/js-yaml": "npm:^4.0.9"
-    "@types/turndown": "npm:^5.0.5"
-    adm-zip: "npm:^0.5.16"
-    commander: "npm:^14.0.0"
-    highlight.js: "npm:^11.11.1"
-    inquirer: "npm:^12.9.4"
-    js-yaml: "npm:^4.1.0"
-    textile-js: "npm:^2.1.1"
-    tsup: "npm:^8.5.0"
-    turndown: "npm:^7.2.1"
-    typescript: "npm:^5.8.3"
-  bin:
-    gamhora: ./dist/cli.cjs
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/shared@workspace:*, @gamhora/shared@workspace:src/packages/shared":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/shared@workspace:src/packages/shared"
-  dependencies:
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/supabase-theme@workspace:*, @gamhora/supabase-theme@workspace:src/tests/supabase-theme":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/supabase-theme@workspace:src/tests/supabase-theme"
-  dependencies:
-    "@gamhora/sdk": "workspace:*"
-    "@types/node": "npm:^24.3.0"
-    tsup: "npm:^8.5.0"
-    typescript: "npm:^5.8.3"
-  languageName: unknown
-  linkType: soft
-
-"@gamhora/ui@workspace:*, @gamhora/ui@workspace:src/packages/ui":
-  version: 0.0.0-use.local
-  resolution: "@gamhora/ui@workspace:src/packages/ui"
-  dependencies:
-    "@atlaskit/pragmatic-drag-and-drop": "npm:^1.7.7"
-    "@atlaskit/pragmatic-drag-and-drop-auto-scroll": "npm:^2.1.2"
-    "@atlaskit/pragmatic-drag-and-drop-hitbox": "npm:^1.1.0"
-    "@atlaskit/pragmatic-drag-and-drop-react-indicator": "npm:^0.18.0"
-    "@dnd-kit/core": "npm:^6.3.1"
-    "@dnd-kit/modifiers": "npm:^9.0.0"
-    "@dnd-kit/sortable": "npm:^10.0.0"
-    "@faker-js/faker": "npm:^10.1.0"
-    "@gamhora/sdk": "workspace:*"
-    "@hello-pangea/dnd": "npm:^18.0.1"
-    "@hookform/resolvers": "npm:^4.1.3"
-    "@maskito/core": "npm:^4.0.0"
-    "@maskito/react": "npm:^4.0.0"
-    "@radix-ui/react-accordion": "npm:^1.2.2"
-    "@radix-ui/react-alert-dialog": "npm:^1.1.14"
-    "@radix-ui/react-avatar": "npm:^1.1.10"
-    "@radix-ui/react-checkbox": "npm:^1.3.1"
-    "@radix-ui/react-collapsible": "npm:^1.1.3"
-    "@radix-ui/react-dialog": "npm:^1.1.15"
-    "@radix-ui/react-dropdown-menu": "npm:^2.1.6"
-    "@radix-ui/react-label": "npm:^2.1.2"
-    "@radix-ui/react-menubar": "npm:^1.1.15"
-    "@radix-ui/react-popover": "npm:^1.1.13"
-    "@radix-ui/react-portal": "npm:^1.1.9"
-    "@radix-ui/react-progress": "npm:^1.1.7"
-    "@radix-ui/react-scroll-area": "npm:^1.2.9"
-    "@radix-ui/react-select": "npm:^2.2.4"
-    "@radix-ui/react-separator": "npm:^1.1.2"
-    "@radix-ui/react-slider": "npm:^1.3.6"
-    "@radix-ui/react-slot": "npm:^1.2.3"
-    "@radix-ui/react-switch": "npm:^1.2.5"
-    "@radix-ui/react-tabs": "npm:^1.1.12"
-    "@radix-ui/react-toggle": "npm:^1.1.9"
-    "@radix-ui/react-toggle-group": "npm:^1.1.10"
-    "@radix-ui/react-tooltip": "npm:^1.2.6"
-    "@stepperize/react": "npm:^6.1.0"
-    "@tanstack/react-query": "npm:^5.77.2"
-    "@tanstack/react-table": "npm:^8.21.3"
-    "@tanstack/react-virtual": "npm:^3.13.12"
-    "@tiptap/core": "npm:^2.11.5"
-    "@tiptap/pm": "npm:^2.11.5"
-    "@tiptap/react": "npm:^2.11.5"
-    "@tiptap/starter-kit": "npm:^2.11.5"
-    "@types/react": "npm:^19.0.0"
-    "@types/react-dom": "npm:^19.0.0"
-    "@types/react-input-mask": "npm:^2"
-    "@vitejs/plugin-react": "npm:^4.3.1"
-    autoprefixer: "npm:^10.4.20"
-    awilix: "npm:^12.0.5"
-    axios: "npm:^1.7.9"
-    class-variance-authority: "npm:^0.7.1"
-    clsx: "npm:^2.1.1"
-    cmdk: "npm:^1.1.1"
-    date-fns: "npm:^3.6.0"
-    dexie: "npm:^4.2.0"
-    electron-updater: "npm:^6.1.7"
-    glob: "npm:^10.4.5"
-    immer: "npm:^10.1.1"
-    jsonwebtoken: "npm:^9.0.2"
-    keytar: "npm:^7.9.0"
-    lucide-react: "npm:^0.548.0"
-    marked: "npm:^15.0.7"
-    motion: "npm:^12.23.24"
-    nuqs: "npm:^2.7.2"
-    postcss: "npm:^8.5.2"
-    radix-ui: "npm:^1.6.7"
-    react-day-picker: "npm:9.11.1"
-    react-hook-form: "npm:^7.54.2"
-    react-icons: "npm:^5.5.0"
-    react-markdown: "npm:^10.0.0"
-    recharts: "npm:^2.15.1"
-    remark-gfm: "npm:^4.0.1"
-    rxdb: "npm:^16.19.0"
-    sonner: "npm:^2.0.6"
-    tailwind-merge: "npm:^3.0.1"
-    tailwindcss-animate: "npm:^1.0.7"
-    typescript: "npm:^5.8.3"
-    use-debounce: "npm:^10.1.0"
-    vaul: "npm:^1.1.2"
-    vite: "npm:^6.3.5"
-    vite-plugin-dts: "npm:^4.5.4"
-    vite-plugin-static-copy: "npm:^3.1.0"
-    vite-tsconfig-paths: "npm:^5.1.4"
-    zod: "npm:^3.24.2"
-    zustand: "npm:^5.0.8"
-  peerDependencies:
-    react: ^19.1.0
-    react-dom: ^19.1.0
-    react-router: ^6.29.0
-    react-router-dom: ^6.29.0
-  languageName: unknown
-  linkType: soft
-
 "@gar/promisify@npm:^1.0.1, @gar/promisify@npm:^1.1.3":
   version: 1.1.3
   resolution: "@gar/promisify@npm:1.1.3"
@@ -3758,9 +3419,9 @@ __metadata:
   linkType: hard
 
 "@jridgewell/sourcemap-codec@npm:^1.4.10, @jridgewell/sourcemap-codec@npm:^1.4.14, @jridgewell/sourcemap-codec@npm:^1.5.0, @jridgewell/sourcemap-codec@npm:^1.5.5":
-  version: 1.5.5
-  resolution: "@jridgewell/sourcemap-codec@npm:1.5.5"
-  checksum: 10c0/f9e538f302b63c0ebc06eecb1dd9918dd4289ed36147a0ddce35d6ea4d7ebbda243cda7b2213b6a5e1d8087a298d5cf630fb2bd39329cdecb82017023f6081a0
+  version: 1.6.0
+  resolution: "@jridgewell/sourcemap-codec@npm:1.6.0"
+  checksum: 10c0/b5be700e45a775f218589c3466c4ffea630582b4988657652da464e5ab8a7d18bf928ee4fd2363fb346ede4bea9c6ff0bae05a538358c4565ece6199531b5f72
   languageName: node
   linkType: hard
 
@@ -4358,6 +4019,345 @@ __metadata:
   checksum: 10c0/adec7c1d4c0a031a83afe976884695ff1467987da3f9e775d24bd596ca82346d3734cc9898f5645955050246a13621b4442696753a2d83d2954127fbdfbd5a5f
   languageName: node
   linkType: hard
+
+"@pandhora/adapters@workspace:*, @pandhora/adapters@workspace:src/packages/adapters":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/adapters@workspace:src/packages/adapters"
+  dependencies:
+    "@pandhora/application": "workspace:*"
+    "@pandhora/domain": "workspace:*"
+    "@pandhora/shared": "workspace:*"
+    "@types/archiver": "npm:^6.0.3"
+    "@types/jsonwebtoken": "npm:^9.0.6"
+    "@types/unzipper": "npm:^0"
+    ajv: "npm:^8.17.1"
+    archiver: "npm:^7.0.1"
+    axios: "npm:^1.7.9"
+    file-type: "npm:^22.0.1"
+    js-yaml: "npm:^4.1.0"
+    jsonwebtoken: "npm:^9.0.2"
+    keytar: "npm:^7.9.0"
+    rxjs: "npm:^7.8.2"
+    typescript: "npm:^5.8.3"
+    unzipper: "npm:^0.12.3"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/application@workspace:*, @pandhora/application@workspace:src/packages/application":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/application@workspace:src/packages/application"
+  dependencies:
+    "@pandhora/domain": "workspace:*"
+    "@pandhora/shared": "workspace:*"
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/datasource-fake@workspace:*, @pandhora/datasource-fake@workspace:src/tests/datasource-fake":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/datasource-fake@workspace:src/tests/datasource-fake"
+  dependencies:
+    "@pandhora/sdk": "workspace:*"
+    tsup: "npm:^8.5.0"
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/desktop@workspace:src/apps/desktop":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/desktop@workspace:src/apps/desktop"
+  dependencies:
+    "@electron-toolkit/preload": "npm:^3.0.1"
+    "@electron-toolkit/tsconfig": "npm:^1.0.1"
+    "@electron-toolkit/utils": "npm:^3.0.0"
+    "@pandhora/adapters": "workspace:*"
+    "@pandhora/application": "workspace:*"
+    "@pandhora/datasource-fake": "workspace:*"
+    "@pandhora/discord-for-tests": "workspace:*"
+    "@pandhora/fake-watcher-for-tests": "workspace:*"
+    "@pandhora/pandhora-ai-for-tests": "workspace:*"
+    "@pandhora/purple-theme": "workspace:*"
+    "@pandhora/redmine-for-tests": "workspace:*"
+    "@pandhora/shared": "workspace:*"
+    "@pandhora/supabase-theme": "workspace:*"
+    "@pandhora/ui": "workspace:*"
+    "@rollup/plugin-image": "npm:^3.0.3"
+    "@tailwindcss/postcss": "npm:^4.1.11"
+    "@tailwindcss/typography": "npm:^0.5.16"
+    "@tailwindcss/vite": "npm:^4.0.6"
+    "@timelapse/redmine-plugin": "npm:^1.0.0"
+    "@types/better-sqlite3": "npm:^7.6.13"
+    "@types/lokijs": "npm:^1"
+    "@types/node": "npm:^20.17.18"
+    "@types/react": "npm:^19.1.0"
+    "@types/react-dom": "npm:^19.1.0"
+    "@vitejs/plugin-react": "npm:^4.3.1"
+    "@welldone-software/why-did-you-render": "npm:^10.0.1"
+    better-sqlite3: "npm:^12.6.2"
+    electron: "npm:31.0.2"
+    electron-builder: "npm:26.0.12"
+    electron-devtools-installer: "npm:^4.0.0"
+    electron-updater: "npm:^6.1.7"
+    electron-vite: "npm:^3.1.0"
+    fake-indexeddb: "npm:^6.2.5"
+    keytar: "npm:^7.9.0"
+    lokijs: "npm:^1.5.12"
+    node-addon-api: "npm:^8.9.2"
+    node-gyp: "npm:^13.0.1"
+    nuqs: "npm:^2.7.2"
+    postcss: "npm:^8.5.6"
+    prebuildify: "npm:^6.0.1"
+    react: "npm:^19.1.0"
+    react-dom: "npm:^19.1.0"
+    react-router-dom: "npm:^6.29.0"
+    rxdb: "npm:^16.21.1"
+    sqlite3: "npm:^5.1.7"
+    tailwind-merge: "npm:^3.0.1"
+    tailwindcss: "npm:^4.1.11"
+    tailwindcss-animate: "npm:^1.0.7"
+    typescript: "npm:^5.8.3"
+    vite: "npm:^6.3.5"
+    vite-plugin-static-copy: "npm:^3.2.0"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/discord-for-tests@workspace:*, @pandhora/discord-for-tests@workspace:src/tests/discord-for-tests":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/discord-for-tests@workspace:src/tests/discord-for-tests"
+  dependencies:
+    "@pandhora/sdk": "workspace:*"
+    "@types/node": "npm:^24.3.0"
+    axios: "npm:^1.7.9"
+    tsup: "npm:^8.5.0"
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/domain@workspace:*, @pandhora/domain@workspace:src/packages/domain":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/domain@workspace:src/packages/domain"
+  dependencies:
+    "@pandhora/shared": "workspace:*"
+    tsup: "npm:^8.2.3"
+    typescript: "npm:^5.8.3"
+    zod: "npm:^3.24.2"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/fake-watcher-for-tests@workspace:*, @pandhora/fake-watcher-for-tests@workspace:src/tests/fake-watcher-for-tests":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/fake-watcher-for-tests@workspace:src/tests/fake-watcher-for-tests"
+  dependencies:
+    "@pandhora/sdk": "workspace:*"
+    "@types/node": "npm:^24.3.0"
+    tsup: "npm:^8.5.0"
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/landing-page@workspace:src/apps/landing-page":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/landing-page@workspace:src/apps/landing-page"
+  dependencies:
+    "@pandhora/application": "workspace:*"
+    "@pandhora/ui": "workspace:*"
+    "@tailwindcss/postcss": "npm:^4"
+    "@tailwindcss/typography": "npm:^0.5.16"
+    "@types/node": "npm:^20"
+    "@types/react": "npm:^19"
+    "@types/react-dom": "npm:^19"
+    babel-plugin-react-compiler: "npm:1.0.0"
+    eslint: "npm:^9"
+    eslint-config-next: "npm:16.2.1"
+    fumadocs-core: "npm:^16.15.0"
+    fumadocs-mdx: "npm:^15.3.1"
+    fumadocs-ui: "npm:^16.15.0"
+    next: "npm:16.2.1"
+    next-themes: "npm:^0.4.6"
+    react: "npm:19.2.4"
+    react-dom: "npm:19.2.4"
+    react-hook-form: "npm:^7.54.2"
+    tailwind-merge: "npm:^3.0.1"
+    tailwindcss: "npm:^4"
+    tailwindcss-animate: "npm:^1.0.7"
+    typescript: "npm:^5"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/pandhora-ai-for-tests@workspace:*, @pandhora/pandhora-ai-for-tests@workspace:src/tests/metric-ai-for-tests":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/pandhora-ai-for-tests@workspace:src/tests/metric-ai-for-tests"
+  dependencies:
+    "@pandhora/sdk": "workspace:*"
+    "@types/node": "npm:^24.3.0"
+    tsup: "npm:^8.5.0"
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/purple-theme@workspace:*, @pandhora/purple-theme@workspace:src/tests/purple-theme":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/purple-theme@workspace:src/tests/purple-theme"
+  dependencies:
+    "@pandhora/sdk": "workspace:*"
+    "@types/node": "npm:^24.3.0"
+    tsup: "npm:^8.5.0"
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/redmine-for-tests@workspace:*, @pandhora/redmine-for-tests@workspace:src/tests/redmine-for-tests":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/redmine-for-tests@workspace:src/tests/redmine-for-tests"
+  dependencies:
+    "@changesets/cli": "npm:^2.29.6"
+    "@pandhora/sdk": "workspace:*"
+    "@types/node": "npm:^24.3.0"
+    axios: "npm:^1.7.9"
+    tsup: "npm:^8.5.0"
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/sdk@workspace:*, @pandhora/sdk@workspace:src/apps/sdk":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/sdk@workspace:src/apps/sdk"
+  dependencies:
+    "@pandhora/application": "workspace:*"
+    "@pandhora/domain": "workspace:*"
+    "@pandhora/shared": "workspace:*"
+    "@types/adm-zip": "npm:^0"
+    "@types/js-yaml": "npm:^4.0.9"
+    "@types/turndown": "npm:^5.0.5"
+    adm-zip: "npm:^0.5.16"
+    commander: "npm:^14.0.0"
+    highlight.js: "npm:^11.11.1"
+    inquirer: "npm:^12.9.4"
+    js-yaml: "npm:^4.1.0"
+    textile-js: "npm:^2.1.1"
+    tsup: "npm:^8.5.0"
+    turndown: "npm:^7.2.1"
+    typescript: "npm:^5.8.3"
+  bin:
+    pandhora: ./dist/cli.cjs
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/shared@workspace:*, @pandhora/shared@workspace:src/packages/shared":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/shared@workspace:src/packages/shared"
+  dependencies:
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/supabase-theme@workspace:*, @pandhora/supabase-theme@workspace:src/tests/supabase-theme":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/supabase-theme@workspace:src/tests/supabase-theme"
+  dependencies:
+    "@pandhora/sdk": "workspace:*"
+    "@types/node": "npm:^24.3.0"
+    tsup: "npm:^8.5.0"
+    typescript: "npm:^5.8.3"
+  languageName: unknown
+  linkType: soft
+
+"@pandhora/ui@workspace:*, @pandhora/ui@workspace:src/packages/ui":
+  version: 0.0.0-use.local
+  resolution: "@pandhora/ui@workspace:src/packages/ui"
+  dependencies:
+    "@atlaskit/pragmatic-drag-and-drop": "npm:^1.7.7"
+    "@atlaskit/pragmatic-drag-and-drop-auto-scroll": "npm:^2.1.2"
+    "@atlaskit/pragmatic-drag-and-drop-hitbox": "npm:^1.1.0"
+    "@atlaskit/pragmatic-drag-and-drop-react-indicator": "npm:^0.18.0"
+    "@dnd-kit/core": "npm:^6.3.1"
+    "@dnd-kit/modifiers": "npm:^9.0.0"
+    "@dnd-kit/sortable": "npm:^10.0.0"
+    "@faker-js/faker": "npm:^10.1.0"
+    "@hello-pangea/dnd": "npm:^18.0.1"
+    "@hookform/resolvers": "npm:^4.1.3"
+    "@maskito/core": "npm:^4.0.0"
+    "@maskito/react": "npm:^4.0.0"
+    "@pandhora/sdk": "workspace:*"
+    "@radix-ui/react-accordion": "npm:^1.2.2"
+    "@radix-ui/react-alert-dialog": "npm:^1.1.14"
+    "@radix-ui/react-avatar": "npm:^1.1.10"
+    "@radix-ui/react-checkbox": "npm:^1.3.1"
+    "@radix-ui/react-collapsible": "npm:^1.1.3"
+    "@radix-ui/react-dialog": "npm:^1.1.15"
+    "@radix-ui/react-dropdown-menu": "npm:^2.1.6"
+    "@radix-ui/react-label": "npm:^2.1.2"
+    "@radix-ui/react-menubar": "npm:^1.1.15"
+    "@radix-ui/react-popover": "npm:^1.1.13"
+    "@radix-ui/react-portal": "npm:^1.1.9"
+    "@radix-ui/react-progress": "npm:^1.1.7"
+    "@radix-ui/react-scroll-area": "npm:^1.2.9"
+    "@radix-ui/react-select": "npm:^2.2.4"
+    "@radix-ui/react-separator": "npm:^1.1.2"
+    "@radix-ui/react-slider": "npm:^1.3.6"
+    "@radix-ui/react-slot": "npm:^1.2.3"
+    "@radix-ui/react-switch": "npm:^1.2.5"
+    "@radix-ui/react-tabs": "npm:^1.1.12"
+    "@radix-ui/react-toggle": "npm:^1.1.9"
+    "@radix-ui/react-toggle-group": "npm:^1.1.10"
+    "@radix-ui/react-tooltip": "npm:^1.2.6"
+    "@stepperize/react": "npm:^6.1.0"
+    "@tanstack/react-query": "npm:^5.77.2"
+    "@tanstack/react-table": "npm:^8.21.3"
+    "@tanstack/react-virtual": "npm:^3.13.12"
+    "@tiptap/core": "npm:^2.11.5"
+    "@tiptap/pm": "npm:^2.11.5"
+    "@tiptap/react": "npm:^2.11.5"
+    "@tiptap/starter-kit": "npm:^2.11.5"
+    "@types/react": "npm:^19.0.0"
+    "@types/react-dom": "npm:^19.0.0"
+    "@types/react-input-mask": "npm:^2"
+    "@vitejs/plugin-react": "npm:^4.3.1"
+    autoprefixer: "npm:^10.4.20"
+    awilix: "npm:^12.0.5"
+    axios: "npm:^1.7.9"
+    class-variance-authority: "npm:^0.7.1"
+    clsx: "npm:^2.1.1"
+    cmdk: "npm:^1.1.1"
+    date-fns: "npm:^3.6.0"
+    dexie: "npm:^4.2.0"
+    electron-updater: "npm:^6.1.7"
+    glob: "npm:^10.4.5"
+    immer: "npm:^10.1.1"
+    jsonwebtoken: "npm:^9.0.2"
+    keytar: "npm:^7.9.0"
+    lucide-react: "npm:^0.548.0"
+    marked: "npm:^15.0.7"
+    motion: "npm:^12.23.24"
+    nuqs: "npm:^2.7.2"
+    postcss: "npm:^8.5.2"
+    radix-ui: "npm:^1.6.7"
+    react-day-picker: "npm:9.11.1"
+    react-hook-form: "npm:^7.54.2"
+    react-icons: "npm:^5.5.0"
+    react-markdown: "npm:^10.0.0"
+    recharts: "npm:^2.15.1"
+    remark-gfm: "npm:^4.0.1"
+    rxdb: "npm:^16.19.0"
+    sonner: "npm:^2.0.6"
+    tailwind-merge: "npm:^3.0.1"
+    tailwindcss-animate: "npm:^1.0.7"
+    typescript: "npm:^5.8.3"
+    use-debounce: "npm:^10.1.0"
+    vaul: "npm:^1.1.2"
+    vite: "npm:^6.3.5"
+    vite-plugin-dts: "npm:^4.5.4"
+    vite-plugin-static-copy: "npm:^3.1.0"
+    vite-tsconfig-paths: "npm:^5.1.4"
+    zod: "npm:^3.24.2"
+    zustand: "npm:^5.0.8"
+  peerDependencies:
+    react: ^19.1.0
+    react-dom: ^19.1.0
+    react-router: ^6.29.0
+    react-router-dom: ^6.29.0
+  languageName: unknown
+  linkType: soft
 
 "@pkgjs/parseargs@npm:^0.11.0":
   version: 0.11.0
@@ -5946,177 +5946,177 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/rollup-android-arm-eabi@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-android-arm-eabi@npm:4.63.0"
+"@rollup/rollup-android-arm-eabi@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-android-arm-eabi@npm:4.63.1"
   conditions: os=android & cpu=arm
   languageName: node
   linkType: hard
 
-"@rollup/rollup-android-arm64@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-android-arm64@npm:4.63.0"
+"@rollup/rollup-android-arm64@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-android-arm64@npm:4.63.1"
   conditions: os=android & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-darwin-arm64@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-darwin-arm64@npm:4.63.0"
+"@rollup/rollup-darwin-arm64@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-darwin-arm64@npm:4.63.1"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-darwin-x64@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-darwin-x64@npm:4.63.0"
+"@rollup/rollup-darwin-x64@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-darwin-x64@npm:4.63.1"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-freebsd-arm64@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-freebsd-arm64@npm:4.63.0"
+"@rollup/rollup-freebsd-arm64@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-freebsd-arm64@npm:4.63.1"
   conditions: os=freebsd & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-freebsd-x64@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-freebsd-x64@npm:4.63.0"
+"@rollup/rollup-freebsd-x64@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-freebsd-x64@npm:4.63.1"
   conditions: os=freebsd & cpu=x64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-arm-gnueabihf@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-arm-gnueabihf@npm:4.63.0"
+"@rollup/rollup-linux-arm-gnueabihf@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-arm-gnueabihf@npm:4.63.1"
   conditions: os=linux & cpu=arm & libc=glibc
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-arm-musleabihf@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-arm-musleabihf@npm:4.63.0"
+"@rollup/rollup-linux-arm-musleabihf@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-arm-musleabihf@npm:4.63.1"
   conditions: os=linux & cpu=arm & libc=musl
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-arm64-gnu@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-arm64-gnu@npm:4.63.0"
+"@rollup/rollup-linux-arm64-gnu@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-arm64-gnu@npm:4.63.1"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-arm64-musl@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-arm64-musl@npm:4.63.0"
+"@rollup/rollup-linux-arm64-musl@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-arm64-musl@npm:4.63.1"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-loong64-gnu@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-loong64-gnu@npm:4.63.0"
+"@rollup/rollup-linux-loong64-gnu@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-loong64-gnu@npm:4.63.1"
   conditions: os=linux & cpu=loong64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-loong64-musl@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-loong64-musl@npm:4.63.0"
+"@rollup/rollup-linux-loong64-musl@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-loong64-musl@npm:4.63.1"
   conditions: os=linux & cpu=loong64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-ppc64-gnu@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-ppc64-gnu@npm:4.63.0"
+"@rollup/rollup-linux-ppc64-gnu@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-ppc64-gnu@npm:4.63.1"
   conditions: os=linux & cpu=ppc64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-ppc64-musl@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-ppc64-musl@npm:4.63.0"
+"@rollup/rollup-linux-ppc64-musl@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-ppc64-musl@npm:4.63.1"
   conditions: os=linux & cpu=ppc64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-riscv64-gnu@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-riscv64-gnu@npm:4.63.0"
+"@rollup/rollup-linux-riscv64-gnu@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-riscv64-gnu@npm:4.63.1"
   conditions: os=linux & cpu=riscv64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-riscv64-musl@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-riscv64-musl@npm:4.63.0"
+"@rollup/rollup-linux-riscv64-musl@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-riscv64-musl@npm:4.63.1"
   conditions: os=linux & cpu=riscv64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-s390x-gnu@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-s390x-gnu@npm:4.63.0"
+"@rollup/rollup-linux-s390x-gnu@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-s390x-gnu@npm:4.63.1"
   conditions: os=linux & cpu=s390x & libc=glibc
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-x64-gnu@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-x64-gnu@npm:4.63.0"
+"@rollup/rollup-linux-x64-gnu@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-x64-gnu@npm:4.63.1"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@rollup/rollup-linux-x64-musl@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-linux-x64-musl@npm:4.63.0"
+"@rollup/rollup-linux-x64-musl@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-linux-x64-musl@npm:4.63.1"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@rollup/rollup-openbsd-x64@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-openbsd-x64@npm:4.63.0"
+"@rollup/rollup-openbsd-x64@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-openbsd-x64@npm:4.63.1"
   conditions: os=openbsd & cpu=x64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-openharmony-arm64@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-openharmony-arm64@npm:4.63.0"
+"@rollup/rollup-openharmony-arm64@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-openharmony-arm64@npm:4.63.1"
   conditions: os=openharmony & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-win32-arm64-msvc@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-win32-arm64-msvc@npm:4.63.0"
+"@rollup/rollup-win32-arm64-msvc@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-win32-arm64-msvc@npm:4.63.1"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-win32-ia32-msvc@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-win32-ia32-msvc@npm:4.63.0"
+"@rollup/rollup-win32-ia32-msvc@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-win32-ia32-msvc@npm:4.63.1"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"@rollup/rollup-win32-x64-gnu@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-win32-x64-gnu@npm:4.63.0"
+"@rollup/rollup-win32-x64-gnu@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-win32-x64-gnu@npm:4.63.1"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@rollup/rollup-win32-x64-msvc@npm:4.63.0":
-  version: 4.63.0
-  resolution: "@rollup/rollup-win32-x64-msvc@npm:4.63.0"
+"@rollup/rollup-win32-x64-msvc@npm:4.63.1":
+  version: 4.63.1
+  resolution: "@rollup/rollup-win32-x64-msvc@npm:4.63.1"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -9597,11 +9597,11 @@ __metadata:
   linkType: hard
 
 "baseline-browser-mapping@npm:^2.11.12, baseline-browser-mapping@npm:^2.9.19":
-  version: 2.11.19
-  resolution: "baseline-browser-mapping@npm:2.11.19"
+  version: 2.11.20
+  resolution: "baseline-browser-mapping@npm:2.11.20"
   bin:
     baseline-browser-mapping: dist/cli.cjs
-  checksum: 10c0/827e60717e1652d80471cc69e61c85966b7934cde4aab94f9eb21b9b8f864f094a810717c569fdec5b372fc4c9b7bbf99c27c5ceddb3a57313238fc6be355d93
+  checksum: 10c0/67588b7edafa4e6c52996ec4b96b6e007312961cefc5a179cb49232f6681a38ba68d4d43990081e9d0e1dcadcbd28f13105ee7dc3e43b267385d0beb14824ecc
   languageName: node
   linkType: hard
 
@@ -11635,9 +11635,9 @@ __metadata:
   linkType: hard
 
 "electron-to-chromium@npm:^1.5.402":
-  version: 1.5.415
-  resolution: "electron-to-chromium@npm:1.5.415"
-  checksum: 10c0/5eb45148e9b3e44183dc970ba2311cf82724a1eb21dafb8b352fb60010ab569e8faf50a3729358b6723a1bdafb99efdeff3d1d613ca07c44ef6568ed4d61c6e1
+  version: 1.5.416
+  resolution: "electron-to-chromium@npm:1.5.416"
+  checksum: 10c0/d69c0fef4fc18f4a01f7c1dfda2e7e648e4e8c6e60072dde693643a9725ba19c99353d0f5f6ba75a214c7fd7410817a518342281ee638461accb6cf24aa254ca
   languageName: node
   linkType: hard
 
@@ -11835,7 +11835,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"es-abstract@npm:^1.17.5, es-abstract@npm:^1.23.2, es-abstract@npm:^1.23.3, es-abstract@npm:^1.23.5, es-abstract@npm:^1.23.6, es-abstract@npm:^1.23.9, es-abstract@npm:^1.24.0, es-abstract@npm:^1.24.2":
+"es-abstract@npm:^1.17.5, es-abstract@npm:^1.23.2, es-abstract@npm:^1.23.3, es-abstract@npm:^1.23.5, es-abstract@npm:^1.23.9, es-abstract@npm:^1.24.0, es-abstract@npm:^1.24.2":
   version: 1.24.2
   resolution: "es-abstract@npm:1.24.2"
   dependencies:
@@ -11987,8 +11987,8 @@ __metadata:
   linkType: hard
 
 "es-toolkit@npm:^1.45.1":
-  version: 1.51.0
-  resolution: "es-toolkit@npm:1.51.0"
+  version: 1.52.0
+  resolution: "es-toolkit@npm:1.52.0"
   dependenciesMeta:
     "@trivago/prettier-plugin-sort-imports@4.3.0":
       unplugged: true
@@ -11996,7 +11996,7 @@ __metadata:
       unplugged: true
     vitepress-plugin-sandpack@1.1.4:
       unplugged: true
-  checksum: 10c0/ad519228a317a27b11144b582c1168c552143dd58ce4e62be50c185de48c69dea996f6ad6ebc518129ebd58c34da150c1a2134d4a3d7cdc75120c626e57ce7c4
+  checksum: 10c0/465988c0a6b84b6d1d171287cbbe40c3247a1f94acea210ae14bc66b7d90c93e6839bd6937cbaf2a1d206669f3179eb26141a89d9125969a4b8e58cb7d86a2ca
   languageName: node
   linkType: hard
 
@@ -13012,11 +13012,11 @@ __metadata:
   linkType: hard
 
 "fastq@npm:^1.6.0":
-  version: 1.20.1
-  resolution: "fastq@npm:1.20.1"
+  version: 1.20.3
+  resolution: "fastq@npm:1.20.3"
   dependencies:
     reusify: "npm:^1.0.4"
-  checksum: 10c0/e5dd725884decb1f11e5c822221d76136f239d0236f176fab80b7b8f9e7619ae57e6b4e5b73defc21e6b9ef99437ee7b545cff8e6c2c337819633712fa9d352e
+  checksum: 10c0/ad055a1b50f7ec9142d2e13699ad6c4d1fa9fea1d947fff89de1b5ea3825223e9a626c359b3a0f21aefbe093cc2a9e92a91e068f982a2b176af16b9ea430ffc5
   languageName: node
   linkType: hard
 
@@ -13637,55 +13637,6 @@ __metadata:
   checksum: 10c0/33e77fd29bddc2d9bb78ab3eb854c165909201f88c75faa8272e35899e2d35a8a642a15e7420ef945e1f64a9670d6aa3ec744106b2aa42be68ca5114025954ca
   languageName: node
   linkType: hard
-
-"gamhora-monorepo@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "gamhora-monorepo@workspace:."
-  dependencies:
-    "@changesets/cli": "npm:^2.29.6"
-    "@commitlint/cli": "npm:^19.8.0"
-    "@commitlint/config-conventional": "npm:^19.8.0"
-    "@eslint/js": "npm:^9.25.0"
-    "@mermaid-js/mermaid-cli": "npm:^11.12.0"
-    "@swc/core": "npm:^1.12.11"
-    "@swc/helpers": "npm:^0.5.17"
-    "@testing-library/jest-dom": "npm:^6.9.1"
-    "@testing-library/react": "npm:^16.3.2"
-    "@types/js-yaml": "npm:^4.0.9"
-    "@types/node": "npm:^25.6.0"
-    "@typescript-eslint/eslint-plugin": "npm:^8.30.1"
-    "@typescript-eslint/parser": "npm:^8.30.1"
-    "@vitest/coverage-v8": "npm:4.1.4"
-    "@vitest/ui": "npm:^4.1.4"
-    awilix: "npm:^12.0.5"
-    changeset: "npm:^0.2.6"
-    eslint: "npm:^9.25.0"
-    eslint-config-prettier: "npm:^10.1.2"
-    eslint-plugin-import: "npm:^2.31.0"
-    eslint-plugin-jsx-a11y: "npm:^6.10.2"
-    eslint-plugin-prettier: "npm:^5.2.6"
-    eslint-plugin-react: "npm:^7.37.5"
-    eslint-plugin-react-hooks: "npm:^5.2.0"
-    eslint-plugin-simple-import-sort: "npm:^12.1.1"
-    eslint-plugin-unused-imports: "npm:^4.1.4"
-    fs-extra: "npm:^11.3.4"
-    globals: "npm:^16.0.0"
-    husky: "npm:^8.0.0"
-    jsdom: "npm:^29.0.2"
-    lint-staged: "npm:^15.5.1"
-    msw: "npm:^2.13.3"
-    pako: "npm:^2.1.0"
-    prettier: "npm:^3.5.3"
-    prettier-plugin-tailwindcss: "npm:^0.6.11"
-    rimraf: "npm:^6.0.1"
-    ts-node: "npm:^10.9.2"
-    tsup: "npm:^8.5.0"
-    turbo: "npm:^2.5.4"
-    typescript: "npm:^5.8.3"
-    typescript-eslint: "npm:^8.30.1"
-    vitest: "npm:^4.1.4"
-  languageName: unknown
-  linkType: soft
 
 "gauge@npm:^4.0.3":
   version: 4.0.4
@@ -14698,9 +14649,9 @@ __metadata:
   linkType: hard
 
 "ip-address@npm:^10.1.1":
-  version: 10.5.0
-  resolution: "ip-address@npm:10.5.0"
-  checksum: 10c0/c6616bc99c90b552dad2beb850ca697c1ea3e2b89662d652a4439cd72a549b0c9af100a54be0d25be86599e2b089db87ef5303157d142e5b4c21bd2a1301dfa7
+  version: 10.7.0
+  resolution: "ip-address@npm:10.7.0"
+  checksum: 10c0/bb6f514708b84ec75ad4d8156f3d571a5b8e592a15359386100f4f8d7366a4b7723d54b88a30d80b3f51ca5f4dee239e94ef4b53765b9c41a8ea46b421307d14
   languageName: node
   linkType: hard
 
@@ -16294,11 +16245,11 @@ __metadata:
   linkType: hard
 
 "lucide-react@npm:^1.34.0":
-  version: 1.34.0
-  resolution: "lucide-react@npm:1.34.0"
+  version: 1.37.0
+  resolution: "lucide-react@npm:1.37.0"
   peerDependencies:
     react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/65fb34c3228c13891f7ad551461477de3ad4b5a1167091ddcf3138f3ff487e3355f1b78cbdd1c2e0b4fe58ab80ace0c5fa1a0dac9e62db760289f7237137d1b2
+  checksum: 10c0/827bdf1f39c5c86fad944260a97769302bdf06ed55d9d96059c5d362e9f1a0aaaede5fc9f31f3144a974e830003f5953e6c83bc3a5bc214c4c8d5110e78ec356
   languageName: node
   linkType: hard
 
@@ -16403,8 +16354,8 @@ __metadata:
   linkType: hard
 
 "markdown-it@npm:^14.0.0":
-  version: 14.3.0
-  resolution: "markdown-it@npm:14.3.0"
+  version: 14.3.1
+  resolution: "markdown-it@npm:14.3.1"
   dependencies:
     argparse: "npm:^2.0.1"
     entities: "npm:^4.5.0"
@@ -16414,7 +16365,7 @@ __metadata:
     uc.micro: "npm:^2.1.0"
   bin:
     markdown-it: bin/markdown-it.mjs
-  checksum: 10c0/b2dea908968109d6e9088ac972254bca842157d85d2e6838d0eb263cd8106e7e6a72663b138366cc98f57441d9f3f2ebfb842bf7b2f9e1c13187ebe70e0af8f9
+  checksum: 10c0/806f0f5f29f1ddd9fd465f905c1f2c54d64af9023095792dd5364e5807f77454f427ee75d66083b432d0900e21836f0fff940f94f5fc93c41b2f78970469874e
   languageName: node
   linkType: hard
 
@@ -17821,11 +17772,11 @@ __metadata:
   linkType: hard
 
 "node-abi@npm:^3.3.0, node-abi@npm:^3.45.0":
-  version: 3.95.0
-  resolution: "node-abi@npm:3.95.0"
+  version: 3.96.0
+  resolution: "node-abi@npm:3.96.0"
   dependencies:
     semver: "npm:^7.3.5"
-  checksum: 10c0/b2008108cf57b556bf7c9b68d090d328b90f8d8f46e1f41239146e1b8622c2674224453cafc62793641309218e34b3fd5379f8f8d8daa316c79339098bb552bd
+  checksum: 10c0/d5f70cc9c384f807c79fbd3020ec03510d3a3540e95a51cabc9a52f658a474aa9e9a15cd331d6c49eb2d6983c6cfcef7483e1fdb833686584a599041b9d171cd
   languageName: node
   linkType: hard
 
@@ -18375,9 +18326,9 @@ __metadata:
   linkType: hard
 
 "p-map@npm:^7.0.4":
-  version: 7.0.6
-  resolution: "p-map@npm:7.0.6"
-  checksum: 10c0/46e3b3c79b6179613161aa1a28c72cfe7155f27f1928afee1b2406858728f9dd4c29637bba25cef9b50517caacdcb71549f5ff228292524b0069b2310922b22e
+  version: 7.0.7
+  resolution: "p-map@npm:7.0.7"
+  checksum: 10c0/41a94dca7f3e79b9b78ee343c22bfa2922357b2131eed93d12f0347c631450306463118d11ba4accac504463911dee7bddb97d14cbf7055f9d29d2ea99b28209
   languageName: node
   linkType: hard
 
@@ -18443,6 +18394,55 @@ __metadata:
   checksum: 10c0/86dd99d8b34c3930345b8bbeb5e1cd8a05f608eeb40967b293f72fe469d0e9c88b783a8777e4cc7dc7c91ce54c5e93d88ff4b4f060e6ff18408fd21030d9ffbe
   languageName: node
   linkType: hard
+
+"pandhora-monorepo@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "pandhora-monorepo@workspace:."
+  dependencies:
+    "@changesets/cli": "npm:^2.29.6"
+    "@commitlint/cli": "npm:^19.8.0"
+    "@commitlint/config-conventional": "npm:^19.8.0"
+    "@eslint/js": "npm:^9.25.0"
+    "@mermaid-js/mermaid-cli": "npm:^11.12.0"
+    "@swc/core": "npm:^1.12.11"
+    "@swc/helpers": "npm:^0.5.17"
+    "@testing-library/jest-dom": "npm:^6.9.1"
+    "@testing-library/react": "npm:^16.3.2"
+    "@types/js-yaml": "npm:^4.0.9"
+    "@types/node": "npm:^25.6.0"
+    "@typescript-eslint/eslint-plugin": "npm:^8.30.1"
+    "@typescript-eslint/parser": "npm:^8.30.1"
+    "@vitest/coverage-v8": "npm:4.1.4"
+    "@vitest/ui": "npm:^4.1.4"
+    awilix: "npm:^12.0.5"
+    changeset: "npm:^0.2.6"
+    eslint: "npm:^9.25.0"
+    eslint-config-prettier: "npm:^10.1.2"
+    eslint-plugin-import: "npm:^2.31.0"
+    eslint-plugin-jsx-a11y: "npm:^6.10.2"
+    eslint-plugin-prettier: "npm:^5.2.6"
+    eslint-plugin-react: "npm:^7.37.5"
+    eslint-plugin-react-hooks: "npm:^5.2.0"
+    eslint-plugin-simple-import-sort: "npm:^12.1.1"
+    eslint-plugin-unused-imports: "npm:^4.1.4"
+    fs-extra: "npm:^11.3.4"
+    globals: "npm:^16.0.0"
+    husky: "npm:^8.0.0"
+    jsdom: "npm:^29.0.2"
+    lint-staged: "npm:^15.5.1"
+    msw: "npm:^2.13.3"
+    pako: "npm:^2.1.0"
+    prettier: "npm:^3.5.3"
+    prettier-plugin-tailwindcss: "npm:^0.6.11"
+    rimraf: "npm:^6.0.1"
+    ts-node: "npm:^10.9.2"
+    tsup: "npm:^8.5.0"
+    turbo: "npm:^2.5.4"
+    typescript: "npm:^5.8.3"
+    typescript-eslint: "npm:^8.30.1"
+    vitest: "npm:^4.1.4"
+  languageName: unknown
+  linkType: soft
 
 "parent-module@npm:^1.0.0":
   version: 1.0.1
@@ -19860,7 +19860,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"regexp.prototype.flags@npm:^1.5.3, regexp.prototype.flags@npm:^1.5.4":
+"regexp.prototype.flags@npm:^1.5.4":
   version: 1.5.4
   resolution: "regexp.prototype.flags@npm:1.5.4"
   dependencies:
@@ -20239,35 +20239,35 @@ __metadata:
   linkType: hard
 
 "rollup@npm:^4.34.8, rollup@npm:^4.34.9":
-  version: 4.63.0
-  resolution: "rollup@npm:4.63.0"
+  version: 4.63.1
+  resolution: "rollup@npm:4.63.1"
   dependencies:
     "@napi-rs/lzma-linux-x64-gnu": "npm:1.5.1"
-    "@rollup/rollup-android-arm-eabi": "npm:4.63.0"
-    "@rollup/rollup-android-arm64": "npm:4.63.0"
-    "@rollup/rollup-darwin-arm64": "npm:4.63.0"
-    "@rollup/rollup-darwin-x64": "npm:4.63.0"
-    "@rollup/rollup-freebsd-arm64": "npm:4.63.0"
-    "@rollup/rollup-freebsd-x64": "npm:4.63.0"
-    "@rollup/rollup-linux-arm-gnueabihf": "npm:4.63.0"
-    "@rollup/rollup-linux-arm-musleabihf": "npm:4.63.0"
-    "@rollup/rollup-linux-arm64-gnu": "npm:4.63.0"
-    "@rollup/rollup-linux-arm64-musl": "npm:4.63.0"
-    "@rollup/rollup-linux-loong64-gnu": "npm:4.63.0"
-    "@rollup/rollup-linux-loong64-musl": "npm:4.63.0"
-    "@rollup/rollup-linux-ppc64-gnu": "npm:4.63.0"
-    "@rollup/rollup-linux-ppc64-musl": "npm:4.63.0"
-    "@rollup/rollup-linux-riscv64-gnu": "npm:4.63.0"
-    "@rollup/rollup-linux-riscv64-musl": "npm:4.63.0"
-    "@rollup/rollup-linux-s390x-gnu": "npm:4.63.0"
-    "@rollup/rollup-linux-x64-gnu": "npm:4.63.0"
-    "@rollup/rollup-linux-x64-musl": "npm:4.63.0"
-    "@rollup/rollup-openbsd-x64": "npm:4.63.0"
-    "@rollup/rollup-openharmony-arm64": "npm:4.63.0"
-    "@rollup/rollup-win32-arm64-msvc": "npm:4.63.0"
-    "@rollup/rollup-win32-ia32-msvc": "npm:4.63.0"
-    "@rollup/rollup-win32-x64-gnu": "npm:4.63.0"
-    "@rollup/rollup-win32-x64-msvc": "npm:4.63.0"
+    "@rollup/rollup-android-arm-eabi": "npm:4.63.1"
+    "@rollup/rollup-android-arm64": "npm:4.63.1"
+    "@rollup/rollup-darwin-arm64": "npm:4.63.1"
+    "@rollup/rollup-darwin-x64": "npm:4.63.1"
+    "@rollup/rollup-freebsd-arm64": "npm:4.63.1"
+    "@rollup/rollup-freebsd-x64": "npm:4.63.1"
+    "@rollup/rollup-linux-arm-gnueabihf": "npm:4.63.1"
+    "@rollup/rollup-linux-arm-musleabihf": "npm:4.63.1"
+    "@rollup/rollup-linux-arm64-gnu": "npm:4.63.1"
+    "@rollup/rollup-linux-arm64-musl": "npm:4.63.1"
+    "@rollup/rollup-linux-loong64-gnu": "npm:4.63.1"
+    "@rollup/rollup-linux-loong64-musl": "npm:4.63.1"
+    "@rollup/rollup-linux-ppc64-gnu": "npm:4.63.1"
+    "@rollup/rollup-linux-ppc64-musl": "npm:4.63.1"
+    "@rollup/rollup-linux-riscv64-gnu": "npm:4.63.1"
+    "@rollup/rollup-linux-riscv64-musl": "npm:4.63.1"
+    "@rollup/rollup-linux-s390x-gnu": "npm:4.63.1"
+    "@rollup/rollup-linux-x64-gnu": "npm:4.63.1"
+    "@rollup/rollup-linux-x64-musl": "npm:4.63.1"
+    "@rollup/rollup-openbsd-x64": "npm:4.63.1"
+    "@rollup/rollup-openharmony-arm64": "npm:4.63.1"
+    "@rollup/rollup-win32-arm64-msvc": "npm:4.63.1"
+    "@rollup/rollup-win32-ia32-msvc": "npm:4.63.1"
+    "@rollup/rollup-win32-x64-gnu": "npm:4.63.1"
+    "@rollup/rollup-win32-x64-msvc": "npm:4.63.1"
     "@types/estree": "npm:1.0.9"
     fsevents: "npm:~2.3.2"
   dependenciesMeta:
@@ -20327,7 +20327,7 @@ __metadata:
       optional: true
   bin:
     rollup: dist/bin/rollup
-  checksum: 10c0/011230c63ad10f35b32fd7dee84fe465bd5433812599bed2f0ee9fa902c8b6053065a31f279f50fe4c99cca4639168f45c6124c2a613cbe57e0695c96e48e88a
+  checksum: 10c0/90cac5c59bdeb7762483b502f1b547057b0a5e18d044a971b9fbd5629ee262518d00c526e92244726c91e11c4fd5005e9e48359787af034035f0668bb5949ab0
   languageName: node
   linkType: hard
 
@@ -20781,7 +20781,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"side-channel@npm:^1.1.0":
+"side-channel@npm:^1.1.0, side-channel@npm:^1.1.1":
   version: 1.1.1
   resolution: "side-channel@npm:1.1.1"
   dependencies:
@@ -21205,23 +21205,23 @@ __metadata:
   linkType: hard
 
 "string.prototype.matchall@npm:^4.0.12":
-  version: 4.0.12
-  resolution: "string.prototype.matchall@npm:4.0.12"
+  version: 4.1.0
+  resolution: "string.prototype.matchall@npm:4.1.0"
   dependencies:
-    call-bind: "npm:^1.0.8"
-    call-bound: "npm:^1.0.3"
+    call-bind: "npm:^1.0.9"
+    call-bound: "npm:^1.0.4"
     define-properties: "npm:^1.2.1"
-    es-abstract: "npm:^1.23.6"
+    es-abstract: "npm:^1.24.2"
     es-errors: "npm:^1.3.0"
-    es-object-atoms: "npm:^1.0.0"
-    get-intrinsic: "npm:^1.2.6"
+    es-object-atoms: "npm:^1.1.2"
+    get-intrinsic: "npm:^1.3.0"
     gopd: "npm:^1.2.0"
     has-symbols: "npm:^1.1.0"
     internal-slot: "npm:^1.1.0"
-    regexp.prototype.flags: "npm:^1.5.3"
+    regexp.prototype.flags: "npm:^1.5.4"
     set-function-name: "npm:^2.0.2"
-    side-channel: "npm:^1.1.0"
-  checksum: 10c0/1a53328ada73f4a77f1fdf1c79414700cf718d0a8ef6672af5603e709d26a24f2181208144aed7e858b1bcc1a0d08567a570abfb45567db4ae47637ed2c2f85c
+    side-channel: "npm:^1.1.1"
+  checksum: 10c0/6bafcfc71b13082d0474c037e8fbd4d9c5e769eae1ba1f9d293666bc6385337c2af359604a68bc6afa18b9a71ab64ac431f49b8006db57ed118cde176bd3a7f6
   languageName: node
   linkType: hard
 
@@ -22502,8 +22502,8 @@ __metadata:
   linkType: hard
 
 "update-browserslist-db@npm:^1.3.0":
-  version: 1.3.1
-  resolution: "update-browserslist-db@npm:1.3.1"
+  version: 1.3.2
+  resolution: "update-browserslist-db@npm:1.3.2"
   dependencies:
     escalade: "npm:^3.2.0"
     picocolors: "npm:^1.1.1"
@@ -22511,7 +22511,7 @@ __metadata:
     browserslist: ">= 4.21.0"
   bin:
     update-browserslist-db: cli.js
-  checksum: 10c0/2a924f5aa283af2d918e5cd941c7e8d77b05adf2ffbe5ca461506b1ff05fee6e8bca74c0f1ba37eb28f00ec93b15e80de24c7222825835aec2dd7bf0a0f6a417
+  checksum: 10c0/837b4ea8c4934228c5c2a922ea747a54b0ec9d1c408d2fbc9220a9b98327c04109776e6ea1206fa056ea61ed8534863af472d9f2cfce569d35f04e98c95db739
   languageName: node
   linkType: hard
 
@@ -23461,9 +23461,9 @@ __metadata:
   linkType: hard
 
 "zod@npm:^3.25.0 || ^4.0.0, zod@npm:^4.4.3":
-  version: 4.4.3
-  resolution: "zod@npm:4.4.3"
-  checksum: 10c0/7ea31b558e88f9faf44f31dd185e2e1cbf51fed3081787fb96cc2534749b50c0acfc6da7f0922a7353ed092dd358c7d50c28ea96c94d04af64191bd33152eca3
+  version: 4.5.4
+  resolution: "zod@npm:4.5.4"
+  checksum: 10c0/511a2a4d1a6f875dfdd70a1586989a8b14ef126776cd6218a2c760b9f65f14ef389ec20d92ee1aa4fcb4566d4ff3fa012956044f9dc503510d82e4c756a8ba92
   languageName: node
   linkType: hard
 

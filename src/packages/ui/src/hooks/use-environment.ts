@@ -1,4 +1,4 @@
-﻿import type { EnvironmentInfo } from '@gamhora/application'
+﻿import type { EnvironmentInfo } from '@pandhora/application'
 import { useContext } from 'react'
 
 import { EnvironmentContext } from '@/contexts/EnvironmentContext'

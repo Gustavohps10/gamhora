@@ -1,7 +1,7 @@
 @import 'tailwindcss' source('../../../../packages/ui/src/');
 @plugin "tailwindcss-animate";
 @plugin "@tailwindcss/typography";
-@import '@gamhora/ui/globals.css';
+@import '@pandhora/ui/globals.css';
 
 /* Firefox */
 * {

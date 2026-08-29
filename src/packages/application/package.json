@@ -1,8 +1,8 @@
 {
-  "name": "@gamhora/application",
+  "name": "@pandhora/application",
   "version": "1.0.0",
   "private": true,
-  "description": "Contém os serviços e casos de uso (use cases) da aplicação Gamhora.",
+  "description": "Contém os serviços e casos de uso (use cases) da aplicação Pandhora.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,8 +19,8 @@
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {
-    "@gamhora/domain": "workspace:*",
-    "@gamhora/shared": "workspace:*"
+    "@pandhora/domain": "workspace:*",
+    "@pandhora/shared": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

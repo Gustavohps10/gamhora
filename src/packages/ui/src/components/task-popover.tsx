@@ -46,7 +46,7 @@ const DEFAULT_ACTIVITIES: Array<{
   { id: 'fix', name: 'Correção', icon: Wrench },
 ]
 
-const PINNED_TASKS_STORAGE_KEY = 'gamhora:pinned-task-ids'
+const PINNED_TASKS_STORAGE_KEY = 'pandhora:pinned-task-ids'
 
 function getPinnedTaskIds(): string[] {
   if (typeof window === 'undefined') return []

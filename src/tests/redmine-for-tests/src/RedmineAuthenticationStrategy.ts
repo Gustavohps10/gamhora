@@ -4,7 +4,7 @@
   Either,
   IAuthenticationStrategy,
   MemberDTO,
-} from '@gamhora/sdk'
+} from '@pandhora/sdk'
 import axios, { AxiosInstance } from 'axios'
 
 export interface RedmineConfiguration {

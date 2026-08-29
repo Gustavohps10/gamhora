@@ -1,5 +1,5 @@
-import { IWorkspacesRepository } from '@gamhora/application'
-import { DataSourceConnection, Workspace } from '@gamhora/domain'
+import { IWorkspacesRepository } from '@pandhora/application'
+import { DataSourceConnection, Workspace } from '@pandhora/domain'
 import { promises as fs } from 'fs'
 import path from 'path'
 

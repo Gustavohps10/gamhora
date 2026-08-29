@@ -1,5 +1,5 @@
-﻿import { TimeEntry } from '@gamhora/domain'
-import { AppError, Either } from '@gamhora/shared/helpers'
+﻿import { TimeEntry } from '@pandhora/domain'
+import { AppError, Either } from '@pandhora/shared/helpers'
 import type { Mocked } from 'vitest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 

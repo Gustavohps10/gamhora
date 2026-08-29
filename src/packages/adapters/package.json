@@ -1,8 +1,8 @@
 {
-  "name": "@gamhora/adapters",
+  "name": "@pandhora/adapters",
   "version": "1.0.0",
   "private": true,
-  "description": "Pacote de infraestrutura consolidado para o Gamhora, contendo implementações concretas de recursos externos",
+  "description": "Pacote de infraestrutura consolidado para o Pandhora, contendo implementações concretas de recursos externos",
   "type": "module",
   "scripts": {
     "build": "tsup",
@@ -45,9 +45,9 @@
     }
   },
   "dependencies": {
-    "@gamhora/application": "workspace:*",
-    "@gamhora/domain": "workspace:*",
-    "@gamhora/shared": "workspace:*",
+    "@pandhora/application": "workspace:*",
+    "@pandhora/domain": "workspace:*",
+    "@pandhora/shared": "workspace:*",
     "ajv": "^8.17.1",
     "archiver": "^7.0.1",
     "axios": "^1.7.9",

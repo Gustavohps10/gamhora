@@ -1,4 +1,4 @@
-﻿import type { DataSourceContext, MetadataDTO } from '@gamhora/sdk'
+﻿import type { DataSourceContext, MetadataDTO } from '@pandhora/sdk'
 
 import { FAKE_METADATA } from './fakeData'
 

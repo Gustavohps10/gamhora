@@ -1,4 +1,4 @@
-# Native Prebuilds (Gamhora Desktop)
+# Native Prebuilds (Pandhora Desktop)
 
 Este diretório contém os binários nativos pré-compilados (`.node`) utilizados pelo processo principal do Electron.
 

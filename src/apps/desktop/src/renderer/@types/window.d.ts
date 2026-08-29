@@ -1,6 +1,6 @@
 ﻿import { ElectronAPI } from '@electron-toolkit/preload'
 
-import type { IOpenAPI } from '@gamhora/application'
+import type { IOpenAPI } from '@pandhora/application'
 
 declare global {
   interface Window {
@@ -8,4 +8,3 @@ declare global {
     api: IOpenAPI
   }
 }
-

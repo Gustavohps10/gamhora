@@ -6,7 +6,7 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     alias: {
-      '@gamhora-org/sdk': path.resolve(__dirname, './src/apps/sdk/src'),
+      '@pandhora/sdk': path.resolve(__dirname, './src/apps/sdk/src'),
     },
   },
   test: {

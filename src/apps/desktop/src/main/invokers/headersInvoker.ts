@@ -1,5 +1,5 @@
-﻿import { IHeadersAPI } from '@gamhora/application'
-import { IHeaders } from '@gamhora/shared/transport'
+﻿import { IHeadersAPI } from '@pandhora/application'
+import { IHeaders } from '@pandhora/shared/transport'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

@@ -13,10 +13,10 @@ import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import {
   JSONWorkspacesQuery,
   JSONWorkspacesRepository,
-} from '@gamhora/adapters/data'
-import { AddonsFacade } from '@gamhora/adapters/facades'
-import { HardDiskStorage, KeytarTokenStorage } from '@gamhora/adapters/tools'
-import { ContainerBuilder, PlatformDependencies } from '@gamhora/IoC'
+} from '@pandhora/adapters/data'
+import { AddonsFacade } from '@pandhora/adapters/facades'
+import { HardDiskStorage, KeytarTokenStorage } from '@pandhora/adapters/tools'
+import { ContainerBuilder, PlatformDependencies } from '@pandhora/IoC'
 import {
   app,
   BrowserWindow,
@@ -75,7 +75,7 @@ export type IHandlersScope = {
 // --------------------------------------------------
 // CONFIGURAÇÕES GLOBAIS & SINGLE INSTANCE LOCK
 // --------------------------------------------------
-app.name = 'gamhora'
+app.name = 'pandhora'
 
 const userDataDir = app.getPath('userData')
 const bridgeFilePath = join(userDataDir, 'oauth_bridge.tmp')
@@ -84,20 +84,20 @@ const gotTheLock = app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
   // PROCESSO SECUNDÁRIO: Grava a URL no arquivo compartilhado e morre instantaneamente
-  console.log('[Gamhora Core] ❌ Instância secundária capturada.')
+  console.log('[Pandhora Core] ❌ Instância secundária capturada.')
 
-  const deepLink = process.argv.find((arg) => arg.includes('gamhora-app://'))
+  const deepLink = process.argv.find((arg) => arg.includes('pandhora-app://'))
 
   if (deepLink) {
-    const cleanUrl = deepLink.substring(deepLink.indexOf('gamhora-app://'))
+    const cleanUrl = deepLink.substring(deepLink.indexOf('pandhora-app://'))
     try {
       writeFileSync(bridgeFilePath, cleanUrl, 'utf-8')
       console.log(
-        '[Gamhora Core] 💾 URL gravada na ponte com sucesso:',
+        '[Pandhora Core] 💾 URL gravada na ponte com sucesso:',
         cleanUrl,
       )
     } catch (err) {
-      console.error('[Gamhora Core] Erro ao gravar URL no arquivo ponte:', err)
+      console.error('[Pandhora Core] Erro ao gravar URL no arquivo ponte:', err)
     }
   }
 
@@ -107,7 +107,7 @@ if (!gotTheLock) {
   // --------------------------------------------------
   // PRIMEIRA INSTÂNCIA
   // --------------------------------------------------
-  console.log('[Gamhora Core] ✅ PRIMEIRA INSTÂNCIA EM EXECUÇÃO')
+  console.log('[Pandhora Core] ✅ PRIMEIRA INSTÂNCIA EM EXECUÇÃO')
 
   let mainWindow: BrowserWindow | null = null
   let tray: Tray | null = null
@@ -119,7 +119,7 @@ if (!gotTheLock) {
   function handleIncomingDeepLink(rawUrl: string) {
     const cleanUrl = rawUrl.replace(/\/$/, '').trim()
     console.log(
-      '[Gamhora Core] 🔗 Deep Link recebido e repassado ao AddonLoader:',
+      '[Pandhora Core] 🔗 Deep Link recebido e repassado ao AddonLoader:',
       cleanUrl,
     )
 
@@ -128,7 +128,7 @@ if (!gotTheLock) {
       mainWindow.focus()
     }
 
-    if (globalAddonLoader && cleanUrl.startsWith('gamhora-app://')) {
+    if (globalAddonLoader && cleanUrl.startsWith('pandhora-app://')) {
       globalAddonLoader.handleOAuthCallbackUrl(cleanUrl)
     }
   }
@@ -153,7 +153,7 @@ if (!gotTheLock) {
       }
     })
   } catch (err) {
-    console.error('[Gamhora Core] Erro ao iniciar watcher da ponte:', err)
+    console.error('[Pandhora Core] Erro ao iniciar watcher da ponte:', err)
   }
 
   // CARREGAMENTO DO PLUGIN C++ NATIVO
@@ -167,7 +167,7 @@ if (!gotTheLock) {
       console.log('✅ [C++ plugin] ✓ Carregado: window_overlay.node')
     } catch (err) {
       console.error(
-        '❌ [@gamhora/desktop] Erro ao carregar window_overlay.node:',
+        '❌ [@pandhora/desktop] Erro ao carregar window_overlay.node:',
         err,
       )
     }
@@ -190,7 +190,7 @@ if (!gotTheLock) {
 
   protocol.registerSchemesAsPrivileged([
     {
-      scheme: 'gamhora-app',
+      scheme: 'pandhora-app',
       privileges: { standard: true, secure: true, supportFetchAPI: true },
     },
   ])
@@ -199,22 +199,22 @@ if (!gotTheLock) {
   const currentCompiledFile = fileURLToPath(import.meta.url)
 
   if (!app.isPackaged) {
-    console.log('[Gamhora Core] 🔗 Registrando protocolo (Dev Monorepo):', {
+    console.log('[Pandhora Core] 🔗 Registrando protocolo (Dev Monorepo):', {
       executable: process.execPath,
       compiledFile: currentCompiledFile,
     })
 
-    app.setAsDefaultProtocolClient('gamhora-app', process.execPath, [
+    app.setAsDefaultProtocolClient('pandhora-app', process.execPath, [
       currentCompiledFile,
     ])
   } else {
-    app.setAsDefaultProtocolClient('gamhora-app')
+    app.setAsDefaultProtocolClient('pandhora-app')
   }
 
   // LISTENERS NATIVOS (Fallback & macOS)
   app.on('second-instance', (_event, commandLine) => {
     const rawDeepLink = commandLine.find((arg) =>
-      arg.startsWith('gamhora-app://'),
+      arg.startsWith('pandhora-app://'),
     )
     if (rawDeepLink) {
       handleIncomingDeepLink(rawDeepLink)
@@ -223,7 +223,7 @@ if (!gotTheLock) {
 
   app.on('open-url', (event, url) => {
     event.preventDefault()
-    if (url.startsWith('gamhora-app://')) {
+    if (url.startsWith('pandhora-app://')) {
       handleIncomingDeepLink(url)
     }
   })
@@ -361,16 +361,16 @@ if (!gotTheLock) {
 
   // HANDLER DE PROTOCOLO INTERNO
   function handleProtocol() {
-    protocol.handle('gamhora-app', async (request) => {
+    protocol.handle('pandhora-app', async (request) => {
       try {
-        if (request.url.startsWith('gamhora-app://oauth/callback')) {
+        if (request.url.startsWith('pandhora-app://oauth/callback')) {
           if (globalAddonLoader) {
             globalAddonLoader.handleOAuthCallbackUrl(request.url)
           }
           return new Response('OK', { status: 200 })
         }
 
-        let filePath = request.url.replace('gamhora-app://', '')
+        let filePath = request.url.replace('pandhora-app://', '')
         filePath = filePath
           .replace(/[?&]buster=[^&]*/g, '')
           .replace(/[?&]$/, '')
@@ -383,7 +383,7 @@ if (!gotTheLock) {
         const fileUrl = pathToFileURL(filePath).toString()
         return net.fetch(fileUrl)
       } catch (error) {
-        console.error('Erro no protocolo gamhora-app:', error)
+        console.error('Erro no protocolo pandhora-app:', error)
         return new Response('Resource not found', { status: 404 })
       }
     })
@@ -401,7 +401,7 @@ if (!gotTheLock) {
 
     // Cold-start link
     const initialDeepLink = process.argv.find((arg) =>
-      arg.startsWith('gamhora-app://'),
+      arg.startsWith('pandhora-app://'),
     )
     if (initialDeepLink) {
       handleIncomingDeepLink(initialDeepLink)
@@ -413,7 +413,7 @@ if (!gotTheLock) {
     const workspacesRepository = new JSONWorkspacesRepository(userDataPath)
     const workspacesQuery = new JSONWorkspacesQuery(userDataPath)
     const eventEmitter = new ElectronJobEventEmitter(() => mainWindow)
-    const nodeFileStorage = new HardDiskStorage(userDataPath, 'gamhora-app://')
+    const nodeFileStorage = new HardDiskStorage(userDataPath, 'pandhora-app://')
     const electronHttpClient = new ElectronHttpClient()
 
     // Carrega e ativa todos os addons instalados no disco
@@ -423,12 +423,12 @@ if (!gotTheLock) {
       if (installedResult.isSuccess() && installedResult.success.length > 0) {
         await addonLoader.loadInstalledAddons(installedResult.success)
         console.log(
-          `🧩 [Gamhora Core] ${installedResult.success.length} addon(s) instalado(s) carregado(s) no boot.`,
+          `🧩 [Pandhora Core] ${installedResult.success.length} addon(s) instalado(s) carregado(s) no boot.`,
         )
       }
     } catch (err) {
       console.error(
-        '❌ [Gamhora Core] Erro ao carregar addons instalados no boot:',
+        '❌ [Pandhora Core] Erro ao carregar addons instalados no boot:',
         err,
       )
     }

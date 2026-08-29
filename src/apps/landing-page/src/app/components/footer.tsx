@@ -1,93 +1,130 @@
 'use client'
 
-const footerLinks = {
-  produto: [
-    { label: 'Funcionalidades', href: '#features' },
-    { label: 'Integrações', href: '#integrations' },
-    { label: 'Demo', href: '#demo' },
-    { label: 'Changelog', href: '#' },
-  ],
-  empresa: [
-    { label: 'Sobre', href: '#' },
-    { label: 'Blog', href: '#' },
-    { label: 'Carreiras', href: '#' },
-    { label: 'Contato', href: '#' },
-  ],
-  legal: [
-    { label: 'Privacidade', href: '#' },
-    { label: 'Termos de Uso', href: '#' },
-    { label: 'Cookies', href: '#' },
-  ],
-}
+import { Separator } from '@pandhora/ui/components'
+import { Github, Linkedin, Twitter } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import * as React from 'react'
+
+const FOOTER_SECTIONS = [
+  {
+    title: 'Produto',
+    links: [
+      { label: 'Funcionalidades', href: '/#features' },
+      { label: 'Integrações', href: '/#integrations' },
+      { label: 'Arquitetura', href: '/#offline' },
+      { label: 'Preços', href: '/#pricing' },
+      { label: 'Demonstração', href: '/#demo' },
+    ],
+  },
+  {
+    title: 'Recursos & Docs',
+    links: [
+      { label: 'Documentação', href: '/docs' },
+      { label: 'Guia Rápido', href: '/docs/quickstart' },
+      { label: 'SDK de Plugins', href: '/docs/apis/storage-and-events' },
+      {
+        label: 'Repositório GitHub',
+        href: 'https://github.com/gustavohps10/pandhora',
+        external: true,
+      },
+      {
+        label: 'Reportar Issue',
+        href: 'https://github.com/gustavohps10/pandhora/issues',
+        external: true,
+      },
+    ],
+  },
+  {
+    title: 'Legal & Privacidade',
+    links: [
+      {
+        label: 'Licença MIT (Open Source)',
+        href: 'https://github.com/gustavohps10/pandhora/blob/main/LICENSE',
+        external: true,
+      },
+      { label: 'Termos de Uso', href: '#' },
+      { label: 'Política de Privacidade', href: '#' },
+      { label: 'Segurança Local-first', href: '/#offline' },
+    ],
+  },
+]
 
 export function Footer() {
   return (
-    <footer className="bg-secondary">
-      {/* Top divider */}
-      <div className="lp-divider-glow" />
+    <footer className="border-border/60 bg-card/60 relative border-t pt-16 pb-12">
+      <div className="container mx-auto px-6 lg:px-8">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-5">
+          {/* Brand Info */}
+          <div className="lg:col-span-2">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="flex h-9 w-auto shrink-0 items-center justify-center">
+                <Image
+                  src="/logo-icon.svg"
+                  alt="Logo Pandhora"
+                  width={28}
+                  height={34}
+                  className="h-8 w-auto object-contain dark:invert"
+                />
+              </div>
 
-      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Brand column */}
-          <div className="lg:col-span-1">
-            <a href="#" className="flex items-center gap-2.5">
-              <img
-                src="/logo_gamhora_icone_sem_fundo.svg"
-                alt="Gamhora"
-                className="h-8 w-8"
+              <Image
+                src="/logo-text.svg"
+                alt="Pandhora"
+                width={124}
+                height={26}
+                className="h-auto w-[124px] object-contain dark:invert"
               />
-              <span className="text-foreground text-lg font-bold">Gamhora</span>
-            </a>
-            <p className="text-muted-foreground mt-4 max-w-xs text-sm leading-relaxed">
-              Plataforma inteligente de apontamento de horas. Gerencie tempo,
-              integre ferramentas, maximize resultados.
+            </Link>
+
+            <p className="text-muted-foreground mt-4 max-w-sm text-sm leading-relaxed">
+              O workflow toolkit local-first para engenharia de software.
+              Controle tarefas, acompanhe horas com precisão e ganhe
+              observabilidade total sobre seu tempo técnico.
             </p>
 
-            {/* Social */}
-            <div className="mt-6 flex gap-4">
-              {[
-                {
-                  label: 'Twitter',
-                  path: 'M22.46 6c-.85.38-1.78.64-2.73.76 1-.6 1.76-1.54 2.12-2.67-.93.55-1.96.95-3.06 1.17A4.81 4.81 0 0 0 15.11 4c-2.65 0-4.79 2.15-4.79 4.79 0 .38.04.74.13 1.09C6.87 9.68 3.92 7.78 1.96 5.08c-.41.71-.65 1.54-.65 2.42 0 1.66.85 3.13 2.13 3.99-.78-.03-1.52-.24-2.17-.6v.06c0 2.32 1.65 4.26 3.84 4.7-.4.11-.83.17-1.27.17-.31 0-.61-.03-.91-.09.62 1.93 2.41 3.34 4.53 3.38A9.65 9.65 0 0 1 0 21.54 13.56 13.56 0 0 0 7.29 23.7c8.76 0 13.54-7.26 13.54-13.54 0-.21 0-.41-.01-.61.93-.67 1.73-1.51 2.37-2.47L22.46 6z',
-                },
-                {
-                  label: 'GitHub',
-                  path: 'M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z',
-                },
-                {
-                  label: 'LinkedIn',
-                  path: 'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z',
-                },
-              ].map((social) => (
-                <a
-                  key={social.label}
-                  href="#"
-                  aria-label={social.label}
-                  className="bg-card border-border flex h-9 w-9 items-center justify-center rounded-lg border transition-all duration-200 hover:scale-110"
-                >
-                  <svg
-                    className="fill-muted-foreground h-4 w-4"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d={social.path} />
-                  </svg>
-                </a>
-              ))}
+            {/* Social Links */}
+            <div className="mt-6 flex items-center gap-3">
+              <a
+                href="https://github.com/gustavohps10/pandhora"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="GitHub"
+                className="border-border/60 bg-background hover:text-foreground text-muted-foreground hover:border-border flex size-9 items-center justify-center rounded-lg border transition-all"
+              >
+                <Github className="size-4" />
+              </a>
+              <a
+                href="#"
+                aria-label="Twitter"
+                className="border-border/60 bg-background hover:text-foreground text-muted-foreground hover:border-border flex size-9 items-center justify-center rounded-lg border transition-all"
+              >
+                <Twitter className="size-4" />
+              </a>
+              <a
+                href="#"
+                aria-label="LinkedIn"
+                className="border-border/60 bg-background hover:text-foreground text-muted-foreground hover:border-border flex size-9 items-center justify-center rounded-lg border transition-all"
+              >
+                <Linkedin className="size-4" />
+              </a>
             </div>
           </div>
 
-          {/* Link columns */}
-          {Object.entries(footerLinks).map(([title, links]) => (
-            <div key={title}>
-              <h4 className="text-foreground text-sm font-semibold tracking-wider uppercase">
-                {title}
-              </h4>
-              <ul className="mt-4 space-y-3">
-                {links.map((link) => (
+          {/* Links Columns */}
+          {FOOTER_SECTIONS.map((section) => (
+            <div key={section.title}>
+              <h3 className="text-foreground text-xs font-bold tracking-wider uppercase">
+                {section.title}
+              </h3>
+              <ul className="mt-4 space-y-2.5 text-xs">
+                {section.links.map((link) => (
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-muted-foreground hover:text-foreground text-sm transition-colors duration-200"
+                      target={link.external ? '_blank' : undefined}
+                      rel={link.external ? 'noreferrer' : undefined}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {link.label}
                     </a>
@@ -98,14 +135,17 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Bottom bar */}
-        <div className="border-border mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row">
-          <p className="text-muted-foreground text-sm">
-            © 2026 Gamhora. Todos os direitos reservados.
-          </p>
-          <p className="text-muted-foreground text-sm">
-            Feito com 💜 para times produtivos.
-          </p>
+        <Separator className="my-10 opacity-40" />
+
+        {/* Bottom copyright */}
+        <div className="text-muted-foreground/60 flex flex-col items-center justify-between gap-4 text-xs sm:flex-row">
+          <p>© 2026 Pandhora. Todos os direitos reservados.</p>
+          <div className="flex items-center gap-2">
+            <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
+            <span>
+              Engenharia local-first &middot; Feito para desenvolvedores
+            </span>
+          </div>
         </div>
       </div>
     </footer>

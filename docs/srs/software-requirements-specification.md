@@ -1,4 +1,4 @@
-﻿# Gamhora
+﻿# Pandhora
 
 ## Sistema de Rastreamento e Visualização de Produtividade
 
@@ -10,11 +10,11 @@
 
 # Tabela de Revisão
 
-| Versão | Autores          | Descrição                                                                                   | Data       |
-| ------ | ---------------- | ------------------------------------------------------------------------------------------- | ---------- |
-| 1.0    | Gustavo Henrique | Versão Inicial consolidada (ADR-001 + Core Sync)                                            | 07/03/2026 |
-| 1.1    | Gustavo Henrique | Arquitetura do Timer Service, Schema de TimeEntries, Journal e timerConfig                  | 10/05/2026 |
-| 1.2    | Gustavo Henrique | Revisão arquitetural: camadas Domain/Application/Main/Renderer, modelo operacional do timer | 10/05/2026 |
+| Versão | Autores          | Descrição                                                                                            | Data       |
+| ------ | ---------------- | ---------------------------------------------------------------------------------------------------- | ---------- |
+| 1.0    | Gustavo Henrique | Versão Inicial consolidada (ADR-001 + Core Sync)                                                     | 07/03/2026 |
+| 1.1    | Gustavo Henrique | Arquitetura do Timer Service, Schema de TimeEntries, Journal e timerConfig                           | 10/05/2026 |
+| 1.2    | Gustavo Henrique | Revisão arquitetural: camadas Domain/Application/Main/Renderer, modelo operacional do timer          | 10/05/2026 |
 | 1.3    | Gustavo Henrique | Simplificação: SDK de Addons Multicapacidade, Política Zero-Cloud, Free vs Pro e Licenciamento Local | 24/08/2026 |
 
 ---
@@ -23,14 +23,15 @@
 
 ## 1.1 Finalidade
 
-O **Gamhora** é um sistema desktop extensível e focado em produtividade para desenvolvedores e equipes de tecnologia.
+O **Pandhora** é um sistema desktop extensível e focado em produtividade para desenvolvedores e equipes de tecnologia.
 
 O sistema atua como um **hub local e agnóstico** que se conecta diretamente a ferramentas de gestão externas (Redmine, Jira, etc.) através de um **SDK de Addons Multicapacidade**, gerenciando o tempo investido com operação **100% offline-first e privacidade absoluta (Zero-Cloud)**.
 
 ## 1.2 Política de Privacidade Estrita (Zero-Cloud Data Policy)
 
-O Gamhora adota uma política rigorosa de **não exfiltração de dados operacionais**:
-- **Nenhum dado de tarefas, títulos de janelas, apontamentos de horas ou informações de clientes trafega para servidores em nuvem do Gamhora ou de terceiros.**
+O Pandhora adota uma política rigorosa de **não exfiltração de dados operacionais**:
+
+- **Nenhum dado de tarefas, títulos de janelas, apontamentos de horas ou informações de clientes trafega para servidores em nuvem do Pandhora ou de terceiros.**
 - Todas as conexões com DataSources acontecem **diretamente da máquina do usuário para o servidor da empresa/ferramenta**.
 - Recursos de inteligência e automação (Window Observer, Git Tracker, OCR, Idle Resolver) executam **100% localmente** na CPU do usuário.
 
@@ -46,24 +47,27 @@ O Gamhora adota uma política rigorosa de **não exfiltração de dados operacio
 
 ## 2.2 Divisão de Planos (Free vs Pro)
 
-O Gamhora opera sob um modelo de licenciamento local simplificado (sem necessidade de cadastro ou login obrigatório):
+O Pandhora opera sob um modelo de licenciamento local simplificado (sem necessidade de cadastro ou login obrigatório):
 
 ### 🟢 Plano FREE (Uso Individual / Básico)
+
 - Timer manual com precisão no Main Process.
-- Widget flutuante com suporte a *click-through* e atalhos globais.
+- Widget flutuante com suporte a _click-through_ e atalhos globais.
 - 1 Conexão de DataSource ativa por vez.
 - Temas nativos da aplicação (Light & Dark padrão).
 - Armazenamento 100% local.
 
 ### 💎 Plano PRO (Automações & Multi-Workspaces)
+
 Ativado localmente via **Chave de Licença (License Key)**:
+
 - **Multi-Workspace & Múltiplas Conexões:** Conectar simultaneamente múltiplos DataSources (ex: Jira + Redmine + GitHub).
 - **Pacote de Automações & Watchers Locais:**
-  - *Window Context Observer:* Identificação de janelas ativas em primeiro plano.
-  - *Git Tracker:* Associação automática de branches/commits a tarefas.
-  - *Idle Resolver:* Detecção e tratamento inteligente de pausas e reuniões.
-  - *Sugestor Automático:* Captura de atividades (Discord, Calls) com pré-preenchimento heurístico.
-  - *Gerador de Daily:* Resumo automático do dia anterior em tópicos para reuniões diárias.
+  - _Window Context Observer:_ Identificação de janelas ativas em primeiro plano.
+  - _Git Tracker:_ Associação automática de branches/commits a tarefas.
+  - _Idle Resolver:_ Detecção e tratamento inteligente de pausas e reuniões.
+  - _Sugestor Automático:_ Captura de atividades (Discord, Calls) com pré-preenchimento heurístico.
+  - _Gerador de Daily:_ Resumo automático do dia anterior em tópicos para reuniões diárias.
 - **Temas e Customização Visual Ilimitada:** Aplicação de temas da comunidade via Addons e injeção de CSS personalizado.
 - **Exportação de Faturamento:** Geração de relatórios consolidados em PDF e planilhas para cobrança de horas.
 
@@ -71,7 +75,7 @@ Ativado localmente via **Chave de Licença (License Key)**:
 
 # 3. Ecossistema e SDK de Addons
 
-O Gamhora possui uma arquitetura orientada a **Addons Multicapacidade**. Um único pacote de addon pode fornecer simultaneamente:
+O Pandhora possui uma arquitetura orientada a **Addons Multicapacidade**. Um único pacote de addon pode fornecer simultaneamente:
 
 1. **DataSources:** Adaptadores de comunicação com APIs externas (Redmine, Jira, GitLab, Mock).
 2. **Navegação & Menus:** Injeção de itens de navegação na Sidebar e subitens.
@@ -85,6 +89,7 @@ O Gamhora possui uma arquitetura orientada a **Addons Multicapacidade**. Um úni
 # 4. Ambiente Operacional
 
 ### Requisitos de Sistema
+
 - **Sistemas Operacionais:** Windows 10/11, macOS, Linux
 - **Stack Técnica:** Electron, TypeScript, React, Tailwind CSS v4, RxDB (Persistência Local)
 - **Privacidade & Rede:** Totalmente funcional offline. Acesso à internet necessário apenas para sincronizar com os DataSources externos configurados pelo próprio usuário e para a validação pontual da Chave de Licença.
@@ -95,33 +100,33 @@ O Gamhora possui uma arquitetura orientada a **Addons Multicapacidade**. Um úni
 
 ## 5.1 Requisitos Funcionais (RF)
 
-| ID    | Descrição                                         | Prioridade | Depende De |
-| ----- | ------------------------------------------------- | ---------- | ---------- |
-| ID    | Descrição                                                         | Prioridade | Depende De |
-| ----- | ----------------------------------------------------------------- | ---------- | ---------- |
-| RF001 | Gestão de Workspaces locais independentes                         | Alta       | —          |
-| RF002 | Gerenciador e SDK de Addons Multicapacidade                       | Alta       | —          |
-| RF003 | Configuração de conexões externas diretas                         | Alta       | RF002      |
-| RF004 | Motor de sincronização Pull/Push direto com DataSources           | Alta       | RF003      |
-| RF005 | Conversão de metadados para padrão interno agnóstico              | Alta       | RF004      |
-| RF006 | Sistema de timer processado em background                         | Alta       | —          |
-| RF007 | Widget flutuante com suporte a click-through e atalhos            | Alta       | RF006      |
-| RF008 | Injeção dinâmica de temas CSS via Addons                          | Alta       | RF002      |
-| RF009 | Validação de Chave de Licença PRO (License Key) offline-first     | Média      | —          |
-| RF010 | Temporização manual e recuperação de estado (Boot Recovery)       | Alta       | RF006      |
-| RF011 | Journal de eventos do timer e auditoria local                     | Alta       | RF006      |
+| ID    | Descrição                                                         | Prioridade | Depende De   |
+| ----- | ----------------------------------------------------------------- | ---------- | ------------ |
+| ID    | Descrição                                                         | Prioridade | Depende De   |
+| ----- | ----------------------------------------------------------------- | ---------- | ----------   |
+| RF001 | Gestão de Workspaces locais independentes                         | Alta       | —            |
+| RF002 | Gerenciador e SDK de Addons Multicapacidade                       | Alta       | —            |
+| RF003 | Configuração de conexões externas diretas                         | Alta       | RF002        |
+| RF004 | Motor de sincronização Pull/Push direto com DataSources           | Alta       | RF003        |
+| RF005 | Conversão de metadados para padrão interno agnóstico              | Alta       | RF004        |
+| RF006 | Sistema de timer processado em background                         | Alta       | —            |
+| RF007 | Widget flutuante com suporte a click-through e atalhos            | Alta       | RF006        |
+| RF008 | Injeção dinâmica de temas CSS via Addons                          | Alta       | RF002        |
+| RF009 | Validação de Chave de Licença PRO (License Key) offline-first     | Média      | —            |
+| RF010 | Temporização manual e recuperação de estado (Boot Recovery)       | Alta       | RF006        |
+| RF011 | Journal de eventos do timer e auditoria local                     | Alta       | RF006        |
 | RF012 | Pacote de Watchers e Automações Locais (Window/Git/Idle/Sugestor) | Média      | RF002, RF009 |
 
 ## 5.2 Requisitos Não Funcionais (RNF)
 
-| ID     | Descrição                                                                      | Categoria      | Prioridade |
-| ------ | ------------------------------------------------------------------------------ | -------------- | ---------- |
-| RNF001 | Política Estrita Zero-Cloud (Nenhum dado operacional enviado a servidores)     | Privacidade    | Crítica    |
-| RNF002 | Persistência local offline-first (RxDB / SQLite)                               | Arquitetura    | Alta       |
-| RNF003 | Timer imune a throttling do Chromium (Processado no Electron Main)             | Performance    | Alta       |
-| RNF004 | Separação estrita em camadas (Domain, Application, Main, Renderer, SDK, UI)   | Arquitetura    | Alta       |
-| RNF005 | Extensibilidade agnóstica via SDK (Zero acoplamento com ferramentas específicas)| Arquitetura    | Alta       |
-| RNF006 | Injeção de CSS tratada para compatibilidade com Tailwind v4 no Client-Side     | Compatibilidade| Alta       |
+| ID     | Descrição                                                                        | Categoria       | Prioridade |
+| ------ | -------------------------------------------------------------------------------- | --------------- | ---------- |
+| RNF001 | Política Estrita Zero-Cloud (Nenhum dado operacional enviado a servidores)       | Privacidade     | Crítica    |
+| RNF002 | Persistência local offline-first (RxDB / SQLite)                                 | Arquitetura     | Alta       |
+| RNF003 | Timer imune a throttling do Chromium (Processado no Electron Main)               | Performance     | Alta       |
+| RNF004 | Separação estrita em camadas (Domain, Application, Main, Renderer, SDK, UI)      | Arquitetura     | Alta       |
+| RNF005 | Extensibilidade agnóstica via SDK (Zero acoplamento com ferramentas específicas) | Arquitetura     | Alta       |
+| RNF006 | Injeção de CSS tratada para compatibilidade com Tailwind v4 no Client-Side       | Compatibilidade | Alta       |
 
 ---
 
@@ -304,16 +309,21 @@ Estrutura de cores:
 # Diagrama de Classes
 
 <!--<BEGIN_CLASSES_DIAGRAM> -->
+
 ###### diagram-classes-001-tasks.puml
+
 <img src="./diagrams/puml-images/classes/diagram-classes-001-tasks.png" alt="CLASSES_DIAGRAM" />
 
 ###### diagram-classes-002-timeEntries.puml
+
 <img src="./diagrams/puml-images/classes/diagram-classes-002-timeEntries.png" alt="CLASSES_DIAGRAM" />
 
 ###### diagram-classes-003-metadata.puml
+
 <img src="./diagrams/puml-images/classes/diagram-classes-003-metadata.png" alt="CLASSES_DIAGRAM" />
 
 ###### diagram-classes-004-license-plan.puml
+
 <img src="./diagrams/puml-images/classes/diagram-classes-004-license-plan.png" alt="CLASSES_DIAGRAM" />
 <!--END_CLASSES_DIAGRAM -->
 
@@ -321,7 +331,7 @@ Estrutura de cores:
 
 # 7. Arquitetura em Camadas
 
-O Gamhora é estruturado em quatro camadas com responsabilidades bem delimitadas, consistentes com os princípios de DDD e com o modelo desktop offline-first.
+O Pandhora é estruturado em quatro camadas com responsabilidades bem delimitadas, consistentes com os princípios de DDD e com o modelo desktop offline-first.
 
 ## 7.1 Domain
 
@@ -632,25 +642,33 @@ Configurar integração com a fonte externa e sincronizar dados.
 ### Diagrama de Fluxos
 
 <!--<BEGIN_FLOW> -->
+
 ###### diagram-flow-001-timer.puml
+
 <img src="./diagrams/puml-images/flow/diagram-flow-001-timer.png" alt="FLOW" />
 
 ###### diagram-flow-002-task-creation.puml
+
 <img src="./diagrams/puml-images/flow/diagram-flow-002-task-creation.png" alt="FLOW" />
 
 ###### diagram-flow-003-task-edit.puml
+
 <img src="./diagrams/puml-images/flow/diagram-flow-003-task-edit.png" alt="FLOW" />
 
 ###### diagram-flow-004-plugin-activation.puml
+
 <img src="./diagrams/puml-images/flow/diagram-flow-004-plugin-activation.png" alt="FLOW" />
 
 ###### diagram-flow-005-sync-success.puml
+
 <img src="./diagrams/puml-images/flow/diagram-flow-005-sync-success.png" alt="FLOW" />
 
 ###### diagram-flow-006-sync-conflict.puml
+
 <img src="./diagrams/puml-images/flow/diagram-flow-006-sync-conflict.png" alt="FLOW" />
 
 ###### diagram-flow-007-payment-pro.puml
+
 <img src="./diagrams/puml-images/flow/diagram-flow-007-payment-pro.png" alt="FLOW" />
 <!--END_FLOW -->
 
@@ -846,13 +864,17 @@ App abre
 ### Diagrama de Componentes
 
 <!--<BEGIN_COMPONENT_DIAGRAM> -->
+
 ###### diagram-component-001-custom-extensions.puml
+
 <img src="./diagrams/puml-images/component/diagram-component-001-custom-extensions.png" alt="COMPONENT_DIAGRAM" />
 
 ###### diagram-component-002-addons-market.puml
+
 <img src="./diagrams/puml-images/component/diagram-component-002-addons-market.png" alt="COMPONENT_DIAGRAM" />
 
 ###### diagram-component-003-shared-ui.puml
+
 <img src="./diagrams/puml-images/component/diagram-component-003-shared-ui.png" alt="COMPONENT_DIAGRAM" />
 <!--END_COMPONENT_DIAGRAM -->
 
@@ -866,7 +888,7 @@ Ativar os recursos do plano Pro localmente através de uma chave de licença (Li
 
 1. Usuário realiza o upgrade/pagamento via Checkout Web
 2. Gateway emite a Chave de Licença (License Key)
-3. Usuário acessa as Configurações do Gamhora e insere a Chave
+3. Usuário acessa as Configurações do Pandhora e insere a Chave
 4. Sistema valida a chave via API (1 única vez) e grava `{ isPro: true }` no `settings.json` local
 5. Recursos Pro (Automações, Watchers, Multi-Workspaces) são desbloqueados imediatamente
 
@@ -875,16 +897,21 @@ Ativar os recursos do plano Pro localmente através de uma chave de licença (Li
 # Diagrama de Infraestrutura
 
 <!--<BEGIN_INFRA_DIAGRAM> -->
+
 ###### diagram-infra-001-architecture.puml
+
 <img src="./diagrams/puml-images/infra/diagram-infra-001-architecture.png" alt="INFRA_DIAGRAM" />
 
 ###### diagram-infra-002-deployment-desktop.puml
+
 <img src="./diagrams/puml-images/infra/diagram-infra-002-deployment-desktop.png" alt="INFRA_DIAGRAM" />
 
 ###### diagram-infra-003-sync-engine.puml
+
 <img src="./diagrams/puml-images/infra/diagram-infra-003-sync-engine.png" alt="INFRA_DIAGRAM" />
 
 ###### diagram-infra-004-rxdb-setup.puml
+
 <img src="./diagrams/puml-images/infra/diagram-infra-004-rxdb-setup.png" alt="INFRA_DIAGRAM" />
 <!--END_INFRA_DIAGRAM -->
 
@@ -893,19 +920,25 @@ Ativar os recursos do plano Pro localmente através de uma chave de licença (Li
 # Diagrama de Integrações
 
 <!--<BEGIN_INTEGRATION_DIAGRAM> -->
+
 ###### diagram-integration-001-jira.puml
+
 <img src="./diagrams/puml-images/integration/diagram-integration-001-jira.png" alt="INTEGRATION_DIAGRAM" />
 
 ###### diagram-integration-002-redmine.puml
+
 <img src="./diagrams/puml-images/integration/diagram-integration-002-redmine.png" alt="INTEGRATION_DIAGRAM" />
 
 ###### diagram-integration-003-other-datasources.puml
+
 <img src="./diagrams/puml-images/integration/diagram-integration-003-other-datasources.png" alt="INTEGRATION_DIAGRAM" />
 
 ###### diagram-integration-004-sync-pull.puml
+
 <img src="./diagrams/puml-images/integration/diagram-integration-004-sync-pull.png" alt="INTEGRATION_DIAGRAM" />
 
 ###### diagram-integration-005-sync-replication.puml
+
 <img src="./diagrams/puml-images/integration/diagram-integration-005-sync-replication.png" alt="INTEGRATION_DIAGRAM" />
 <!--END_INTEGRATION_DIAGRAM -->
 
@@ -914,19 +947,25 @@ Ativar os recursos do plano Pro localmente através de uma chave de licença (Li
 # Diagrama de UML
 
 <!--<BEGIN_UML_DIAGRAM> -->
+
 ###### diagram-uml-001-use-case-setup.puml
+
 <img src="./diagrams/puml-images/uml/diagram-uml-001-use-case-setup.png" alt="UML_DIAGRAM" />
 
 ###### diagram-uml-002-use-case-timer.puml
+
 <img src="./diagrams/puml-images/uml/diagram-uml-002-use-case-timer.png" alt="UML_DIAGRAM" />
 
 ###### diagram-uml-003-sequence-sync.puml
+
 <img src="./diagrams/puml-images/uml/diagram-uml-003-sequence-sync.png" alt="UML_DIAGRAM" />
 
 ###### diagram-uml-004-sequence-payment.puml
+
 <img src="./diagrams/puml-images/uml/diagram-uml-004-sequence-payment.png" alt="UML_DIAGRAM" />
 
 ###### diagram-uml-005-component-overview.puml
+
 <img src="./diagrams/puml-images/uml/diagram-uml-005-component-overview.png" alt="UML_DIAGRAM" />
 <!--END_UML_DIAGRAM -->
 
@@ -950,7 +989,7 @@ flowchart TB
         UI <--> Loader
     end
 
-    subgraph Addons [Addon Ecosystem — @gamhora/sdk]
+    subgraph Addons [Addon Ecosystem — @pandhora/sdk]
         direction TB
         DS[DataSources — Redmine, Jira, Fake]
         Themes[Visual Themes — CSS Injected]
@@ -1056,11 +1095,12 @@ flowchart TB
 
 **Contexto:** Ferramentas extensíveis costumam sofrer de fragmentação ou acoplamento forte quando cada tipo de plugin (tema, conector, atalho) exige uma arquitetura isolada.
 
-**Decisão:** O Gamhora adota um contrato de **Addon Multicapacidade** no `@gamhora/sdk`. Um único Addon pode registrar simultaneamente DataSources, Menus de Sidebar, Botões e Popovers na Timerbar, Comandos, Watchers e Temas Visuais.
+**Decisão:** O Pandhora adota um contrato de **Addon Multicapacidade** no `@pandhora/sdk`. Um único Addon pode registrar simultaneamente DataSources, Menus de Sidebar, Botões e Popovers na Timerbar, Comandos, Watchers e Temas Visuais.
 
 **Consequências:**
+
 - Facilidade para a comunidade e empresas desenvolverem extensões completas.
-- O Core do Gamhora e a UI permanecem 100% agnósticos aos detalhes das ferramentas externas.
+- O Core do Pandhora e a UI permanecem 100% agnósticos aos detalhes das ferramentas externas.
 
 ## ADR-005 — Licenciamento Local-First por Chave (Zero Backend Auth)
 
@@ -1069,6 +1109,7 @@ flowchart TB
 **Decisão:** O licenciamento PRO opera no modelo **License Key Offline-First**. A chave adquirida no checkout é validada e persistida localmente nas configurações do app. O app opera 100% funcional localmente sem obrigatoriedade de login.
 
 **Consequências:**
+
 - Zero custo e manutenção de servidores de autenticação centralizados.
 - Cumprimento rigoroso da política de privacidade Zero-Cloud.
 
@@ -1079,7 +1120,6 @@ flowchart TB
 **Decisão:** O `AddonThemeBridge` extrai dinamicamente apenas as variáveis CSS dos blocos `:root` e `.dark` fornecidos pelo Addon, descartando diretivas de build e aplicando-as com seletores de alta especificidade (`:root:root` e `.dark:root`).
 
 **Consequências:**
+
 - Addons podem fornecer arquivos `.css` completos no padrão Shadcn/Tailwind sem quebrar o runtime.
 - Suporte a alternância de temas em tempo real na janela principal e no widget flutuante.
-
-

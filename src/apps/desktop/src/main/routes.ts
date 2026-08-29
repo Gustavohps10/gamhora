@@ -2,8 +2,8 @@
   AppSettings,
   IDataSourceResolver,
   IServiceProvider,
-} from '@gamhora/application'
-import { IRequest } from '@gamhora/shared/transport'
+} from '@pandhora/application'
+import { IRequest } from '@pandhora/shared/transport'
 import { app, BrowserWindow, screen } from 'electron'
 
 import { NativeOverlay } from '@/main'

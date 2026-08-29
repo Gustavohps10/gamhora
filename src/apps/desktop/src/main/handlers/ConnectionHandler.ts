@@ -3,14 +3,14 @@ import {
   IConnectDataSourceUseCase,
   ICredentialsStorage,
   IDisconnectDataSourceUseCase,
-} from '@gamhora/application'
-import { createResponseViewModel } from '@gamhora/shared/helpers'
-import { IRequest } from '@gamhora/shared/transport'
+} from '@pandhora/application'
+import { createResponseViewModel } from '@pandhora/shared/helpers'
+import { IRequest } from '@pandhora/shared/transport'
 import {
   ConnectionResultViewModel,
   MemberViewModel,
   ViewModel,
-} from '@gamhora/shared/view-models'
+} from '@pandhora/shared/view-models'
 import { IpcMainInvokeEvent } from 'electron'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'
@@ -75,12 +75,12 @@ export class ConnectionHandler implements HandlerBase<ConnectionHandler> {
     // Usamos o connectionInstanceId para garantir a chave única por conta
     const key = getMemberStorageKey(body.workspaceId, body.connectionInstanceId)
 
-    let raw = await this.credentialsStorage.getToken('gamhora', key)
+    let raw = await this.credentialsStorage.getToken('pandhora', key)
 
     if (!raw) {
       // Fallback para chaves antigas se necessário, mas mantendo o foco na instância
       const legacyKey = `workspace-session-${body.workspaceId}-${body.connectionInstanceId}-member`
-      raw = await this.credentialsStorage.getToken('gamhora', legacyKey)
+      raw = await this.credentialsStorage.getToken('pandhora', legacyKey)
     }
 
     if (!raw) {

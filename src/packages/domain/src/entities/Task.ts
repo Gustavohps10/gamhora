@@ -1,4 +1,4 @@
-﻿import { AppError, Either, FieldErrors } from '@gamhora/shared/helpers'
+﻿import { AppError, Either, FieldErrors } from '@pandhora/shared/helpers'
 import z from 'zod'
 
 import { Entity } from '@/entities/Entity'

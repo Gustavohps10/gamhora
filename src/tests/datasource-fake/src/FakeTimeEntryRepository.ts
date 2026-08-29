@@ -1,4 +1,4 @@
-﻿import type { TimeEntry } from '@gamhora/sdk'
+﻿import type { TimeEntry } from '@pandhora/sdk'
 
 const store = new Map<string, TimeEntry>()
 

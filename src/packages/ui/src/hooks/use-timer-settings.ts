@@ -76,7 +76,7 @@ export const useTimerSettings = create<TimerSettingsState>()(
     }),
 
     {
-      name: 'gamhora-timer-preferences',
+      name: 'pandhora-timer-preferences',
     },
   ),
 )

@@ -4,7 +4,7 @@
   MetadataItem,
   TaskDTO,
   TimeEntryDTO,
-} from '@gamhora/sdk'
+} from '@pandhora/sdk'
 
 const FAKE_USER_ID = '1'
 

@@ -1,4 +1,4 @@
-﻿import { ITimeEntryRepository, TimeEntry } from '@gamhora/sdk'
+﻿import { ITimeEntryRepository, TimeEntry } from '@pandhora/sdk'
 
 import { RedmineBase } from './RedmineBase'
 

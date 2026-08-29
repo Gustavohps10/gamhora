@@ -1,4 +1,4 @@
-﻿import { IEventEmitter, ISystemEvents } from '@gamhora/shared/transport'
+﻿import { IEventEmitter, ISystemEvents } from '@pandhora/shared/transport'
 
 import { IAddonThemesRegistry } from './AddonTheme'
 import { ICommandRegistry } from './commands/ICommandRegistry'

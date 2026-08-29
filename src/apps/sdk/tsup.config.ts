@@ -15,7 +15,11 @@ export default defineConfig([
     sourcemap: true,
     splitting: false,
     tsconfig: './tsconfig.build.json',
-    noExternal: ['@gamhora/application', '@gamhora/shared', '@gamhora/domain'],
+    noExternal: [
+      '@pandhora/application',
+      '@pandhora/shared',
+      '@pandhora/domain',
+    ],
     define: {
       __SDK_VERSION__: JSON.stringify(pkg.version),
     },
@@ -35,9 +39,9 @@ export default defineConfig([
     splitting: false,
     tsconfig: './tsconfig.build.json',
     noExternal: [
-      '@gamhora/application',
-      '@gamhora/shared',
-      '@gamhora/domain',
+      '@pandhora/application',
+      '@pandhora/shared',
+      '@pandhora/domain',
       'commander',
       'inquirer',
       'js-yaml',

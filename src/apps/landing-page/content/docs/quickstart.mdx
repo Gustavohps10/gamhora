@@ -1,11 +1,11 @@
 ---
 title: Criando seu Primeiro Addon
-description: Guia prático e passo a passo para criar, configurar e testar seu primeiro Addon utilizando o SDK do Gamhora.
+description: Guia prático e passo a passo para criar, configurar e testar seu primeiro Addon utilizando o SDK do Pandhora.
 ---
 
 # Criando seu Primeiro Addon
 
-Neste guia prático, você aprenderá a construir um Addon completo para o Gamhora do zero utilizando **TypeScript** e o pacote oficial **`@gamhora-org/sdk`**.
+Neste guia prático, você aprenderá a construir um Addon completo para o Pandhora do zero utilizando **TypeScript** e o pacote oficial **`@pandhora/sdk`**.
 
 ---
 
@@ -14,10 +14,10 @@ Neste guia prático, você aprenderá a construir um Addon completo para o Gamho
 Crie um novo diretório para o seu plugin e inicialize o projeto com suas dependências:
 
 ```bash
-mkdir gamhora-meu-addon
-cd gamhora-meu-addon
+mkdir pandhora-meu-addon
+cd pandhora-meu-addon
 npm init -y
-npm install @gamhora-org/sdk
+npm install @pandhora/sdk
 npm install -D typescript tsup @types/node
 ```
 
@@ -41,24 +41,24 @@ Configure o arquivo `tsconfig.json`:
 
 ## 2. Estrutura do Addon
 
-Todo addon do Gamhora exporta como `default` uma classe que implementa o contrato **`IAddon`**.
+Todo addon do Pandhora exporta como `default` uma classe que implementa o contrato **`IAddon`**.
 
 Crie o arquivo `src/index.ts`:
 
 ```typescript
-import type { IAddon, AddonContext, AddonSettingsField } from '@gamhora-org/sdk'
+import type { IAddon, AddonContext, AddonSettingsField } from '@pandhora/sdk'
 
 export default class MeuPrimeiroAddon implements IAddon {
   // Metadados obrigatórios do Addon
   public id = 'meu-primeiro-addon'
   public name = 'Meu Primeiro Addon'
   public version = '1.0.0'
-  public description = 'Exemplo prático de extensão para o Gamhora'
+  public description = 'Exemplo prático de extensão para o Pandhora'
   public author = 'Seu Nome ou Empresa'
 
   private context?: AddonContext
 
-  // Formulário de preferências renderizado automaticamente na interface do Gamhora
+  // Formulário de preferências renderizado automaticamente na interface do Pandhora
   public settingsFields: AddonSettingsField[] = [
     {
       key: 'servidorUrl',
@@ -83,7 +83,7 @@ export default class MeuPrimeiroAddon implements IAddon {
     },
   ]
 
-  // Ciclo de Vida: Executado quando o plugin é ativado no Gamhora
+  // Ciclo de Vida: Executado quando o plugin é ativado no Pandhora
   public async onActivate(context: AddonContext): Promise<void> {
     this.context = context
     console.log(`[${this.name}] Addon ativado com sucesso!`)
@@ -95,7 +95,7 @@ export default class MeuPrimeiroAddon implements IAddon {
     if (notificar) {
       await context.notifications.show({
         title: 'Addon Ativado',
-        body: `Conectado ao Gamhora com sucesso!`,
+        body: `Conectado ao Pandhora com sucesso!`,
       })
     }
 
@@ -124,7 +124,7 @@ export default class MeuPrimeiroAddon implements IAddon {
 
 ## 3. Configurações Dinâmicas (`settingsFields`)
 
-A propriedade `settingsFields` permite que seu plugin defina formulários de configuração sem escrever uma única linha de interface gráfica (UI). O Gamhora gera e valida os campos nativamente.
+A propriedade `settingsFields` permite que seu plugin defina formulários de configuração sem escrever uma única linha de interface gráfica (UI). O Pandhora gera e valida os campos nativamente.
 
 ### Tipos de Campos Suportados:
 
@@ -137,7 +137,7 @@ A propriedade `settingsFields` permite que seu plugin defina formulários de con
 
 ## 4. O Contexto do Addon (`AddonContext`)
 
-Ao ser ativado, o Gamhora injeta o objeto `AddonContext` contendo todas as APIs e ferramentas disponíveis:
+Ao ser ativado, o Pandhora injeta o objeto `AddonContext` contendo todas as APIs e ferramentas disponíveis:
 
 | Propriedade             | Descrição                                                                         |
 | :---------------------- | :-------------------------------------------------------------------------------- |
@@ -167,4 +167,4 @@ Execute a compilação:
 npm run build
 ```
 
-O arquivo compilado resultante pode ser importado diretamente nas configurações de Addons do Gamhora.
+O arquivo compilado resultante pode ser importado diretamente nas configurações de Addons do Pandhora.

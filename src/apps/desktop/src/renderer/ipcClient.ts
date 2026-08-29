@@ -1,4 +1,4 @@
-﻿import { IOpenAPI } from '@gamhora/application'
+﻿import { IOpenAPI } from '@pandhora/application'
 
 const ipcClient: IOpenAPI = {
   timer: window.api.timer,

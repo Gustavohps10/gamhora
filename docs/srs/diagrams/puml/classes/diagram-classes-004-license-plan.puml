@@ -1,5 +1,5 @@
 @startuml ClassLicensePlan
-title GAMHORA - Modelo de Licenciamento Local (Free vs Pro)
+title PANDHORA - Modelo de Licenciamento Local (Free vs Pro)
 package "Core Licensing" {
     class LicenseInfo {
         +String key

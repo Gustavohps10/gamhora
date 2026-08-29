@@ -1,4 +1,4 @@
-﻿import type { SidebarMenuItem as AddonSidebarMenuItem } from '@gamhora/sdk'
+﻿import type { SidebarMenuItem as AddonSidebarMenuItem } from '@pandhora/sdk'
 import {
   Brain,
   CalendarDays,

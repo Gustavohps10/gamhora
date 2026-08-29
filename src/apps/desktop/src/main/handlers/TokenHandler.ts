@@ -1,6 +1,6 @@
-﻿import { ICredentialsStorage } from '@gamhora/application'
-import { IRequest } from '@gamhora/shared/transport'
-import { ViewModel } from '@gamhora/shared/view-models'
+﻿import { ICredentialsStorage } from '@pandhora/application'
+import { IRequest } from '@pandhora/shared/transport'
+import { ViewModel } from '@pandhora/shared/view-models'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'
 

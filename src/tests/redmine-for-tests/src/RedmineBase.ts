@@ -1,5 +1,5 @@
-﻿import { IHttpClient } from '@gamhora/adapters/contracts'
-import type { DataSourceContext } from '@gamhora/sdk'
+﻿import { IHttpClient } from '@pandhora/adapters/contracts'
+import type { DataSourceContext } from '@pandhora/sdk'
 
 export abstract class RedmineBase {
   protected httpClient: IHttpClient

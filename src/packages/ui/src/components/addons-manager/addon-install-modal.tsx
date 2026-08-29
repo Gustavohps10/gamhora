@@ -1,7 +1,7 @@
 ﻿'use client'
 
-import { AddonPackageViewModel } from '@gamhora/sdk'
-import { IJobEvent } from '@gamhora/shared/transport'
+import { AddonPackageViewModel } from '@pandhora/sdk'
+import { IJobEvent } from '@pandhora/shared/transport'
 import { useQueryClient } from '@tanstack/react-query'
 import {
   Check,

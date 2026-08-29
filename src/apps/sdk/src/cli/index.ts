@@ -8,8 +8,8 @@ import { printPrSnippet } from './prSnippet'
 import { runValidationCommand } from './validate'
 
 program
-  .name('gamhora')
-  .description('CLI do Gamhora SDK para criar, validar e empacotar plugins')
+  .name('pandhora')
+  .description('CLI do Pandhora SDK para criar, validar e empacotar plugins')
   .version(__SDK_VERSION__)
 
 program

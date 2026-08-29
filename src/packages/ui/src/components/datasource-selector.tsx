@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { AddonManifest } from '@gamhora/application'
+import { AddonManifest } from '@pandhora/application'
 import { Check } from 'lucide-react'
 
 import { Badge, Button, ScrollArea } from '@/components/ui'

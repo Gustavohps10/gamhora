@@ -14,16 +14,16 @@ import {
   IUpdateWorkspaceIdentityUseCase,
   MarkWorkspaceAsConfiguredInput,
   UpdateWorkspaceIdentityInput,
-} from '@gamhora/application'
-import { createResponseViewModel } from '@gamhora/shared/helpers'
-import { IRequest } from '@gamhora/shared/transport'
+} from '@pandhora/application'
+import { createResponseViewModel } from '@pandhora/shared/helpers'
+import { IRequest } from '@pandhora/shared/transport'
 import {
   ConnectionResultViewModel,
   MemberViewModel,
   PaginatedViewModel,
   ViewModel,
   WorkspaceViewModel,
-} from '@gamhora/shared/view-models'
+} from '@pandhora/shared/view-models'
 import { IpcMainInvokeEvent } from 'electron'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'

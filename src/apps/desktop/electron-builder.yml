@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: gamhora
+productName: pandhora
 directories:
   buildResources: build
 files:
@@ -20,11 +20,11 @@ extraResources:
 asarUnpack:
   - resources/**
 protocols:
-  name: Gamhora Auth Protocol
+  name: Pandhora Auth Protocol
   schemes:
-    - gamhora
+    - pandhora
 win:
-  executableName: gamhora
+  executableName: pandhora
 nsis:
   artifactName: ${productName}-${version}-setup.${ext}
   shortcutName: ${productName}
