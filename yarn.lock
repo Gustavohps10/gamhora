@@ -4085,7 +4085,6 @@ __metadata:
     "@tailwindcss/postcss": "npm:^4.1.11"
     "@tailwindcss/typography": "npm:^0.5.16"
     "@tailwindcss/vite": "npm:^4.0.6"
-    "@timelapse/redmine-plugin": "npm:^1.0.0"
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/lokijs": "npm:^1"
     "@types/node": "npm:^20.17.18"
@@ -4210,7 +4209,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@pandhora/redmine-for-tests@workspace:src/tests/redmine-for-tests"
   dependencies:
-    "@changesets/cli": "npm:^2.29.6"
     "@pandhora/sdk": "workspace:*"
     "@types/node": "npm:^24.3.0"
     axios: "npm:^1.7.9"
@@ -6774,25 +6772,6 @@ __metadata:
     "@types/react-dom":
       optional: true
   checksum: 10c0/87d65cca71a39c93fffa23746a751a7037a4b4e939ea6b234af5188e4bdec96a7568b05000db109b5b76c686899e93a329a594d7e690674e30b35594c87c9e1d
-  languageName: node
-  linkType: hard
-
-"@timelapse/redmine-plugin@npm:^1.0.0":
-  version: 1.0.1
-  resolution: "@timelapse/redmine-plugin@npm:1.0.1"
-  dependencies:
-    "@timelapse/sdk": "npm:^1.1.0"
-    axios: "npm:^1.7.9"
-  checksum: 10c0/6dfeb6a801fa3c8824ec5454aa23906b7b9e87dd1d80333b74c653de9ca64ab8ded275e9a30e4d324e67b0cada65292c43f82abd3aef19c54c9e1ef03883057c
-  languageName: node
-  linkType: hard
-
-"@timelapse/sdk@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@timelapse/sdk@npm:1.1.0"
-  bin:
-    timelapse: dist/cli.cjs
-  checksum: 10c0/7e69386dbcf16f047bf40964048eaa1480af97cec832e9da38a4ed7af0fa7c476c21877420bcb5a1510898d3249ab32762e53f165fda24f049fccbbfc9267a51
   languageName: node
   linkType: hard
 
