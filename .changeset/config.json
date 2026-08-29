@@ -7,5 +7,15 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [
+    "@pandhora/datasource-fake",
+    "@pandhora/discord-for-tests",
+    "@pandhora/fake-watcher-for-tests",
+    "@pandhora/pandhora-ai-for-tests",
+    "@pandhora/purple-theme",
+    "@pandhora/redmine-for-tests",
+    "@pandhora/supabase-theme",
+    "@pandhora/desktop",
+    "@pandhora/landing-page"
+  ]
 }
