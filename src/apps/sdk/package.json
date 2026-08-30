@@ -1,9 +1,10 @@
 {
   "name": "@pandhora/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Toolkit para o ecossistema Pandhora.",
   "repository": {
-    "url": ""
+    "type": "git",
+    "url": "https://github.com/pandhora-community/pandhora.git"
   },
   "type": "module",
   "main": "./dist/index.js",

@@ -5,6 +5,7 @@ import { runInitWizard } from './init'
 import { runManifestWizard } from './manifest'
 import { buildAddon } from './pkg'
 import { printPrSnippet } from './prSnippet'
+import { syncManifest } from './sync'
 import { runValidationCommand } from './validate'
 
 program
@@ -26,6 +27,16 @@ program
   .description('Cria ou atualiza interativamente o manifest.yaml do plugin')
   .action(async (addonDir = '.') => {
     await runManifestWizard(addonDir)
+  })
+
+program
+  .command('sync [addonDir]')
+  .alias('sync:manifest')
+  .description(
+    'Sincroniza capturas de tela, ícones e URLs dinâmicas no manifest.yaml',
+  )
+  .action((addonDir = '.') => {
+    syncManifest(addonDir)
   })
 
 program
