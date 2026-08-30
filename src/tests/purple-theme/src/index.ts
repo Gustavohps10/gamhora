@@ -1,9 +1,9 @@
-import type {
+﻿import type {
   AddonContext,
   AddonSettingsSchema,
   AddonTheme,
   IAddon,
-} from '@metric-org/sdk'
+} from '@pandhora/sdk'
 
 import { PURPLE_CSS } from './purpleCss.js'
 
@@ -83,7 +83,7 @@ export default class PurpleThemeAddon implements IAddon {
         isSuccess: true,
         display: {
           title: 'Tema Padrão Restaurado!',
-          message: 'A interface retornou ao estilo nativo do Metric.',
+          message: 'A interface retornou ao estilo nativo do Pandhora.',
         },
       }
     }

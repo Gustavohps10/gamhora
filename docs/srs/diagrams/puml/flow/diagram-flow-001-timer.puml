@@ -1,5 +1,5 @@
 ﻿@startuml TimerFlow
-title METRIC - Motor do Timer (Local-First)
+title PANDHORA - Motor do Timer (Local-First)
 participant UI
 participant TimerEngine
 participant RxDB

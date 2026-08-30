@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import type { AddonManifest } from '@metric-org/application'
+import type { AddonManifest } from '@pandhora/application'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { DownloadIcon, LayoutGrid, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'

@@ -1,18 +1,18 @@
-import '@/renderer/index.css'
+﻿import '@/renderer/index.css'
 
 import {
   AddonThemeBridge,
   AddonToastBridge,
   Toaster,
-} from '@metric-org/ui/components'
-import { queryClient } from '@metric-org/ui/lib'
+} from '@pandhora/ui/components'
+import { queryClient } from '@pandhora/ui/lib'
 import {
   EnvironmentProvider,
   OpenAPIProvider,
   SidebarProvider,
   ThemeProvider,
   TooltipProvider,
-} from '@metric-org/ui/providers'
+} from '@pandhora/ui/providers'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { NuqsAdapter } from 'nuqs/adapters/react-router/v6'
 import { useEffect, useState } from 'react'

@@ -76,7 +76,7 @@ export const useTimerSettings = create<TimerSettingsState>()(
     }),
 
     {
-      name: 'metric-timer-preferences',
+      name: 'pandhora-timer-preferences',
     },
   ),
 )

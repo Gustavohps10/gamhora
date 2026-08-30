@@ -1,8 +1,8 @@
 {
-  "name": "@metric-org/ui",
-  "version": "1.0.0",
+  "name": "@pandhora/ui",
+  "version": "1.0.2",
   "private": true,
-  "description": "Biblioteca de componentes de UI compartilhados para o ecossistema Metric.",
+  "description": "Biblioteca de componentes de UI compartilhados para o ecossistema Pandhora.",
   "type": "module",
   "sideEffects": [
     "**/*.css"
@@ -43,8 +43,9 @@
     }
   },
   "scripts": {
-    "build": "tsup --format esm,cjs --dts --external react",
-    "dev": "tsup --format esm,cjs --dts --external react --watch"
+    "build": "tsup",
+    "dev": "tsup --watch --no-dts",
+    "typecheck": "tsc --noEmit -p tsconfig.build.json"
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",
@@ -59,7 +60,7 @@
     "@hookform/resolvers": "^4.1.3",
     "@maskito/core": "^4.0.0",
     "@maskito/react": "^4.0.0",
-    "@metric-org/sdk": "workspace:*",
+    "@pandhora/sdk": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.10",

@@ -1,10 +1,7 @@
 import type { AddonCategory } from '../components/addon-category-sidebar'
 
 export type ConnectionStatus =
-  | 'connected'
-  | 'disconnected'
-  | 'warning'
-  | 'error'
+  'connected' | 'disconnected' | 'warning' | 'error'
 
 export interface AddonConnection {
   id: string

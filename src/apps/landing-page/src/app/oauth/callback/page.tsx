@@ -15,7 +15,7 @@ function OAuthCallbackContent() {
     const errorDescription = searchParams.get('error_description')
 
     const query = searchParams.toString()
-    const targetUrl = `metric-app://oauth/callback${query ? `?${query}` : ''}`
+    const targetUrl = `pandhora-app://oauth/callback${query ? `?${query}` : ''}`
     setDeepLinkUrl(targetUrl)
 
     if (error) {
@@ -36,7 +36,7 @@ function OAuthCallbackContent() {
       <div className="border-border bg-card w-full max-w-md rounded-lg border p-6 text-center shadow-sm">
         {hasError ? (
           <>
-            <div className="bg-destructive/10 text-destructive mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full text-2xl font-bold">
+            <div className="bg-destructive/10 text-destructive mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg text-2xl font-bold">
               ✕
             </div>
             <h1 className="text-foreground mb-2 text-lg font-semibold">
@@ -55,22 +55,22 @@ function OAuthCallbackContent() {
           </>
         ) : (
           <>
-            <div className="bg-primary/10 text-primary mx-auto mb-4 flex h-12 w-12 animate-pulse items-center justify-center rounded-full text-2xl font-bold">
+            <div className="bg-primary/10 text-primary mx-auto mb-4 flex h-12 w-12 animate-pulse items-center justify-center rounded-lg text-2xl font-bold">
               ✓
             </div>
             <h1 className="text-foreground mb-2 text-lg font-semibold">
               Autenticação Concluída
             </h1>
             <p className="text-muted-foreground mb-6 text-sm">
-              Retornando ao aplicativo Metric Desktop. Se o aplicativo não abrir
-              automaticamente, clique no botão abaixo.
+              Retornando ao aplicativo Pandhora Desktop. Se o aplicativo não
+              abrir automaticamente, clique no botão abaixo.
             </p>
             {deepLinkUrl && (
               <a
                 href={deepLinkUrl}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium shadow-sm transition-colors"
               >
-                Abrir no Metric Desktop
+                Abrir no Pandhora Desktop
               </a>
             )}
           </>

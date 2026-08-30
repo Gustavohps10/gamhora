@@ -190,7 +190,7 @@ export default function AutomationModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="scrollbar-thin flex-1 overflow-y-auto p-6">
+        <div className="flex-1 scrollbar-thin overflow-y-auto p-6">
           {!editing ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">

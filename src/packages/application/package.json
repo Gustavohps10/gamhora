@@ -1,8 +1,8 @@
 {
-  "name": "@metric-org/application",
+  "name": "@pandhora/application",
   "version": "1.0.0",
   "private": true,
-  "description": "Contém os serviços e casos de uso (use cases) da aplicação Metric.",
+  "description": "Contém os serviços e casos de uso (use cases) da aplicação Pandhora.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -14,11 +14,13 @@
   },
   "scripts": {
     "build": "tsup --format esm,cjs --dts",
+    "dev": "tsup --format esm,cjs --watch --no-dts",
+    "typecheck": "tsc --noEmit",
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {
-    "@metric-org/domain": "workspace:*",
-    "@metric-org/shared": "workspace:*"
+    "@pandhora/domain": "workspace:*",
+    "@pandhora/shared": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

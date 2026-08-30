@@ -1,17 +1,17 @@
-import {
+﻿import {
   IListTimeEntriesUseCase,
   ITimeEntriesPullUseCase,
   ITimeEntriesPushUseCase,
   PushTimeEntriesInput,
-} from '@metric-org/application'
-import { createResponseViewModel } from '@metric-org/shared/helpers'
-import { IRequest } from '@metric-org/shared/transport'
+} from '@pandhora/application'
+import { createResponseViewModel } from '@pandhora/shared/helpers'
+import { IRequest } from '@pandhora/shared/transport'
 import {
   PaginatedViewModel,
   SyncDocumentViewModel,
   TimeEntryViewModel,
   ViewModel,
-} from '@metric-org/shared/view-models'
+} from '@pandhora/shared/view-models'
 import { IpcMainInvokeEvent } from 'electron'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'

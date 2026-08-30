@@ -1,4 +1,4 @@
-import { AppError } from '@metric-org/shared/helpers'
+﻿import { AppError } from '@pandhora/shared/helpers'
 
 export type SyncDocumentDTO<T> = T & {
   _deleted?: boolean

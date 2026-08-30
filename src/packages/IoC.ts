@@ -1,7 +1,7 @@
-import { JwtService } from '@metric-org/adapters/auth'
-import { IHttpClient } from '@metric-org/adapters/contracts'
-import { AddonsFacade } from '@metric-org/adapters/facades'
-import { FileManager } from '@metric-org/adapters/tools'
+﻿import { JwtService } from '@pandhora/adapters/auth'
+import { IHttpClient } from '@pandhora/adapters/contracts'
+import { AddonsFacade } from '@pandhora/adapters/facades'
+import { FileManager } from '@pandhora/adapters/tools'
 import {
   ConnectDataSourceService,
   CreateWorkspaceService,
@@ -27,8 +27,8 @@ import {
   TimeEntriesPushService,
   UnlinkDataSourceService,
   UpdateWorkspaceIdentityService,
-} from '@metric-org/application'
-import { IEventEmitter, IJobEvents } from '@metric-org/shared/transport'
+} from '@pandhora/application'
+import { IEventEmitter, IJobEvents } from '@pandhora/shared/transport'
 import {
   asClass,
   asValue,

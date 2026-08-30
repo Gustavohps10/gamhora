@@ -46,7 +46,7 @@ const DEFAULT_ACTIVITIES: Array<{
   { id: 'fix', name: 'Correção', icon: Wrench },
 ]
 
-const PINNED_TASKS_STORAGE_KEY = 'metric:pinned-task-ids'
+const PINNED_TASKS_STORAGE_KEY = 'pandhora:pinned-task-ids'
 
 function getPinnedTaskIds(): string[] {
   if (typeof window === 'undefined') return []
@@ -486,7 +486,7 @@ export function TaskPopover({
                 )}
               </div>
 
-              <div className="scrollbar-thin flex max-h-[150px] flex-col gap-0.5 overflow-y-auto pr-0.5">
+              <div className="flex max-h-[150px] scrollbar-thin flex-col gap-0.5 overflow-y-auto pr-0.5">
                 {sortedTasks.length === 0 ? (
                   <div className="text-muted-foreground py-3 text-center text-[11px]">
                     Nenhuma tarefa encontrada

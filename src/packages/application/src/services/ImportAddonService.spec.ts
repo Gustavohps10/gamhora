@@ -1,4 +1,4 @@
-import { AppError, Either } from '@metric-org/shared/helpers'
+﻿import { AppError, Either } from '@pandhora/shared/helpers'
 import type { Mocked } from 'vitest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -75,11 +75,11 @@ describe('ImportAddonService', () => {
     )
 
     expect(fileStorageMock.write).toHaveBeenCalledWith(
-      `./addons/datasource/${fakeAddonId}/manifest.yaml`,
+      `./addons/${fakeAddonId}/1.0.0/manifest.yaml`,
       extractedFiles[0].content,
     )
     expect(fileStorageMock.write).toHaveBeenCalledWith(
-      `./addons/datasource/${fakeAddonId}/index.js`,
+      `./addons/${fakeAddonId}/1.0.0/index.js`,
       extractedFiles[1].content,
     )
   })

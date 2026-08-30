@@ -1,25 +1,32 @@
-# @timelapse/redmine-plugin
+﻿# @timelapse/redmine-plugin
+
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies
+  - @pandhora/sdk@0.1.0
 
 ## 1.0.3
 
 ### Patch Changes
 
 - Updated dependencies
-  - @metric-org/sdk@1.1.0
+  - @pandhora/sdk@1.1.0
 
 ## 1.0.2
 
 ### Patch Changes
 
 - Updated dependencies
-  - @metric-org/sdk@1.2.1
+  - @pandhora/sdk@1.2.1
 
 ## 1.0.1
 
 ### Patch Changes
 
 - Updated dependencies
-  - @metric-org/sdk@1.2.0
+  - @pandhora/sdk@1.2.0
 
 ## 1.0.0
 

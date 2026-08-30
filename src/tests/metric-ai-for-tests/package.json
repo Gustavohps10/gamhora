@@ -1,8 +1,8 @@
 {
-  "name": "@metric-org/metric-ai-for-tests",
+  "name": "@pandhora/pandhora-ai-for-tests",
   "private": true,
-  "version": "1.0.0",
-  "description": "Metric AI addon para testes de simulacao OCR e visao computacional.",
+  "version": "1.0.1",
+  "description": "Pandhora AI addon para testes de simulacao OCR e visao computacional.",
   "author": "Gustavo <gustavoh.santos735@gmail.com>",
   "license": "MIT",
   "type": "module",
@@ -22,7 +22,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@metric-org/sdk": "workspace:*"
+    "@pandhora/sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

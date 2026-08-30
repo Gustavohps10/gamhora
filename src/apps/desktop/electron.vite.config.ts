@@ -10,7 +10,7 @@ const uiSubpaths = readdirSync(resolve(__dirname, '../../packages/ui/src'), {
   withFileTypes: true,
 })
   .filter((dirent) => dirent.isDirectory())
-  .map((dirent) => `@metric-org/ui/${dirent.name}`)
+  .map((dirent) => `@pandhora/ui/${dirent.name}`)
 
 export default defineConfig({
   main: {
@@ -27,7 +27,7 @@ export default defineConfig({
     ],
     resolve: {
       alias: {
-        '@metric-org/IoC': resolve(__dirname, '../../packages/IoC.ts'),
+        '@pandhora/IoC': resolve(__dirname, '../../packages/IoC.ts'),
         '@': resolve(__dirname, 'src'),
       },
     },
@@ -56,10 +56,16 @@ export default defineConfig({
       alias: {
         '@': resolve(__dirname, 'src'),
       },
-      dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom'],
+      dedupe: [
+        'react',
+        'react-dom',
+        'react-router',
+        'react-router-dom',
+        'nuqs',
+      ],
     },
     optimizeDeps: {
-      exclude: ['@metric-org/ui', ...uiSubpaths],
+      exclude: ['@pandhora/ui', ...uiSubpaths],
     },
     plugins: [react(), tailwindcss(), image()],
     build: {

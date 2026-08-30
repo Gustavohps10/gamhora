@@ -1,4 +1,4 @@
-import { ITaskRepository, Task } from '@metric-org/sdk'
+﻿import { ITaskRepository, Task } from '@pandhora/sdk'
 
 export class RedmineTaskRepository implements ITaskRepository {
   create(entity: Task): Promise<void> {

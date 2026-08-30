@@ -141,7 +141,7 @@ export async function updateTrayTimer(info: TrayTimerInfo) {
 
   if (info.status === 'idle') {
     tray.setImage(nativeImage.createEmpty())
-    tray.setToolTip('Metric')
+    tray.setToolTip('Pandhora')
     updateTooltipContent(info)
     return
   }
@@ -155,7 +155,7 @@ export async function updateTrayTimer(info: TrayTimerInfo) {
     // Tooltip nativo continua como fallback (leitores de tela, ou usuário
     // que preferir desativar o hover custom no futuro).
     tray.setToolTip(
-      `Metric — ${info.taskName ?? 'Sem tarefa'} · ${info.elapsedText}`,
+      `Pandhora — ${info.taskName ?? 'Sem tarefa'} · ${info.elapsedText}`,
     )
     updateTooltipContent(info)
   } catch (error) {
@@ -240,7 +240,7 @@ function getTooltipHtml(): string {
         <div class="card">
           <div class="header">
             <span class="dot" id="status-dot"></span>
-            <span>Metric</span>
+            <span>Pandhora</span>
           </div>
           <div class="divider"></div>
           <div class="task-name" id="task-name">Sem tarefa</div>
@@ -453,7 +453,7 @@ export const createTray = (
     ])
   }
 
-  tray.setToolTip('Metric')
+  tray.setToolTip('Pandhora')
 
   tray.on('click', () => {
     const menu = buildContextMenu()

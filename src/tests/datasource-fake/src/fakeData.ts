@@ -1,10 +1,10 @@
-import type {
+﻿import type {
   MemberDTO,
   MetadataDTO,
   MetadataItem,
   TaskDTO,
   TimeEntryDTO,
-} from '@metric-org/sdk'
+} from '@pandhora/sdk'
 
 const FAKE_USER_ID = '1'
 

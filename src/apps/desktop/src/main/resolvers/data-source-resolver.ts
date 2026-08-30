@@ -1,21 +1,26 @@
-import { IHttpClient } from '@metric-org/adapters/contracts'
 import {
   DataSourceContext,
   ICredentialsStorage,
   IDataSourceAdapter,
   IDataSourceResolver,
+  IHttpClient,
   IWorkspacesRepository,
   ResolvedConnection,
-} from '@metric-org/application'
-import { FakeDataSource } from '@metric-org/datasource-fake'
-import { AppError, Either, type IDataSource } from '@metric-org/sdk'
+} from '@pandhora/application'
+import { FakeDataSource } from '@pandhora/datasource-fake'
+import {
+  AddonSettingsGroup,
+  AppError,
+  Either,
+  type IDataSource,
+} from '@pandhora/sdk'
 import { existsSync } from 'fs'
 import { resolve } from 'path'
 import { pathToFileURL } from 'url'
 
 import { AddonLoader } from '@/main/services/AddonLoader'
 
-export const FAKE_DATASOURCE_ADDON_ID = 'metric-datasource-fake'
+export const FAKE_DATASOURCE_ADDON_ID = 'pandhora-datasource-fake'
 export const REDMINE4TEST_ADDON_ID = '@timelapse/redmine-plugin'
 
 export interface DataSourceResolverOptions {
@@ -59,7 +64,7 @@ export class DataSourceResolver implements IDataSourceResolver {
     } else {
       const storageKey = `workspace-connection-${workspaceId}-${connectionInstanceId}`
       const credentialsSerialized = await this.credentialsStorage.getToken(
-        'metric',
+        'pandhora',
         storageKey,
       )
 
@@ -115,8 +120,8 @@ export class DataSourceResolver implements IDataSourceResolver {
   }
 
   async getConfigFields(pluginId: string): Promise<{
-    credentials: FieldGroup[]
-    configuration: FieldGroup[]
+    credentials: AddonSettingsGroup[]
+    configuration: AddonSettingsGroup[]
   }> {
     const mod = await this.loadModule(pluginId)
     return mod.configFields

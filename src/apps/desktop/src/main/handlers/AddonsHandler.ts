@@ -3,22 +3,22 @@ import {
   FileData,
   IAddonsFacade,
   IImportAddonUseCase,
-} from '@metric-org/application'
-import { AddonSettingsSchema } from '@metric-org/sdk'
-import { createResponseViewModel } from '@metric-org/shared/helpers'
+} from '@pandhora/application'
+import { AddonSettingsSchema } from '@pandhora/sdk'
+import { createResponseViewModel } from '@pandhora/shared/helpers'
 import {
   IEventEmitter,
   IJobEvents,
   IJobResult,
   IRequest,
-} from '@metric-org/shared/transport'
+} from '@pandhora/shared/transport'
 import {
   AddonInstallerViewModel,
   AddonManifestViewModel,
   AddonThemeViewModel,
   PaginatedViewModel,
   ViewModel,
-} from '@metric-org/shared/view-models'
+} from '@pandhora/shared/view-models'
 import { app, type IpcMainInvokeEvent } from 'electron'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'
@@ -30,7 +30,7 @@ import {
 const DEV_FAKE_MANIFEST: AddonManifest = {
   id: FAKE_DATASOURCE_ADDON_ID,
   name: 'DataSource Fake (Testes)',
-  creator: 'Metric',
+  creator: 'Pandhora',
   description:
     'Datasource mock com 1000 tarefas e 1000 apontamentos locais para testes e validação de envio de dados.',
   path: '',
@@ -46,7 +46,7 @@ const DEV_FAKE_MANIFEST: AddonManifest = {
 const DEV_REDMINE_MANIFEST: AddonManifest = {
   id: REDMINE4TEST_ADDON_ID,
   name: 'Redmine (Oficial)',
-  creator: 'Metric',
+  creator: 'Pandhora',
   description: 'Conector Redmine para testes.',
   path: '',
   logo: 'https://raw.githubusercontent.com/Gustavohps10/redmine-plugin/main/src/icon.png',
@@ -58,10 +58,10 @@ const DEV_REDMINE_MANIFEST: AddonManifest = {
   tags: ['redmine', 'datasource', 'theme', 'tema', 'teste'],
 }
 
-const DEV_METRIC_AI_MANIFEST: AddonManifest = {
-  id: '@metric-org/metric-ai-for-tests',
-  name: 'Metric AI (Testes)',
-  creator: 'Metric',
+const DEV_PANDHORA_AI_MANIFEST: AddonManifest = {
+  id: '@pandhora/pandhora-ai-for-tests',
+  name: 'Pandhora AI (Testes)',
+  creator: 'Pandhora',
   description: 'Addon de IA para testes de OCR e análise de atividade visual.',
   path: '',
   logo: 'Sparkles',
@@ -74,9 +74,9 @@ const DEV_METRIC_AI_MANIFEST: AddonManifest = {
 }
 
 const DEV_DISCORD_MANIFEST: AddonManifest = {
-  id: '@metric-org/discord-for-tests',
+  id: '@pandhora/discord-for-tests',
   name: 'Discord Presence',
-  creator: 'Metric',
+  creator: 'Pandhora',
   description: 'Sincroniza status do timer no Discord',
   path: '',
   logo: 'https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png',
@@ -89,9 +89,9 @@ const DEV_DISCORD_MANIFEST: AddonManifest = {
 }
 
 const DEV_FAKE_WATCHER_MANIFEST: AddonManifest = {
-  id: '@metric-org/fake-watcher-for-tests',
+  id: '@pandhora/fake-watcher-for-tests',
   name: 'Fake Watcher',
-  creator: 'Metric',
+  creator: 'Pandhora',
   description: 'Watcher falso para testes',
   path: '',
   logo: '',
@@ -104,9 +104,9 @@ const DEV_FAKE_WATCHER_MANIFEST: AddonManifest = {
 }
 
 const DEV_SUPABASE_THEME_MANIFEST: AddonManifest = {
-  id: '@metric-org/supabase-theme',
+  id: '@pandhora/supabase-theme',
   name: 'Supabase Emerald',
-  creator: 'Metric',
+  creator: 'Pandhora',
   description: 'Tema verde esmeralda inspirado no Supabase.',
   path: '',
   logo: 'Palette',
@@ -119,9 +119,9 @@ const DEV_SUPABASE_THEME_MANIFEST: AddonManifest = {
 }
 
 const DEV_PURPLE_THEME_MANIFEST: AddonManifest = {
-  id: '@metric-org/purple-theme',
+  id: '@pandhora/purple-theme',
   name: 'Purple Neon',
-  creator: 'Metric',
+  creator: 'Pandhora',
   description: 'Tema roxo vibrante neon.',
   path: '',
   logo: 'Palette',
@@ -136,14 +136,14 @@ const DEV_PURPLE_THEME_MANIFEST: AddonManifest = {
 const DEV_ADDONS: AddonManifest[] = [
   DEV_FAKE_MANIFEST,
   DEV_REDMINE_MANIFEST,
-  DEV_METRIC_AI_MANIFEST,
+  DEV_PANDHORA_AI_MANIFEST,
   DEV_DISCORD_MANIFEST,
   DEV_FAKE_WATCHER_MANIFEST,
   DEV_SUPABASE_THEME_MANIFEST,
   DEV_PURPLE_THEME_MANIFEST,
 ]
 
-import { SidebarMenuItem, TimerbarMenuItem } from '@metric-org/sdk'
+import { SidebarMenuItem, TimerbarMenuItem } from '@pandhora/sdk'
 
 import { AddonLoader } from '@/main/services/AddonLoader'
 
@@ -248,6 +248,18 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
   ): Promise<ViewModel<AddonSettingsSchema>> {
     if (!this.addonLoader) return { isSuccess: true, data: [] }
     try {
+      if (body?.addonId && !this.addonLoader.hasActiveAddon(body.addonId)) {
+        const installedResult = await this.addonsFacade.getInstalledById(
+          body.addonId,
+        )
+        if (installedResult.isSuccess() && installedResult.success.path) {
+          await this.addonLoader.loadAndActivateFromDisk(
+            body.addonId,
+            installedResult.success.path,
+          )
+        }
+      }
+
       const schema = await this.addonLoader.getSettingsSchema(body.addonId)
       return { isSuccess: true, data: schema }
     } catch (e: unknown) {
@@ -291,6 +303,18 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
     if (!this.addonLoader)
       return { isSuccess: false, error: 'LOADER_NOT_FOUND' }
     try {
+      if (body?.addonId && !this.addonLoader.hasActiveAddon(body.addonId)) {
+        const installedResult = await this.addonsFacade.getInstalledById(
+          body.addonId,
+        )
+        if (installedResult.isSuccess() && installedResult.success.path) {
+          await this.addonLoader.loadAndActivateFromDisk(
+            body.addonId,
+            installedResult.success.path,
+          )
+        }
+      }
+
       const data = await this.addonLoader.executeAction(
         body.addonId,
         body.actionId,
@@ -359,33 +383,55 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
     _event?: IpcMainInvokeEvent,
     _req?: IRequest,
   ): Promise<PaginatedViewModel<AddonManifestViewModel[]>> {
-    if (isDevelopment() || true) {
+    const result = await this.addonsFacade.listInstalled()
+
+    if (result.isFailure()) {
+      return createResponseViewModel(result.forwardFailure())
+    }
+
+    let installedItems = result.success
+
+    // Em modo de desenvolvimento, mescla os DEV_ADDONS caso ainda não existam no disco
+    if (isDevelopment()) {
+      const existingIds = new Set(installedItems.map((item) => item.id))
+      const extraDevAddons = DEV_ADDONS.filter(
+        (dev) => !existingIds.has(dev.id),
+      )
+      installedItems = [...installedItems, ...extraDevAddons]
+    }
+
+    const viewModels = installedItems.map((item) => ({
+      ...item,
+      installed: true,
+    }))
+
+    return {
+      isSuccess: true,
+      statusCode: 200,
+      data: viewModels,
+      totalItems: viewModels.length,
+      totalPages: 1,
+      currentPage: 1,
+    }
+  }
+
+  public async uninstall(
+    _event: IpcMainInvokeEvent,
+    { body }: IRequest<{ addonId: string; version?: string }>,
+  ): Promise<ViewModel<void>> {
+    if (!body?.addonId) {
       return {
-        isSuccess: true,
-        statusCode: 200,
-        data: [...DEV_ADDONS],
-        totalItems: DEV_ADDONS.length,
-        totalPages: 1,
-        currentPage: 1,
+        isSuccess: false,
+        statusCode: 400,
+        error: 'ADDON_ID_REQUIRED',
       }
     }
 
-    const result = await this.addonsFacade.listInstalled()
-
-    const mappedResult = result.map((items) => {
-      const viewModels = items.map((item) => ({
-        ...item,
-      }))
-
-      return {
-        data: viewModels,
-        totalItems: items.length,
-        totalPages: 1,
-        currentPage: 1,
-      }
-    })
-
-    return createResponseViewModel(mappedResult)
+    const result = await this.addonsFacade.uninstallAddon(
+      body.addonId,
+      body.version,
+    )
+    return createResponseViewModel(result)
   }
 
   public async getInstalledById(
@@ -511,6 +557,29 @@ export class AddonsHandler implements HandlerBase<AddonsHandler> {
           error: result.failure.messageKey,
         })
         return
+      }
+
+      // Ativação imediata em memória do addon recém-instalado
+      try {
+        const installedList = await this.addonsFacade.listInstalled()
+        if (installedList.isSuccess() && this.addonLoader) {
+          for (const installed of installedList.success) {
+            if (
+              !this.addonLoader.hasActiveAddon(installed.id) &&
+              installed.path
+            ) {
+              await this.addonLoader.loadAndActivateFromDisk(
+                installed.id,
+                installed.path,
+              )
+            }
+          }
+        }
+      } catch (activationErr) {
+        console.warn(
+          '⚠️ [AddonsHandler] Aviso ao auto-ativar addon pós-instalação:',
+          activationErr,
+        )
       }
 
       this.jobEmitter.emit(jobId, { status: 'progress', value: 100 })

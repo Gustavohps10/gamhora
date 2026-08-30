@@ -1,4 +1,4 @@
-import { AppError } from '@metric-org/shared/helpers'
+﻿import { AppError } from '@pandhora/shared/helpers'
 import type { Mocked } from 'vitest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -18,7 +18,7 @@ describe('ListWorkspacesService', () => {
     items: [
       {
         id: 'workspace-1',
-        name: 'Metric Development',
+        name: 'Pandhora Development',
         status: 'configured',
         description: 'Dev env',
         dataSourceConnections: [],
@@ -27,7 +27,7 @@ describe('ListWorkspacesService', () => {
       },
       {
         id: 'workspace-2',
-        name: 'Metric Production',
+        name: 'Pandhora Production',
         status: 'configured',
         description: 'Prod env',
         dataSourceConnections: [],

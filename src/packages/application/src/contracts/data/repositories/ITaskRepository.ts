@@ -1,4 +1,4 @@
-import { Task } from '@metric-org/domain'
+﻿import { Task } from '@pandhora/domain'
 
 import { IRepositoryBase } from '@/contracts/data'
 

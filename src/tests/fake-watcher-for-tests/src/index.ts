@@ -1,4 +1,4 @@
-import { AddonContext, IAddon } from '@metric-org/sdk'
+﻿import { AddonContext, IAddon } from '@pandhora/sdk'
 
 export default class FakeWatcherAddon implements IAddon {
   public metadata = {

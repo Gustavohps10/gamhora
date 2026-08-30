@@ -1,4 +1,4 @@
-import { TimeEntry } from '@metric-org/domain'
+﻿import { TimeEntry } from '@pandhora/domain'
 
 import { IRepositoryBase } from '@/contracts/data'
 

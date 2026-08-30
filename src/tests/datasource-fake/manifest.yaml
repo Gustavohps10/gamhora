@@ -1,8 +1,8 @@
-AddonId: metric-datasource-fake
+AddonId: pandhora-datasource-fake
 Version: 1.0.0
 Category: DataSources
 Name: DataSource Fake (Testes)
-Author: Metric
+Author: Pandhora
 ShortDescription: Datasource mock para testes
 Description: Datasource com dados locais fixos (1000 tarefas, 1000 apontamentos) para testes e validação de envio de dados.
 Tags:

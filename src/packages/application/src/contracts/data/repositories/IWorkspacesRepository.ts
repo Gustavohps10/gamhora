@@ -1,4 +1,4 @@
-import { Workspace } from '@metric-org/domain'
+﻿import { Workspace } from '@pandhora/domain'
 
 import { IRepositoryBase } from '@/contracts/data/repositories'
 

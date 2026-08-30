@@ -1,4 +1,4 @@
-import { AppError, Either } from '@metric-org/shared/helpers'
+﻿import { AppError, Either } from '@pandhora/shared/helpers'
 
 import { PagedResultDTO, WorkspaceDTO } from '@/dtos'
 

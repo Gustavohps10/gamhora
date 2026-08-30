@@ -1,19 +1,14 @@
-# @metric-org/sdk
+﻿# @pandhora/sdk
 
-## 1.1.0
-
-### Minor Changes
-
-- Initial version
-
-## 1.2.1
+## 0.1.1
 
 ### Patch Changes
 
-- include installer.yaml in initial packaging to prevent missing file
+- 82941c8: Initial Version
+- Add native 'pandhora sync' CLI command for automatic screenshot, icon and manifest synchronization
 
-## 1.2.0
+## 0.1.0
 
 ### Minor Changes
 
-- add new CLI to package addons
+- Initial Version

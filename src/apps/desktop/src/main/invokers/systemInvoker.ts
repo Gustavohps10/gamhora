@@ -1,4 +1,4 @@
-import { AppSettings, ISystemAPI } from '@metric-org/application'
+﻿import { AppSettings, ISystemAPI } from '@pandhora/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

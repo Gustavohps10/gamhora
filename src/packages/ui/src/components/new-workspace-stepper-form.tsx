@@ -1,11 +1,8 @@
-'use client'
+﻿'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { AddonManifest } from '@metric-org/application'
-import {
-  WorkspaceConnectionViewModel,
-  WorkspaceViewModel,
-} from '@metric-org/sdk'
+import { AddonManifest } from '@pandhora/application'
+import { WorkspaceConnectionViewModel, WorkspaceViewModel } from '@pandhora/sdk'
 import { defineStepper } from '@stepperize/react'
 import { useStepItemContext } from '@stepperize/react/primitives'
 import { useQueryClient } from '@tanstack/react-query'
@@ -1300,11 +1297,9 @@ export function StepperForm({
                               ) : (
                                 /* O FORMULÁRIO DINÂMICO */
                                 <NewDataSourceInstanceForm
-                                  connectionInstanceId={
-                                    methods.getValues(
-                                      'currentConnectionInstanceId',
-                                    )!
-                                  }
+                                  connectionInstanceId={methods.getValues(
+                                    'currentConnectionInstanceId',
+                                  )!}
                                   pluginId={selectedPlugin.id}
                                   isSubmitting={false} // O controle aqui é local do componente
                                   onSubmit={handleConnectDataSource}

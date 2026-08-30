@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Metric — Apontamento de Horas Inteligente',
+  title: 'Pandhora — Apontamento de Horas Inteligente',
   description:
     'Controle cada minuto do seu time com integrações poderosas. Jira, Redmine, Trello, Slack, GitHub e Asana em um só lugar.',
 }
@@ -32,12 +32,13 @@ export default function RootLayout({
       suppressHydrationWarning // Utilizado para ignorar erro do NextThemes
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-full flex-col" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
+          enableColorScheme={false}
         >
           {children}
         </ThemeProvider>

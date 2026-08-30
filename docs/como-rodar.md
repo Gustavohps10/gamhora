@@ -1,4 +1,4 @@
-# Como rodar o projeto
+﻿# Como rodar o projeto
 
 Siga os passos **na ordem**. Cada um depende do anterior.
 
@@ -102,7 +102,7 @@ yarn --version
 
 **4.2 — Atualizar para Yarn 4 (só com Yarn, sem Corepack)**
 
-Na **raiz do repositório** (pasta do Metric), rode:
+Na **raiz do repositório** (pasta do Pandhora), rode:
 
 ```bash
 yarn set version 4

@@ -2,7 +2,7 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import { RootProvider } from 'fumadocs-ui/provider/next'
 import type { ReactNode } from 'react'
 
-import { Navbar } from '@/app/page'
+import { Navbar } from '@/app/components/navbar'
 import { source } from '@/lib/source'
 
 export default function Layout({ children }: { children: ReactNode }) {

@@ -1,5 +1,5 @@
-import { Workspace } from '@metric-org/domain'
-import { AppError, Either } from '@metric-org/shared/helpers'
+﻿import { Workspace } from '@pandhora/domain'
+import { AppError, Either } from '@pandhora/shared/helpers'
 
 import {
   CreateWorkspaceInput,

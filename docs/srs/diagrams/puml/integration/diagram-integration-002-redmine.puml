@@ -1,16 +1,16 @@
 @startuml IntegrationRedmine
-title METRIC - Integração Redmine (RF003, RF004)
-participant Metric
+title PANDHORA - Integração Redmine (RF003, RF004)
+participant Pandhora
 participant RedmineAdapter
 participant RedmineAPI
 
-Metric -> RedmineAdapter: Request Sync (lastCheckpoint)
+Pandhora -> RedmineAdapter: Request Sync (lastCheckpoint)
 RedmineAdapter -> RedmineAPI: GET /issues.json?updated_on=>checkpoint
 RedmineAPI -> RedmineAdapter: JSON (issues)
 
-RedmineAdapter -> RedmineAdapter: Map RedmineIssue -> MetricTask
+RedmineAdapter -> RedmineAdapter: Map RedmineIssue -> PandhoraTask
 RedmineAdapter -> RedmineAdapter: Map status, tracker, priority
-RedmineAdapter -> Metric: Return Normalized Data
+RedmineAdapter -> Pandhora: Return Normalized Data
 
 note over RedmineAdapter
   Conversão de metadados

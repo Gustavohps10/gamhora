@@ -12,9 +12,7 @@ export default defineConfig({
     'src/workflow/index.ts',
   ],
   format: ['esm'],
-  dts: {
-    resolve: true,
-  },
+  dts: true,
   clean: true,
   sourcemap: true,
   splitting: true,

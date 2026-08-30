@@ -1,6 +1,9 @@
 export const logo = '/ui/logo.svg'
+export const logoDarkSvg = '/ui/logo-dark.svg'
 export const logoIcon = '/ui/logo-icon.svg'
 export const logoText = '/ui/logo-text.svg'
+export const logoLight = '/ui/logo-light.png'
+export const logoDark = '/ui/logo-dark.jpg'
 
 export const jiraLogo = '/ui/temp-plugins-icons/jira.png'
 export const youtrackLogo = '/ui/temp-plugins-icons/youtrack.png'

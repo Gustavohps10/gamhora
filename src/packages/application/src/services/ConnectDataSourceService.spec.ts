@@ -1,5 +1,5 @@
-import { Workspace } from '@metric-org/domain'
-import { AppError, Either } from '@metric-org/shared/helpers'
+﻿import { Workspace } from '@pandhora/domain'
+import { AppError, Either } from '@pandhora/shared/helpers'
 import type { Mocked } from 'vitest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -120,7 +120,7 @@ describe('ConnectDataSourceService', () => {
     const storageKey = `workspace-connection-${input.workspaceId}-${input.connectionInstanceId}`
 
     expect(credentialsStorageMock.saveToken).toHaveBeenCalledWith(
-      'metric',
+      'pandhora',
       storageKey,
       JSON.stringify({
         member: fakeMember,
@@ -207,7 +207,7 @@ describe('ConnectDataSourceService', () => {
     expect(result.failure).toBe(domainError)
 
     expect(credentialsStorageMock.deleteToken).toHaveBeenCalledWith(
-      'metric',
+      'pandhora',
       storageKey,
     )
     expect(workspacesRepositoryMock.update).not.toHaveBeenCalled()
@@ -231,7 +231,7 @@ describe('ConnectDataSourceService', () => {
 
     expect(credentialsStorageMock.deleteToken).toHaveBeenCalledTimes(1)
     expect(credentialsStorageMock.deleteToken).toHaveBeenCalledWith(
-      'metric',
+      'pandhora',
       storageKey,
     )
   })

@@ -365,7 +365,7 @@ export function Column({ column }: { column: TColumn }) {
               )}
           </div>
           <div
-            className="flex flex-col gap-y-3.5 overflow-y-auto px-3 py-3 [overflow-anchor:none] [scrollbar-color:theme(colors.slate.600)_theme(colors.slate.700)] [scrollbar-width:thin]"
+            className="flex [scrollbar-width:thin] [scrollbar-color:theme(colors.slate.600)_theme(colors.slate.700)] flex-col gap-y-3.5 overflow-y-auto px-3 py-3 [overflow-anchor:none]"
             ref={scrollableRef}
           >
             <CardList column={column} /> 

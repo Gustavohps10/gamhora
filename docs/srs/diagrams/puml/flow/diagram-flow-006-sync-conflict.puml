@@ -1,5 +1,5 @@
 ﻿@startuml SyncConflict
-title METRIC - Resolução de Conflitos
+title PANDHORA - Resolução de Conflitos
 participant LocalDB
 participant SyncEngine
 participant RemoteAPI

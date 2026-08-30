@@ -1,9 +1,9 @@
 @startuml UseCaseTimer
-title METRIC - Casos de Uso: Rastreamento de Tempo (UC002 - SRS)
+title PANDHORA - Casos de Uso: Rastreamento de Tempo (UC002 - SRS)
 left to right direction
 actor "User" as U
 
-rectangle "Metric System" {
+rectangle "Pandhora System" {
     usecase "Selecionar Tarefa" as UC1
     usecase "Iniciar Timer" as UC2
     usecase "Pausar Timer" as UC3

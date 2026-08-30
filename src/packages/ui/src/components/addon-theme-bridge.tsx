@@ -41,7 +41,7 @@ export function AddonThemeBridge() {
   }, [openAPI, queryClient])
 
   useEffect(() => {
-    const STYLE_ID = 'metric-addon-active-theme'
+    const STYLE_ID = 'pandhora-addon-active-theme'
     let styleEl = document.getElementById(STYLE_ID) as HTMLStyleElement | null
 
     console.log(
@@ -58,7 +58,7 @@ export function AddonThemeBridge() {
         styleEl.setAttribute('type', 'text/css')
         document.head.appendChild(styleEl)
         console.log(
-          '🎨 [AddonThemeBridge] Tag <style id="metric-addon-active-theme"> inserida no <head>.',
+          '🎨 [AddonThemeBridge] Tag <style id="pandhora-addon-active-theme"> inserida no <head>.',
         )
       }
 

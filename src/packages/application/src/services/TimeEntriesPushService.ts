@@ -1,5 +1,5 @@
-import { TimeEntry } from '@metric-org/domain'
-import { AppError, Either } from '@metric-org/shared/helpers'
+﻿import { TimeEntry } from '@pandhora/domain'
+import { AppError, Either } from '@pandhora/shared/helpers'
 
 import {
   IDataSourceResolver,

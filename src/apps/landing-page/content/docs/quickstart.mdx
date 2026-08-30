@@ -1,11 +1,11 @@
 ---
 title: Criando seu Primeiro Addon
-description: Guia prático e passo a passo para criar, configurar e testar seu primeiro Addon utilizando o SDK do Metric.
+description: Guia prático e passo a passo para criar, configurar e testar seu primeiro Addon utilizando o SDK do Pandhora.
 ---
 
 # Criando seu Primeiro Addon
 
-Neste guia prático, você aprenderá a construir um Addon completo para o Metric do zero utilizando **TypeScript** e o pacote oficial **`@metric-org/sdk`**.
+Neste guia prático, você aprenderá a construir um Addon completo para o Pandhora do zero utilizando **TypeScript** e o pacote oficial **`@pandhora/sdk`**.
 
 ---
 
@@ -14,10 +14,10 @@ Neste guia prático, você aprenderá a construir um Addon completo para o Metri
 Crie um novo diretório para o seu plugin e inicialize o projeto com suas dependências:
 
 ```bash
-mkdir metric-meu-addon
-cd metric-meu-addon
+mkdir pandhora-meu-addon
+cd pandhora-meu-addon
 npm init -y
-npm install @metric-org/sdk
+npm install @pandhora/sdk
 npm install -D typescript tsup @types/node
 ```
 
@@ -41,28 +41,24 @@ Configure o arquivo `tsconfig.json`:
 
 ## 2. Estrutura do Addon
 
-Todo addon do Metric exporta como `default` uma classe que implementa o contrato **`IAddon`**.
+Todo addon do Pandhora exporta como `default` uma classe que implementa o contrato **`IAddon`**.
 
 Crie o arquivo `src/index.ts`:
 
 ```typescript
-import type { 
-  IAddon, 
-  AddonContext, 
-  AddonSettingsField 
-} from '@metric-org/sdk'
+import type { IAddon, AddonContext, AddonSettingsField } from '@pandhora/sdk'
 
 export default class MeuPrimeiroAddon implements IAddon {
   // Metadados obrigatórios do Addon
   public id = 'meu-primeiro-addon'
   public name = 'Meu Primeiro Addon'
   public version = '1.0.0'
-  public description = 'Exemplo prático de extensão para o Metric'
+  public description = 'Exemplo prático de extensão para o Pandhora'
   public author = 'Seu Nome ou Empresa'
 
   private context?: AddonContext
 
-  // Formulário de preferências renderizado automaticamente na interface do Metric
+  // Formulário de preferências renderizado automaticamente na interface do Pandhora
   public settingsFields: AddonSettingsField[] = [
     {
       key: 'servidorUrl',
@@ -76,7 +72,8 @@ export default class MeuPrimeiroAddon implements IAddon {
       label: 'Chave de Acesso / Token',
       type: 'password',
       required: true,
-      description: 'Token de autenticação gerado nas preferências da sua conta.',
+      description:
+        'Token de autenticação gerado nas preferências da sua conta.',
     },
     {
       key: 'notificarEventos',
@@ -86,7 +83,7 @@ export default class MeuPrimeiroAddon implements IAddon {
     },
   ]
 
-  // Ciclo de Vida: Executado quando o plugin é ativado no Metric
+  // Ciclo de Vida: Executado quando o plugin é ativado no Pandhora
   public async onActivate(context: AddonContext): Promise<void> {
     this.context = context
     console.log(`[${this.name}] Addon ativado com sucesso!`)
@@ -98,7 +95,7 @@ export default class MeuPrimeiroAddon implements IAddon {
     if (notificar) {
       await context.notifications.show({
         title: 'Addon Ativado',
-        body: `Conectado ao Metric com sucesso!`,
+        body: `Conectado ao Pandhora com sucesso!`,
       })
     }
 
@@ -108,7 +105,10 @@ export default class MeuPrimeiroAddon implements IAddon {
     })
 
     context.events.onTimerStop((data) => {
-      console.log(`[${this.name}] Timer finalizado. Tempo registrado:`, data.durationSeconds)
+      console.log(
+        `[${this.name}] Timer finalizado. Tempo registrado:`,
+        data.durationSeconds,
+      )
     })
   }
 
@@ -124,9 +124,10 @@ export default class MeuPrimeiroAddon implements IAddon {
 
 ## 3. Configurações Dinâmicas (`settingsFields`)
 
-A propriedade `settingsFields` permite que seu plugin defina formulários de configuração sem escrever uma única linha de interface gráfica (UI). O Metric gera e valida os campos nativamente.
+A propriedade `settingsFields` permite que seu plugin defina formulários de configuração sem escrever uma única linha de interface gráfica (UI). O Pandhora gera e valida os campos nativamente.
 
 ### Tipos de Campos Suportados:
+
 - **`text`**: Entrada de texto comum.
 - **`password`**: Campo com máscara de segurança para tokens, senhas e API keys.
 - **`boolean`**: Interruptor (Toggle) de verdadeiro/falso.
@@ -136,15 +137,15 @@ A propriedade `settingsFields` permite que seu plugin defina formulários de con
 
 ## 4. O Contexto do Addon (`AddonContext`)
 
-Ao ser ativado, o Metric injeta o objeto `AddonContext` contendo todas as APIs e ferramentas disponíveis:
+Ao ser ativado, o Pandhora injeta o objeto `AddonContext` contendo todas as APIs e ferramentas disponíveis:
 
-| Propriedade | Descrição |
-| :--- | :--- |
-| `context.storage` | Armazenamento chave-valor criptografado e isolado por Workspace. |
-| `context.events` | Eventos em tempo real do sistema (início/fim de timer, idle, troca de workspace). |
-| `context.notifications` | Emissão de notificações nativas no sistema operacional. |
-| `context.timer` | Leitura e controle do cronômetro ativo. |
-| `context.oauth` | Fluxo de autenticação OAuth 2.0 PKCE seguro sem necessidade de secrets. |
+| Propriedade             | Descrição                                                                         |
+| :---------------------- | :-------------------------------------------------------------------------------- |
+| `context.storage`       | Armazenamento chave-valor criptografado e isolado por Workspace.                  |
+| `context.events`        | Eventos em tempo real do sistema (início/fim de timer, idle, troca de workspace). |
+| `context.notifications` | Emissão de notificações nativas no sistema operacional.                           |
+| `context.timer`         | Leitura e controle do cronômetro ativo.                                           |
+| `context.oauth`         | Fluxo de autenticação OAuth 2.0 PKCE seguro sem necessidade de secrets.           |
 
 ---
 
@@ -166,4 +167,4 @@ Execute a compilação:
 npm run build
 ```
 
-O arquivo compilado resultante pode ser importado diretamente nas configurações de Addons do Metric.
+O arquivo compilado resultante pode ser importado diretamente nas configurações de Addons do Pandhora.

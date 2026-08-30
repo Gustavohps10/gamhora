@@ -6,10 +6,7 @@ import { NavLink, useParams } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 
 export type AddonCapabilityType =
-  | 'data-sources'
-  | 'watchers'
-  | 'themes'
-  | 'utilities'
+  'data-sources' | 'watchers' | 'themes' | 'utilities'
 
 export type AddonCategory = 'integrations' | 'watchers' | 'themes' | 'utilities'
 

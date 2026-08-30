@@ -1,4 +1,4 @@
-import { AppError, Either } from '@metric-org/shared/helpers'
+import { AppError, Either } from '@pandhora/shared/helpers'
 import type { Mocked } from 'vitest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -21,8 +21,6 @@ describe('TimeEntriesPullService', () => {
 
   const makeInput = (): PullTimeEntriesInput => ({
     workspaceId: 'workspace-123',
-    pluginId: 'plugin-xyz',
-    memberId: '',
     connectionInstanceId: 'conn-abc',
     checkpoint: {
       updatedAt: fakeDate,

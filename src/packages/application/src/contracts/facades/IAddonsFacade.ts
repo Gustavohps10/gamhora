@@ -1,5 +1,5 @@
-import { AppError, Either } from '@metric-org/shared/helpers'
-import { IJobEvent } from '@metric-org/shared/transport'
+﻿import { AppError, Either } from '@pandhora/shared/helpers'
+import { IJobEvent } from '@pandhora/shared/transport'
 
 import { AddonInstallerDTO } from '@/dtos/AddonInstallerDTO'
 import { AddonManifestDTO } from '@/dtos/AddonManifestDTO'
@@ -24,4 +24,9 @@ export interface IAddonsFacade {
     downloadUrl: string,
     onProgress?: (event: IJobEvent) => void,
   ): Promise<Either<AppError, Uint8Array>>
+
+  uninstallAddon(
+    addonId: string,
+    version?: string,
+  ): Promise<Either<AppError, void>>
 }

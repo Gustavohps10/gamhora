@@ -1,10 +1,10 @@
-import { ICredentialsStorage } from '@metric-org/application'
+import { ICredentialsStorage } from '@pandhora/application'
 import {
   exchangeAuthorizationCode,
   formatStoredToken,
   generateOAuthState,
   generatePKCE,
-} from '@metric-org/sdk'
+} from '@pandhora/sdk'
 import { shell } from 'electron'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -31,6 +31,8 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       getToken: vi.fn().mockResolvedValue(null),
       saveToken: vi.fn().mockResolvedValue(undefined),
       deleteToken: vi.fn().mockResolvedValue(undefined),
+      hasToken: vi.fn().mockResolvedValue(false),
+      replaceToken: vi.fn().mockResolvedValue(undefined),
     }
 
     addonLoader = new AddonLoader(fakeCredentialsStorage)
@@ -60,7 +62,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
 
       // Clean up
       addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?code=abc&state=${generatedState}`,
+        `pandhora-app://oauth/callback?code=abc&state=${generatedState}`,
       )
       await authPromise
     })
@@ -80,7 +82,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       expect(parsedUrl.searchParams.get('state')).toBe(customState)
 
       addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?code=auth-code-123&state=${customState}`,
+        `pandhora-app://oauth/callback?code=auth-code-123&state=${customState}`,
       )
       const result = await authPromise
       expect(result.code).toBe('auth-code-123')
@@ -115,7 +117,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
 
       expect(shell.openExternal).toHaveBeenCalledTimes(1)
       addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?code=code-ok&state=${matchingState}`,
+        `pandhora-app://oauth/callback?code=code-ok&state=${matchingState}`,
       )
       const result = await authPromise
       expect(result.code).toBe('code-ok')
@@ -148,7 +150,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
 
       expect(shell.openExternal).toHaveBeenCalledTimes(1)
       addonLoader.handleOAuthCallbackUrl(
-        'metric-app://oauth/callback?code=ok&state=https-state',
+        'pandhora-app://oauth/callback?code=ok&state=https-state',
       )
       await authPromise
     })
@@ -177,7 +179,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
 
       expect(shell.openExternal).toHaveBeenCalledTimes(1)
       addonLoader.handleOAuthCallbackUrl(
-        'metric-app://oauth/callback?code=ok&state=localhost-state',
+        'pandhora-app://oauth/callback?code=ok&state=localhost-state',
       )
       await authPromise
     })
@@ -193,7 +195,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
 
       expect(shell.openExternal).toHaveBeenCalledTimes(1)
       addonLoader.handleOAuthCallbackUrl(
-        'metric-app://oauth/callback?code=ok&state=ip-state',
+        'pandhora-app://oauth/callback?code=ok&state=ip-state',
       )
       await authPromise
     })
@@ -239,7 +241,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       })
 
       const handled = addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?code=my-secret-code&state=${state}&custom_param=extra`,
+        `pandhora-app://oauth/callback?code=my-secret-code&state=${state}&custom_param=extra`,
       )
       expect(handled).toBe(true)
 
@@ -260,7 +262,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       })
 
       const handled = addonLoader.handleOAuthCallbackUrl(
-        'metric-app://oauth/callback?code=some-code',
+        'pandhora-app://oauth/callback?code=some-code',
       )
       expect(handled).toBe(false)
 
@@ -281,7 +283,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       })
 
       const handled = addonLoader.handleOAuthCallbackUrl(
-        'metric-app://oauth/callback?code=attacker-code&state=unknown-state',
+        'pandhora-app://oauth/callback?code=attacker-code&state=unknown-state',
       )
       expect(handled).toBe(false)
 
@@ -302,7 +304,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       })
 
       const handled = addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?error=access_denied&error_description=User+denied+access&state=${state}`,
+        `pandhora-app://oauth/callback?error=access_denied&error_description=User+denied+access&state=${state}`,
       )
       expect(handled).toBe(true)
 
@@ -322,7 +324,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       })
 
       const handled = addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?state=${state}`,
+        `pandhora-app://oauth/callback?state=${state}`,
       )
       expect(handled).toBe(true)
 
@@ -342,12 +344,12 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       })
 
       const firstHandled = addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?code=valid-code&state=${state}`,
+        `pandhora-app://oauth/callback?code=valid-code&state=${state}`,
       )
       expect(firstHandled).toBe(true)
 
       const secondHandled = addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?code=valid-code&state=${state}`,
+        `pandhora-app://oauth/callback?code=valid-code&state=${state}`,
       )
       expect(secondHandled).toBe(false)
 
@@ -368,19 +370,19 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
 
       expect(
         addonLoader.handleOAuthCallbackUrl(
-          `https://metricapp.com.br/oauth/callback?code=abc&state=${state}`,
+          `https://pandhoraapp.com.br/oauth/callback?code=abc&state=${state}`,
         ),
       ).toBe(false)
 
       expect(
         addonLoader.handleOAuthCallbackUrl(
-          `metric-app://outro-endpoint?code=abc&state=${state}`,
+          `pandhora-app://outro-endpoint?code=abc&state=${state}`,
         ),
       ).toBe(false)
 
       expect(
         addonLoader.handleOAuthCallbackUrl(
-          `metric-app://oauth/outro?code=abc&state=${state}`,
+          `pandhora-app://oauth/outro?code=abc&state=${state}`,
         ),
       ).toBe(false)
 
@@ -408,7 +410,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       )
 
       const handled = addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?code=late-code&state=${state}`,
+        `pandhora-app://oauth/callback?code=late-code&state=${state}`,
       )
       expect(handled).toBe(false)
     })
@@ -425,7 +427,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       })
 
       addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?code=code-123&state=${state}`,
+        `pandhora-app://oauth/callback?code=code-123&state=${state}`,
       )
       const result = await authPromise
       expect(result.code).toBe('code-123')
@@ -449,7 +451,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       )
 
       addonLoader.handleOAuthCallbackUrl(
-        'metric-app://oauth/callback?code=123&state=my-state-open',
+        'pandhora-app://oauth/callback?code=123&state=my-state-open',
       )
       await authPromise
     })
@@ -471,7 +473,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       )
 
       const handled = addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?code=code-123&state=${state}`,
+        `pandhora-app://oauth/callback?code=code-123&state=${state}`,
       )
       expect(handled).toBe(false)
     })
@@ -493,7 +495,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
       )
 
       const handled = addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?code=123&state=${state}`,
+        `pandhora-app://oauth/callback?code=123&state=${state}`,
       )
       expect(handled).toBe(false)
     })
@@ -519,7 +521,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
 
       // Resolve addon 2 first
       addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?code=code-for-2&state=${state2}`,
+        `pandhora-app://oauth/callback?code=code-for-2&state=${state2}`,
       )
       const result2 = await authPromise2
       expect(result2.code).toBe('code-for-2')
@@ -527,7 +529,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
 
       // Resolve addon 1 second
       addonLoader.handleOAuthCallbackUrl(
-        `metric-app://oauth/callback?code=code-for-1&state=${state1}`,
+        `pandhora-app://oauth/callback?code=code-for-1&state=${state1}`,
       )
       const result1 = await authPromise1
       expect(result1.code).toBe('code-for-1')
@@ -555,7 +557,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
         clientId: 'client-123',
         code: 'auth-code',
         codeVerifier: 'verifier-123',
-        redirectUri: 'https://metricapp.com.br/oauth/callback',
+        redirectUri: 'https://pandhoraapp.com.br/oauth/callback',
       })
 
       expect(result.accessToken).toBe('valid-access-token')
@@ -582,7 +584,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
           clientId: 'client-123',
           code: 'auth-code',
           codeVerifier: 'verifier-123',
-          redirectUri: 'https://metricapp.com.br/oauth/callback',
+          redirectUri: 'https://pandhoraapp.com.br/oauth/callback',
         }),
       ).rejects.toThrow(
         'Falha na troca de código OAuth: Code verifier is invalid',
@@ -606,7 +608,7 @@ describe('OAuth 2.0 PKCE Flow in AddonLoader', () => {
           clientId: 'client-123',
           code: 'auth-code',
           codeVerifier: 'verifier-123',
-          redirectUri: 'https://metricapp.com.br/oauth/callback',
+          redirectUri: 'https://pandhoraapp.com.br/oauth/callback',
         }),
       ).rejects.toThrow(
         'Falha na troca de código OAuth: Client is not authorized',

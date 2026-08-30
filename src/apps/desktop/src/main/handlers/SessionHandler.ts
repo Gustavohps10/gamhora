@@ -1,12 +1,12 @@
-import { IGetCurrentUserUseCase } from '@metric-org/application'
-import { MemberDTO } from '@metric-org/application'
+﻿import { IGetCurrentUserUseCase } from '@pandhora/application'
+import { MemberDTO } from '@pandhora/application'
 import {
   AppError,
   createResponseViewModel,
   Either,
-} from '@metric-org/shared/helpers'
-import { IRequest } from '@metric-org/shared/transport'
-import { MemberViewModel, ViewModel } from '@metric-org/shared/view-models'
+} from '@pandhora/shared/helpers'
+import { IRequest } from '@pandhora/shared/transport'
+import { MemberViewModel, ViewModel } from '@pandhora/shared/view-models'
 import { IpcMainInvokeEvent } from 'electron'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'

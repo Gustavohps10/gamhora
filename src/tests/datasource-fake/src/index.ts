@@ -1,10 +1,10 @@
-import type {
+﻿import type {
   AddonContext,
   AddonSettingsGroup,
   AddonSettingsSchema,
   IAddon,
   IDataSource,
-} from '@metric-org/sdk'
+} from '@pandhora/sdk'
 
 import { FakeAuthenticationStrategy } from './FakeAuthenticationStrategy'
 import { FakeMemberQuery } from './FakeMemberQuery'
@@ -29,8 +29,8 @@ const configFields: {
           id: 'serverUrl',
           type: 'text',
           label: 'URL do Servidor',
-          placeholder: 'https://fake.metric-app.local',
-          defaultValue: 'https://fake.metric-app.local',
+          placeholder: 'https://fake.pandhora-app.local',
+          defaultValue: 'https://fake.pandhora-app.local',
         },
         {
           id: 'username',
@@ -68,7 +68,7 @@ const configFields: {
 }
 
 export const FakeDataSource: IDataSource = {
-  id: 'metric-datasource-fake',
+  id: 'pandhora-datasource-fake',
   dataSourceType: 'fake',
   displayName: 'DataSource Fake (Testes)',
   configFields,

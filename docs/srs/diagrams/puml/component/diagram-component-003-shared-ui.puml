@@ -1,5 +1,5 @@
 @startuml ComponentSharedUI
-title METRIC - Application Layer Compartilhada (RNF001)
+title PANDHORA - Application Layer Compartilhada (RNF001)
 package "Shared UI Layer" {
     component [Task List Component] as TaskList
     component [Timer Component] as Timer

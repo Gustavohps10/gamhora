@@ -1,15 +1,15 @@
-import { MetadataDTO } from '@metric-org/application'
 import {
   IMetadataPullUseCase,
+  MetadataDTO,
   PullMetadataInput,
-} from '@metric-org/application/contracts/use-cases/IMetadataPullUseCase'
+} from '@pandhora/application'
 import {
   AppError,
   createResponseViewModel,
   Either,
-} from '@metric-org/shared/helpers'
-import { IRequest } from '@metric-org/shared/transport'
-import { MetadataViewModel, ViewModel } from '@metric-org/shared/view-models'
+} from '@pandhora/shared/helpers'
+import { IRequest } from '@pandhora/shared/transport'
+import { MetadataViewModel, ViewModel } from '@pandhora/shared/view-models'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'
 

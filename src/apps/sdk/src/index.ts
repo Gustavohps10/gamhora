@@ -1,4 +1,4 @@
-export * from './AddonConfig'
+﻿export * from './AddonConfig'
 export * from './contracts'
 export type { IHttpClient, IHttpClientConfig } from './contracts/IHttpClient'
 export {
@@ -34,8 +34,8 @@ export type {
   TaskDTO,
   TimeEntryDTO,
   WorkspaceDTO,
-} from '@metric-org/application'
-export { Member, Task, TimeEntry, Workspace } from '@metric-org/domain'
-export { AppError, Either } from '@metric-org/shared/helpers'
-export type { IHeaders, IRequest } from '@metric-org/shared/transport'
-export * from '@metric-org/shared/view-models'
+} from '@pandhora/application'
+export { Member, Task, TimeEntry, Workspace } from '@pandhora/domain'
+export { AppError, Either } from '@pandhora/shared/helpers'
+export type { IHeaders, IRequest } from '@pandhora/shared/transport'
+export * from '@pandhora/shared/view-models'

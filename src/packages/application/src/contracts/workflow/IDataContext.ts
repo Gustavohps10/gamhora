@@ -1,4 +1,4 @@
-import { Entity } from '@metric-org/domain'
+﻿import { Entity } from '@pandhora/domain'
 
 import { IQueryBase } from '@/contracts/data'
 import { IRepositoryBase } from '@/contracts/data'

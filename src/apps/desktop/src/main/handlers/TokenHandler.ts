@@ -1,6 +1,6 @@
-import { ICredentialsStorage } from '@metric-org/application'
-import { IRequest } from '@metric-org/shared/transport'
-import { ViewModel } from '@metric-org/shared/view-models'
+﻿import { ICredentialsStorage } from '@pandhora/application'
+import { IRequest } from '@pandhora/shared/transport'
+import { ViewModel } from '@pandhora/shared/view-models'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'
 

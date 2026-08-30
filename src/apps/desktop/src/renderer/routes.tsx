@@ -1,11 +1,11 @@
-import {
+﻿import {
   ActivitiesLayout,
   AddonsLayout,
   AppLayout,
   HomeLayout,
   WidgetLayout,
   WorkspaceLayout,
-} from '@metric-org/ui/layouts'
+} from '@pandhora/ui/layouts'
 import {
   Activities,
   AddonsPage,
@@ -19,7 +19,7 @@ import {
   TimeEntries,
   TimerWidget,
   WorkspaceSettings,
-} from '@metric-org/ui/pages'
+} from '@pandhora/ui/pages'
 import { createHashRouter, Navigate } from 'react-router-dom'
 
 export const router = createHashRouter([
@@ -76,7 +76,7 @@ export const router = createHashRouter([
                   },
                   { path: 'notes', element: <Notes /> },
                   { path: 'time-entries', element: <TimeEntries /> },
-                  { path: 'my-metrics', element: <Metrics /> },
+                  { path: 'my-metric', element: <Metrics /> },
                   {
                     path: 'activities',
                     element: <ActivitiesLayout />,

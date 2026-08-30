@@ -1,9 +1,9 @@
 {
-  "name": "@metric-org/purple-theme",
+  "name": "@pandhora/purple-theme",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Purple Neon theme addon for tests.",
-  "author": "Metric",
+  "author": "Pandhora",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -22,7 +22,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@metric-org/sdk": "workspace:*"
+    "@pandhora/sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

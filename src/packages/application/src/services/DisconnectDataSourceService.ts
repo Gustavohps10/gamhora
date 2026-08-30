@@ -1,4 +1,4 @@
-import { AppError, Either } from '@metric-org/shared/helpers'
+﻿import { AppError, Either } from '@pandhora/shared/helpers'
 
 import {
   DisconnectDataSourceInput,
@@ -32,8 +32,8 @@ export class DisconnectDataSourceService implements IDisconnectDataSourceUseCase
         input.connectionInstanceId,
       )
 
-      await this.credentialsStorage.deleteToken('metric', storageKey)
-      await this.credentialsStorage.deleteToken('metric', memberKey)
+      await this.credentialsStorage.deleteToken('pandhora', storageKey)
+      await this.credentialsStorage.deleteToken('pandhora', memberKey)
 
       const result = workspace.disconnectDataSource(input.connectionInstanceId)
 

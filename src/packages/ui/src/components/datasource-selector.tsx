@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { AddonManifest } from '@metric-org/application'
+import { AddonManifest } from '@pandhora/application'
 import { Check } from 'lucide-react'
 
 import { Badge, Button, ScrollArea } from '@/components/ui'

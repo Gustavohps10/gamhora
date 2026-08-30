@@ -1,4 +1,4 @@
-import { IOpenAPI } from '@metric-org/application'
+﻿import { IOpenAPI } from '@pandhora/application'
 import React from 'react'
 import { createContext } from 'react'
 

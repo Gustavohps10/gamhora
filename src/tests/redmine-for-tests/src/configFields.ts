@@ -1,4 +1,4 @@
-import { AddonSettingsGroup, AddonSettingsTab } from '@metric-org/sdk'
+﻿import { AddonSettingsGroup, AddonSettingsTab } from '@pandhora/sdk'
 
 export const credentialFieldGroups: AddonSettingsGroup[] = [
   {

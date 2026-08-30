@@ -1,10 +1,10 @@
-import {
+﻿import {
   DataSourceContext,
   IMemberQuery,
   MemberDTO,
   PagedResultDTO,
   PaginationOptionsDTO,
-} from '@metric-org/sdk'
+} from '@pandhora/sdk'
 
 import { RedmineBase } from '@/RedmineBase'
 

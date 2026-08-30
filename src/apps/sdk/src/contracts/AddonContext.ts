@@ -1,4 +1,4 @@
-import { IEventEmitter, ISystemEvents } from '@metric-org/shared/transport'
+﻿import { IEventEmitter, ISystemEvents } from '@pandhora/shared/transport'
 
 import { IAddonThemesRegistry } from './AddonTheme'
 import { ICommandRegistry } from './commands/ICommandRegistry'

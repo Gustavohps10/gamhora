@@ -7,9 +7,6 @@ import { Button } from '@/components/ui/button'
 import { exportTableToCSV } from '@/lib/export'
 import { SyncTaskRxDBDTO } from '@/local-db/schemas/tasks-sync-schema'
 
-import { CreateTaskSheet } from './create-task-sheet'
-// import { DeleteTasksDialog } from './delete-tasks-dialog'
-
 interface TasksTableToolbarActionsProps {
   table: Table<SyncTaskRxDBDTO>
 }
@@ -28,7 +25,6 @@ export function TasksTableToolbarActions({
         // />
         <></>
       ) : null}
-      <CreateTaskSheet />
       <Button
         variant="outline"
         size="sm"

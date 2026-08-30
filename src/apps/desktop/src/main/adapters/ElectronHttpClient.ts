@@ -1,5 +1,5 @@
-import { IHttpClient, IHttpClientConfig } from '@metric-org/adapters/contracts'
-import { AppError, Either } from '@metric-org/shared/helpers'
+﻿import { IHttpClient, IHttpClientConfig } from '@pandhora/adapters/contracts'
+import { AppError, Either } from '@pandhora/shared/helpers'
 import { AxiosRequestConfig } from 'axios'
 import { net } from 'electron'
 

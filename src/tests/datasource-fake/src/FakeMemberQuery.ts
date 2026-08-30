@@ -1,9 +1,9 @@
-import type {
+﻿import type {
   DataSourceContext,
   MemberDTO,
   PagedResultDTO,
   PaginationOptionsDTO,
-} from '@metric-org/sdk'
+} from '@pandhora/sdk'
 
 import { FAKE_MEMBER } from './fakeData'
 

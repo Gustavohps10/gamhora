@@ -1,4 +1,4 @@
-import type { Task } from '@metric-org/sdk'
+﻿import type { Task } from '@pandhora/sdk'
 
 const store = new Map<string, Task>()
 

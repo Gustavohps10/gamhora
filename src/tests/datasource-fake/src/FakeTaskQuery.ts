@@ -1,9 +1,9 @@
-import type {
+﻿import type {
   DataSourceContext,
   PagedResultDTO,
   PaginationOptionsDTO,
   TaskDTO,
-} from '@metric-org/sdk'
+} from '@pandhora/sdk'
 
 import { FAKE_TASKS } from './fakeData'
 

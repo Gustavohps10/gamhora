@@ -1,9 +1,9 @@
-import {
+﻿import {
   AddonContext,
   AddonSettingsSchema,
   formatStoredToken,
   IAddon,
-} from '@metric-org/sdk'
+} from '@pandhora/sdk'
 import axios from 'axios'
 import net from 'net'
 
@@ -449,7 +449,7 @@ export default class DiscordAddon implements IAddon {
 
       const CLIENT_ID = '1372352088457220126'
       const REDIRECT_URI =
-        process.env.METRIC_OAUTH_REDIRECT_URI ||
+        process.env.PANDHORA_OAUTH_REDIRECT_URI ||
         'http://localhost:3000/oauth/callback'
 
       const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(
@@ -525,7 +525,7 @@ export default class DiscordAddon implements IAddon {
         isSuccess: true,
         display: {
           title: 'Autenticado com sucesso!',
-          message: 'Sua conta do Discord foi vinculada ao Metric.',
+          message: 'Sua conta do Discord foi vinculada ao Pandhora.',
           avatarUrl,
           data: {
             Usuário: discordUser.username,

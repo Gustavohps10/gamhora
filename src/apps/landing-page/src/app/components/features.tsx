@@ -1,130 +1,140 @@
 'use client'
 
-const features = [
+import { Badge } from '@pandhora/ui/components'
+import { Activity, CheckCircle, Layers, Sparkles, Timer } from 'lucide-react'
+import * as React from 'react'
+
+export interface FeatureItem {
+  icon: React.ReactNode
+  tag: string
+  problem: string
+  title: string
+  description: string
+  highlights: string[]
+  accentColor: string
+}
+
+const FEATURES: FeatureItem[] = [
   {
-    icon: (
-      <svg
-        className="h-7 w-7"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M9 11l3 3L22 4" />
-        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-      </svg>
-    ),
-    title: 'Apontamento Sem Esforço',
+    icon: <Activity className="size-5" />,
+    tag: 'Observabilidade',
+    problem: 'Você não sabe para onde foi seu tempo técnico no final do dia',
+    title: 'Métricas de Deep Work e foco com granularidade de minutos',
     description:
-      'Monitore cada minuto investido com precisão granular. Nosso sistema de apontamento permite registrar tempo por tarefa, ticket e atividade, gerando visibilidade total sobre o seu dia de trabalho.',
-    tag: 'Produtividade',
-    image: '/images/feature_apontamento.jpeg',
+      'Detecte trocas de contexto, meça blocos de concentração contínua e visualize a distribuição real do seu esforço entre código, bugs e reuniões.',
+    highlights: [
+      'Score diário de Deep Work',
+      'Detecção de context switching',
+      'Cálculo 100% local sem expor dados',
+    ],
+    accentColor: 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10',
   },
   {
-    icon: (
-      <svg
-        className="h-7 w-7"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-      </svg>
-    ),
-    title: 'Sincronize com suas ferramentas',
+    icon: <Layers className="size-5" />,
+    tag: 'Controle de Tarefas',
+    problem: 'Tarefas espalhadas em múltiplos silos e abas de navegadores',
+    title: 'Hub unificado para tarefas de múltiplos DataSources',
     description:
-      'Conecte o Metric ao Redmine, Jira ou YouTrack em segundos. Importe suas tarefas e gerencie seu tempo sem sair do fluxo de trabalho que você já domina.',
-    tag: 'Conectividade',
-    image: '/images/feature_conectividade.jpeg',
+      'Acesse e gerencie seus tickets do Jira, Redmine, GitHub e YouTrack em um único lugar. Crie, atualize status e vincule apontamentos com atalhos de teclado.',
+    highlights: [
+      'Busca global instantânea (Cmd/Ctrl + K)',
+      'Vínculo de PRs e commits às tarefas',
+      'Atualização de status bidirecional',
+    ],
+    accentColor: 'border-sky-500/30 text-sky-500 bg-sky-500/10',
   },
   {
-    icon: (
-      <svg
-        className="h-7 w-7"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <line x1="18" y1="20" x2="18" y2="10" />
-        <line x1="12" y1="20" x2="12" y2="4" />
-        <line x1="6" y1="20" x2="6" y2="14" />
-      </svg>
-    ),
-    title: 'Métricas de Alta Performance',
+    icon: <Timer className="size-5" />,
+    tag: 'Apontamento Inteligente',
+    problem: 'Apontar horas manualmente é burocrático e fácil de esquecer',
+    title: 'Apontamento de horas rápido que não quebra o fluxo',
     description:
-      'Vá além do simples registro de horas. Analise seu nível de Deep Work, identifique trocas de contexto excessivas e monitore sua constância com gráficos avançados que mostram onde sua energia está sendo realmente investida.',
-    tag: 'Dashboards',
-    image: '/images/feature_dashboard.jpeg',
+      'Inicie e pause timers globais com um atalho. Salve contexto, adicione notas técnicas e faça push dos logs de horas para os rastreadores automaticamente.',
+    highlights: [
+      'Atalho global para iniciar timer',
+      'Suporte a múltiplos timers simultâneos',
+      'Sincronização em segundo plano',
+    ],
+    accentColor: 'border-violet-500/30 text-violet-500 bg-violet-500/10',
   },
 ]
 
 export function Features() {
   return (
-    <section id="features" className="bg-secondary relative py-24 lg:py-32">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        {/* Section header */}
+    <section
+      id="features"
+      className="bg-muted/15 relative overflow-hidden py-24 lg:py-32"
+    >
+      <div className="relative z-10 container mx-auto px-6 lg:px-8">
+        {/* Section Header */}
         <div className="mx-auto max-w-2xl text-center">
-          <span className="text-primary inline-block text-sm font-semibold tracking-widest uppercase">
-            Funcionalidades
-          </span>
-          <h2 className="text-foreground mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-            Tudo que você precisa para
-            <span className="text-primary"> gerenciar tempo</span>
+          <div className="border-primary/20 bg-primary/5 text-primary mb-3 inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-1 text-xs font-semibold">
+            <Sparkles className="size-3.5" />
+            Engenharia &amp; Produtividade
+          </div>
+
+          <h2 className="text-foreground mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+            Construído para a realidade de quem desenvolve software.
           </h2>
+
+          <p className="text-muted-foreground mt-4 text-base leading-relaxed sm:text-lg">
+            Não é apenas um timer genérico. É um toolkit completo de
+            observabilidade para controlar tarefas, gerenciar horas e maximizar
+            seu foco técnico.
+          </p>
         </div>
 
-        {/* Feature cards */}
-        <div className="mt-16 grid gap-6 lg:grid-cols-3">
-          {features.map((feature, index) => (
+        {/* Features Grid */}
+        <div className="mt-16 grid gap-8 md:grid-cols-3">
+          {FEATURES.map((feature) => (
             <div
               key={feature.title}
-              className={`lp-card group lp-animate-fade-in-up overflow-hidden lp-delay-${(index + 1) * 100}`}
+              className="border-border/50 bg-card/70 hover:border-border/90 group relative flex flex-col justify-between rounded-lg border p-7 shadow-xs backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
-              {/* Image area */}
-              <div
-                className="border-border relative overflow-hidden rounded-t-2xl border-b"
-                style={{
-                  aspectRatio: '16 / 10',
-                }}
-              >
-                <img
-                  src={feature.image}
-                  alt={feature.title}
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
+              <div>
+                {/* Problem Callout */}
+                <div className="bg-muted/40 mb-4 rounded-md p-3">
+                  <p className="text-muted-foreground/80 font-mono text-xs italic">
+                    &ldquo;{feature.problem}&rdquo;
+                  </p>
+                </div>
 
-              {/* Content */}
-              <div className="p-6">
-                {/* Tag */}
-                <span
-                  className="text-primary inline-block rounded-full px-3 py-1 text-xs font-semibold"
-                  style={{
-                    background: 'oklch(0.6635 0.1517 255.9445 / 0.12)',
-                  }}
-                >
-                  {feature.tag}
-                </span>
+                <div className="mb-4 flex items-center justify-between">
+                  <div
+                    className={`flex size-10 items-center justify-center rounded-lg border ${feature.accentColor}`}
+                  >
+                    {feature.icon}
+                  </div>
+                  <Badge
+                    variant="secondary"
+                    className="rounded-md text-[10px] font-semibold tracking-wide"
+                  >
+                    {feature.tag}
+                  </Badge>
+                </div>
 
-                {/* Title */}
-                <h3 className="text-foreground mt-4 flex items-center gap-3 text-xl font-bold">
-                  <span className="text-primary">{feature.icon}</span>
+                <h3 className="text-foreground text-lg leading-snug font-bold">
                   {feature.title}
                 </h3>
 
-                {/* Description */}
                 <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
                   {feature.description}
                 </p>
+              </div>
+
+              {/* Feature Highlights */}
+              <div className="border-border/40 mt-6 border-t pt-5">
+                <ul className="space-y-2">
+                  {feature.highlights.map((h) => (
+                    <li
+                      key={h}
+                      className="text-foreground/80 flex items-center gap-2 text-xs"
+                    >
+                      <CheckCircle className="size-3.5 shrink-0 text-emerald-500" />
+                      <span>{h}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           ))}
