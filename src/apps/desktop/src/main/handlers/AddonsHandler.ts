@@ -51,7 +51,7 @@ const DEV_REDMINE_MANIFEST: AddonManifest = {
   path: '',
   logo: 'https://raw.githubusercontent.com/Gustavohps10/redmine-plugin/main/src/icon.png',
   downloads: 0,
-  version: '1.0.3',
+  version: '1.0.4',
   stars: 0,
   installed: true,
   category: 'DataSources',
