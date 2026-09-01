@@ -4,7 +4,7 @@ import type {
   AddonManifest,
   WorkspaceConnectionDTO,
   WorkspaceDTO,
-} from '@pandhora/application'
+} from '@mr-tick/application'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Database,
@@ -307,7 +307,7 @@ export function AddonsSettingsPage() {
             </h2>
             <p className="text-muted-foreground text-xs">
               Personalize esquemas de cores e estilos visuais instalados no
-              Pandhora.
+              Mr-tick.
             </p>
           </div>
         )}

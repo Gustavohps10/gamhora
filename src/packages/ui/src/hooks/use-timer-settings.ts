@@ -76,7 +76,7 @@ export const useTimerSettings = create<TimerSettingsState>()(
     }),
 
     {
-      name: 'pandhora-timer-preferences',
+      name: 'mr-tick-timer-preferences',
     },
   ),
 )

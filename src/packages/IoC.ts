@@ -1,7 +1,7 @@
-﻿import { JwtService } from '@pandhora/adapters/auth'
-import { IHttpClient } from '@pandhora/adapters/contracts'
-import { AddonsFacade } from '@pandhora/adapters/facades'
-import { FileManager } from '@pandhora/adapters/tools'
+﻿import { JwtService } from '@mr-tick/adapters/auth'
+import { IHttpClient } from '@mr-tick/adapters/contracts'
+import { AddonsFacade } from '@mr-tick/adapters/facades'
+import { FileManager } from '@mr-tick/adapters/tools'
 import {
   ConnectDataSourceService,
   CreateWorkspaceService,
@@ -27,8 +27,8 @@ import {
   TimeEntriesPushService,
   UnlinkDataSourceService,
   UpdateWorkspaceIdentityService,
-} from '@pandhora/application'
-import { IEventEmitter, IJobEvents } from '@pandhora/shared/transport'
+} from '@mr-tick/application'
+import { IEventEmitter, IJobEvents } from '@mr-tick/shared/transport'
 import {
   asClass,
   asValue,

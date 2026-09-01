@@ -39,7 +39,7 @@ export function VideoShowcase() {
                 <div className="size-2.5 rounded-full bg-emerald-500/60" />
               </div>
               <div className="text-muted-foreground/60 font-mono text-xs">
-                Pandhora Quick Demo
+                Mr-tick Quick Demo
               </div>
               <div className="w-8" />
             </div>

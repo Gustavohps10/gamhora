@@ -1,8 +1,8 @@
-﻿# @pandhora/pandhora-ai-for-tests
+﻿# @mr-tick/mr-tick-ai-for-tests
 
 ## 1.0.1
 
 ### Patch Changes
 
 - Updated dependencies
-  - @pandhora/sdk@0.1.0
+  - @mr-tick/sdk@0.1.0

@@ -1,4 +1,4 @@
-﻿import { IMetadataAPI } from '@pandhora/application'
+﻿import { IMetadataAPI } from '@mr-tick/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

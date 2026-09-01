@@ -1,7 +1,7 @@
 ﻿'use client'
 
-import { IOpenAPI } from '@pandhora/application'
-import { TaskViewModel, TimeEntryViewModel } from '@pandhora/shared/view-models'
+import { IOpenAPI } from '@mr-tick/application'
+import { TaskViewModel, TimeEntryViewModel } from '@mr-tick/shared/view-models'
 import {
   createContext,
   ReactNode,

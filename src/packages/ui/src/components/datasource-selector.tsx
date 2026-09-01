@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { AddonManifest } from '@pandhora/application'
+import { AddonManifest } from '@mr-tick/application'
 import { Check } from 'lucide-react'
 
 import { Badge, Button, ScrollArea } from '@/components/ui'

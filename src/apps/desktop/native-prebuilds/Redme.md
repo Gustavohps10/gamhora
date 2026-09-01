@@ -1,4 +1,4 @@
-# Native Prebuilds (Pandhora Desktop)
+# Native Prebuilds (Mr-tick Desktop)
 
 Este diretório contém os binários nativos pré-compilados (`.node`) utilizados pelo processo principal do Electron.
 

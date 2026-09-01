@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge } from '@pandhora/ui/components'
+import { Badge } from '@mr-tick/ui/components'
 import { Activity, CheckCircle, Layers, Sparkles, Timer } from 'lucide-react'
 import * as React from 'react'
 

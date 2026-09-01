@@ -3,7 +3,7 @@
   MemberDTO,
   PagedResultDTO,
   PaginationOptionsDTO,
-} from '@pandhora/sdk'
+} from '@mr-tick/sdk'
 
 import { FAKE_MEMBER } from './fakeData'
 

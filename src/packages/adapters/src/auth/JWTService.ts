@@ -1,4 +1,4 @@
-﻿import { IJWTService } from '@pandhora/application'
+﻿import { IJWTService } from '@mr-tick/application'
 import jwt from 'jsonwebtoken'
 
 export class JwtService implements IJWTService {

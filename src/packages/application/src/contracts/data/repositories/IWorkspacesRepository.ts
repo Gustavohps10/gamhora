@@ -1,4 +1,4 @@
-﻿import { Workspace } from '@pandhora/domain'
+﻿import { Workspace } from '@mr-tick/domain'
 
 import { IRepositoryBase } from '@/contracts/data/repositories'
 

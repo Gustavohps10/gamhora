@@ -1,5 +1,5 @@
 @startuml SequencePayment
-title PANDHORA - Sequência: Ativação Pro via License Key (UC003)
+title MR-TICK - Sequência: Ativação Pro via License Key (UC003)
 actor User
 participant DesktopApp
 participant GatewayCheckout

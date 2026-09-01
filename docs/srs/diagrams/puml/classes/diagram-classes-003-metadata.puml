@@ -1,5 +1,5 @@
 @startuml ClassMetadata
-title PANDHORA - Coleção metadata (SRS 6.3)
+title MR-TICK - Coleção metadata (SRS 6.3)
 package "Core Models" {
     class Metadata {
         +String _id

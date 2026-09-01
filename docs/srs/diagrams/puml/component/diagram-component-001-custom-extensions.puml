@@ -1,7 +1,7 @@
 @startuml ComponentCustomExtensions
-title PANDHORA - SDK de Addons Multicapacidade (@pandhora/sdk)
+title MR-TICK - SDK de Addons Multicapacidade (@mr-tick/sdk)
 
-package "Pandhora Addon Core" {
+package "Mr-tick Addon Core" {
     interface "IAddon" as IAddon
     interface "AddonContext" as AddonCtx
     component [AddonLoader] as Loader

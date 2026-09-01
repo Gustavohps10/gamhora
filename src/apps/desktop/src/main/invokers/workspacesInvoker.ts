@@ -1,4 +1,4 @@
-﻿import { IWorkspacesAPI } from '@pandhora/application'
+﻿import { IWorkspacesAPI } from '@mr-tick/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

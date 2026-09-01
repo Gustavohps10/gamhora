@@ -1,7 +1,7 @@
-﻿# @pandhora/landing-page
+﻿# @mr-tick/landing-page
 
 ## 0.1.1
 
 ### Patch Changes
 
-- @pandhora/ui@1.0.1
+- @mr-tick/ui@1.0.1

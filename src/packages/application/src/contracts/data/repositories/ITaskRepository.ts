@@ -1,4 +1,4 @@
-﻿import { Task } from '@pandhora/domain'
+﻿import { Task } from '@mr-tick/domain'
 
 import { IRepositoryBase } from '@/contracts/data'
 

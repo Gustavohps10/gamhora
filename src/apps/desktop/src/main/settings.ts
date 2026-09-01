@@ -1,4 +1,4 @@
-﻿import { AppSettings } from '@pandhora/application'
+﻿import { AppSettings } from '@mr-tick/application'
 import { app } from 'electron'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'

@@ -1,4 +1,11 @@
-import { Outlet, useParams } from 'react-router'
+import {
+  ChartColumnBig,
+  LayoutDashboard,
+  ListTodo,
+  Puzzle,
+  Timer,
+} from 'lucide-react'
+import { Outlet, useLocation, useParams } from 'react-router'
 
 import {
   AppSidebar,
@@ -24,8 +31,31 @@ import { TimeEntryProvider } from '@/stores/timeEntryStore'
 export function WorkspaceLayout() {
   const { workspaceId } = useParams<{ workspaceId: string }>()
   const [widgetPosition] = useCurrentWidgetPosition()
+  const location = useLocation()
   const isAddonsModalOpen = useAddonsModalStore((s) => s.isOpen)
   const closeModal = useAddonsModalStore((s) => s.closeModal)
+
+  const getPageInfo = () => {
+    if (
+      location.pathname.includes('my-metric') ||
+      location.pathname.includes('metrics')
+    ) {
+      return { title: 'Métricas Pessoais', icon: ChartColumnBig }
+    }
+    if (location.pathname.includes('time-entries')) {
+      return { title: 'Meus Apontamentos', icon: Timer }
+    }
+    if (location.pathname.includes('activities')) {
+      return { title: 'Atividades', icon: ListTodo }
+    }
+    if (location.pathname.includes('addons')) {
+      return { title: 'Addons', icon: Puzzle }
+    }
+    return { title: 'Workspace', icon: LayoutDashboard }
+  }
+
+  const pageInfo = getPageInfo()
+  const PageIcon = pageInfo.icon
 
   return (
     <WorkspaceProvider workspaceId={workspaceId}>
@@ -50,6 +80,16 @@ export function WorkspaceLayout() {
               <Header />
 
               <main className="flex h-full flex-1 flex-col overflow-hidden">
+                {/* Barra Superior Twenty Colada ao Topo (Acima de Toda a Divisão da Timerbar) */}
+                <div className="border-border/60 bg-background/95 z-20 flex h-10 shrink-0 items-center justify-between border-b px-4 backdrop-blur-sm select-none">
+                  <div className="flex items-center gap-2">
+                    <PageIcon className="text-muted-foreground size-3.5" />
+                    <span className="text-foreground text-xs font-semibold tracking-tight">
+                      {pageInfo.title}
+                    </span>
+                  </div>
+                </div>
+
                 {/* 1. TOPO */}
                 {widgetPosition === 'top' && (
                   <div

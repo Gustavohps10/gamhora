@@ -3,7 +3,7 @@
   AddonSettingsSchema,
   AddonTheme,
   IAddon,
-} from '@pandhora/sdk'
+} from '@mr-tick/sdk'
 
 import { SUPABASE_CSS } from './supabaseCss.js'
 
@@ -81,7 +81,7 @@ export default class SupabaseThemeAddon implements IAddon {
         isSuccess: true,
         display: {
           title: 'Tema Padrão Restaurado!',
-          message: 'A interface retornou ao estilo nativo do Pandhora.',
+          message: 'A interface retornou ao estilo nativo do Mr-tick.',
         },
       }
     }

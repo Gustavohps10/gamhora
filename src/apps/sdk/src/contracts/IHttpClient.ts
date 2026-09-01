@@ -1,1 +1,1 @@
-export type { IHttpClient, IHttpClientConfig } from '@pandhora/application'
+export type { IHttpClient, IHttpClientConfig } from '@mr-tick/application'

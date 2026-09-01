@@ -1,4 +1,4 @@
-﻿import { AppError, Either } from '@pandhora/shared/helpers'
+﻿import { AppError, Either } from '@mr-tick/shared/helpers'
 
 import { FileData } from '@/contracts/infra'
 import { WorkspaceDTO } from '@/dtos'

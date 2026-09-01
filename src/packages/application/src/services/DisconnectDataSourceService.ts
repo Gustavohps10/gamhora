@@ -1,4 +1,4 @@
-﻿import { AppError, Either } from '@pandhora/shared/helpers'
+﻿import { AppError, Either } from '@mr-tick/shared/helpers'
 
 import {
   DisconnectDataSourceInput,
@@ -32,8 +32,8 @@ export class DisconnectDataSourceService implements IDisconnectDataSourceUseCase
         input.connectionInstanceId,
       )
 
-      await this.credentialsStorage.deleteToken('pandhora', storageKey)
-      await this.credentialsStorage.deleteToken('pandhora', memberKey)
+      await this.credentialsStorage.deleteToken('mr-tick', storageKey)
+      await this.credentialsStorage.deleteToken('mr-tick', memberKey)
 
       const result = workspace.disconnectDataSource(input.connectionInstanceId)
 

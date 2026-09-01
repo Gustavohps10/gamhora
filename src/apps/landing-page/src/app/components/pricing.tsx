@@ -7,7 +7,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '@pandhora/ui/components'
+} from '@mr-tick/ui/components'
 import {
   Building2,
   Check,

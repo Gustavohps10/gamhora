@@ -34,7 +34,7 @@ Resumo: o trabalho é **só dentro de um novo addon**. O resto do monorepo conti
 
 Arquivos que você **vai criar** (todos dentro de `src/tests/datasource-fake`):
 
-- `manifest.yaml` — Type: DataSource, id único (ex.: `Pandhora-datasource-fake`), displayName ex.: "DataSource Fake (Testes)".
+- `manifest.yaml` — Type: DataSource, id único (ex.: `Mr-tick-datasource-fake`), displayName ex.: "DataSource Fake (Testes)".
 - `package.json` / `tsconfig` / build (ex.: tsup) — espelhando o addon-for-tests para o addon ser buildável.
 - `src/index.ts` — export default de um objeto que implementa `IDataSource` (id, dataSourceType, displayName, configFields, getAuthenticationStrategy, getTaskQuery, getTimeEntryQuery, getTimeEntryRepository, getMemberQuery, getTaskRepository, getMetadataQuery).
 - `src/FakeAuthenticationStrategy.ts` — implementa `IAuthenticationStrategy`; `authenticate()` sempre sucesso (ex.: credenciais fixas ou qualquer login/senha).

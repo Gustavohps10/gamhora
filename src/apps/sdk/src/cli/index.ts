@@ -9,8 +9,8 @@ import { syncManifest } from './sync'
 import { runValidationCommand } from './validate'
 
 program
-  .name('pandhora')
-  .description('CLI do Pandhora SDK para criar, validar e empacotar plugins')
+  .name('mr-tick')
+  .description('CLI do Mr-tick SDK para criar, validar e empacotar plugins')
   .version(__SDK_VERSION__)
 
 program

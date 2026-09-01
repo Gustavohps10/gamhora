@@ -11,19 +11,19 @@ export function AppSidebarDefaultHeader() {
       <div className="relative flex items-center justify-between gap-3 rounded-lg p-2 transition-all duration-200 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
         {/* Lado Esquerdo: Identidade Visual */}
         <div className="flex min-w-0 items-center gap-2.5">
-          <div className="flex h-8 w-7 shrink-0 items-center justify-center">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center">
             <img
               src={logoIcon}
               className="h-full w-auto object-contain dark:invert"
-              alt="Logo Pandhora"
+              alt="Logo Mr-tick"
             />
           </div>
 
           <div className="flex min-w-0 flex-col">
             <img
               src={logoText}
-              className="w-[100px] self-start dark:invert"
-              alt="Pandhora"
+              className="w-[80px] self-start dark:invert"
+              alt="Mr-tick"
             />
 
             {/* Linha de Metadados: Open Core + GitHub Stars */}
@@ -35,7 +35,7 @@ export function AppSidebarDefaultHeader() {
               <div className="h-2 w-[1px] bg-zinc-200 dark:bg-zinc-800" />
 
               <a
-                href="https://github.com/gustavohps10/pandhora"
+                href="https://github.com/gustavohps10/mr-tick"
                 target="_blank"
                 rel="noreferrer"
                 className="group flex items-center gap-1 opacity-70 transition-opacity hover:opacity-100"

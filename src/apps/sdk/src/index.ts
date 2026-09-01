@@ -34,8 +34,8 @@ export type {
   TaskDTO,
   TimeEntryDTO,
   WorkspaceDTO,
-} from '@pandhora/application'
-export { Member, Task, TimeEntry, Workspace } from '@pandhora/domain'
-export { AppError, Either } from '@pandhora/shared/helpers'
-export type { IHeaders, IRequest } from '@pandhora/shared/transport'
-export * from '@pandhora/shared/view-models'
+} from '@mr-tick/application'
+export { Member, Task, TimeEntry, Workspace } from '@mr-tick/domain'
+export { AppError, Either } from '@mr-tick/shared/helpers'
+export type { IHeaders, IRequest } from '@mr-tick/shared/transport'
+export * from '@mr-tick/shared/view-models'

@@ -6,21 +6,21 @@ import {
   IHttpClient,
   IWorkspacesRepository,
   ResolvedConnection,
-} from '@pandhora/application'
-import { FakeDataSource } from '@pandhora/datasource-fake'
+} from '@mr-tick/application'
+import { FakeDataSource } from '@mr-tick/datasource-fake'
 import {
   AddonSettingsGroup,
   AppError,
   Either,
   type IDataSource,
-} from '@pandhora/sdk'
+} from '@mr-tick/sdk'
 import { existsSync } from 'fs'
 import { resolve } from 'path'
 import { pathToFileURL } from 'url'
 
 import { AddonLoader } from '@/main/services/AddonLoader'
 
-export const FAKE_DATASOURCE_ADDON_ID = 'pandhora-datasource-fake'
+export const FAKE_DATASOURCE_ADDON_ID = 'mr-tick-datasource-fake'
 export const REDMINE4TEST_ADDON_ID = '@timelapse/redmine-plugin'
 
 export interface DataSourceResolverOptions {
@@ -64,7 +64,7 @@ export class DataSourceResolver implements IDataSourceResolver {
     } else {
       const storageKey = `workspace-connection-${workspaceId}-${connectionInstanceId}`
       const credentialsSerialized = await this.credentialsStorage.getToken(
-        'pandhora',
+        'mr-tick',
         storageKey,
       )
 

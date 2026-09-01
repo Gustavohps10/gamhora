@@ -4,15 +4,15 @@ import {
   AddonThemeBridge,
   AddonToastBridge,
   Toaster,
-} from '@pandhora/ui/components'
-import { queryClient } from '@pandhora/ui/lib'
+} from '@mr-tick/ui/components'
+import { queryClient } from '@mr-tick/ui/lib'
 import {
   EnvironmentProvider,
   OpenAPIProvider,
   SidebarProvider,
   ThemeProvider,
   TooltipProvider,
-} from '@pandhora/ui/providers'
+} from '@mr-tick/ui/providers'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { NuqsAdapter } from 'nuqs/adapters/react-router/v6'
 import { useEffect, useState } from 'react'

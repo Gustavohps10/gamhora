@@ -1,5 +1,5 @@
-﻿import { IHttpClient, IHttpClientConfig } from '@pandhora/adapters/contracts'
-import { AppError, Either } from '@pandhora/shared/helpers'
+﻿import { IHttpClient, IHttpClientConfig } from '@mr-tick/adapters/contracts'
+import { AppError, Either } from '@mr-tick/shared/helpers'
 import { AxiosRequestConfig } from 'axios'
 import { net } from 'electron'
 

@@ -3,7 +3,7 @@
   AddonSettingsSchema,
   AddonTheme,
   IAddon,
-} from '@pandhora/sdk'
+} from '@mr-tick/sdk'
 
 import { PURPLE_CSS } from './purpleCss.js'
 
@@ -83,7 +83,7 @@ export default class PurpleThemeAddon implements IAddon {
         isSuccess: true,
         display: {
           title: 'Tema Padrão Restaurado!',
-          message: 'A interface retornou ao estilo nativo do Pandhora.',
+          message: 'A interface retornou ao estilo nativo do Mr-tick.',
         },
       }
     }

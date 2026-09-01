@@ -1,4 +1,4 @@
-﻿import type { SidebarMenuItem as AddonSidebarMenuItem } from '@pandhora/sdk'
+﻿import type { SidebarMenuItem as AddonSidebarMenuItem } from '@mr-tick/sdk'
 import {
   Brain,
   CalendarDays,

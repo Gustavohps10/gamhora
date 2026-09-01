@@ -1,5 +1,5 @@
 @startuml PaymentProFlow
-title PANDHORA - Ativação Pro via License Key (Zero Backend Auth)
+title MR-TICK - Ativação Pro via License Key (Zero Backend Auth)
 actor User
 participant DesktopApp
 participant GatewayCheckout
@@ -8,7 +8,7 @@ participant LocalSettings
 User -> DesktopApp: Clica em "Upgrade para Pro"
 DesktopApp -> GatewayCheckout: Abre Checkout (Navegador)
 User -> GatewayCheckout: Realiza pagamento
-GatewayCheckout -> User: Emite License Key (ex: PANDHORA-PRO-XXXX)
+GatewayCheckout -> User: Emite License Key (ex: MR-TICK-PRO-XXXX)
 
 User -> DesktopApp: Acessa Configurações e cola a Chave
 DesktopApp -> GatewayCheckout: Valida Chave via API (1 única vez)

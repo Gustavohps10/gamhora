@@ -1,4 +1,4 @@
-﻿import { AppError } from '@pandhora/shared/helpers'
+﻿import { AppError } from '@mr-tick/shared/helpers'
 
 export type SyncDocumentDTO<T> = T & {
   _deleted?: boolean

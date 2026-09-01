@@ -1,4 +1,4 @@
-﻿import { TimeEntry } from '@pandhora/domain'
+﻿import { TimeEntry } from '@mr-tick/domain'
 
 import { IRepositoryBase } from '@/contracts/data'
 

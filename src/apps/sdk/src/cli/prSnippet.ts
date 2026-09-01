@@ -19,7 +19,7 @@ export function printPrSnippet(addonDir: string) {
   const targetPath = `addons/${filename}`
 
   console.log(`\n======================================================`)
-  console.log(`  📄 YAML PARA PULL REQUEST EM: pandhora/addons-manifest`)
+  console.log(`  📄 YAML PARA PULL REQUEST EM: mr-tick/addons-manifest`)
   console.log(`  Destino: ${targetPath}`)
   console.log(`======================================================\n`)
 

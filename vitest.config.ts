@@ -6,7 +6,7 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     alias: {
-      '@pandhora/sdk': path.resolve(__dirname, './src/apps/sdk/src'),
+      '@mr-tick/sdk': path.resolve(__dirname, './src/apps/sdk/src'),
     },
   },
   test: {

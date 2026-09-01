@@ -1,4 +1,4 @@
-﻿import { AppError, Either } from '@pandhora/shared/helpers'
+﻿import { AppError, Either } from '@mr-tick/shared/helpers'
 import type { Mocked } from 'vitest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 

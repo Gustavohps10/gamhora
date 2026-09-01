@@ -11,6 +11,16 @@
 @import 'fumadocs-ui/css/shadcn.css';
 @import 'fumadocs-ui/css/preset.css';
 
+/* Enforce Design System Sovereignty (Geist Mono from globals.css) */
+:root,
+body,
+#nd-docs-layout,
+.fd-layout {
+  --font-sans: var(--font-geist-mono, 'Geist Mono', monospace) !important;
+  --font-mono: var(--font-geist-mono, 'Geist Mono', monospace) !important;
+  font-family: var(--font-geist-mono, 'Geist Mono', monospace) !important;
+}
+
 /* Firefox */
 * {
   scrollbar-width: thin;

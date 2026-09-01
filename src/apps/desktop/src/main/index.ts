@@ -13,10 +13,10 @@ import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import {
   JSONWorkspacesQuery,
   JSONWorkspacesRepository,
-} from '@pandhora/adapters/data'
-import { AddonsFacade } from '@pandhora/adapters/facades'
-import { HardDiskStorage, KeytarTokenStorage } from '@pandhora/adapters/tools'
-import { ContainerBuilder, PlatformDependencies } from '@pandhora/IoC'
+} from '@mr-tick/adapters/data'
+import { AddonsFacade } from '@mr-tick/adapters/facades'
+import { HardDiskStorage, KeytarTokenStorage } from '@mr-tick/adapters/tools'
+import { ContainerBuilder, PlatformDependencies } from '@mr-tick/IoC'
 import {
   app,
   BrowserWindow,
@@ -75,7 +75,7 @@ export type IHandlersScope = {
 // --------------------------------------------------
 // CONFIGURAÇÕES GLOBAIS & SINGLE INSTANCE LOCK
 // --------------------------------------------------
-app.name = 'pandhora'
+app.name = 'mr-tick'
 
 const userDataDir = app.getPath('userData')
 const bridgeFilePath = join(userDataDir, 'oauth_bridge.tmp')
@@ -84,20 +84,20 @@ const gotTheLock = app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
   // PROCESSO SECUNDÁRIO: Grava a URL no arquivo compartilhado e morre instantaneamente
-  console.log('[Pandhora Core] ❌ Instância secundária capturada.')
+  console.log('[Mr-tick Core] ❌ Instância secundária capturada.')
 
-  const deepLink = process.argv.find((arg) => arg.includes('pandhora-app://'))
+  const deepLink = process.argv.find((arg) => arg.includes('mr-tick-app://'))
 
   if (deepLink) {
-    const cleanUrl = deepLink.substring(deepLink.indexOf('pandhora-app://'))
+    const cleanUrl = deepLink.substring(deepLink.indexOf('mr-tick-app://'))
     try {
       writeFileSync(bridgeFilePath, cleanUrl, 'utf-8')
       console.log(
-        '[Pandhora Core] 💾 URL gravada na ponte com sucesso:',
+        '[Mr-tick Core] 💾 URL gravada na ponte com sucesso:',
         cleanUrl,
       )
     } catch (err) {
-      console.error('[Pandhora Core] Erro ao gravar URL no arquivo ponte:', err)
+      console.error('[Mr-tick Core] Erro ao gravar URL no arquivo ponte:', err)
     }
   }
 
@@ -107,7 +107,7 @@ if (!gotTheLock) {
   // --------------------------------------------------
   // PRIMEIRA INSTÂNCIA
   // --------------------------------------------------
-  console.log('[Pandhora Core] ✅ PRIMEIRA INSTÂNCIA EM EXECUÇÃO')
+  console.log('[Mr-tick Core] ✅ PRIMEIRA INSTÂNCIA EM EXECUÇÃO')
 
   let mainWindow: BrowserWindow | null = null
   let tray: Tray | null = null
@@ -119,7 +119,7 @@ if (!gotTheLock) {
   function handleIncomingDeepLink(rawUrl: string) {
     const cleanUrl = rawUrl.replace(/\/$/, '').trim()
     console.log(
-      '[Pandhora Core] 🔗 Deep Link recebido e repassado ao AddonLoader:',
+      '[Mr-tick Core] 🔗 Deep Link recebido e repassado ao AddonLoader:',
       cleanUrl,
     )
 
@@ -128,7 +128,7 @@ if (!gotTheLock) {
       mainWindow.focus()
     }
 
-    if (globalAddonLoader && cleanUrl.startsWith('pandhora-app://')) {
+    if (globalAddonLoader && cleanUrl.startsWith('mr-tick-app://')) {
       globalAddonLoader.handleOAuthCallbackUrl(cleanUrl)
     }
   }
@@ -153,7 +153,7 @@ if (!gotTheLock) {
       }
     })
   } catch (err) {
-    console.error('[Pandhora Core] Erro ao iniciar watcher da ponte:', err)
+    console.error('[Mr-tick Core] Erro ao iniciar watcher da ponte:', err)
   }
 
   // CARREGAMENTO DO PLUGIN C++ NATIVO
@@ -167,7 +167,7 @@ if (!gotTheLock) {
       console.log('✅ [C++ plugin] ✓ Carregado: window_overlay.node')
     } catch (err) {
       console.error(
-        '❌ [@pandhora/desktop] Erro ao carregar window_overlay.node:',
+        '❌ [@mr-tick/desktop] Erro ao carregar window_overlay.node:',
         err,
       )
     }
@@ -190,7 +190,7 @@ if (!gotTheLock) {
 
   protocol.registerSchemesAsPrivileged([
     {
-      scheme: 'pandhora-app',
+      scheme: 'mr-tick-app',
       privileges: { standard: true, secure: true, supportFetchAPI: true },
     },
   ])
@@ -199,22 +199,22 @@ if (!gotTheLock) {
   const currentCompiledFile = fileURLToPath(import.meta.url)
 
   if (!app.isPackaged) {
-    console.log('[Pandhora Core] 🔗 Registrando protocolo (Dev Monorepo):', {
+    console.log('[Mr-tick Core] 🔗 Registrando protocolo (Dev Monorepo):', {
       executable: process.execPath,
       compiledFile: currentCompiledFile,
     })
 
-    app.setAsDefaultProtocolClient('pandhora-app', process.execPath, [
+    app.setAsDefaultProtocolClient('mr-tick-app', process.execPath, [
       currentCompiledFile,
     ])
   } else {
-    app.setAsDefaultProtocolClient('pandhora-app')
+    app.setAsDefaultProtocolClient('mr-tick-app')
   }
 
   // LISTENERS NATIVOS (Fallback & macOS)
   app.on('second-instance', (_event, commandLine) => {
     const rawDeepLink = commandLine.find((arg) =>
-      arg.startsWith('pandhora-app://'),
+      arg.startsWith('mr-tick-app://'),
     )
     if (rawDeepLink) {
       handleIncomingDeepLink(rawDeepLink)
@@ -223,7 +223,7 @@ if (!gotTheLock) {
 
   app.on('open-url', (event, url) => {
     event.preventDefault()
-    if (url.startsWith('pandhora-app://')) {
+    if (url.startsWith('mr-tick-app://')) {
       handleIncomingDeepLink(url)
     }
   })
@@ -361,16 +361,16 @@ if (!gotTheLock) {
 
   // HANDLER DE PROTOCOLO INTERNO
   function handleProtocol() {
-    protocol.handle('pandhora-app', async (request) => {
+    protocol.handle('mr-tick-app', async (request) => {
       try {
-        if (request.url.startsWith('pandhora-app://oauth/callback')) {
+        if (request.url.startsWith('mr-tick-app://oauth/callback')) {
           if (globalAddonLoader) {
             globalAddonLoader.handleOAuthCallbackUrl(request.url)
           }
           return new Response('OK', { status: 200 })
         }
 
-        let filePath = request.url.replace('pandhora-app://', '')
+        let filePath = request.url.replace('mr-tick-app://', '')
         filePath = filePath
           .replace(/[?&]buster=[^&]*/g, '')
           .replace(/[?&]$/, '')
@@ -383,7 +383,7 @@ if (!gotTheLock) {
         const fileUrl = pathToFileURL(filePath).toString()
         return net.fetch(fileUrl)
       } catch (error) {
-        console.error('Erro no protocolo pandhora-app:', error)
+        console.error('Erro no protocolo mr-tick-app:', error)
         return new Response('Resource not found', { status: 404 })
       }
     })
@@ -401,7 +401,7 @@ if (!gotTheLock) {
 
     // Cold-start link
     const initialDeepLink = process.argv.find((arg) =>
-      arg.startsWith('pandhora-app://'),
+      arg.startsWith('mr-tick-app://'),
     )
     if (initialDeepLink) {
       handleIncomingDeepLink(initialDeepLink)
@@ -413,7 +413,7 @@ if (!gotTheLock) {
     const workspacesRepository = new JSONWorkspacesRepository(userDataPath)
     const workspacesQuery = new JSONWorkspacesQuery(userDataPath)
     const eventEmitter = new ElectronJobEventEmitter(() => mainWindow)
-    const nodeFileStorage = new HardDiskStorage(userDataPath, 'pandhora-app://')
+    const nodeFileStorage = new HardDiskStorage(userDataPath, 'mr-tick-app://')
     const electronHttpClient = new ElectronHttpClient()
 
     // Carrega e ativa todos os addons instalados no disco
@@ -423,12 +423,12 @@ if (!gotTheLock) {
       if (installedResult.isSuccess() && installedResult.success.length > 0) {
         await addonLoader.loadInstalledAddons(installedResult.success)
         console.log(
-          `🧩 [Pandhora Core] ${installedResult.success.length} addon(s) instalado(s) carregado(s) no boot.`,
+          `🧩 [Mr-tick Core] ${installedResult.success.length} addon(s) instalado(s) carregado(s) no boot.`,
         )
       }
     } catch (err) {
       console.error(
-        '❌ [Pandhora Core] Erro ao carregar addons instalados no boot:',
+        '❌ [Mr-tick Core] Erro ao carregar addons instalados no boot:',
         err,
       )
     }

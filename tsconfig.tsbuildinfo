@@ -79159,7 +79159,7 @@
         {
           "start": 599,
           "length": 14,
-          "messageText": "Cannot find module '@pandhora/IoC' or its corresponding type declarations.",
+          "messageText": "Cannot find module '@mr-tick/IoC' or its corresponding type declarations.",
           "category": 1,
           "code": 2307
         },
@@ -80423,7 +80423,7 @@
         {
           "start": 9,
           "length": 11,
-          "messageText": "Module '\"@pandhora/application\"' has no exported member 'IDiscordAPI'.",
+          "messageText": "Module '\"@mr-tick/application\"' has no exported member 'IDiscordAPI'.",
           "category": 1,
           "code": 2305
         },
@@ -80559,7 +80559,7 @@
         {
           "start": 49,
           "length": 15,
-          "messageText": "Module '\"@pandhora/application\"' has no exported member 'ISessionManager'.",
+          "messageText": "Module '\"@mr-tick/application\"' has no exported member 'ISessionManager'.",
           "category": 1,
           "code": 2305
         }
@@ -84584,7 +84584,7 @@
         {
           "start": 30,
           "length": 10,
-          "messageText": "Module '\"@pandhora/application\"' has no exported member 'FieldGroup'.",
+          "messageText": "Module '\"@mr-tick/application\"' has no exported member 'FieldGroup'.",
           "category": 1,
           "code": 2305
         },

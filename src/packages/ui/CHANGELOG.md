@@ -1,4 +1,4 @@
-﻿# @pandhora/ui
+﻿# @mr-tick/ui
 
 ## 1.0.2
 
@@ -6,11 +6,11 @@
 
 - Updated dependencies [82941c8]
 - Updated dependencies
-  - @pandhora/sdk@0.1.1
+  - @mr-tick/sdk@0.1.1
 
 ## 1.0.1
 
 ### Patch Changes
 
 - Updated dependencies
-  - @pandhora/sdk@0.1.0
+  - @mr-tick/sdk@0.1.0

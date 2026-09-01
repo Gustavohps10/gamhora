@@ -1,4 +1,4 @@
-import { ITimeEntriesAPI } from '@pandhora/application'
+import { ITimeEntriesAPI } from '@mr-tick/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

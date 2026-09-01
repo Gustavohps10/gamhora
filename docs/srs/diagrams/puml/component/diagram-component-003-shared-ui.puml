@@ -1,5 +1,5 @@
 @startuml ComponentSharedUI
-title PANDHORA - Application Layer Compartilhada (RNF001)
+title MR-TICK - Application Layer Compartilhada (RNF001)
 package "Shared UI Layer" {
     component [Task List Component] as TaskList
     component [Timer Component] as Timer

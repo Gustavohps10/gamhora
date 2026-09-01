@@ -1,4 +1,4 @@
-﻿import { IOpenAPI } from '@pandhora/application'
+﻿import { IOpenAPI } from '@mr-tick/application'
 import React from 'react'
 import { createContext } from 'react'
 

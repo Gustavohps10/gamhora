@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { Button } from '@pandhora/ui/components'
+import { Button } from '@mr-tick/ui/components'
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import * as React from 'react'

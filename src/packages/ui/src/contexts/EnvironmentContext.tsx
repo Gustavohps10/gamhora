@@ -1,4 +1,4 @@
-﻿import type { EnvironmentInfo } from '@pandhora/application'
+﻿import type { EnvironmentInfo } from '@mr-tick/application'
 import { createContext, type ReactNode } from 'react'
 
 export const EnvironmentContext = createContext<EnvironmentInfo | null>(null)

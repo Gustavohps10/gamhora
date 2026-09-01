@@ -5,15 +5,15 @@ description: Como integrar agendas externas (Google Calendar, Outlook) para sinc
 
 # Calendars (Agendas & Reuniões)
 
-Os addons da categoria **Calendars** conectam o Pandhora a provedores de agenda como **Google Calendar**, **Microsoft Outlook / 365** e calendários baseados em **iCal**.
+Os addons da categoria **Calendars** conectam o Mr-tick a provedores de agenda como **Google Calendar**, **Microsoft Outlook / 365** e calendários baseados em **iCal**.
 
-Essa integração permite que os compromissos diários apareçam diretamente na visualização de agenda do Pandhora, possibilitando que o usuário transforme reuniões passadas em apontamentos de horas reais com um simples clique.
+Essa integração permite que os compromissos diários apareçam diretamente na visualização de agenda do Mr-tick, possibilitando que o usuário transforme reuniões passadas em apontamentos de horas reais com um simples clique.
 
 ---
 
 ## 🎯 Estrutura de um Evento de Calendário
 
-Para alimentar a interface do Pandhora, o plugin de calendário normaliza os eventos externos para uma estrutura padrão:
+Para alimentar a interface do Mr-tick, o plugin de calendário normaliza os eventos externos para uma estrutura padrão:
 
 ```typescript
 export interface CalendarEventDTO {
@@ -33,7 +33,7 @@ export interface CalendarEventDTO {
 ## 💻 Exemplo de Implementação de Calendário
 
 ```typescript
-import type { IAddon, AddonContext, AddonSettingsField } from '@pandhora/sdk'
+import type { IAddon, AddonContext, AddonSettingsField } from '@mr-tick/sdk'
 
 export interface CalendarEventDTO {
   id: string
@@ -47,7 +47,7 @@ export default class GoogleCalendarAddon implements IAddon {
   public id = 'google-calendar-addon'
   public name = 'Google Calendar Integration'
   public version = '1.0.0'
-  public description = 'Sincroniza reuniões do Google Calendar com o Pandhora'
+  public description = 'Sincroniza reuniões do Google Calendar com o Mr-tick'
 
   private context?: AddonContext
 
@@ -113,8 +113,8 @@ export default class GoogleCalendarAddon implements IAddon {
 
 ## 🚀 Conversão Rápida para Apontamento de Horas
 
-Quando o usuário visualiza suas reuniões no Pandhora:
+Quando o usuário visualiza suas reuniões no Mr-tick:
 
-1. O Pandhora destaca reuniões já encerradas.
-2. Com o botão **"Apontar Horas"**, o Pandhora abre o formulário pré-preenchido com o título da reunião, as horas calculadas (`(endDate - startDate)`) e a atividade sugerida.
+1. O Mr-tick destaca reuniões já encerradas.
+2. Com o botão **"Apontar Horas"**, o Mr-tick abre o formulário pré-preenchido com o título da reunião, as horas calculadas (`(endDate - startDate)`) e a atividade sugerida.
 3. Ao salvar, a entidade `TimeEntry` é criada e enviada para o [Motor de Sincronização](/docs/sync-engine).

@@ -1,4 +1,4 @@
-﻿import { ITokenStorageAPI } from '@pandhora/application'
+﻿import { ITokenStorageAPI } from '@mr-tick/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

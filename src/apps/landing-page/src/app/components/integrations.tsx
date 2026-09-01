@@ -204,7 +204,7 @@ export function Integrations() {
             </h3>
 
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400 md:text-base">
-              O Pandhora é open-source e focado em privacidade. Sinta-se em casa
+              O Mr-tick é open-source e focado em privacidade. Sinta-se em casa
               para contribuir com código ou sugerir as ferramentas que faltam no
               seu workflow.
             </p>
@@ -239,7 +239,7 @@ export function Integrations() {
                 {/* Seção de Botões */}
                 <div className="flex flex-col items-center gap-4 sm:flex-row">
                   <a
-                    href="https://github.com/gustavohps10/pandhora"
+                    href="https://github.com/gustavohps10/mr-tick"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-zinc-100 px-6 text-sm font-medium text-zinc-950 transition-all hover:bg-zinc-200 active:scale-95"
@@ -249,7 +249,7 @@ export function Integrations() {
                   </a>
 
                   <a
-                    href="https://github.com/gustavohps10/pandhora/issues/new"
+                    href="https://github.com/gustavohps10/mr-tick/issues/new"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/40 px-6 text-sm font-medium text-zinc-400 transition-all hover:border-zinc-700 hover:bg-zinc-900 hover:text-zinc-100 active:scale-95"

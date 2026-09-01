@@ -1,5 +1,5 @@
-﻿import { FileData } from '@pandhora/application'
-import { WorkspaceViewModel } from '@pandhora/shared/view-models'
+﻿import { FileData } from '@mr-tick/application'
+import { WorkspaceViewModel } from '@mr-tick/shared/view-models'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createContext, ReactNode, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router'

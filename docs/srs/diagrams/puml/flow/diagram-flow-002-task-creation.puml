@@ -1,5 +1,5 @@
 @startuml TaskCreationFlow
-title PANDHORA - Criação de Tarefa (UC005 - SRS)
+title MR-TICK - Criação de Tarefa (UC005 - SRS)
 actor User
 participant UI
 participant SyncEngine

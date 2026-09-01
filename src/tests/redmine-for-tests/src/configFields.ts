@@ -1,4 +1,4 @@
-﻿import { AddonSettingsGroup, AddonSettingsTab } from '@pandhora/sdk'
+﻿import { AddonSettingsGroup, AddonSettingsTab } from '@mr-tick/sdk'
 
 export const credentialFieldGroups: AddonSettingsGroup[] = [
   {

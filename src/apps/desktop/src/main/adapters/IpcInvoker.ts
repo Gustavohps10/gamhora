@@ -1,4 +1,4 @@
-﻿import { IHeaders, IRequest } from '@pandhora/shared/transport'
+﻿import { IHeaders, IRequest } from '@mr-tick/shared/transport'
 import { ipcRenderer } from 'electron'
 
 import { IpcChannels } from '@/main/IpcChannels'

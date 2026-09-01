@@ -2,6 +2,7 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import { RootProvider } from 'fumadocs-ui/provider/next'
 import type { ReactNode } from 'react'
 
+import { Footer } from '@/app/components/footer'
 import { Navbar } from '@/app/components/navbar'
 import { source } from '@/lib/source'
 
@@ -22,6 +23,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             {children}
           </DocsLayout>
         </div>
+        <Footer />
       </div>
     </RootProvider>
   )

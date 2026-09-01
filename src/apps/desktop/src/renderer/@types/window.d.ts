@@ -1,6 +1,6 @@
 ﻿import { ElectronAPI } from '@electron-toolkit/preload'
 
-import type { IOpenAPI } from '@pandhora/application'
+import type { IOpenAPI } from '@mr-tick/application'
 
 declare global {
   interface Window {

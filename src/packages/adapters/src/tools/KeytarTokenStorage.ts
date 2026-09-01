@@ -1,4 +1,4 @@
-﻿import { ICredentialsStorage } from '@pandhora/application'
+﻿import { ICredentialsStorage } from '@mr-tick/application'
 import keytar from 'keytar'
 
 export class KeytarTokenStorage implements ICredentialsStorage {

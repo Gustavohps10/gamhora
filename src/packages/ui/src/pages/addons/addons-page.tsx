@@ -4,7 +4,7 @@ import {
   AddonManifest,
   WorkspaceConnectionDTO,
   WorkspaceDTO,
-} from '@pandhora/application'
+} from '@mr-tick/application'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
@@ -41,8 +41,8 @@ const MOCK_ADDONS: AddonItem[] = [
     id: 'jira-mock',
     name: 'Jira Software',
     description:
-      'Importe suas issues e gerencie o tempo diretamente no Pandhora.',
-    author: 'Pandhora Foundation',
+      'Importe suas issues e gerencie o tempo diretamente no Mr-tick.',
+    author: 'Mr-tick Foundation',
     version: '1.0.0',
     logo: jiraLogo,
     installed: true,
@@ -61,7 +61,7 @@ const MOCK_ADDONS: AddonItem[] = [
     name: 'YouTrack',
     description:
       'Sincronização ágil com JetBrains YouTrack para rastreamento de tarefas.',
-    author: 'Pandhora Foundation',
+    author: 'Mr-tick Foundation',
     version: '1.2.4',
     logo: youtrackLogo,
     installed: true,

@@ -1,4 +1,4 @@
-﻿import { AddonContext, IAddon } from '@pandhora/sdk'
+﻿import { AddonContext, IAddon } from '@mr-tick/sdk'
 
 export default class FakeWatcherAddon implements IAddon {
   public metadata = {

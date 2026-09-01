@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-import { ICredentialsStorage } from '@pandhora/application'
+import { ICredentialsStorage } from '@mr-tick/application'
 import {
   AddonContext,
   AddonSettingsField,
@@ -28,8 +28,8 @@ import {
   OAuthResult,
   SidebarMenuItem,
   TimerbarMenuItem,
-} from '@pandhora/sdk'
-import { IEventEmitter, ISystemEvents } from '@pandhora/shared/transport'
+} from '@mr-tick/sdk'
+import { IEventEmitter, ISystemEvents } from '@mr-tick/shared/transport'
 import { BrowserWindow, shell } from 'electron'
 
 import { getSettings, saveSettings } from '@/main/settings'
@@ -667,13 +667,13 @@ export class AddonLoader {
         return false
       }
 
-      if (!rawUrl.startsWith('pandhora-app://')) {
+      if (!rawUrl.startsWith('mr-tick-app://')) {
         return false
       }
 
       let parsed: URL
       try {
-        parsed = new URL(rawUrl.replace('pandhora-app://', 'http://localhost/'))
+        parsed = new URL(rawUrl.replace('mr-tick-app://', 'http://localhost/'))
       } catch {
         return false
       }
@@ -952,7 +952,7 @@ export class AddonLoader {
 
   public async initializeDevAddons(): Promise<void> {
     try {
-      const redmineModule = await import('@pandhora/redmine-for-tests')
+      const redmineModule = await import('@mr-tick/redmine-for-tests')
       const Redmine4Test = redmineModule.default
       if (Redmine4Test && typeof Redmine4Test === 'function') {
         const addonInstance = new (Redmine4Test as new () => IAddon)()
@@ -966,29 +966,26 @@ export class AddonLoader {
     }
 
     try {
-      const aiModule = await import('@pandhora/pandhora-ai-for-tests')
-      const PandhoraAI4Test = aiModule.default
-      if (PandhoraAI4Test && typeof PandhoraAI4Test === 'function') {
-        const addonInstance = new (PandhoraAI4Test as new () => IAddon)()
-        await this.activateAddon(
-          '@pandhora/pandhora-ai-for-tests',
-          addonInstance,
-        )
+      const aiModule = await import('@mr-tick/mr-tick-ai-for-tests')
+      const MrTickAI4Test = aiModule.default
+      if (MrTickAI4Test && typeof MrTickAI4Test === 'function') {
+        const addonInstance = new (MrTickAI4Test as new () => IAddon)()
+        await this.activateAddon('@mr-tick/mr-tick-ai-for-tests', addonInstance)
       }
     } catch (err) {
       console.error(
-        '❌ [AddonLoader] Erro ao carregar addon PandhoraAI4Test:',
+        '❌ [AddonLoader] Erro ao carregar addon Mr-tickAI4Test:',
         err,
       )
     }
 
     try {
-      const watcherModule = await import('@pandhora/fake-watcher-for-tests')
+      const watcherModule = await import('@mr-tick/fake-watcher-for-tests')
       const FakeWatcherAddon = watcherModule.default
       if (FakeWatcherAddon && typeof FakeWatcherAddon === 'function') {
         const addonInstance = new (FakeWatcherAddon as new () => IAddon)()
         await this.activateAddon(
-          '@pandhora/fake-watcher-for-tests',
+          '@mr-tick/fake-watcher-for-tests',
           addonInstance,
         )
       }
@@ -1000,11 +997,11 @@ export class AddonLoader {
     }
 
     try {
-      const discordModule = await import('@pandhora/discord-for-tests')
+      const discordModule = await import('@mr-tick/discord-for-tests')
       const DiscordAddon = discordModule.default
       if (DiscordAddon && typeof DiscordAddon === 'function') {
         const addonInstance = new (DiscordAddon as new () => IAddon)()
-        await this.activateAddon('@pandhora/discord-for-tests', addonInstance)
+        await this.activateAddon('@mr-tick/discord-for-tests', addonInstance)
       }
     } catch (err) {
       console.error(
@@ -1020,11 +1017,11 @@ export class AddonLoader {
     })
 
     try {
-      const fakeDsModule = await import('@pandhora/datasource-fake')
+      const fakeDsModule = await import('@mr-tick/datasource-fake')
       const FakeDataSourceAddon = fakeDsModule.default
       if (FakeDataSourceAddon && typeof FakeDataSourceAddon === 'function') {
         const addonInstance = new (FakeDataSourceAddon as new () => IAddon)()
-        await this.activateAddon('pandhora-datasource-fake', addonInstance)
+        await this.activateAddon('mr-tick-datasource-fake', addonInstance)
       }
     } catch (err) {
       console.error(
@@ -1034,11 +1031,11 @@ export class AddonLoader {
     }
 
     try {
-      const supabaseModule = await import('@pandhora/supabase-theme')
+      const supabaseModule = await import('@mr-tick/supabase-theme')
       const SupabaseThemeAddon = supabaseModule.default
       if (SupabaseThemeAddon && typeof SupabaseThemeAddon === 'function') {
         const addonInstance = new (SupabaseThemeAddon as new () => IAddon)()
-        await this.activateAddon('@pandhora/supabase-theme', addonInstance)
+        await this.activateAddon('@mr-tick/supabase-theme', addonInstance)
       }
     } catch (err) {
       console.error(
@@ -1048,11 +1045,11 @@ export class AddonLoader {
     }
 
     try {
-      const purpleModule = await import('@pandhora/purple-theme')
+      const purpleModule = await import('@mr-tick/purple-theme')
       const PurpleThemeAddon = purpleModule.default
       if (PurpleThemeAddon && typeof PurpleThemeAddon === 'function') {
         const addonInstance = new (PurpleThemeAddon as new () => IAddon)()
-        await this.activateAddon('@pandhora/purple-theme', addonInstance)
+        await this.activateAddon('@mr-tick/purple-theme', addonInstance)
       }
     } catch (err) {
       console.error('❌ [AddonLoader] Erro ao carregar addon PurpleTheme:', err)

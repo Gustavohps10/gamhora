@@ -1,10 +1,10 @@
-﻿import { IHttpClient } from '@pandhora/adapters/contracts'
+﻿import { IHttpClient } from '@mr-tick/adapters/contracts'
 import {
   ITaskQuery,
   PagedResultDTO,
   PaginationOptionsDTO,
   TaskDTO,
-} from '@pandhora/sdk'
+} from '@mr-tick/sdk'
 
 import { RedmineBase } from '@/RedmineBase'
 

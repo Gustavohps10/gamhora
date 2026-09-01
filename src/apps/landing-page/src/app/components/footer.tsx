@@ -1,6 +1,6 @@
 'use client'
 
-import { Separator } from '@pandhora/ui/components'
+import { Separator } from '@mr-tick/ui/components'
 import { Github, Linkedin, Twitter } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -25,12 +25,12 @@ const FOOTER_SECTIONS = [
       { label: 'SDK de Plugins', href: '/docs/apis/storage-and-events' },
       {
         label: 'Repositório GitHub',
-        href: 'https://github.com/gustavohps10/pandhora',
+        href: 'https://github.com/gustavohps10/mr-tick',
         external: true,
       },
       {
         label: 'Reportar Issue',
-        href: 'https://github.com/gustavohps10/pandhora/issues',
+        href: 'https://github.com/gustavohps10/mr-tick/issues',
         external: true,
       },
     ],
@@ -40,7 +40,7 @@ const FOOTER_SECTIONS = [
     links: [
       {
         label: 'Licença MIT (Open Source)',
-        href: 'https://github.com/gustavohps10/pandhora/blob/main/LICENSE',
+        href: 'https://github.com/gustavohps10/mr-tick/blob/main/LICENSE',
         external: true,
       },
       { label: 'Termos de Uso', href: '#' },
@@ -61,7 +61,7 @@ export function Footer() {
               <div className="flex h-9 w-auto shrink-0 items-center justify-center">
                 <Image
                   src="/logo-icon.svg"
-                  alt="Logo Pandhora"
+                  alt="Logo Mr-tick"
                   width={28}
                   height={34}
                   className="h-8 w-auto object-contain dark:invert"
@@ -70,7 +70,7 @@ export function Footer() {
 
               <Image
                 src="/logo-text.svg"
-                alt="Pandhora"
+                alt="Mr-tick"
                 width={124}
                 height={26}
                 className="h-auto w-[124px] object-contain dark:invert"
@@ -86,7 +86,7 @@ export function Footer() {
             {/* Social Links */}
             <div className="mt-6 flex items-center gap-3">
               <a
-                href="https://github.com/gustavohps10/pandhora"
+                href="https://github.com/gustavohps10/mr-tick"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="GitHub"
@@ -139,7 +139,7 @@ export function Footer() {
 
         {/* Bottom copyright */}
         <div className="text-muted-foreground/60 flex flex-col items-center justify-between gap-4 text-xs sm:flex-row">
-          <p>© 2026 Pandhora. Todos os direitos reservados.</p>
+          <p>© 2026 Mr-tick. Todos os direitos reservados.</p>
           <div className="flex items-center gap-2">
             <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
             <span>

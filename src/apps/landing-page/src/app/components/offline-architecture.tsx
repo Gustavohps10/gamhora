@@ -71,7 +71,7 @@ export function OfflineArchitecture() {
             Sua produtividade não depende de servidores externos.
           </h2>
           <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-base leading-relaxed sm:text-lg">
-            Enquanto soluções SaaS ficam fora do ar ou lentas, o Pandhora
+            Enquanto soluções SaaS ficam fora do ar ou lentas, o Mr-tick
             continua instantâneo. Offline é a regra, não o fallback.
           </p>
         </div>

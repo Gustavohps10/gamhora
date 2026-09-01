@@ -1,8 +1,8 @@
 {
-  "name": "@pandhora/pandhora-ai-for-tests",
+  "name": "@mr-tick/mr-tick-ai-for-tests",
   "private": true,
   "version": "1.0.1",
-  "description": "Pandhora AI addon para testes de simulacao OCR e visao computacional.",
+  "description": "Mr-tick AI addon para testes de simulacao OCR e visao computacional.",
   "author": "Gustavo <gustavoh.santos735@gmail.com>",
   "license": "MIT",
   "type": "module",
@@ -22,7 +22,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@pandhora/sdk": "workspace:*"
+    "@mr-tick/sdk": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

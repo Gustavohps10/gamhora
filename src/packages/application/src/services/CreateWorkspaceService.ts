@@ -1,5 +1,5 @@
-﻿import { Workspace } from '@pandhora/domain'
-import { AppError, Either } from '@pandhora/shared/helpers'
+﻿import { Workspace } from '@mr-tick/domain'
+import { AppError, Either } from '@mr-tick/shared/helpers'
 
 import {
   CreateWorkspaceInput,

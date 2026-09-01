@@ -1,4 +1,4 @@
-﻿import { IOpenAPI } from '@pandhora/application'
+﻿import { IOpenAPI } from '@mr-tick/application'
 
 const ipcClient: IOpenAPI = {
   timer: window.api.timer,

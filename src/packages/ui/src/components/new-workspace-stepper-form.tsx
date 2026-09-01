@@ -1,8 +1,8 @@
 ﻿'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { AddonManifest } from '@pandhora/application'
-import { WorkspaceConnectionViewModel, WorkspaceViewModel } from '@pandhora/sdk'
+import { AddonManifest } from '@mr-tick/application'
+import { WorkspaceConnectionViewModel, WorkspaceViewModel } from '@mr-tick/sdk'
 import { defineStepper } from '@stepperize/react'
 import { useStepItemContext } from '@stepperize/react/primitives'
 import { useQueryClient } from '@tanstack/react-query'

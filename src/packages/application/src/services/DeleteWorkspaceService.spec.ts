@@ -1,4 +1,4 @@
-﻿import { Workspace } from '@pandhora/domain'
+﻿import { Workspace } from '@mr-tick/domain'
 import type { Mocked } from 'vitest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -37,7 +37,7 @@ describe('DeleteWorkspaceService', () => {
 
   it('should delete workspace and its avatar from storage if it exists', async () => {
     const input = makeInput()
-    const workspace = Workspace.create({ name: 'Pandhora Workspace' }).success
+    const workspace = Workspace.create({ name: 'Mr-tick Workspace' }).success
     workspace.updateAvatarUrl('https://storage.com/avatars/ws-123.png')
 
     workspacesRepositoryMock.findById.mockResolvedValue(workspace)

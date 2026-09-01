@@ -1,5 +1,5 @@
 @startuml ComponentAddonsMarket
-title PANDHORA - Gerenciador de Addons e Configurações
+title MR-TICK - Gerenciador de Addons e Configurações
 
 package "Desktop UI" {
     component [Addons Manager Modal] as ManagerModal
@@ -16,7 +16,7 @@ package "Installed Addons" {
     [Redmine Addon (DS + Themes + Menus)] as RedmineAddon
     [Supabase Theme Addon] as SupabaseAddon
     [Purple Theme Addon] as PurpleAddon
-    [Pandhora AI / Watcher Addon] as AIAddon
+    [Mr-tick AI / Watcher Addon] as AIAddon
 }
 
 ManagerModal --> Loader : Listar instalados / disponíveis

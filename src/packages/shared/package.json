@@ -1,5 +1,5 @@
 {
-  "name": "@pandhora/shared",
+  "name": "@mr-tick/shared",
   "version": "1.0.0",
   "private": true,
   "description": "Conjunto de helpers que servem para todas as camadas.",

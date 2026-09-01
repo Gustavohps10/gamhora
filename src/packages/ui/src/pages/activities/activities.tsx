@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { WorkspaceViewModel } from '@pandhora/shared/view-models'
+import { WorkspaceViewModel } from '@mr-tick/shared/view-models'
 import {
   useMutation,
   useQueryClient,
