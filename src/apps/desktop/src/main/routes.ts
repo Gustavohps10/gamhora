@@ -1,4 +1,4 @@
-﻿import {
+import {
   AppSettings,
   IDataSourceResolver,
   IServiceProvider,
@@ -56,7 +56,10 @@ export function openIpcRoutes(
   // --- SYSTEM ---
   IpcHandler.register('SYSTEM_VERSION', () => Promise.resolve(app.getVersion()))
   IpcHandler.register('SYSTEM_GET_ENVIRONMENT', () =>
-    Promise.resolve({ isDevelopment: !app.isPackaged }),
+    Promise.resolve({
+      isDevelopment: !app.isPackaged,
+      platform: process.platform,
+    }),
   )
 
   // --- TOKEN STORAGE ---

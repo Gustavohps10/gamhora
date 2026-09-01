@@ -394,6 +394,7 @@ export interface IAddonsAPI {
 
 export interface EnvironmentInfo {
   isDevelopment: boolean
+  platform?: 'win32' | 'darwin' | 'linux' | 'web' | string
 }
 
 export interface DisplayInfo {

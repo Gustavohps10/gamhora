@@ -1,6 +1,11 @@
 'use client'
 
-import { AppRail, Header, UltimateTimeTracker } from '@mr-tick/ui/components'
+import {
+  AppRail,
+  Header,
+  TitleBar,
+  UltimateTimeTracker,
+} from '@mr-tick/ui/components'
 import { useCurrentWidgetPosition } from '@mr-tick/ui/hooks'
 import { queryClient } from '@mr-tick/ui/lib'
 import { Metrics, TimeEntries } from '@mr-tick/ui/pages'
@@ -31,8 +36,8 @@ import {
 import * as React from 'react'
 import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom'
 
-// Mock environment for OpenAPI/RxDB fallback in web
-const mockEnvironment = { isDevelopment: false }
+// Mock environment for OpenAPI/RxDB fallback in web (injected as darwin for macOS traffic lights)
+const mockEnvironment = { isDevelopment: false, platform: 'darwin' }
 
 // Mock workspace data model with Jira and Redmine connections and user credentials
 const mockWorkspace = {
@@ -399,89 +404,92 @@ function MockDesktopShell() {
   const TitleIcon = titleInfo.icon
 
   return (
-    <main className="bg-background relative flex h-full min-h-0 w-full overflow-hidden pt-11">
-      {/* 1. Header Oficial Flutuante no topo do espaço pt-11 */}
-      <Header />
+    <div className="bg-background text-foreground flex h-full w-full flex-col overflow-hidden select-none">
+      <TitleBar>
+        <Header />
+      </TitleBar>
 
-      {/* 2. AppRail Oficial na Extrema Esquerda */}
-      <AppRail onNewWorkspaceClick={() => {}} />
+      <main className="bg-background relative mt-1.5 flex min-h-0 w-full flex-1 overflow-hidden">
+        {/* 1. AppRail Oficial na Extrema Esquerda */}
+        <AppRail onNewWorkspaceClick={() => {}} />
 
-      {/* 3. Seção Interna do Workspace com Borda Superior/Esquerda Arredondada */}
-      <section className="border-border bg-background relative flex h-full min-h-0 flex-1 overflow-hidden rounded-tl-md border-t border-l">
-        {/* Mock Sidebar Exclusiva da Landing Page */}
-        <MockSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        {/* 2. Seção Interna do Workspace com Borda Superior/Esquerda Arredondada */}
+        <section className="border-border bg-background relative flex h-full min-h-0 flex-1 overflow-hidden rounded-tl-md border-t border-l">
+          {/* Mock Sidebar Exclusiva da Landing Page */}
+          <MockSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        {/* Layout Oficial: Barra Twenty Colada ao Topo + 4 Modos de Ancoragem da Timerbar */}
-        <div className="bg-background flex h-full min-h-0 flex-1 flex-col overflow-hidden">
-          {/* Barra Twenty Colada ao Topo (ACIMA de toda a divisão da Timerbar) */}
-          <div className="border-border/60 bg-background/95 z-20 flex h-9 shrink-0 items-center justify-between border-b px-4 backdrop-blur-sm select-none">
-            <div className="flex items-center gap-2">
-              <TitleIcon className="text-muted-foreground size-3.5" />
-              <span className="text-foreground text-xs font-semibold tracking-tight">
-                {titleInfo.title}
-              </span>
+          {/* Layout Oficial: Barra Twenty Colada ao Topo + 4 Modos de Ancoragem da Timerbar */}
+          <div className="bg-background flex h-full min-h-0 flex-1 flex-col overflow-hidden">
+            {/* Barra Twenty Colada ao Topo (ACIMA de toda a divisão da Timerbar) */}
+            <div className="border-border/60 bg-background/95 z-20 flex h-9 shrink-0 items-center justify-between border-b px-4 backdrop-blur-sm select-none">
+              <div className="flex items-center gap-2">
+                <TitleIcon className="text-muted-foreground size-3.5" />
+                <span className="text-foreground text-xs font-semibold tracking-tight">
+                  {titleInfo.title}
+                </span>
+              </div>
             </div>
-          </div>
 
-          {/* 1. TOPO */}
-          {widgetPosition === 'top' && (
-            <div
-              data-widget-drag-boundary
-              className="bg-background z-10 shrink-0 border-b px-2 py-2 shadow-sm"
-            >
-              <UltimateTimeTracker />
-            </div>
-          )}
-
-          <div className="flex min-h-0 flex-1 overflow-hidden">
-            {/* 2. ESQUERDA */}
-            {widgetPosition === 'left' && (
+            {/* 1. TOPO */}
+            {widgetPosition === 'top' && (
               <div
                 data-widget-drag-boundary
-                className="bg-background z-10 flex h-full shrink-0 border-r shadow-sm"
+                className="bg-background z-10 shrink-0 border-b px-2 py-2 shadow-sm"
               >
                 <UltimateTimeTracker />
               </div>
             )}
 
-            {/* CENTRO: CONTEÚDO OFICIAL COM SCROLL REAL E SEM CORTE */}
-            <div className="bg-muted/10 min-h-0 min-w-0 flex-1 overflow-y-auto p-4 pb-12">
-              <Routes>
-                <Route
-                  path="/workspaces/:workspaceId/time-entries"
-                  element={<TimeEntries />}
-                />
-                <Route
-                  path="/workspaces/:workspaceId/my-metric"
-                  element={<Metrics />}
-                />
-                <Route path="*" element={<TimeEntries />} />
-              </Routes>
+            <div className="flex min-h-0 flex-1 overflow-hidden">
+              {/* 2. ESQUERDA */}
+              {widgetPosition === 'left' && (
+                <div
+                  data-widget-drag-boundary
+                  className="bg-background z-10 flex h-full shrink-0 border-r shadow-sm"
+                >
+                  <UltimateTimeTracker />
+                </div>
+              )}
+
+              {/* CENTRO: CONTEÚDO OFICIAL COM SCROLL REAL E SEM CORTE */}
+              <div className="bg-muted/10 min-h-0 min-w-0 flex-1 overflow-y-auto p-4 pb-12">
+                <Routes>
+                  <Route
+                    path="/workspaces/:workspaceId/time-entries"
+                    element={<TimeEntries />}
+                  />
+                  <Route
+                    path="/workspaces/:workspaceId/my-metric"
+                    element={<Metrics />}
+                  />
+                  <Route path="*" element={<TimeEntries />} />
+                </Routes>
+              </div>
+
+              {/* 3. DIREITA */}
+              {widgetPosition === 'right' && (
+                <div
+                  data-widget-drag-boundary
+                  className="bg-background z-10 flex h-full shrink-0 border-l shadow-sm"
+                >
+                  <UltimateTimeTracker />
+                </div>
+              )}
             </div>
 
-            {/* 3. DIREITA */}
-            {widgetPosition === 'right' && (
+            {/* 4. RODAPÉ */}
+            {widgetPosition === 'bottom' && (
               <div
                 data-widget-drag-boundary
-                className="bg-background z-10 flex h-full shrink-0 border-l shadow-sm"
+                className="bg-background z-10 shrink-0 border-t px-2 py-2 shadow-sm"
               >
                 <UltimateTimeTracker />
               </div>
             )}
           </div>
-
-          {/* 4. RODAPÉ */}
-          {widgetPosition === 'bottom' && (
-            <div
-              data-widget-drag-boundary
-              className="bg-background z-10 shrink-0 border-t px-2 py-2 shadow-sm"
-            >
-              <UltimateTimeTracker />
-            </div>
-          )}
-        </div>
-      </section>
-    </main>
+        </section>
+      </main>
+    </div>
   )
 }
 
@@ -502,23 +510,6 @@ export function DesktopAppMockup() {
     <div className="mx-auto mt-12 w-full max-w-5xl text-left">
       {/* Moldura da Janela Desktop com Proporção 16:9 e Scroll Perfeito */}
       <div className="border-border bg-card text-foreground relative flex aspect-[16/9] w-full flex-col overflow-hidden rounded-xl border shadow-2xl transition-all">
-        {/* Barra Superior da Janela */}
-        <div className="border-border/60 bg-muted/40 flex h-8 shrink-0 items-center justify-between border-b px-3 text-xs select-none">
-          <div className="flex items-center gap-2">
-            <div className="size-2.5 rounded-full bg-[#FF5F56]" />
-            <div className="size-2.5 rounded-full bg-[#FFBD2E]" />
-            <div className="size-2.5 rounded-full bg-[#27C93F]" />
-            <span className="text-muted-foreground/70 ml-2 font-mono text-[11px]">
-              mr-tick desktop
-            </span>
-          </div>
-
-          <div className="text-muted-foreground/60 flex items-center gap-1.5 text-[11px]">
-            <span className="size-1.5 rounded-full bg-emerald-500" />
-            <span>Local-First DB</span>
-          </div>
-        </div>
-
         {/* Canvas do App com Proporção Desktop Nativa e Scroll Total */}
         <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden">
           <MemoryRouter initialEntries={['/workspaces/default/time-entries']}>

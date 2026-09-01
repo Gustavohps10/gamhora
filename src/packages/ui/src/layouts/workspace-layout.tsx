@@ -14,7 +14,6 @@ import {
   AppSidebarHeader,
   AppSidebarWorkspacesContent,
   AppSidebarWorkspacesFooter,
-  Header,
 } from '@/components'
 import { AddonsManagerModal } from '@/components/addons-manager/addons-manager-modal'
 import { AppSidebarDefaultHeader } from '@/components/app-sidebar/app-sidebar-default-header'
@@ -77,8 +76,6 @@ export function WorkspaceLayout() {
                 </AppSidebarFooter>
               </AppSidebar>
 
-              <Header />
-
               <main className="flex h-full flex-1 flex-col overflow-hidden">
                 {/* Barra Superior Twenty Colada ao Topo (Acima de Toda a Divisão da Timerbar) */}
                 <div className="border-border/60 bg-background/95 z-20 flex h-10 shrink-0 items-center justify-between border-b px-4 backdrop-blur-sm select-none">
@@ -114,7 +111,7 @@ export function WorkspaceLayout() {
                   {/* CENTRO */}
                   <div className="bg-muted/10 min-w-0 flex-1">
                     <ScrollArea className="h-full">
-                      <section className="px-4 pt-12">
+                      <section className="px-4 py-4">
                         <Outlet />
                       </section>
                       <Footer />

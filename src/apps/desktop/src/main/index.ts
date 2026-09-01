@@ -234,6 +234,8 @@ if (!gotTheLock) {
       width: 1280,
       height: 720,
       show: false,
+      frame: false,
+      titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'hidden',
       autoHideMenuBar: true,
       webPreferences: {
         preload: join(__dirname, '../preload/index.mjs'),
@@ -247,6 +249,14 @@ if (!gotTheLock) {
     mainWindow.on('ready-to-show', () => {
       const settings = getSettings()
       settings.startMinimized ? mainWindow?.minimize() : mainWindow?.show()
+    })
+
+    mainWindow.on('maximize', () => {
+      mainWindow?.webContents.send('window:maximized-change', true)
+    })
+
+    mainWindow.on('unmaximize', () => {
+      mainWindow?.webContents.send('window:maximized-change', false)
     })
 
     let moveTimeout: NodeJS.Timeout | null = null

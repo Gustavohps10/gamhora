@@ -5,7 +5,9 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { AppRail } from '@/components/app-rail'
 import { DraftWorkspacesPanel } from '@/components/draft-workspace-panel'
+import { Header } from '@/components/header'
 import { NewWorkspaceDialog } from '@/components/new-workspace-dialog'
+import { TitleBar } from '@/components/title-bar'
 import { Toaster } from '@/components/ui/sonner'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { useOpenAPI } from '@/hooks'
@@ -46,12 +48,20 @@ export function AppLayout() {
     return () => unsub?.()
   }, [openAPI, navigate, location.pathname])
 
+  const routeWorkspaceId = location.pathname.match(/\/workspaces\/([^/]+)/)?.[1]
+  const currentWorkspaceId = activeWorkspaceId || routeWorkspaceId
+  const isWorkspaceActive = Boolean(
+    currentWorkspaceId && location.pathname.startsWith('/workspaces/'),
+  )
+
   return (
-    <>
-      <main className="flex h-screen w-screen overflow-hidden pt-12">
-        <WorkspaceProvider workspaceId={activeWorkspaceId}>
-          <DataSourceConnectionsProvider>
-            <SyncProvider>
+    <WorkspaceProvider workspaceId={currentWorkspaceId}>
+      <DataSourceConnectionsProvider>
+        <SyncProvider>
+          <div className="bg-background text-foreground flex h-screen w-screen flex-col overflow-hidden select-none">
+            <TitleBar>{isWorkspaceActive && <Header />}</TitleBar>
+
+            <main className="mt-1.5 flex min-h-0 flex-1 overflow-hidden">
               <NewWorkspaceDialog
                 isOpen={workspaceDialogIsOpen}
                 setIsOpen={setWorkspaceDialogIsOpen}
@@ -73,15 +83,15 @@ export function AppLayout() {
                   setWorkspaceDialogIsOpen(true)
                 }}
               />
-            </SyncProvider>
-          </DataSourceConnectionsProvider>
-        </WorkspaceProvider>
 
-        <section className="flex flex-1 overflow-hidden rounded-tl-md border-t border-l">
-          <Outlet />
-        </section>
-      </main>
-      <Toaster />
-    </>
+              <section className="flex flex-1 overflow-hidden rounded-tl-md border-t border-l">
+                <Outlet />
+              </section>
+            </main>
+            <Toaster />
+          </div>
+        </SyncProvider>
+      </DataSourceConnectionsProvider>
+    </WorkspaceProvider>
   )
 }

@@ -1,5 +1,6 @@
-﻿import '@/renderer/index.css'
+import '@/renderer/index.css'
 
+import type { EnvironmentInfo } from '@mr-tick/application'
 import {
   AddonThemeBridge,
   AddonToastBridge,
@@ -21,7 +22,13 @@ import { RouterProvider } from 'react-router-dom'
 import { ipcClient } from '@/renderer/ipcClient'
 import { router } from '@/renderer/routes'
 
-const defaultEnvironment = { isDevelopment: false }
+const defaultEnvironment: EnvironmentInfo = {
+  isDevelopment: false,
+  platform:
+    typeof window !== 'undefined' && window.electron?.process?.platform
+      ? window.electron.process.platform
+      : 'web',
+}
 
 export function AppDesktop() {
   const [environment, setEnvironment] = useState(defaultEnvironment)
