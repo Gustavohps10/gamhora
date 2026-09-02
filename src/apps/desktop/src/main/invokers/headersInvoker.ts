@@ -1,5 +1,5 @@
-﻿import { IHeadersAPI } from '@pandhora/application'
-import { IHeaders } from '@pandhora/shared/transport'
+﻿import { IHeadersAPI } from '@mr-tick/application'
+import { IHeaders } from '@mr-tick/shared/transport'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

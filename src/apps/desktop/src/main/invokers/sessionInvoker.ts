@@ -1,4 +1,4 @@
-﻿import { ISessionAPI } from '@pandhora/application'
+﻿import { ISessionAPI } from '@mr-tick/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

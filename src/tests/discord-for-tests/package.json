@@ -1,9 +1,9 @@
 {
-  "name": "@pandhora/discord-for-tests",
+  "name": "@mr-tick/discord-for-tests",
   "private": true,
   "version": "1.0.1",
   "description": "Discord addon for tests.",
-  "author": "Pandhora",
+  "author": "Mr-tick",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -22,7 +22,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@pandhora/sdk": "workspace:*",
+    "@mr-tick/sdk": "workspace:*",
     "axios": "^1.7.9"
   },
   "devDependencies": {

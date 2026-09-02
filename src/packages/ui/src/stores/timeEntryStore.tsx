@@ -1,7 +1,7 @@
 ﻿// stores/timeEntryStore.tsx
 'use client'
 
-import { IOpenAPI } from '@pandhora/application'
+import { IOpenAPI } from '@mr-tick/application'
 import { differenceInSeconds, parseISO, subSeconds } from 'date-fns'
 import { createContext, ReactNode, useContext, useEffect, useRef } from 'react'
 import { createStore, StoreApi, useStore } from 'zustand'

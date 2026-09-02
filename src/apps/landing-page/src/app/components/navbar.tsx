@@ -1,6 +1,6 @@
 'use client'
 
-import { Separator } from '@pandhora/ui/components'
+import { Separator } from '@mr-tick/ui/components'
 import { BookOpenTextIcon, Github, Star } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -15,10 +15,11 @@ export interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/#features', label: 'Funcionalidades' },
-  { href: '/#integrations', label: 'Integrações' },
-  { href: '/#offline', label: 'Arquitetura' },
-  { href: '/#pricing', label: 'Preços' },
+  { href: '/#positioning', label: 'Why Mr. Tick' },
+  { href: '/#integrations', label: 'Integrations & SDK' },
+  { href: '/#offline', label: 'Architecture' },
+  { href: '/#pricing', label: 'Pricing' },
+  { href: '/download', label: 'Download' },
 ]
 
 export function Navbar() {
@@ -51,9 +52,9 @@ export function Navbar() {
           <div className="flex h-9 w-auto shrink-0 items-center justify-center transition-transform duration-300 group-hover:scale-105">
             <Image
               src="/logo-icon.svg"
-              alt="Logo Pandhora"
-              width={28}
-              height={34}
+              alt="Logo Mr-tick"
+              width={48}
+              height={48}
               className="h-8 w-auto object-contain dark:invert"
               priority
             />
@@ -61,7 +62,7 @@ export function Navbar() {
 
           <Image
             src="/logo-text.svg"
-            alt="Pandhora"
+            alt="Mr-tick"
             width={124}
             height={26}
             className="h-auto w-[124px] object-contain dark:invert"
@@ -102,13 +103,13 @@ export function Navbar() {
           <Separator orientation="vertical" className="mx-2 !h-4 self-center" />
 
           <a
-            href="https://github.com/gustavohps10/pandhora"
+            href="https://github.com/gustavohps10/mr-tick"
             target="_blank"
             rel="noreferrer"
             className="group text-muted-foreground hover:text-foreground flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium transition-all"
           >
             <Github className="size-4" />
-            <span className="text-foreground/90">gustavohps10/pandhora</span>
+            <span className="text-foreground/90">gustavohps10/mr-tick</span>
             <div className="ml-0.5 flex items-center gap-1">
               <Star className="size-3.5 transition-transform duration-200 group-hover:scale-110" />
               <span className="text-xs tabular-nums opacity-80">120</span>

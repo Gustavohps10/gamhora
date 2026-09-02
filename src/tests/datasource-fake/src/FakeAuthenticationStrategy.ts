@@ -3,7 +3,7 @@
   AuthenticationResult,
   Either,
   IAuthenticationStrategy,
-} from '@pandhora/sdk'
+} from '@mr-tick/sdk'
 
 import { FAKE_MEMBER } from './fakeData'
 

@@ -1,5 +1,5 @@
 ﻿import { electronAPI } from '@electron-toolkit/preload'
-import { IOpenAPI } from '@pandhora/application'
+import { IOpenAPI } from '@mr-tick/application'
 import { contextBridge, ipcRenderer } from 'electron'
 
 import {

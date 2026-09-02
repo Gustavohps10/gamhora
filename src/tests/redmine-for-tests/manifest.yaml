@@ -4,7 +4,7 @@ Category: DataSources
 Name: Meu Addon Exemplo
 Author: Gustavo Henrique
 ShortDescription: Addon de exemplo para testes
-Description: Este addon serve como exemplo de configuração padrão no Pandhora SDK.
+Description: Este addon serve como exemplo de configuração padrão no Mr-tick SDK.
 Tags:
   - exemplo
   - teste

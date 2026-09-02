@@ -1,4 +1,4 @@
-﻿import { AddonContext, AddonSettingsSchema, IAddon } from '@pandhora/sdk'
+﻿import { AddonContext, AddonSettingsSchema, IAddon } from '@mr-tick/sdk'
 
 import { redmineSettingsSchema } from './configFields.js'
 import { REDMINE_CSS } from './redmineCss.js'
@@ -148,7 +148,7 @@ export default class Redmine4TestAddon implements IAddon {
         isSuccess: true,
         display: {
           title: 'Tema Padrão Restaurado!',
-          message: 'A interface retornou ao estilo nativo do Pandhora.',
+          message: 'A interface retornou ao estilo nativo do Mr-tick.',
         },
       }
     }

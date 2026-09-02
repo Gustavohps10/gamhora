@@ -1,6 +1,6 @@
 ﻿# Guia de Manutenção de Diagramas PlantUML (PUML)
 
-Este documento serve como guia de instrução para **desenvolvedores e IAs** sobre como criar, editar, organizar e sincronizar os diagramas de arquitetura e requisitos do projeto Pandhora.
+Este documento serve como guia de instrução para **desenvolvedores e IAs** sobre como criar, editar, organizar e sincronizar os diagramas de arquitetura e requisitos do projeto Mr-tick.
 
 ---
 

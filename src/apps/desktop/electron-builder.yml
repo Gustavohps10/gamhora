@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: pandhora
+productName: mr-tick
 directories:
   buildResources: build
 files:
@@ -20,11 +20,11 @@ extraResources:
 asarUnpack:
   - resources/**
 protocols:
-  name: Pandhora Auth Protocol
+  name: Mr-tick Auth Protocol
   schemes:
-    - pandhora
+    - mr-tick
 win:
-  executableName: pandhora
+  executableName: mr-tick
 nsis:
   artifactName: ${productName}-${version}-setup.${ext}
   shortcutName: ${productName}

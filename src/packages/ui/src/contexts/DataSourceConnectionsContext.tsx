@@ -6,7 +6,7 @@ import {
   ViewModel,
   WorkspaceConnectionViewModel,
   WorkspaceViewModel,
-} from '@pandhora/sdk'
+} from '@mr-tick/sdk'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import React, {
   createContext,

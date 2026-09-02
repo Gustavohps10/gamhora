@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import type { AddonManifest } from '@pandhora/application'
+import type { AddonManifest } from '@mr-tick/application'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { DownloadIcon, LayoutGrid, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'

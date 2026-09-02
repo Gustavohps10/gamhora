@@ -1,6 +1,6 @@
-﻿import { ICredentialsStorage } from '@pandhora/application'
-import { IRequest } from '@pandhora/shared/transport'
-import { ViewModel } from '@pandhora/shared/view-models'
+﻿import { ICredentialsStorage } from '@mr-tick/application'
+import { IRequest } from '@mr-tick/shared/transport'
+import { ViewModel } from '@mr-tick/shared/view-models'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'
 

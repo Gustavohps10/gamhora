@@ -3,7 +3,7 @@
   PagedResultDTO,
   PaginationOptionsDTO,
   WorkspaceDTO,
-} from '@pandhora/application'
+} from '@mr-tick/application'
 import { promises as fs } from 'fs'
 import path from 'path'
 

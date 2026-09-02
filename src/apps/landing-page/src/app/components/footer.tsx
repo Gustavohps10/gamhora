@@ -1,6 +1,6 @@
 'use client'
 
-import { Separator } from '@pandhora/ui/components'
+import { Separator } from '@mr-tick/ui/components'
 import { Github, Linkedin, Twitter } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -8,44 +8,43 @@ import * as React from 'react'
 
 const FOOTER_SECTIONS = [
   {
-    title: 'Produto',
+    title: 'Product',
     links: [
-      { label: 'Funcionalidades', href: '/#features' },
-      { label: 'Integrações', href: '/#integrations' },
-      { label: 'Arquitetura', href: '/#offline' },
-      { label: 'Preços', href: '/#pricing' },
-      { label: 'Demonstração', href: '/#demo' },
+      { label: 'Why Mr. Tick', href: '/#positioning' },
+      { label: 'Integrations & SDK', href: '/#integrations' },
+      { label: 'Architecture', href: '/#offline' },
+      { label: 'Pricing', href: '/#pricing' },
     ],
   },
   {
-    title: 'Recursos & Docs',
+    title: 'Resources & Docs',
     links: [
-      { label: 'Documentação', href: '/docs' },
-      { label: 'Guia Rápido', href: '/docs/quickstart' },
-      { label: 'SDK de Plugins', href: '/docs/apis/storage-and-events' },
+      { label: 'Documentation', href: '/docs' },
+      { label: 'Quickstart Guide', href: '/docs/quickstart' },
+      { label: 'Addon SDK', href: '/docs/apis/storage-and-events' },
       {
-        label: 'Repositório GitHub',
-        href: 'https://github.com/gustavohps10/pandhora',
+        label: 'GitHub Repository',
+        href: 'https://github.com/gustavohps10/mr-tick',
         external: true,
       },
       {
-        label: 'Reportar Issue',
-        href: 'https://github.com/gustavohps10/pandhora/issues',
+        label: 'Report an Issue',
+        href: 'https://github.com/gustavohps10/mr-tick/issues',
         external: true,
       },
     ],
   },
   {
-    title: 'Legal & Privacidade',
+    title: 'Legal & Privacy',
     links: [
       {
-        label: 'Licença MIT (Open Source)',
-        href: 'https://github.com/gustavohps10/pandhora/blob/main/LICENSE',
+        label: 'MIT License (Open Source)',
+        href: 'https://github.com/gustavohps10/mr-tick/blob/main/LICENSE',
         external: true,
       },
-      { label: 'Termos de Uso', href: '#' },
-      { label: 'Política de Privacidade', href: '#' },
-      { label: 'Segurança Local-first', href: '/#offline' },
+      { label: 'Terms of Service', href: '#' },
+      { label: 'Privacy Policy', href: '#' },
+      { label: 'Local-First Security', href: '/#offline' },
     ],
   },
 ]
@@ -61,7 +60,7 @@ export function Footer() {
               <div className="flex h-9 w-auto shrink-0 items-center justify-center">
                 <Image
                   src="/logo-icon.svg"
-                  alt="Logo Pandhora"
+                  alt="Logo Mr-tick"
                   width={28}
                   height={34}
                   className="h-8 w-auto object-contain dark:invert"
@@ -70,7 +69,7 @@ export function Footer() {
 
               <Image
                 src="/logo-text.svg"
-                alt="Pandhora"
+                alt="Mr-tick"
                 width={124}
                 height={26}
                 className="h-auto w-[124px] object-contain dark:invert"
@@ -78,15 +77,15 @@ export function Footer() {
             </Link>
 
             <p className="text-muted-foreground mt-4 max-w-sm text-sm leading-relaxed">
-              O workflow toolkit local-first para engenharia de software.
-              Controle tarefas, acompanhe horas com precisão e ganhe
-              observabilidade total sobre seu tempo técnico.
+              The local-first workflow observability toolkit for software
+              engineering. Track hours with precision, unify tickets, and
+              protect your technical flow state.
             </p>
 
             {/* Social Links */}
             <div className="mt-6 flex items-center gap-3">
               <a
-                href="https://github.com/gustavohps10/pandhora"
+                href="https://github.com/gustavohps10/mr-tick"
                 target="_blank"
                 rel="noreferrer"
                 aria-label="GitHub"
@@ -111,23 +110,32 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Links Columns */}
+          {/* Nav Columns */}
           {FOOTER_SECTIONS.map((section) => (
             <div key={section.title}>
-              <h3 className="text-foreground text-xs font-bold tracking-wider uppercase">
+              <h4 className="text-foreground font-mono text-xs font-bold tracking-wider uppercase">
                 {section.title}
-              </h3>
+              </h4>
               <ul className="mt-4 space-y-2.5 text-xs">
                 {section.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      target={link.external ? '_blank' : undefined}
-                      rel={link.external ? 'noreferrer' : undefined}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {link.label}
-                    </a>
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -135,15 +143,17 @@ export function Footer() {
           ))}
         </div>
 
-        <Separator className="my-10 opacity-40" />
+        <Separator className="border-border/40 mt-12 mb-8" />
 
-        {/* Bottom copyright */}
-        <div className="text-muted-foreground/60 flex flex-col items-center justify-between gap-4 text-xs sm:flex-row">
-          <p>© 2026 Pandhora. Todos os direitos reservados.</p>
+        <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+          <p className="text-muted-foreground font-mono text-xs">
+            © 2026 Mr. Tick. Released under the MIT License.
+          </p>
+
           <div className="flex items-center gap-2">
             <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
-            <span>
-              Engenharia local-first &middot; Feito para desenvolvedores
+            <span className="text-muted-foreground font-mono text-xs">
+              All systems operational · Local-First
             </span>
           </div>
         </div>

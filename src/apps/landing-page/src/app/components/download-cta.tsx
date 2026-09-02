@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import {
   Button,
@@ -6,7 +6,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@pandhora/ui/components'
+} from '@mr-tick/ui/components'
 import { ChevronDown } from 'lucide-react'
 import type { ComponentProps } from 'react'
 import React from 'react'
@@ -23,10 +23,10 @@ const downloads: Record<Exclude<OS, 'unknown'>, string> = {
 }
 
 const labels: Record<OS, string> = {
-  windows: 'Baixar para Windows',
-  mac: 'Baixar para macOS',
-  linux: 'Baixar para Linux',
-  unknown: 'Baixar',
+  windows: 'Download for Windows',
+  mac: 'Download for macOS',
+  linux: 'Download for Linux',
+  unknown: 'Download',
 }
 
 const icons: Record<Exclude<OS, 'unknown'>, React.ReactNode> = {

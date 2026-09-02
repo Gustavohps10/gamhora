@@ -4,7 +4,7 @@
   MemberDTO,
   PagedResultDTO,
   PaginationOptionsDTO,
-} from '@pandhora/sdk'
+} from '@mr-tick/sdk'
 
 import { RedmineBase } from '@/RedmineBase'
 

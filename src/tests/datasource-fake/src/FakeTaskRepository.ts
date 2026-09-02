@@ -1,4 +1,4 @@
-﻿import type { Task } from '@pandhora/sdk'
+﻿import type { Task } from '@mr-tick/sdk'
 
 const store = new Map<string, Task>()
 

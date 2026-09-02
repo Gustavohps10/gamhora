@@ -1,14 +1,6 @@
 import { DateRange } from 'react-day-picker'
 
 import { DatePickerWithRange } from '@/components'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { TimeEntriesSyncIndicator } from '@/pages/time-entries/components/time-entries-sync-indicator'
@@ -31,48 +23,30 @@ export function TimeEntriesHeader({
   onToggleGrouped,
 }: TimeEntriesHeaderProps) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="#">Visão Geral</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Apontamentos de Horas</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      <div className="flex flex-col items-start gap-2 sm:items-end">
-        <div className="flex items-center gap-3">
-          <TimeEntriesSyncIndicator
-            isSyncing={isSyncing}
-            isPulling={isPulling}
+    <div className="mb-4 flex flex-wrap items-center justify-end gap-2.5">
+      {onToggleGrouped && (
+        <div className="border-border/60 bg-background/50 flex h-8 items-center gap-2 rounded-md border px-2.5 shadow-2xs">
+          <Switch
+            id="group-by-task-switch"
+            checked={isGrouped}
+            onCheckedChange={onToggleGrouped}
+            className="scale-75"
           />
-          <DatePickerWithRange
-            date={{ from: range.from, to: range.to }}
-            setDate={onRangeChange}
-          />
+          <Label
+            htmlFor="group-by-task-switch"
+            className="text-muted-foreground hover:text-foreground cursor-pointer text-xs font-medium select-none"
+          >
+            Agrupar por tarefa
+          </Label>
         </div>
+      )}
 
-        {onToggleGrouped && (
-          <div className="flex items-center gap-2 pr-1">
-            <Switch
-              id="group-by-task-switch"
-              checked={isGrouped}
-              onCheckedChange={onToggleGrouped}
-              className="scale-90"
-            />
-            <Label
-              htmlFor="group-by-task-switch"
-              className="text-muted-foreground hover:text-foreground cursor-pointer text-xs font-medium select-none"
-            >
-              Agrupar por tarefa
-            </Label>
-          </div>
-        )}
-      </div>
+      <TimeEntriesSyncIndicator isSyncing={isSyncing} isPulling={isPulling} />
+
+      <DatePickerWithRange
+        date={{ from: range.from, to: range.to }}
+        setDate={onRangeChange}
+      />
     </div>
   )
 }

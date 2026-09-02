@@ -1,6 +1,6 @@
 'use client'
 
-import type { AddonSettingsField, AddonSettingsGroup } from '@pandhora/sdk'
+import type { AddonSettingsField, AddonSettingsGroup } from '@mr-tick/sdk'
 import { AlertCircle, CheckCircle, ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 

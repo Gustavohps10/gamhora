@@ -1,4 +1,4 @@
-﻿import { AppError, Either } from '@pandhora/shared/helpers'
+﻿import { AppError, Either } from '@mr-tick/shared/helpers'
 
 import {
   ICredentialsStorage,
@@ -66,9 +66,9 @@ export class UnlinkDataSourceService implements IUnlinkDataSourceUseCase {
     connectionInstanceId: string,
   ): Promise<void> {
     const sessionKey = `workspace-session-${workspaceId}-${connectionInstanceId}`
-    await this.credentialsStorage.deleteToken('pandhora', sessionKey)
+    await this.credentialsStorage.deleteToken('mr-tick', sessionKey)
     await this.credentialsStorage.deleteToken(
-      'pandhora',
+      'mr-tick',
       getMemberStorageKey(workspaceId, connectionInstanceId),
     )
   }

@@ -1,4 +1,4 @@
-import { IHeaders, IJobResult, IRequest } from '@pandhora/shared/transport'
+import { IHeaders, IJobResult, IRequest } from '@mr-tick/shared/transport'
 import {
   AddonInstallerViewModel,
   AddonManifestViewModel,
@@ -11,7 +11,7 @@ import {
   TimeEntryViewModel,
   ViewModel,
   WorkspaceViewModel,
-} from '@pandhora/shared/view-models'
+} from '@mr-tick/shared/view-models'
 
 import { FileData } from '@/contracts/infra'
 import {
@@ -394,6 +394,7 @@ export interface IAddonsAPI {
 
 export interface EnvironmentInfo {
   isDevelopment: boolean
+  platform?: 'win32' | 'darwin' | 'linux' | 'web' | string
 }
 
 export interface DisplayInfo {

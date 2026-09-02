@@ -1,4 +1,4 @@
-﻿import { AppError, Either } from '@pandhora/shared/helpers'
+﻿import { AppError, Either } from '@mr-tick/shared/helpers'
 
 import {
   ConnectDataSourceInput,
@@ -54,7 +54,7 @@ export class ConnectDataSourceService implements IConnectDataSourceUseCase {
       const { member, credentials } = authResult.success
 
       await this.credentialsStorage.saveToken(
-        'pandhora',
+        'mr-tick',
         storageKey,
         JSON.stringify({
           member,
@@ -74,7 +74,7 @@ export class ConnectDataSourceService implements IConnectDataSourceUseCase {
       )
 
       if (connectResult.isFailure()) {
-        await this.credentialsStorage.deleteToken('pandhora', storageKey)
+        await this.credentialsStorage.deleteToken('mr-tick', storageKey)
         return connectResult.forwardFailure()
       }
 
@@ -84,7 +84,7 @@ export class ConnectDataSourceService implements IConnectDataSourceUseCase {
         member,
       })
     } catch {
-      await this.credentialsStorage.deleteToken('pandhora', storageKey)
+      await this.credentialsStorage.deleteToken('mr-tick', storageKey)
 
       return Either.failure(AppError.Internal('ERRO_AO_CONECTAR_DATA_SOURCE'))
     }

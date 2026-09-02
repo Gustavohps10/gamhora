@@ -1,4 +1,4 @@
-﻿import type { TimeEntry } from '@pandhora/sdk'
+﻿import type { TimeEntry } from '@mr-tick/sdk'
 
 const store = new Map<string, TimeEntry>()
 

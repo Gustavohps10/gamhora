@@ -8,14 +8,14 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@pandhora/datasource-fake",
-    "@pandhora/discord-for-tests",
-    "@pandhora/fake-watcher-for-tests",
-    "@pandhora/pandhora-ai-for-tests",
-    "@pandhora/purple-theme",
-    "@pandhora/redmine-for-tests",
-    "@pandhora/supabase-theme",
-    "@pandhora/desktop",
-    "@pandhora/landing-page"
+    "@mr-tick/datasource-fake",
+    "@mr-tick/discord-for-tests",
+    "@mr-tick/fake-watcher-for-tests",
+    "@mr-tick/mr-tick-ai-for-tests",
+    "@mr-tick/purple-theme",
+    "@mr-tick/redmine-for-tests",
+    "@mr-tick/supabase-theme",
+    "@mr-tick/desktop",
+    "@mr-tick/landing-page"
   ]
 }

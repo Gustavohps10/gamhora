@@ -15,11 +15,7 @@ export default defineConfig([
     sourcemap: true,
     splitting: false,
     tsconfig: './tsconfig.build.json',
-    noExternal: [
-      '@pandhora/application',
-      '@pandhora/shared',
-      '@pandhora/domain',
-    ],
+    noExternal: ['@mr-tick/application', '@mr-tick/shared', '@mr-tick/domain'],
     define: {
       __SDK_VERSION__: JSON.stringify(pkg.version),
     },
@@ -39,9 +35,9 @@ export default defineConfig([
     splitting: false,
     tsconfig: './tsconfig.build.json',
     noExternal: [
-      '@pandhora/application',
-      '@pandhora/shared',
-      '@pandhora/domain',
+      '@mr-tick/application',
+      '@mr-tick/shared',
+      '@mr-tick/domain',
       'commander',
       'inquirer',
       'js-yaml',

@@ -3,7 +3,7 @@
   PagedResultDTO,
   PaginationOptionsDTO,
   TimeEntryDTO,
-} from '@pandhora/sdk'
+} from '@mr-tick/sdk'
 
 import { FAKE_TIME_ENTRIES } from './fakeData'
 

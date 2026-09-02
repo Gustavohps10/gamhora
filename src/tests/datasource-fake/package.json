@@ -1,9 +1,9 @@
 {
-  "name": "@pandhora/datasource-fake",
+  "name": "@mr-tick/datasource-fake",
   "private": true,
   "version": "1.0.1",
   "description": "Datasource fake para testes e validação de envio de dados (1000 tarefas, 1000 apontamentos).",
-  "author": "Pandhora",
+  "author": "Mr-tick",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -22,7 +22,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@pandhora/sdk": "workspace:*"
+    "@mr-tick/sdk": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.5.0",

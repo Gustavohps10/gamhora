@@ -1,9 +1,9 @@
-﻿import {
+import {
   AppSettings,
   IDataSourceResolver,
   IServiceProvider,
-} from '@pandhora/application'
-import { IRequest } from '@pandhora/shared/transport'
+} from '@mr-tick/application'
+import { IRequest } from '@mr-tick/shared/transport'
 import { app, BrowserWindow, screen } from 'electron'
 
 import { NativeOverlay } from '@/main'
@@ -56,7 +56,10 @@ export function openIpcRoutes(
   // --- SYSTEM ---
   IpcHandler.register('SYSTEM_VERSION', () => Promise.resolve(app.getVersion()))
   IpcHandler.register('SYSTEM_GET_ENVIRONMENT', () =>
-    Promise.resolve({ isDevelopment: !app.isPackaged }),
+    Promise.resolve({
+      isDevelopment: !app.isPackaged,
+      platform: process.platform,
+    }),
   )
 
   // --- TOKEN STORAGE ---

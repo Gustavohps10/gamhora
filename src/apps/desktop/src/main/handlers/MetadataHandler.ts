@@ -2,14 +2,14 @@ import {
   IMetadataPullUseCase,
   MetadataDTO,
   PullMetadataInput,
-} from '@pandhora/application'
+} from '@mr-tick/application'
 import {
   AppError,
   createResponseViewModel,
   Either,
-} from '@pandhora/shared/helpers'
-import { IRequest } from '@pandhora/shared/transport'
-import { MetadataViewModel, ViewModel } from '@pandhora/shared/view-models'
+} from '@mr-tick/shared/helpers'
+import { IRequest } from '@mr-tick/shared/transport'
+import { MetadataViewModel, ViewModel } from '@mr-tick/shared/view-models'
 
 import { HandlerBase } from '@/main/handlers/HandlerBase'
 

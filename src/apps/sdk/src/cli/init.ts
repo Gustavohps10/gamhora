@@ -6,14 +6,14 @@ import { VALID_ADDON_CATEGORIES } from '../contracts/manifest'
 import { writeYaml } from '../utils/yaml'
 
 export async function runInitWizard(targetDirName?: string) {
-  console.log('\n🚀 Bem-vindo ao inicializador de plugins do Pandhora!\n')
+  console.log('\n🚀 Bem-vindo ao inicializador de plugins do Mr-tick!\n')
 
   const answers = await inquirer.prompt([
     {
       type: 'input',
       name: 'id',
-      message: 'ID único do plugin (ex: pandhora-datasource-redmine):',
-      default: targetDirName || 'pandhora-plugin-sample',
+      message: 'ID único do plugin (ex: mr-tick-datasource-redmine):',
+      default: targetDirName || 'mr-tick-plugin-sample',
       validate: (input: string) => {
         if (!input.trim()) return 'O ID não pode ser vazio.'
         if (!/^[a-z0-9-_@/]+$/i.test(input.trim())) {
@@ -26,7 +26,7 @@ export async function runInitWizard(targetDirName?: string) {
       type: 'input',
       name: 'name',
       message: 'Nome legível do plugin (ex: Redmine Integration):',
-      default: 'Meu Plugin Pandhora',
+      default: 'Meu Plugin Mr-tick',
     },
     {
       type: 'checkbox',
@@ -48,19 +48,19 @@ export async function runInitWizard(targetDirName?: string) {
       type: 'input',
       name: 'author',
       message: 'Autor ou organização:',
-      default: 'Pandhora Community',
+      default: 'Mr-tick Community',
     },
     {
       type: 'input',
       name: 'shortDescription',
       message: 'Descrição curta (1 linha):',
-      default: 'Integração oficial para o Pandhora',
+      default: 'Integração oficial para o Mr-tick',
     },
     {
       type: 'input',
       name: 'description',
       message: 'Descrição detalhada:',
-      default: 'Extensão para integração e sincronização com o Pandhora.',
+      default: 'Extensão para integração e sincronização com o Mr-tick.',
     },
   ])
 
@@ -86,12 +86,12 @@ export async function runInitWizard(targetDirName?: string) {
     types: './dist/index.d.ts',
     scripts: {
       build: 'tsup src/index.ts --format esm,cjs --dts --clean',
-      manifest: 'pandhora manifest .',
-      validate: 'pandhora validate .',
-      pack: 'pandhora pack .',
+      manifest: 'mr-tick manifest .',
+      validate: 'mr-tick validate .',
+      pack: 'mr-tick pack .',
     },
     devDependencies: {
-      '@pandhora/sdk': '^1.1.0',
+      '@mr-tick/sdk': '^1.1.0',
       tsup: '^8.5.0',
       typescript: '^5.8.0',
     },
@@ -129,7 +129,7 @@ export async function runInitWizard(targetDirName?: string) {
     author: answers.author,
     shortDescription: answers.shortDescription,
     description: answers.description,
-    tags: [answers.categories[0], 'pandhora'],
+    tags: [answers.categories[0], 'mr-tick'],
     screenshots: [],
     requiredApiVersion: '>=1.0.0',
     releaseDate: new Date().toISOString().split('T')[0],
@@ -139,7 +139,7 @@ export async function runInitWizard(targetDirName?: string) {
 
   // 4. src/index.ts boilerplate
   const isDataSource = answers.categories.includes('dataSource')
-  const indexTsContent = `import { AddonContext, IAddon } from '@pandhora/sdk'
+  const indexTsContent = `import { AddonContext, IAddon } from '@mr-tick/sdk'
 
 export default class ${toPascalCase(answers.name)}Plugin implements IAddon {
   public async activate(context: AddonContext): Promise<void> {

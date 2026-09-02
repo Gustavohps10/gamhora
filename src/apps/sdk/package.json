@@ -1,10 +1,10 @@
 {
-  "name": "@pandhora/sdk",
-  "version": "0.1.1",
-  "description": "Toolkit para o ecossistema Pandhora.",
+  "name": "@mr-tick/sdk",
+  "version": "0.3.0",
+  "description": "Toolkit para o ecossistema Mr-tick.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pandhora-community/pandhora.git"
+    "url": "https://github.com/mr-tick-community/mr-tick.git"
   },
   "type": "module",
   "main": "./dist/index.js",
@@ -27,9 +27,9 @@
     "clean": "rimraf dist .turbo"
   },
   "devDependencies": {
-    "@pandhora/application": "workspace:*",
-    "@pandhora/domain": "workspace:*",
-    "@pandhora/shared": "workspace:*",
+    "@mr-tick/application": "workspace:*",
+    "@mr-tick/domain": "workspace:*",
+    "@mr-tick/shared": "workspace:*",
     "@types/adm-zip": "^0",
     "@types/js-yaml": "^4.0.9",
     "@types/turndown": "^5.0.5",
@@ -41,7 +41,7 @@
     "typescript": "^5.8.3"
   },
   "bin": {
-    "pandhora": "./dist/cli.cjs"
+    "mr-tick": "./dist/cli.cjs"
   },
   "dependencies": {
     "highlight.js": "^11.11.1",

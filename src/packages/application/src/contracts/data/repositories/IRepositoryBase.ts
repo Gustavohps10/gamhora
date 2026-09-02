@@ -1,4 +1,4 @@
-﻿import { Entity } from '@pandhora/domain'
+﻿import { Entity } from '@mr-tick/domain'
 
 export interface IRepositoryBase<T extends Entity> {
   create(entity: T): Promise<void>

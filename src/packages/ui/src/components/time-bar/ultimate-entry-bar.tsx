@@ -25,7 +25,7 @@ import { CSS } from '@dnd-kit/utilities'
 import type {
   AddonTimerbarMenuItem,
   AddonTimerbarPopoverSubItem,
-} from '@pandhora/application'
+} from '@mr-tick/application'
 import { differenceInSeconds, isSameDay, isValid, parseISO } from 'date-fns'
 import {
   AlertCircle,
@@ -104,8 +104,8 @@ const mockActivities: Array<{
   { id: 'break', name: 'Break', icon: Coffee },
 ]
 
-const STORAGE_KEY = 'pandhora:widget:block-order'
-const FREE_DRAG_STORAGE_KEY = 'pandhora:widget:free-offset'
+const STORAGE_KEY = 'mr-tick:widget:block-order'
+const FREE_DRAG_STORAGE_KEY = 'mr-tick:widget:free-offset'
 
 type WidgetPosition = 'top' | 'bottom' | 'left' | 'right'
 type FreeOffset = { x: number; y: number }
@@ -1910,7 +1910,7 @@ function renderAddonIcon(
     icon.startsWith('data:image/') ||
     icon.startsWith('http://') ||
     icon.startsWith('https://') ||
-    icon.startsWith('pandhora-app://')
+    icon.startsWith('mr-tick-app://')
   ) {
     return (
       <img

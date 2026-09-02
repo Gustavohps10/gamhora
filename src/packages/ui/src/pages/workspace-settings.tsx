@@ -6,14 +6,6 @@ import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -319,130 +311,113 @@ export function WorkspaceSettings() {
   }
 
   return (
-    <>
-      <h1 className="text-2xl font-semibold tracking-tight">Configurações</h1>
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Workspace</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Configurações</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      <hr className="mt-2" />
-
-      <div className="mt-6 space-y-6 pb-12">
-        {/* Identidade */}
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Card>
-            <CardHeader>
-              <CardTitle>Identidade do Workspace</CardTitle>
-              <CardDescription>
-                Nome, descrição e logotipo exibidos em todo o sistema.
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-5">
-              <Controller
-                name="avatarUrl"
-                control={control}
-                render={({ field }) => (
-                  <WorkspaceAvatar
-                    value={field.value}
-                    onChange={(url) => {
-                      field.onChange(url)
-                      setValue('removeAvatar', false)
-                    }}
-                    onRemove={() => {
-                      field.onChange('')
-                      setValue('removeAvatar', true)
-                    }}
-                    name={workspace?.name}
-                  />
-                )}
-              />
-
-              <div className="space-y-1.5">
-                <Label className="text-muted-foreground text-xs font-semibold">
-                  Nome do Workspace
-                </Label>
-                <Input
-                  placeholder="Ex: Redmine Atak, Freelance..."
-                  {...register('name')}
-                />
-                {errors.name && (
-                  <p className="text-destructive text-xs">
-                    {errors.name.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-muted-foreground text-xs font-semibold">
-                  Descrição{' '}
-                  <span className="font-normal opacity-60">(opcional)</span>
-                </Label>
-                <Textarea
-                  placeholder="Descreva o propósito deste workspace..."
-                  className="resize-none"
-                  rows={3}
-                  {...register('description')}
-                />
-              </div>
-            </CardContent>
-
-            <CardFooter className="justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                disabled={!isDirty || isUpdatingIdentity}
-                onClick={() => reset()}
-              >
-                Descartar
-              </Button>
-              <Button type="submit" disabled={!isDirty || isUpdatingIdentity}>
-                {isUpdatingIdentity && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Salvar Alterações
-              </Button>
-            </CardFooter>
-          </Card>
-        </form>
-
-        {/* Danger Zone */}
-        <Card className="border-destructive/40">
+    <div className="space-y-6 pb-12">
+      {/* Identidade */}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Card>
           <CardHeader>
-            <CardTitle className="text-destructive">Zona de Perigo</CardTitle>
+            <CardTitle>Identidade do Workspace</CardTitle>
             <CardDescription>
-              Ações irreversíveis que afetam permanentemente este workspace.
+              Nome, descrição e logotipo exibidos em todo o sistema.
             </CardDescription>
           </CardHeader>
 
-          <CardContent>
-            <div className="flex items-center justify-between gap-4">
-              <div className="space-y-0.5">
-                <p className="text-sm font-medium">Excluir este workspace</p>
-                <p className="text-muted-foreground text-xs">
-                  Remove permanentemente o workspace e todos os seus dados.
+          <CardContent className="space-y-5">
+            <Controller
+              name="avatarUrl"
+              control={control}
+              render={({ field }) => (
+                <WorkspaceAvatar
+                  value={field.value}
+                  onChange={(url) => {
+                    field.onChange(url)
+                    setValue('removeAvatar', false)
+                  }}
+                  onRemove={() => {
+                    field.onChange('')
+                    setValue('removeAvatar', true)
+                  }}
+                  name={workspace?.name}
+                />
+              )}
+            />
+
+            <div className="space-y-1.5">
+              <Label className="text-muted-foreground text-xs font-semibold">
+                Nome do Workspace
+              </Label>
+              <Input
+                placeholder="Ex: Redmine Atak, Freelance..."
+                {...register('name')}
+              />
+              {errors.name && (
+                <p className="text-destructive text-xs">
+                  {errors.name.message}
                 </p>
-              </div>
-              <DeleteWorkspaceDialog
-                workspaceName={workspace?.name ?? ''}
-                isRemoving={isRemoving}
-                onConfirm={async () => {
-                  await drop?.()
-                  await remove()
-                }}
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-muted-foreground text-xs font-semibold">
+                Descrição{' '}
+                <span className="font-normal opacity-60">(opcional)</span>
+              </Label>
+              <Textarea
+                placeholder="Descreva o propósito deste workspace..."
+                className="resize-none"
+                rows={3}
+                {...register('description')}
               />
             </div>
           </CardContent>
+
+          <CardFooter className="justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!isDirty || isUpdatingIdentity}
+              onClick={() => reset()}
+            >
+              Descartar
+            </Button>
+            <Button type="submit" disabled={!isDirty || isUpdatingIdentity}>
+              {isUpdatingIdentity && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Salvar Alterações
+            </Button>
+          </CardFooter>
         </Card>
-      </div>
-    </>
+      </form>
+
+      {/* Danger Zone */}
+      <Card className="border-destructive/40">
+        <CardHeader>
+          <CardTitle className="text-destructive">Zona de Perigo</CardTitle>
+          <CardDescription>
+            Ações irreversíveis que afetam permanentemente este workspace.
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium">Excluir este workspace</p>
+              <p className="text-muted-foreground text-xs">
+                Remove permanentemente o workspace e todos os seus dados.
+              </p>
+            </div>
+            <DeleteWorkspaceDialog
+              workspaceName={workspace?.name ?? ''}
+              isRemoving={isRemoving}
+              onConfirm={async () => {
+                await drop?.()
+                await remove()
+              }}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

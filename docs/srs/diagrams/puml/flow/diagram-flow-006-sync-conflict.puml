@@ -1,5 +1,5 @@
 ﻿@startuml SyncConflict
-title PANDHORA - Resolução de Conflitos
+title MR-TICK - Resolução de Conflitos
 participant LocalDB
 participant SyncEngine
 participant RemoteAPI

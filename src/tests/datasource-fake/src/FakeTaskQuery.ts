@@ -3,7 +3,7 @@
   PagedResultDTO,
   PaginationOptionsDTO,
   TaskDTO,
-} from '@pandhora/sdk'
+} from '@mr-tick/sdk'
 
 import { FAKE_TASKS } from './fakeData'
 

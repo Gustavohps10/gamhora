@@ -6,7 +6,7 @@ import {
   SheetContent,
   SheetTitle,
   SheetTrigger,
-} from '@pandhora/ui/components'
+} from '@mr-tick/ui/components'
 import { BookOpenTextIcon, Github, Menu, Star } from 'lucide-react'
 import Link from 'next/link'
 import * as React from 'react'
@@ -67,14 +67,14 @@ export function MobileMenu() {
 
             {/* Github */}
             <a
-              href="https://github.com/gustavohps10/pandhora"
+              href="https://github.com/gustavohps10/mr-tick"
               target="_blank"
               rel="noreferrer"
               className="text-muted-foreground hover:text-foreground flex items-center justify-between text-sm font-medium"
             >
               <div className="flex items-center gap-2">
                 <Github className="size-4" />
-                gustavohps10/pandhora
+                gustavohps10/mr-tick
               </div>
 
               <div className="flex items-center gap-1">

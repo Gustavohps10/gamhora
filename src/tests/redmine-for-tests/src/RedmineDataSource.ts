@@ -1,4 +1,4 @@
-﻿import { DataSourceContext, IDataSource } from '@pandhora/sdk'
+﻿import { DataSourceContext, IDataSource } from '@mr-tick/sdk'
 
 import { configurationFieldGroups, credentialFieldGroups } from './configFields'
 import { RedmineAuthenticationStrategy } from './RedmineAuthenticationStrategy'

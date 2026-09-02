@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { WorkspaceViewModel } from '@pandhora/shared/view-models'
+import { WorkspaceViewModel } from '@mr-tick/shared/view-models'
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import {

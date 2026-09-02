@@ -1,4 +1,4 @@
-﻿# Pandhora
+﻿# Mr-tick
 
 ## Sistema de Rastreamento e Visualização de Produtividade
 
@@ -23,15 +23,15 @@
 
 ## 1.1 Finalidade
 
-O **Pandhora** é um sistema desktop extensível e focado em produtividade para desenvolvedores e equipes de tecnologia.
+O **Mr-tick** é um sistema desktop extensível e focado em produtividade para desenvolvedores e equipes de tecnologia.
 
 O sistema atua como um **hub local e agnóstico** que se conecta diretamente a ferramentas de gestão externas (Redmine, Jira, etc.) através de um **SDK de Addons Multicapacidade**, gerenciando o tempo investido com operação **100% offline-first e privacidade absoluta (Zero-Cloud)**.
 
 ## 1.2 Política de Privacidade Estrita (Zero-Cloud Data Policy)
 
-O Pandhora adota uma política rigorosa de **não exfiltração de dados operacionais**:
+O Mr-tick adota uma política rigorosa de **não exfiltração de dados operacionais**:
 
-- **Nenhum dado de tarefas, títulos de janelas, apontamentos de horas ou informações de clientes trafega para servidores em nuvem do Pandhora ou de terceiros.**
+- **Nenhum dado de tarefas, títulos de janelas, apontamentos de horas ou informações de clientes trafega para servidores em nuvem do Mr-tick ou de terceiros.**
 - Todas as conexões com DataSources acontecem **diretamente da máquina do usuário para o servidor da empresa/ferramenta**.
 - Recursos de inteligência e automação (Window Observer, Git Tracker, OCR, Idle Resolver) executam **100% localmente** na CPU do usuário.
 
@@ -47,7 +47,7 @@ O Pandhora adota uma política rigorosa de **não exfiltração de dados operaci
 
 ## 2.2 Divisão de Planos (Free vs Pro)
 
-O Pandhora opera sob um modelo de licenciamento local simplificado (sem necessidade de cadastro ou login obrigatório):
+O Mr-tick opera sob um modelo de licenciamento local simplificado (sem necessidade de cadastro ou login obrigatório):
 
 ### 🟢 Plano FREE (Uso Individual / Básico)
 
@@ -75,7 +75,7 @@ Ativado localmente via **Chave de Licença (License Key)**:
 
 # 3. Ecossistema e SDK de Addons
 
-O Pandhora possui uma arquitetura orientada a **Addons Multicapacidade**. Um único pacote de addon pode fornecer simultaneamente:
+O Mr-tick possui uma arquitetura orientada a **Addons Multicapacidade**. Um único pacote de addon pode fornecer simultaneamente:
 
 1. **DataSources:** Adaptadores de comunicação com APIs externas (Redmine, Jira, GitLab, Mock).
 2. **Navegação & Menus:** Injeção de itens de navegação na Sidebar e subitens.
@@ -331,7 +331,7 @@ Estrutura de cores:
 
 # 7. Arquitetura em Camadas
 
-O Pandhora é estruturado em quatro camadas com responsabilidades bem delimitadas, consistentes com os princípios de DDD e com o modelo desktop offline-first.
+O Mr-tick é estruturado em quatro camadas com responsabilidades bem delimitadas, consistentes com os princípios de DDD e com o modelo desktop offline-first.
 
 ## 7.1 Domain
 
@@ -888,7 +888,7 @@ Ativar os recursos do plano Pro localmente através de uma chave de licença (Li
 
 1. Usuário realiza o upgrade/pagamento via Checkout Web
 2. Gateway emite a Chave de Licença (License Key)
-3. Usuário acessa as Configurações do Pandhora e insere a Chave
+3. Usuário acessa as Configurações do Mr-tick e insere a Chave
 4. Sistema valida a chave via API (1 única vez) e grava `{ isPro: true }` no `settings.json` local
 5. Recursos Pro (Automações, Watchers, Multi-Workspaces) são desbloqueados imediatamente
 
@@ -989,7 +989,7 @@ flowchart TB
         UI <--> Loader
     end
 
-    subgraph Addons [Addon Ecosystem — @pandhora/sdk]
+    subgraph Addons [Addon Ecosystem — @mr-tick/sdk]
         direction TB
         DS[DataSources — Redmine, Jira, Fake]
         Themes[Visual Themes — CSS Injected]
@@ -1095,12 +1095,12 @@ flowchart TB
 
 **Contexto:** Ferramentas extensíveis costumam sofrer de fragmentação ou acoplamento forte quando cada tipo de plugin (tema, conector, atalho) exige uma arquitetura isolada.
 
-**Decisão:** O Pandhora adota um contrato de **Addon Multicapacidade** no `@pandhora/sdk`. Um único Addon pode registrar simultaneamente DataSources, Menus de Sidebar, Botões e Popovers na Timerbar, Comandos, Watchers e Temas Visuais.
+**Decisão:** O Mr-tick adota um contrato de **Addon Multicapacidade** no `@mr-tick/sdk`. Um único Addon pode registrar simultaneamente DataSources, Menus de Sidebar, Botões e Popovers na Timerbar, Comandos, Watchers e Temas Visuais.
 
 **Consequências:**
 
 - Facilidade para a comunidade e empresas desenvolverem extensões completas.
-- O Core do Pandhora e a UI permanecem 100% agnósticos aos detalhes das ferramentas externas.
+- O Core do Mr-tick e a UI permanecem 100% agnósticos aos detalhes das ferramentas externas.
 
 ## ADR-005 — Licenciamento Local-First por Chave (Zero Backend Auth)
 

@@ -1,5 +1,5 @@
 @startuml ClassLicensePlan
-title PANDHORA - Modelo de Licenciamento Local (Free vs Pro)
+title MR-TICK - Modelo de Licenciamento Local (Free vs Pro)
 package "Core Licensing" {
     class LicenseInfo {
         +String key

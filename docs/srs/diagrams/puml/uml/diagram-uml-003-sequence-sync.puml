@@ -1,5 +1,5 @@
 @startuml SequenceSync
-title PANDHORA - Sequência: Sincronização Completa (UC001 - RF004, RF008)
+title MR-TICK - Sequência: Sincronização Completa (UC001 - RF004, RF008)
 actor User
 participant UI
 participant SyncEngine

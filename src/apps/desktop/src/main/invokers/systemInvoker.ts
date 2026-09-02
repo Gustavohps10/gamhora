@@ -1,4 +1,4 @@
-﻿import { AppSettings, ISystemAPI } from '@pandhora/application'
+﻿import { AppSettings, ISystemAPI } from '@mr-tick/application'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

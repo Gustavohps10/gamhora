@@ -1,4 +1,4 @@
-﻿import { FileData, IFileStorage } from '@pandhora/application'
+﻿import { FileData, IFileStorage } from '@mr-tick/application'
 import fs from 'fs'
 import path, { dirname, resolve } from 'path'
 

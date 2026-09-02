@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
 
   reactCompiler: true,
 
-  transpilePackages: ['@pandhora/ui', '@pandhora/application'],
+  transpilePackages: ['@mr-tick/ui', '@mr-tick/application'],
 
   images: {
     remotePatterns: [

@@ -1,5 +1,5 @@
 @startuml IntegrationSyncPull
-title PANDHORA - Sincronização Pull (RF004, RF005 - UC001)
+title MR-TICK - Sincronização Pull (RF004, RF005 - UC001)
 participant UI
 participant SyncEngine
 participant CheckpointStore

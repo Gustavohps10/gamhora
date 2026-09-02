@@ -1,4 +1,4 @@
-﻿import type { EnvironmentInfo } from '@pandhora/application'
+﻿import type { EnvironmentInfo } from '@mr-tick/application'
 import { useContext } from 'react'
 
 import { EnvironmentContext } from '@/contexts/EnvironmentContext'

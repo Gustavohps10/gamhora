@@ -1,5 +1,5 @@
 @startuml DeploymentDesktop
-title PANDHORA - Deploy Desktop Client (Local-First)
+title MR-TICK - Deploy Desktop Client (Local-First)
 
 node "Máquina do Usuário" {
     component "Electron Desktop App" as App

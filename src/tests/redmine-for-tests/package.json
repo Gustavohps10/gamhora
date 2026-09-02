@@ -1,5 +1,5 @@
 {
-  "name": "@pandhora/redmine-for-tests",
+  "name": "@mr-tick/redmine-for-tests",
   "private": true,
   "version": "1.0.4",
   "description": "Redmine datasource para testes.",
@@ -20,11 +20,11 @@
   "scripts": {
     "build": "tsup --format esm,cjs --dts",
     "clean": "rimraf dist",
-    "manifest": "pandhora manifest ./ --config ./pandhora.json",
-    "pkg": "pandhora pkg ./dist --config ./pandhora.json"
+    "manifest": "mr-tick manifest ./ --config ./mr-tick.json",
+    "pkg": "mr-tick pkg ./dist --config ./mr-tick.json"
   },
   "dependencies": {
-    "@pandhora/sdk": "workspace:*",
+    "@mr-tick/sdk": "workspace:*",
     "axios": "^1.7.9"
   },
   "devDependencies": {

@@ -1,6 +1,5 @@
 'use client'
 
-import { Badge } from '@pandhora/ui/components'
 import { Activity, CheckCircle, Layers, Sparkles, Timer } from 'lucide-react'
 import * as React from 'react'
 
@@ -17,43 +16,46 @@ export interface FeatureItem {
 const FEATURES: FeatureItem[] = [
   {
     icon: <Activity className="size-5" />,
-    tag: 'Observabilidade',
-    problem: 'Você não sabe para onde foi seu tempo técnico no final do dia',
-    title: 'Métricas de Deep Work e foco com granularidade de minutos',
+    tag: 'Observability',
+    problem:
+      'You never know where your engineering hours actually went at the end of the day',
+    title: 'Deep Work metrics and focus tracking with minute granularity',
     description:
-      'Detecte trocas de contexto, meça blocos de concentração contínua e visualize a distribuição real do seu esforço entre código, bugs e reuniões.',
+      'Spot context switching, measure uninterrupted coding sessions, and visualize your real effort distribution between bug fixes, features, and meetings.',
     highlights: [
-      'Score diário de Deep Work',
-      'Detecção de context switching',
-      'Cálculo 100% local sem expor dados',
+      'Daily Deep Work focus score',
+      'Context switching frequency detection',
+      '100% computed locally without cloud telemetry',
     ],
     accentColor: 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10',
   },
   {
     icon: <Layers className="size-5" />,
-    tag: 'Controle de Tarefas',
-    problem: 'Tarefas espalhadas em múltiplos silos e abas de navegadores',
-    title: 'Hub unificado para tarefas de múltiplos DataSources',
+    tag: 'Unified Hub',
+    problem:
+      'Tasks scattered across 15 slow browser tabs in different issue trackers',
+    title: 'One fast desktop view for tickets from multiple DataSources',
     description:
-      'Acesse e gerencie seus tickets do Jira, Redmine, GitHub e YouTrack em um único lugar. Crie, atualize status e vincule apontamentos com atalhos de teclado.',
+      'Query and interact with your Jira, Redmine, GitHub, and YouTrack tickets directly from your desktop. Update status and link commits without opening heavy web apps.',
     highlights: [
-      'Busca global instantânea (Cmd/Ctrl + K)',
-      'Vínculo de PRs e commits às tarefas',
-      'Atualização de status bidirecional',
+      'Global instant search (⌘K / Ctrl+K)',
+      'Direct branch & PR correlations',
+      'Bi-directional status & progress updates',
     ],
     accentColor: 'border-sky-500/30 text-sky-500 bg-sky-500/10',
   },
   {
     icon: <Timer className="size-5" />,
-    tag: 'Apontamento Inteligente',
-    problem: 'Apontar horas manualmente é burocrático e fácil de esquecer',
-    title: 'Apontamento de horas rápido que não quebra o fluxo',
+    tag: 'Ergonomic Tracking',
+    problem:
+      'Manual timesheet filling is tedious, bureaucratic, and easy to forget',
+    title: 'Frictionless time logging designed to preserve your flow state',
     description:
-      'Inicie e pause timers globais com um atalho. Salve contexto, adicione notas técnicas e faça push dos logs de horas para os rastreadores automaticamente.',
+      'Start and pause global timers with single-key shortcuts. Attach technical notes, auto-link issue IDs, and sync your time entries to remote trackers in the background.',
     highlights: [
-      'Atalho global para iniciar timer',
-      'Suporte a múltiplos timers simultâneos',
-      'Sincronização em segundo plano',
+      'Dockable timer bar (Top, Bottom, Left, Right)',
+      'Multiple simultaneous timer support',
+      'Offline queue with background sync engine',
     ],
     accentColor: 'border-violet-500/30 text-violet-500 bg-violet-500/10',
   },
@@ -68,19 +70,18 @@ export function Features() {
       <div className="relative z-10 container mx-auto px-6 lg:px-8">
         {/* Section Header */}
         <div className="mx-auto max-w-2xl text-center">
-          <div className="border-primary/20 bg-primary/5 text-primary mb-3 inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-1 text-xs font-semibold">
+          <div className="border-primary/20 bg-primary/5 text-primary mb-3 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1 text-xs font-semibold">
             <Sparkles className="size-3.5" />
-            Engenharia &amp; Produtividade
+            Engineering &amp; Flow
           </div>
 
           <h2 className="text-foreground mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-            Construído para a realidade de quem desenvolve software.
+            Built by developers, for developers.
           </h2>
 
           <p className="text-muted-foreground mt-4 text-base leading-relaxed sm:text-lg">
-            Não é apenas um timer genérico. É um toolkit completo de
-            observabilidade para controlar tarefas, gerenciar horas e maximizar
-            seu foco técnico.
+            More than a simple stopwatch. A complete local-first toolkit to
+            manage tasks, track hours, and maximize your technical focus.
           </p>
         </div>
 
@@ -99,43 +100,39 @@ export function Features() {
                   </p>
                 </div>
 
-                <div className="mb-4 flex items-center justify-between">
-                  <div
-                    className={`flex size-10 items-center justify-center rounded-lg border ${feature.accentColor}`}
+                {/* Tag & Icon */}
+                <div className="mb-4 flex items-center gap-2.5">
+                  <span
+                    className={`inline-flex size-9 items-center justify-center rounded-lg border ${feature.accentColor}`}
                   >
                     {feature.icon}
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="rounded-md text-[10px] font-semibold tracking-wide"
-                  >
+                  </span>
+                  <span className="text-muted-foreground font-mono text-xs font-semibold tracking-wider uppercase">
                     {feature.tag}
-                  </Badge>
+                  </span>
                 </div>
 
-                <h3 className="text-foreground text-lg leading-snug font-bold">
+                <h3 className="text-foreground mb-2.5 text-lg leading-snug font-bold">
                   {feature.title}
                 </h3>
 
-                <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+                <p className="text-muted-foreground text-xs leading-relaxed">
                   {feature.description}
                 </p>
               </div>
 
-              {/* Feature Highlights */}
-              <div className="border-border/40 mt-6 border-t pt-5">
-                <ul className="space-y-2">
-                  {feature.highlights.map((h) => (
-                    <li
-                      key={h}
-                      className="text-foreground/80 flex items-center gap-2 text-xs"
-                    >
-                      <CheckCircle className="size-3.5 shrink-0 text-emerald-500" />
-                      <span>{h}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {/* Highlights */}
+              <ul className="border-border/40 mt-6 space-y-2 border-t pt-4">
+                {feature.highlights.map((highlight) => (
+                  <li
+                    key={highlight}
+                    className="text-muted-foreground flex items-center gap-2 text-xs"
+                  >
+                    <CheckCircle className="size-3.5 shrink-0 text-emerald-500" />
+                    <span>{highlight}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>

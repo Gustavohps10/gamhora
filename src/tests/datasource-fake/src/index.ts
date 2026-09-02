@@ -4,7 +4,7 @@
   AddonSettingsSchema,
   IAddon,
   IDataSource,
-} from '@pandhora/sdk'
+} from '@mr-tick/sdk'
 
 import { FakeAuthenticationStrategy } from './FakeAuthenticationStrategy'
 import { FakeMemberQuery } from './FakeMemberQuery'
@@ -29,8 +29,8 @@ const configFields: {
           id: 'serverUrl',
           type: 'text',
           label: 'URL do Servidor',
-          placeholder: 'https://fake.pandhora-app.local',
-          defaultValue: 'https://fake.pandhora-app.local',
+          placeholder: 'https://fake.mr-tick-app.local',
+          defaultValue: 'https://fake.mr-tick-app.local',
         },
         {
           id: 'username',
@@ -68,7 +68,7 @@ const configFields: {
 }
 
 export const FakeDataSource: IDataSource = {
-  id: 'pandhora-datasource-fake',
+  id: 'mr-tick-datasource-fake',
   dataSourceType: 'fake',
   displayName: 'DataSource Fake (Testes)',
   configFields,

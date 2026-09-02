@@ -1,5 +1,5 @@
-﻿import { AppError, Either } from '@pandhora/shared/helpers'
-import { IJobEvent } from '@pandhora/shared/transport'
+﻿import { AppError, Either } from '@mr-tick/shared/helpers'
+import { IJobEvent } from '@mr-tick/shared/transport'
 
 import { FileData } from '@/contracts/infra'
 

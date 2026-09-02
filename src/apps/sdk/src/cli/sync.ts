@@ -18,7 +18,7 @@ function extractRepo(addonDir: string): string {
     const match = pkg.repository.url.match(/github\.com[/:]([^/.]+\/[^/.]+)/)
     if (match) return match[1].replace(/\.git$/, '')
   }
-  return 'pandhora-community/plugin'
+  return 'mr-tick-community/plugin'
 }
 
 export function syncManifest(addonDir = '.', options?: SyncManifestOptions) {
@@ -87,7 +87,7 @@ export function syncManifest(addonDir = '.', options?: SyncManifestOptions) {
     iconUrl: existingManifest.iconUrl || iconUrl,
     sourceUrl: existingManifest.sourceUrl || `https://github.com/${repo}`,
     homepage: existingManifest.homepage || `https://github.com/${repo}#readme`,
-    tags: existingManifest.tags || existingManifest.Tags || ['pandhora'],
+    tags: existingManifest.tags || existingManifest.Tags || ['mr-tick'],
   }
 
   if (screenshots.length > 0) {

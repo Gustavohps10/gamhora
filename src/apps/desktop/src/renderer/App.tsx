@@ -1,18 +1,19 @@
-﻿import '@/renderer/index.css'
+import '@/renderer/index.css'
 
+import type { EnvironmentInfo } from '@mr-tick/application'
 import {
   AddonThemeBridge,
   AddonToastBridge,
   Toaster,
-} from '@pandhora/ui/components'
-import { queryClient } from '@pandhora/ui/lib'
+} from '@mr-tick/ui/components'
+import { queryClient } from '@mr-tick/ui/lib'
 import {
   EnvironmentProvider,
   OpenAPIProvider,
   SidebarProvider,
   ThemeProvider,
   TooltipProvider,
-} from '@pandhora/ui/providers'
+} from '@mr-tick/ui/providers'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { NuqsAdapter } from 'nuqs/adapters/react-router/v6'
 import { useEffect, useState } from 'react'
@@ -21,7 +22,13 @@ import { RouterProvider } from 'react-router-dom'
 import { ipcClient } from '@/renderer/ipcClient'
 import { router } from '@/renderer/routes'
 
-const defaultEnvironment = { isDevelopment: false }
+const defaultEnvironment: EnvironmentInfo = {
+  isDevelopment: false,
+  platform:
+    typeof window !== 'undefined' && window.electron?.process?.platform
+      ? window.electron.process.platform
+      : 'web',
+}
 
 export function AppDesktop() {
   const [environment, setEnvironment] = useState(defaultEnvironment)

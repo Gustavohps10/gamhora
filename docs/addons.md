@@ -1,16 +1,16 @@
-﻿# PANDHORA — Arquitetura de Extensibilidade e Plugins (Addons)
+﻿# MR-TICK — Arquitetura de Extensibilidade e Plugins (Addons)
 
-Este documento consolida a arquitetura oficial de extensibilidade do **PANDHORA**, definindo os **4 Pilares Principais de Addons**, o ciclo de vida e a integração nativa com o **`@pandhora/sdk`**.
+Este documento consolida a arquitetura oficial de extensibilidade do **MR-TICK**, definindo os **4 Pilares Principais de Addons**, o ciclo de vida e a integração nativa com o **`@mr-tick/sdk`**.
 
 ---
 
 ## 1. Visão Geral da Arquitetura
 
-O PANDHORA opera com uma arquitetura **Local-First** desacoplada. Os plugins são organizados estritamente em torno de **4 Pilares Principais**:
+O MR-TICK opera com uma arquitetura **Local-First** desacoplada. Os plugins são organizados estritamente em torno de **4 Pilares Principais**:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                          PANDHORA CORE (RxDB)                            │
+│                          MR-TICK CORE (RxDB)                            │
 │  • Gerenciador de Apontamentos (Time Entries)                           │
 │  • Motor de Sugestões de Apontamento (Timeline)                         │
 │  • Timer Runtime (Ao vivo, Pausado, Sincronizado)                       │
@@ -39,11 +39,11 @@ O PANDHORA opera com uma arquitetura **Local-First** desacoplada. Os plugins sã
 
 ### A. 📦 DataSources (Fontes de Dados & Tarefas)
 
-- **Objetivo**: Conecta o Pandhora às plataformas oficiais de gestão de projetos.
+- **Objetivo**: Conecta o Mr-tick às plataformas oficiais de gestão de projetos.
 - **Exemplos**: Jira, Redmine, YouTrack, GitHub Issues, Trello, Linear.
 - **Responsabilidades**:
   - Listar e buscar tarefas atribuídas ao usuário no workspace ativo (`fetchTasks`).
-  - Sincronizar e enviar os apontamentos de horas concluídos no Pandhora (`logTime`).
+  - Sincronizar e enviar os apontamentos de horas concluídos no Mr-tick (`logTime`).
 
 ---
 
@@ -52,7 +52,7 @@ O PANDHORA opera com uma arquitetura **Local-First** desacoplada. Os plugins sã
 - **Objetivo**: Observadores em segundo plano que monitoram o ambiente de trabalho do usuário ou escutam eventos nativos (`context.events`) para sugerir blocos de tempo ou atualizar status de presença externamente.
 - **Exemplos**:
   - **Discord Voice**: Detecta saída de chamadas de voz e gera sugestão de tempo.
-  - **Discord Rich Presence**: Atualiza o status do Discord quando o timer do Pandhora inicia ou pausa.
+  - **Discord Rich Presence**: Atualiza o status do Discord quando o timer do Mr-tick inicia ou pausa.
   - **Git & IDE Watcher**: Detecta tempo ativo em repositórios locais ou no VS Code.
 - **Responsabilidades**:
   - Escutar eventos locais ou do sistema (`timer:start`, `timer:stop`, `system:idle`).
@@ -82,10 +82,10 @@ O PANDHORA opera com uma arquitetura **Local-First** desacoplada. Os plugins sã
 
 ## 3. Manifesto e Configurações Dinâmicas (`settingsFields`)
 
-Cada Addon declara suas opções de preferência no atributo `settingsFields`. O Pandhora renderiza automaticamente o formulário de configurações do addon na interface do aplicativo Desktop:
+Cada Addon declara suas opções de preferência no atributo `settingsFields`. O Mr-tick renderiza automaticamente o formulário de configurações do addon na interface do aplicativo Desktop:
 
 ```typescript
-import type { IAddon, AddonContext, AddonSettingsField } from '@pandhora/sdk'
+import type { IAddon, AddonContext, AddonSettingsField } from '@mr-tick/sdk'
 
 export default class MeuAddon implements IAddon {
   public id = 'meu-addon'
@@ -128,7 +128,7 @@ export default class MeuAddon implements IAddon {
 ## 4. Tabela Resumo dos Pilares
 
 ┌─────────────────┬──────────────────────────────────────────────────────────────────┐
-│ Pilar │ O que faz no Pandhora? │
+│ Pilar │ O que faz no Mr-tick? │
 ├─────────────────┼──────────────────────────────────────────────────────────────────┤
 │ **DataSources** │ Puxa tarefas de plataformas externas e envia os logs de tempo. │
 │ **Watchers** │ Monitora apps/eventos e sugere blocos de tempo na timeline. │
@@ -152,7 +152,7 @@ O **`tsup`** (baseado no **`esbuild`**) é o bundler padrão moderno adotado por
 
 ### 📦 Configuração Oficial Recomendada (`tsup.config.ts`)
 
-Todo Addon do Pandhora deve conter o seguinte `tsup.config.ts` na raiz do seu projeto:
+Todo Addon do Mr-tick deve conter o seguinte `tsup.config.ts` na raiz do seu projeto:
 
 ```typescript
 import { cpSync } from 'node:fs'
@@ -186,9 +186,9 @@ export default defineConfig({
 
 ### ⚠️ Diagnóstico e Solução de Problemas Comuns
 
-#### 1. Erro: `Cannot find package '@pandhora/sdk' imported from ...`
+#### 1. Erro: `Cannot find package '@mr-tick/sdk' imported from ...`
 
-- **Causa:** O bundler gerou um arquivo JS com `import { ... } from 'xyz'` externo. Como o Pandhora apenas descompacta o `.tladdon` sem rodar `npm install` no cliente, o Node não encontra o pacote.
+- **Causa:** O bundler gerou um arquivo JS com `import { ... } from 'xyz'` externo. Como o Mr-tick apenas descompacta o `.tladdon` sem rodar `npm install` no cliente, o Node não encontra o pacote.
 - **Solução:** Adicione `noExternal: [/.*/]` no `tsup.config.ts`. Isso força o bundler a inliner todo o código necessário dentro do `dist/index.js`.
 
 #### 2. Erro: `Dynamic require of "util" (ou outro módulo) is not supported`
@@ -215,7 +215,7 @@ export default defineConfig({
 yarn build
 
 # 2. Empacotar o Addon e atualizar o manifesto
-yarn Pandhora pkg ./ --download-url "https://github.com/usuario/meu-addon/releases/download/v0.1.0/meu-addon-0.1.0.tladdon"
+yarn Mr-tick pkg ./ --download-url "https://github.com/usuario/meu-addon/releases/download/v0.1.0/meu-addon-0.1.0.tladdon"
 
 # 3. Sincronizar formatação e screenshots
 yarn sync:manifest

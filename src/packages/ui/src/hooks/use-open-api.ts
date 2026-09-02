@@ -1,4 +1,4 @@
-import { IOpenAPI } from '@pandhora/sdk'
+import { IOpenAPI } from '@mr-tick/sdk'
 import { useContext } from 'react'
 
 import { OpenAPIContext } from '@/contexts/OpenAPIContext'

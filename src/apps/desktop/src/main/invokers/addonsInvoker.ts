@@ -1,5 +1,5 @@
-import { FileData, IAddonsAPI } from '@pandhora/application'
-import { IRequest } from '@pandhora/shared/transport'
+import { FileData, IAddonsAPI } from '@mr-tick/application'
+import { IRequest } from '@mr-tick/shared/transport'
 
 import { IpcInvoker } from '@/main/adapters/IpcInvoker'
 

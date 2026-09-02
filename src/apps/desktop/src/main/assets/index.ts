@@ -1,4 +1,4 @@
-import logoPandhora from './logo-pandhora.png'
+import logoMrTick from './logo-mr-tick.png'
 import timerIcon from './timer-icon.png'
 
-export { logoPandhora, timerIcon }
+export { logoMrTick, timerIcon }

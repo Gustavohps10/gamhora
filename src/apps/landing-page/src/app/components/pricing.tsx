@@ -1,23 +1,13 @@
 'use client'
 
 import {
-  Badge,
   Button,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '@pandhora/ui/components'
-import {
-  Building2,
-  Check,
-  CloudOff,
-  Lock,
-  RefreshCw,
-  ShieldCheck,
-  User,
-  X,
-} from 'lucide-react'
+} from '@mr-tick/ui/components'
+import { Building2, Check, Sparkles, User, X } from 'lucide-react'
 import * as React from 'react'
 
 export interface PricingFeature {
@@ -39,242 +29,238 @@ export interface PricingPlan {
 const INDIVIDUAL_PLANS: PricingPlan[] = [
   {
     name: 'Free (Open Core)',
-    price: 'R$ 0',
+    price: '$0',
     description:
-      'Essencial para o desenvolvedor organizar sua rotina local e apontamentos.',
+      'Everything an individual developer needs for local task execution and time tracking.',
     features: [
-      { text: 'App Desktop nativo (Windows, Mac, Linux)', status: 'check' },
-      { text: 'Persistência 100% local (SQLite embarcado)', status: 'check' },
-      { text: 'Atalhos globais e Timer rápido', status: 'check' },
-      { text: 'Analytics básico de horas por dia', status: 'check' },
-      { text: '1 Workspace e 1 DataSource integrada', status: 'check' },
-      { text: 'Analytics avançado de Deep Work', status: 'block' },
-      { text: 'Gestão de times e squads', status: 'block' },
+      { text: 'Native Desktop App (macOS, Windows, Linux)', status: 'check' },
+      {
+        text: '100% Local Persistence (Embedded Local Storage)',
+        status: 'check',
+      },
+      { text: 'Global keyboard shortcuts & quick timer bar', status: 'check' },
+      { text: 'Basic daily time & activity summaries', status: 'check' },
+      { text: '1 Workspace and 1 integrated DataSource', status: 'check' },
+      { text: 'Advanced Deep Work focus analytics', status: 'block' },
+      { text: 'Team coordination & squad dashboards', status: 'block' },
     ],
-    cta: 'Baixar Gratuitamente',
+    cta: 'Download Free',
   },
   {
     name: 'Individual Pro',
-    price: 'R$ 16,90',
-    period: '/mês',
+    price: '$4',
+    period: '/month',
     description:
-      'Para o desenvolvedor que busca máxima produtividade e métricas de foco.',
+      'For engineers aiming for maximum focus, Deep Work metrics, and multiple tool integrations.',
     features: [
-      { text: 'Workspaces e DataSources ilimitados', status: 'check' },
+      { text: 'Unlimited Workspaces & DataSources', status: 'check' },
       {
-        text: 'Múltiplas integrações (Jira, Redmine, GitHub, YouTrack)',
+        text: 'Multiple integrations (Jira, Redmine, GitHub, YouTrack)',
         status: 'check',
       },
-      { text: 'Analytics avançado de Deep Work & foco', status: 'check' },
+      { text: 'Advanced Deep Work & focus analytics', status: 'check' },
       {
-        text: 'Detecção de trocas de contexto (Context switching)',
+        text: 'Context switching frequency detection',
         status: 'check',
       },
       {
-        text: 'Relatórios de esforço exportáveis (JSON, CSV)',
+        text: 'Exportable effort reports (JSON, CSV)',
         status: 'check',
       },
-      { text: 'Correlação com commits e pull requests', status: 'check' },
-      { text: 'Gestão coletiva de times', status: 'block' },
+      { text: 'Commit & Pull Request correlation', status: 'check' },
+      { text: 'Team squad aggregation', status: 'block' },
     ],
     highlighted: true,
-    badge: 'Mais Popular',
-    cta: 'Testar 14 Dias Grátis',
+    badge: 'Most Popular',
+    cta: 'Start 14-Day Free Trial',
   },
 ]
 
 const ENTERPRISE_PLANS: PricingPlan[] = [
   {
     name: 'Team Squads',
-    price: 'R$ 49',
-    period: '/mês por membro',
+    price: '$10',
+    period: '/user /month',
     description:
-      'Visibilidade, alocação e observabilidade de esforço para times técnicos.',
+      'Shared visibility, effort allocation, and workflow observability for engineering teams.',
     features: [
-      { text: 'Workspaces e DataSources ilimitados', status: 'check' },
-      { text: 'Replicação e sync automático de tarefas', status: 'check' },
-      { text: 'Dashboard coletivo de horas e alocação', status: 'check' },
-      { text: 'Relatórios de esforço por sprint e épico', status: 'check' },
-      { text: 'Métricas agregadas de Deep Work da equipe', status: 'check' },
-      { text: 'Painel administrativo de membros', status: 'check' },
-      { text: 'Modo Self-Hosted dedicado', status: 'block' },
+      { text: 'Unlimited Workspaces & DataSources', status: 'check' },
+      { text: 'Automatic bi-directional task sync', status: 'check' },
+      { text: 'Collective hours & capacity dashboard', status: 'check' },
+      { text: 'Effort reports by sprint and epic', status: 'check' },
+      { text: 'Aggregated team Deep Work metrics', status: 'check' },
+      { text: 'Member role management & team admin', status: 'check' },
+      { text: 'Dedicated self-hosted deployment', status: 'block' },
     ],
     highlighted: true,
-    badge: 'Para Times',
-    cta: 'Iniciar Teste de Equipe',
+    badge: 'For Tech Teams',
+    cta: 'Start Team Trial',
   },
   {
-    name: 'Enterprise Soberano',
-    price: 'Sob Consulta',
+    name: 'Self-Hosted Enterprise',
+    price: 'Custom',
     description:
-      'Soberania total de dados, governança e conformidade corporativa.',
+      'On-premise enterprise infrastructure, custom SSO, audit logs, and dedicated SLA.',
     features: [
-      { text: 'Deploy 100% Self-Hosted (On-Premise / VPC)', status: 'check' },
-      { text: 'API Pública e Webhooks para ERP/BI', status: 'check' },
-      { text: 'Autenticação SSO / SAML / OIDC', status: 'check' },
       {
-        text: 'Relatórios customizados de rentabilidade & ROI',
+        text: 'Deploy on your own infrastructure (Docker/K8s)',
         status: 'check',
       },
-      {
-        text: 'Controle de políticas de domínio e permissões',
-        status: 'check',
-      },
-      { text: 'SLA de 99.9% e canal de suporte dedicado', status: 'check' },
-      { text: 'Treinamento e onboarding guiado', status: 'check' },
+      { text: 'Custom SAML SSO & Active Directory', status: 'check' },
+      { text: 'Custom Addon development support', status: 'check' },
+      { text: 'Enterprise audit logs & compliance', status: 'check' },
+      { text: 'Dedicated account manager & 99.9% SLA', status: 'check' },
+      { text: 'Custom DataSource connectors built on demand', status: 'check' },
     ],
-    cta: 'Falar com Especialistas',
+    cta: 'Contact Sales',
   },
 ]
 
 export function Pricing() {
   return (
-    <section id="pricing" className="relative overflow-hidden py-24 lg:py-32">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="bg-primary/5 absolute bottom-0 left-1/2 h-[450px] w-[750px] -translate-x-1/2 rounded-full blur-[140px]" />
-      </div>
-
+    <section
+      id="pricing"
+      className="bg-muted/15 relative overflow-hidden py-24 lg:py-32"
+    >
       <div className="container mx-auto px-6 lg:px-8">
+        {/* Section Header */}
         <div className="mb-14 text-center">
-          <span className="text-primary inline-block text-xs font-semibold tracking-widest uppercase">
-            Planos Transparentes
-          </span>
-          <h2 className="text-foreground mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-            Comece grátis. Evolua com seu time.
+          <div className="border-primary/25 bg-primary/5 text-primary mb-3.5 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1 text-xs font-semibold">
+            <Sparkles className="size-3.5" />
+            Simple, Transparent Pricing
+          </div>
+
+          <h2 className="text-foreground text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+            Start free. Upgrade when you need team power.
           </h2>
-          <p className="text-muted-foreground mx-auto mt-4 max-w-lg text-base leading-relaxed sm:text-lg">
-            Modelo open-core sustentável. O aplicativo core é gratuito e
-            privado; planos Pro e Team adicionam métricas avançadas e
-            governança.
+
+          <p className="text-muted-foreground mx-auto mt-4 max-w-xl text-base leading-relaxed sm:text-lg">
+            Mr. Tick is Open Core. Free forever for local individual use, with
+            Pro analytics and Team collaboration plans.
           </p>
         </div>
 
+        {/* Pricing Tabs */}
         <Tabs defaultValue="individual" className="mx-auto max-w-4xl">
           <div className="mb-10 flex justify-center">
-            <TabsList className="h-10 gap-1 rounded-lg p-1 shadow-xs">
+            <TabsList className="border-border/60 bg-muted/60 rounded-lg border p-1">
               <TabsTrigger
                 value="individual"
-                className="gap-2 rounded-md px-5 text-xs font-semibold"
+                className="data-[state=active]:bg-background data-[state=active]:text-foreground flex items-center gap-2 rounded-md px-5 py-2 text-xs font-semibold data-[state=active]:shadow-xs"
               >
                 <User className="size-3.5" />
-                <span>Individual</span>
+                For Developers
               </TabsTrigger>
               <TabsTrigger
                 value="enterprise"
-                className="gap-2 rounded-md px-5 text-xs font-semibold"
+                className="data-[state=active]:bg-background data-[state=active]:text-foreground flex items-center gap-2 rounded-md px-5 py-2 text-xs font-semibold data-[state=active]:shadow-xs"
               >
                 <Building2 className="size-3.5" />
-                <span>Enterprise</span>
+                For Engineering Teams
               </TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="individual" className="grid gap-6 md:grid-cols-2">
-            {INDIVIDUAL_PLANS.map((plan) => (
-              <PricingCard key={plan.name} plan={plan} />
-            ))}
+          {/* Individual Plans */}
+          <TabsContent value="individual">
+            <div className="grid gap-6 md:grid-cols-2">
+              {INDIVIDUAL_PLANS.map((plan) => (
+                <PlanCard key={plan.name} plan={plan} />
+              ))}
+            </div>
           </TabsContent>
 
-          <TabsContent value="enterprise" className="grid gap-6 md:grid-cols-2">
-            {ENTERPRISE_PLANS.map((plan) => (
-              <PricingCard key={plan.name} plan={plan} />
-            ))}
+          {/* Enterprise Plans */}
+          <TabsContent value="enterprise">
+            <div className="grid gap-6 md:grid-cols-2">
+              {ENTERPRISE_PLANS.map((plan) => (
+                <PlanCard key={plan.name} plan={plan} />
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
-
-        {/* Trust Signals */}
-        <div className="text-muted-foreground/70 mt-14 flex flex-wrap justify-center gap-8 text-xs font-medium">
-          <div className="flex items-center gap-1.5">
-            <ShieldCheck className="size-4 text-emerald-500" />
-            <span>Dados 100% locais por padrão</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <CloudOff className="size-4 text-amber-500" />
-            <span>Funciona offline sem bloqueios</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Lock className="size-4 text-sky-500" />
-            <span>Sem cartão de crédito para iniciar</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <RefreshCw className="size-4 text-violet-500" />
-            <span>Cancelamento a qualquer momento</span>
-          </div>
-        </div>
       </div>
     </section>
   )
 }
 
-function PricingCard({ plan }: { plan: PricingPlan }) {
+function PlanCard({ plan }: { plan: PricingPlan }) {
   return (
     <div
-      className={`relative flex flex-col justify-between rounded-lg border p-7 transition-all duration-300 hover:-translate-y-1 ${
+      className={`relative flex flex-col justify-between rounded-lg border p-8 backdrop-blur-sm transition-all duration-300 ${
         plan.highlighted
-          ? 'border-primary/60 bg-primary/5 shadow-primary/10 ring-primary/30 shadow-xl ring-1'
-          : 'border-border/60 bg-card/60 hover:border-border/90'
+          ? 'border-primary/50 bg-card shadow-primary/5 ring-primary/20 shadow-xl ring-1'
+          : 'border-border/60 bg-card/70 hover:border-border'
       }`}
     >
+      {/* Badge */}
       {plan.badge && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <Badge className="rounded-md px-3 py-0.5 text-[10px] font-bold tracking-wider uppercase shadow-md">
+        <div className="absolute -top-3 right-6">
+          <span className="bg-primary text-primary-foreground rounded-full px-3 py-1 font-mono text-[10px] font-bold tracking-wide uppercase shadow-md">
             {plan.badge}
-          </Badge>
+          </span>
         </div>
       )}
 
       <div>
-        <div className="mb-6">
-          <p className="text-muted-foreground mb-2 text-xs font-bold tracking-wider uppercase">
-            {plan.name}
-          </p>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-foreground text-3xl font-extrabold tracking-tight sm:text-4xl">
-              {plan.price}
+        <h3 className="text-foreground text-lg font-bold">{plan.name}</h3>
+        <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+          {plan.description}
+        </p>
+
+        {/* Price */}
+        <div className="my-6 flex items-baseline gap-1">
+          <span className="text-foreground text-4xl font-extrabold tracking-tight">
+            {plan.price}
+          </span>
+          {plan.period && (
+            <span className="text-muted-foreground text-xs font-medium">
+              {plan.period}
             </span>
-            {plan.period && (
-              <span className="text-muted-foreground text-xs font-medium">
-                {plan.period}
-              </span>
-            )}
-          </div>
-          <p className="text-muted-foreground mt-3 text-xs leading-relaxed">
-            {plan.description}
-          </p>
+          )}
         </div>
 
-        <div className="mb-8 space-y-3">
-          {plan.features.map((f, index) => (
-            <div key={index} className="flex items-start gap-2.5 text-xs">
-              {f.status === 'check' ? (
-                <Check className="text-primary mt-0.5 size-4 shrink-0" />
-              ) : (
-                <X className="text-muted-foreground/30 mt-0.5 size-4 shrink-0" />
-              )}
-              <span
-                className={`leading-relaxed ${
-                  f.status === 'check'
-                    ? 'text-foreground/90 font-medium'
-                    : 'text-muted-foreground/40 line-through'
-                }`}
+        {/* Features List */}
+        <div className="border-border/40 space-y-3 border-t pt-6">
+          <p className="text-muted-foreground/70 font-mono text-[11px] font-semibold tracking-wider uppercase">
+            What&apos;s included
+          </p>
+          <ul className="space-y-2.5">
+            {plan.features.map((feature) => (
+              <li
+                key={feature.text}
+                className="flex items-start gap-2.5 text-xs"
               >
-                {f.text}
-              </span>
-            </div>
-          ))}
+                {feature.status === 'check' ? (
+                  <Check className="text-primary mt-0.5 size-4 shrink-0" />
+                ) : (
+                  <X className="text-muted-foreground/40 mt-0.5 size-4 shrink-0" />
+                )}
+                <span
+                  className={
+                    feature.status === 'check'
+                      ? 'text-foreground font-medium'
+                      : 'text-muted-foreground/60 line-through'
+                  }
+                >
+                  {feature.text}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
-      <Button
-        variant={plan.highlighted ? 'default' : 'outline'}
-        className={`h-11 w-full rounded-lg text-sm font-semibold transition-all ${
-          plan.highlighted
-            ? 'shadow-primary/20 shadow-md'
-            : 'border-border/60 hover:bg-muted/60'
-        }`}
-      >
-        {plan.cta}
-      </Button>
+      {/* CTA Button */}
+      <div className="mt-8">
+        <Button
+          asChild
+          variant={plan.highlighted ? 'default' : 'outline'}
+          className="w-full text-xs font-semibold"
+        >
+          <a href="/download">{plan.cta}</a>
+        </Button>
+      </div>
     </div>
   )
 }

@@ -4,7 +4,7 @@
   MetadataItem,
   TaskDTO,
   TimeEntryDTO,
-} from '@pandhora/sdk'
+} from '@mr-tick/sdk'
 
 const FAKE_USER_ID = '1'
 

@@ -1,5 +1,5 @@
 @startuml IntegrationSyncReplication
-title PANDHORA - Replicação de Apontamentos (RF008)
+title MR-TICK - Replicação de Apontamentos (RF008)
 participant UI
 participant SyncEngine
 participant RxDB

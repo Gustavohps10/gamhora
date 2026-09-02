@@ -1,4 +1,4 @@
-﻿import { ITaskRepository, Task } from '@pandhora/sdk'
+﻿import { ITaskRepository, Task } from '@mr-tick/sdk'
 
 export class RedmineTaskRepository implements ITaskRepository {
   create(entity: Task): Promise<void> {

@@ -1,5 +1,5 @@
-﻿import { Workspace } from '@pandhora/domain'
-import { AppError } from '@pandhora/shared/helpers'
+﻿import { Workspace } from '@mr-tick/domain'
+import { AppError } from '@mr-tick/shared/helpers'
 import type { Mocked } from 'vitest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 

@@ -1,4 +1,4 @@
-﻿import { AddonManifestViewModel } from '@pandhora/sdk'
+﻿import { AddonManifestViewModel } from '@mr-tick/sdk'
 import { useQuery } from '@tanstack/react-query'
 import {
   Calendar,

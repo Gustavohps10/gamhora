@@ -58,14 +58,6 @@ import { MangoQuerySelector, RxDatabase } from 'rxdb'
 
 import { DatePickerWithRange } from '@/components'
 import { Badge } from '@/components/ui/badge'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -1808,98 +1800,76 @@ export function Metrics() {
 
   return (
     <>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Workspace</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Métricas Pessoais</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">
-            Métricas Pessoais
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Insights sobre esforço, foco e consistência no trabalho.
-          </p>
-        </div>
-
-        {availableDataSources.length > 0 && (
-          <div className="flex items-center gap-3">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="border-border/50 bg-secondary/50 hover:bg-secondary h-9"
+      {availableDataSources.length > 0 && (
+        <div className="mb-4 flex justify-end">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-border/60 bg-background/50 hover:bg-accent h-8 rounded-md px-2.5 text-xs font-medium shadow-2xs"
+              >
+                <Database className="mr-1.5 size-3.5 opacity-70" />
+                {(() => {
+                  if (
+                    selectedSources.includes('all') ||
+                    selectedSources.length === 0
+                  ) {
+                    return 'Todas as Fontes'
+                  }
+                  if (selectedSources.length === 1) {
+                    const source = availableDataSources.find(
+                      (s) => s.id === selectedSources[0],
+                    )
+                    return source?.label || '1 fonte'
+                  }
+                  return `${selectedSources.length} fontes`
+                })()}
+                <ChevronDown className="ml-1.5 size-3 opacity-60" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-52 p-1.5" align="end">
+              <div className="space-y-0.5 text-xs">
+                <div
+                  className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 transition-colors"
+                  onClick={() => setSelectedSources(['all'])}
                 >
-                  <Database className="mr-2 h-4 w-4" />
-                  {(() => {
-                    if (
-                      selectedSources.includes('all') ||
-                      selectedSources.length === 0
-                    ) {
-                      return 'Todas as Fontes'
-                    }
-                    if (selectedSources.length === 1) {
-                      const source = availableDataSources.find(
-                        (s) => s.id === selectedSources[0],
-                      )
-                      return source?.label || '1 fonte'
-                    }
-                    return `${selectedSources.length} fontes`
-                  })()}
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-56 p-2" align="end">
-                <div className="space-y-1">
+                  <Checkbox
+                    checked={selectedSources.includes('all')}
+                    className="size-3.5"
+                  />
+                  <span>Todas as Fontes</span>
+                </div>
+                {availableDataSources.map((source) => (
                   <div
-                    className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5"
-                    onClick={() => setSelectedSources(['all'])}
+                    key={source.id}
+                    className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 transition-colors"
+                    onClick={() =>
+                      setSelectedSources((prev) => {
+                        if (prev.includes('all')) return [source.id]
+                        return prev.includes(source.id)
+                          ? prev.filter((id) => id !== source.id)
+                          : [...prev, source.id]
+                      })
+                    }
                   >
                     <Checkbox
-                      checked={selectedSources.includes('all')}
-                      className="h-4 w-4"
-                    />
-                    <span className="text-sm">Todas as Fontes</span>
-                  </div>
-                  {availableDataSources.map((source) => (
-                    <div
-                      key={source.id}
-                      className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5"
-                      onClick={() =>
-                        setSelectedSources((prev) => {
-                          if (prev.includes('all')) return [source.id]
-                          return prev.includes(source.id)
-                            ? prev.filter((id) => id !== source.id)
-                            : [...prev, source.id]
-                        })
+                      checked={
+                        selectedSources.includes('all') ||
+                        selectedSources.includes(source.id)
                       }
-                    >
-                      <Checkbox
-                        checked={
-                          selectedSources.includes('all') ||
-                          selectedSources.includes(source.id)
-                        }
-                        className="h-4 w-4"
-                      />
-                      <span className="text-sm">{source.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
-        )}
-      </div>
-      <hr className="mt-2" />
+                      className="size-3.5"
+                    />
+                    <span>{source.label}</span>
+                  </div>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
 
-      <div className="mt-6 flex flex-col gap-6">
+      <div className="flex flex-col gap-6">
         {/* --- 1. SEÇÃO "STATUS ATUAL" --- */}
         <div>
           <h2 className="font-sans text-lg font-bold tracking-tight">

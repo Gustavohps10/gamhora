@@ -1,8 +1,8 @@
 {
-  "name": "@pandhora/application",
+  "name": "@mr-tick/application",
   "version": "1.0.0",
   "private": true,
-  "description": "Contém os serviços e casos de uso (use cases) da aplicação Pandhora.",
+  "description": "Contém os serviços e casos de uso (use cases) da aplicação Mr-tick.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,8 +19,8 @@
     "clean": "rimraf dist .turbo"
   },
   "dependencies": {
-    "@pandhora/domain": "workspace:*",
-    "@pandhora/shared": "workspace:*"
+    "@mr-tick/domain": "workspace:*",
+    "@mr-tick/shared": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

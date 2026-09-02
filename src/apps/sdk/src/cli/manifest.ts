@@ -43,7 +43,7 @@ export async function runManifestWizard(addonDir: string) {
     existingManifest.author ||
     existingManifest.Author ||
     pkg.author ||
-    'Pandhora Community'
+    'Mr-tick Community'
   const defaultShortDesc =
     existingManifest.shortDescription ||
     existingManifest.ShortDescription ||
@@ -55,7 +55,7 @@ export async function runManifestWizard(addonDir: string) {
     pkg.description ||
     ''
   const defaultTags = existingManifest.tags ||
-    existingManifest.Tags || ['pandhora']
+    existingManifest.Tags || ['mr-tick']
 
   const existingCategories: AddonCategory[] =
     existingManifest.categories ||

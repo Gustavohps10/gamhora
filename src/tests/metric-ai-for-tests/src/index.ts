@@ -1,45 +1,45 @@
-﻿import { AddonContext, IAddon } from '@pandhora/sdk'
+import { AddonContext, IAddon } from '@mr-tick/sdk'
 
-export default class PandhoraAI4TestAddon implements IAddon {
+export default class MrTickAI4TestAddon implements IAddon {
   public metadata = {
-    name: 'Pandhora AI',
+    name: 'Mr-tick AI',
     iconUrl:
       'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%238B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>',
   }
   activate(context: AddonContext): void {
-    console.log('🤖 [PandhoraAI4TestAddon] Ativando addon de testes de IA...')
+    console.log('🤖 [Mr-tickAI4TestAddon] Ativando addon de testes de IA...')
 
     context.menus.timerbar.register({
-      id: 'pandhora-ai-timerbar-popover',
+      id: 'mr-tick-ai-timerbar-popover',
       type: 'popover',
       icon: 'Sparkles',
-      tooltip: 'Pandhora AI (OCR & Processamento)',
+      tooltip: 'Mr-tick AI (OCR & Processamento)',
       items: [
         {
-          id: 'pandhora-ai:ocr-tesseract',
+          id: 'mr-tick-ai:ocr-tesseract',
           label: 'Executar OCR (Tesseract)',
           icon: 'ScanText',
           shortcut: 'Ctrl+Shift+O',
         },
         {
-          id: 'pandhora-ai:analyze-screen',
+          id: 'mr-tick-ai:analyze-screen',
           label: 'Analisar Atividade Visual',
           icon: 'Eye',
           shortcut: 'Ctrl+Shift+V',
         },
         {
-          id: 'pandhora-ai:auto-categorize',
+          id: 'mr-tick-ai:auto-categorize',
           label: 'Sugerir Categoria por IA',
           icon: 'Brain',
         },
       ],
     })
 
-    context.commands.register('pandhora-ai:ocr-tesseract', async () => {
+    context.commands.register('mr-tick-ai:ocr-tesseract', async () => {
       console.log('DISPARADO OCR TESSERACT')
       await context.notifications.loading(
         '📷 Capturando imagem da tela...',
-        'Pandhora AI - OCR',
+        'Mr-tick AI - OCR',
       )
       console.log('APOS MENSAGEM')
 
@@ -47,7 +47,7 @@ export default class PandhoraAI4TestAddon implements IAddon {
 
       await context.notifications.loading(
         '⚙️ Processando Engine Tesseract (Modelo LSTM)...',
-        'Pandhora AI - OCR',
+        'Mr-tick AI - OCR',
       )
 
       await new Promise((r) => setTimeout(r, 1200))
@@ -63,17 +63,17 @@ export default class PandhoraAI4TestAddon implements IAddon {
       }
     })
 
-    context.commands.register('pandhora-ai:analyze-screen', async () => {
+    context.commands.register('mr-tick-ai:analyze-screen', async () => {
       await context.notifications.loading(
         '🔍 Analisando hierarquia de janelas...',
-        'Pandhora AI - Visão Computacional',
+        'Mr-tick AI - Visão Computacional',
       )
 
       await new Promise((r) => setTimeout(r, 1000))
 
       await context.notifications.loading(
         '🧠 Modelo ResNet-50 identificando aplicativo...',
-        'Pandhora AI - Visão Computacional',
+        'Mr-tick AI - Visão Computacional',
       )
 
       await new Promise((r) => setTimeout(r, 1000))
@@ -89,10 +89,10 @@ export default class PandhoraAI4TestAddon implements IAddon {
       }
     })
 
-    context.commands.register('pandhora-ai:auto-categorize', async () => {
+    context.commands.register('mr-tick-ai:auto-categorize', async () => {
       await context.notifications.loading(
         '📊 Consultando vetores e embeddings de tarefas...',
-        'Pandhora AI - Categorização',
+        'Mr-tick AI - Categorização',
       )
 
       await new Promise((r) => setTimeout(r, 800))
@@ -110,6 +110,6 @@ export default class PandhoraAI4TestAddon implements IAddon {
   }
 
   deactivate(): void {
-    console.log('🤖 [PandhoraAI4TestAddon] Desativando addon de testes de IA.')
+    console.log('🤖 [Mr-tickAI4TestAddon] Desativando addon de testes de IA.')
   }
 }

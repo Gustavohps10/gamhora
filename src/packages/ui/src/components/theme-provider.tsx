@@ -27,7 +27,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  storageKey = 'pandhora-theme',
+  storageKey = 'mr-tick-theme',
   ...props
 }: ThemeProviderProps) {
   const openAPI = useOpenAPI()

@@ -1,13 +1,12 @@
 import * as React from 'react'
 
-import { Features } from '@/app/components/features'
 import { Footer } from '@/app/components/footer'
 import { Hero } from '@/app/components/hero'
 import { Integrations } from '@/app/components/integrations'
 import { Navbar } from '@/app/components/navbar'
 import { OfflineArchitecture } from '@/app/components/offline-architecture'
+import { Positioning } from '@/app/components/positioning'
 import { Pricing } from '@/app/components/pricing'
-import { VideoShowcase } from '@/app/components/video-showcase'
 
 export default function LandingPage() {
   return (
@@ -15,10 +14,9 @@ export default function LandingPage() {
       <Navbar />
       <main className="flex-1">
         <Hero />
-        <Features />
+        <Positioning />
         <Integrations />
         <OfflineArchitecture />
-        <VideoShowcase />
         <Pricing />
       </main>
       <Footer />

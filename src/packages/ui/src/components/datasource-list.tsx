@@ -1,7 +1,7 @@
 ﻿'use client'
 
-import { AddonInstaller, AddonManifest } from '@pandhora/application'
-import { IJobEvent } from '@pandhora/shared/transport'
+import { AddonInstaller, AddonManifest } from '@mr-tick/application'
+import { IJobEvent } from '@mr-tick/shared/transport'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
@@ -414,7 +414,7 @@ export function DataSourceList({
               <span>Instalar {activePlugin?.name}</span>
             </DialogTitle>
             <DialogDescription>
-              Selecione a versão compatível com seu Pandhora App.
+              Selecione a versão compatível com seu Mr-tick App.
             </DialogDescription>
           </DialogHeader>
 
