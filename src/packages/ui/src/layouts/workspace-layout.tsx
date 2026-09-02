@@ -14,12 +14,14 @@ import {
   AppSidebarHeader,
   AppSidebarWorkspacesContent,
   AppSidebarWorkspacesFooter,
+  PageHeaderBreadcrumb,
 } from '@/components'
 import { AddonsManagerModal } from '@/components/addons-manager/addons-manager-modal'
 import { AppSidebarDefaultHeader } from '@/components/app-sidebar/app-sidebar-default-header'
 import { Footer } from '@/components/footer'
 import { UltimateTimeTracker } from '@/components/time-bar/ultimate-entry-bar'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { DataSourceConnectionsProvider } from '@/contexts/DataSourceConnectionsContext'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { useCurrentWidgetPosition } from '@/hooks/use-timer-settings'
@@ -34,34 +36,75 @@ export function WorkspaceLayout() {
   const isAddonsModalOpen = useAddonsModalStore((s) => s.isOpen)
   const closeModal = useAddonsModalStore((s) => s.closeModal)
 
-  const getPageInfo = () => {
+  const getBreadcrumbItems = () => {
+    const base = [
+      {
+        label: 'Workspace',
+        href: `/workspaces/${workspaceId}/time-entries`,
+      },
+    ]
+
     if (
       location.pathname.includes('my-metric') ||
       location.pathname.includes('metrics')
     ) {
-      return { title: 'Métricas Pessoais', icon: ChartColumnBig }
+      return [
+        ...base,
+        { label: 'Pessoal' },
+        { label: 'Métricas', icon: ChartColumnBig },
+      ]
     }
     if (location.pathname.includes('time-entries')) {
-      return { title: 'Meus Apontamentos', icon: Timer }
+      return [
+        ...base,
+        { label: 'Pessoal' },
+        { label: 'Meus Apontamentos', icon: Timer },
+      ]
     }
     if (location.pathname.includes('activities')) {
-      return { title: 'Atividades', icon: ListTodo }
+      return [
+        ...base,
+        { label: 'Pessoal' },
+        { label: 'Minhas Tarefas', icon: ListTodo },
+      ]
+    }
+    if (location.pathname.includes('calendar')) {
+      return [...base, { label: 'Pessoal' }, { label: 'Calendário' }]
     }
     if (location.pathname.includes('addons')) {
-      return { title: 'Addons', icon: Puzzle }
+      return [
+        ...base,
+        { label: 'Integrações' },
+        { label: 'Addons', icon: Puzzle },
+      ]
     }
-    return { title: 'Workspace', icon: LayoutDashboard }
+    if (location.pathname.includes('settings')) {
+      return [...base, { label: 'Configurações' }]
+    }
+    if (location.pathname.includes('team')) {
+      return [
+        ...base,
+        { label: 'Time' },
+        { label: 'Visão Geral', icon: LayoutDashboard },
+      ]
+    }
+    if (location.pathname.includes('members')) {
+      return [...base, { label: 'Time' }, { label: 'Membros' }]
+    }
+    return [...base, { label: 'Visão Geral', icon: LayoutDashboard }]
   }
 
-  const pageInfo = getPageInfo()
-  const PageIcon = pageInfo.icon
+  const breadcrumbItems = getBreadcrumbItems()
 
   return (
     <WorkspaceProvider workspaceId={workspaceId}>
       <DataSourceConnectionsProvider>
         <SyncProvider>
           <TimeEntryProvider>
-            <>
+            <SidebarProvider
+              defaultOpen={true}
+              className="h-full min-h-0 flex-1 overflow-hidden"
+            >
               <AppSidebar>
                 <AppSidebarHeader>
                   <AppSidebarDefaultHeader />
@@ -77,13 +120,12 @@ export function WorkspaceLayout() {
               </AppSidebar>
 
               <main className="flex h-full flex-1 flex-col overflow-hidden">
-                {/* Barra Superior Twenty Colada ao Topo (Acima de Toda a Divisão da Timerbar) */}
-                <div className="border-border/60 bg-background/95 z-20 flex h-10 shrink-0 items-center justify-between border-b px-4 backdrop-blur-sm select-none">
+                {/* Barra Superior Twenty com Sidebar Trigger e Breadcrumbs */}
+                <div className="border-border/60 bg-background/95 z-20 flex h-9 shrink-0 items-center justify-between border-b px-3 backdrop-blur-sm select-none">
                   <div className="flex items-center gap-2">
-                    <PageIcon className="text-muted-foreground size-3.5" />
-                    <span className="text-foreground text-xs font-semibold tracking-tight">
-                      {pageInfo.title}
-                    </span>
+                    <SidebarTrigger className="hover:bg-muted/70 text-muted-foreground hover:text-foreground h-6.5 w-6.5 rounded-md transition-colors" />
+                    <div className="bg-border/60 h-3.5 w-px" />
+                    <PageHeaderBreadcrumb items={breadcrumbItems} />
                   </div>
                 </div>
 
@@ -146,7 +188,7 @@ export function WorkspaceLayout() {
                   if (!open) closeModal()
                 }}
               />
-            </>
+            </SidebarProvider>
           </TimeEntryProvider>
         </SyncProvider>
       </DataSourceConnectionsProvider>

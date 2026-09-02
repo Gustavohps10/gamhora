@@ -9,14 +9,14 @@ export function VideoShowcase() {
       <div className="container mx-auto px-6 lg:px-8">
         <div className="mb-12 text-center">
           <span className="text-primary inline-block text-xs font-semibold tracking-widest uppercase">
-            Demonstração
+            Product Walkthrough
           </span>
           <h2 className="text-foreground mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Veja como funciona na prática.
+            See how it works in action.
           </h2>
           <p className="text-muted-foreground mt-3 text-base">
-            Do primeiro timer até o sync com Jira e métricas de foco — em menos
-            de 2 minutos.
+            From your first timer click to automatic tracker sync and focus
+            metrics — in under 2 minutes.
           </p>
         </div>
 
@@ -39,7 +39,7 @@ export function VideoShowcase() {
                 <div className="size-2.5 rounded-full bg-emerald-500/60" />
               </div>
               <div className="text-muted-foreground/60 font-mono text-xs">
-                Mr-tick Quick Demo
+                Mr. Tick Quick Demo
               </div>
               <div className="w-8" />
             </div>
@@ -52,10 +52,10 @@ export function VideoShowcase() {
                 </div>
               </div>
               <p className="text-foreground text-base font-bold">
-                Assistir demonstração rápida
+                Watch the 2-minute overview
               </p>
               <p className="text-muted-foreground mt-1 text-xs">
-                2 minutos &middot; sem necessidade de cadastro
+                Quick walkthrough &middot; No registration required
               </p>
             </div>
           </div>

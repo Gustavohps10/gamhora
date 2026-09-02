@@ -15,10 +15,10 @@ export interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/#features', label: 'Funcionalidades' },
-  { href: '/#integrations', label: 'Integrações' },
-  { href: '/#offline', label: 'Arquitetura' },
-  { href: '/#pricing', label: 'Preços' },
+  { href: '/#positioning', label: 'Why Mr. Tick' },
+  { href: '/#integrations', label: 'Integrations & SDK' },
+  { href: '/#offline', label: 'Architecture' },
+  { href: '/#pricing', label: 'Pricing' },
   { href: '/download', label: 'Download' },
 ]
 

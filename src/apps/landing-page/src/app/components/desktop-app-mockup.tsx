@@ -3,11 +3,15 @@
 import {
   AppRail,
   Header,
+  PageHeaderBreadcrumb,
   TitleBar,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
   UltimateTimeTracker,
 } from '@mr-tick/ui/components'
 import { useCurrentWidgetPosition } from '@mr-tick/ui/hooks'
-import { queryClient } from '@mr-tick/ui/lib'
+import { cn, queryClient } from '@mr-tick/ui/lib'
 import { Metrics, TimeEntries } from '@mr-tick/ui/pages'
 import {
   DataSourceConnectionsProvider,
@@ -26,7 +30,10 @@ import {
   LayoutDashboard,
   ListTodo,
   Lock,
+  PanelLeft,
   Puzzle,
+  Search,
+  Settings,
   Sparkles,
   Star,
   Timer,
@@ -227,9 +234,11 @@ const mockOpenApiClient: any = createOpenApiProxy({
 function MockSidebar({
   activeTab,
   setActiveTab,
+  isOpen = true,
 }: {
   activeTab: 'time-entries' | 'metrics'
   setActiveTab: (tab: 'time-entries' | 'metrics') => void
+  isOpen?: boolean
 }) {
   const navigate = useNavigate()
 
@@ -242,11 +251,192 @@ function MockSidebar({
     }
   }
 
+  // MODO ÍCONES (Sidebar Colapsada)
+  if (!isOpen) {
+    return (
+      <aside className="border-border/60 bg-sidebar text-sidebar-foreground flex h-full w-[54px] shrink-0 flex-col justify-between border-r transition-[width] duration-200 ease-in-out select-none">
+        <div className="flex flex-col items-center gap-2 p-1.5">
+          {/* Header Icon */}
+          <Tooltip delayDuration={150}>
+            <TooltipTrigger asChild>
+              <div className="hover:bg-muted/60 flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors">
+                <img
+                  src="/logo-icon.svg"
+                  alt="Mr. Tick"
+                  className="size-5.5 object-contain dark:invert"
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="text-xs">
+              Mr. Tick (Open Core)
+            </TooltipContent>
+          </Tooltip>
+
+          {/* Quick Actions Icons */}
+          <div className="flex flex-col items-center gap-1">
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <div className="hover:bg-muted/60 text-muted-foreground hover:text-foreground flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors">
+                  <Search className="size-3.5" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-xs">
+                Busca (⌘K)
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <div className="hover:bg-muted/60 text-muted-foreground hover:text-foreground flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors">
+                  <Puzzle className="size-3.5" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-xs">
+                Addons & Integrações
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <div className="hover:bg-muted/60 text-muted-foreground hover:text-foreground flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors">
+                  <Settings className="size-3.5" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-xs">
+                Configurações
+              </TooltipContent>
+            </Tooltip>
+          </div>
+
+          <div className="bg-border/50 my-0.5 h-px w-6" />
+
+          {/* 1. Pessoal */}
+          <div className="flex flex-col items-center gap-1">
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => handleTabClick('time-entries')}
+                  className={cn(
+                    'flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors',
+                    activeTab === 'time-entries'
+                      ? 'bg-muted/80 text-primary font-medium shadow-2xs'
+                      : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                  )}
+                >
+                  <Timer className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-xs">
+                Meus Apontamentos
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() => handleTabClick('metrics')}
+                  className={cn(
+                    'flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors',
+                    activeTab === 'metrics'
+                      ? 'bg-muted/80 text-primary font-medium shadow-2xs'
+                      : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                  )}
+                >
+                  <ChartColumnBig className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-xs">
+                Métricas
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <div className="text-muted-foreground/40 flex size-8 cursor-not-allowed items-center justify-center rounded-md">
+                  <ListTodo className="size-4 opacity-40" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-xs">
+                Minhas Tarefas (Em breve)
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <div className="text-muted-foreground/40 flex size-8 cursor-not-allowed items-center justify-center rounded-md">
+                  <CalendarDays className="size-4 opacity-40" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-xs">
+                Calendário (Em breve)
+              </TooltipContent>
+            </Tooltip>
+          </div>
+
+          <div className="bg-border/50 my-0.5 h-px w-6" />
+
+          {/* 2. Gestão de Time (PRO) */}
+          <div className="flex flex-col items-center gap-1">
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <div className="text-muted-foreground/50 hover:bg-muted/40 hover:text-foreground flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors">
+                  <LayoutDashboard className="size-4 opacity-60" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-xs">
+                Visão Geral (PRO)
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <div className="text-muted-foreground/50 hover:bg-muted/40 hover:text-foreground flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors">
+                  <Users className="size-4 opacity-60" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-xs">
+                Membros (PRO)
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip delayDuration={150}>
+              <TooltipTrigger asChild>
+                <div className="text-muted-foreground/50 hover:bg-muted/40 hover:text-foreground flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors">
+                  <Sparkles className="size-4 opacity-60" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-xs">
+                Insights IA (PRO)
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+
+        {/* Footer Icon */}
+        <div className="border-border/40 flex w-full items-center justify-center border-t p-2">
+          <Tooltip delayDuration={150}>
+            <TooltipTrigger asChild>
+              <div className="hover:bg-muted/50 flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors">
+                <User className="text-muted-foreground size-4" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="text-xs">
+              Gustavo (v0.1.1)
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </aside>
+    )
+  }
+
+  // MODO EXPANDIDO (Sidebar Aberta)
   return (
-    <aside className="border-border/60 bg-sidebar text-sidebar-foreground flex h-full w-52 shrink-0 flex-col justify-between border-r select-none">
-      <div className="space-y-3 p-3">
+    <aside className="border-border/60 bg-sidebar text-sidebar-foreground flex h-full w-52 shrink-0 flex-col justify-between border-r transition-[width] duration-200 ease-in-out select-none">
+      <div className="space-y-2 p-2">
         {/* Header com a logo oficial limpa */}
-        <div className="border-border/40 flex items-center justify-between gap-2 border-b pb-3">
+        <div className="hover:bg-muted/40 flex items-center justify-between gap-2 rounded-lg p-1.5 transition-colors">
           <div className="flex items-center gap-2">
             <img
               src="/logo-icon.svg"
@@ -257,121 +447,134 @@ function MockSidebar({
               <img
                 src="/logo-text.svg"
                 alt="Mr. Tick"
-                className="w-[72px] object-contain dark:invert"
+                className="w-[70px] object-contain dark:invert"
               />
-              <div className="text-muted-foreground mt-1 flex items-center gap-1 text-[9px]">
-                <span>Open Core</span>
-                <span className="opacity-40">&middot;</span>
+              <div className="mt-0.5 flex items-center gap-1">
+                <span className="text-muted-foreground/70 font-mono text-[9px] leading-none font-medium">
+                  Open Core
+                </span>
+                <span className="bg-border/60 h-2 w-px" />
                 <span className="flex items-center gap-0.5 text-amber-500">
-                  <Star className="size-2 fill-current" /> 120
+                  <Star className="size-2 fill-current" />
+                  <span className="font-mono text-[9px] font-bold tabular-nums">
+                    120
+                  </span>
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Grupos de Navegação */}
-        <div className="space-y-3.5 font-mono text-xs">
-          {/* 1. Controle Pessoal */}
-          <div>
-            <div className="text-muted-foreground/60 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase">
-              Controle Pessoal
+        {/* Quick Actions Bar */}
+        <div className="flex items-center gap-1 px-1">
+          <div className="bg-muted/40 text-muted-foreground border-border/40 flex h-6.5 flex-1 items-center justify-between rounded-md border px-2 text-xs">
+            <div className="flex items-center gap-1.5 truncate">
+              <Search className="size-3 opacity-70" />
+              <span className="text-[10px] font-medium">Buscar</span>
             </div>
-            <nav className="mt-1 space-y-0.5">
-              <div className="text-muted-foreground/40 flex cursor-not-allowed items-center justify-between rounded px-2 py-1.5">
+            <span className="bg-muted/80 border-border/50 rounded border px-1 font-mono text-[8px]">
+              ⌘K
+            </span>
+          </div>
+          <div className="hover:bg-muted/60 text-muted-foreground flex size-6.5 cursor-pointer items-center justify-center rounded-md">
+            <Puzzle className="size-3" />
+          </div>
+          <div className="hover:bg-muted/60 text-muted-foreground flex size-6.5 cursor-pointer items-center justify-center rounded-md">
+            <Settings className="size-3" />
+          </div>
+        </div>
+
+        {/* Grupos de Navegação */}
+        <div className="space-y-2 pt-1 font-mono text-xs">
+          {/* 1. Pessoal */}
+          <div>
+            <div className="text-muted-foreground/60 px-2 py-0.5 font-mono text-[9px] font-semibold tracking-wider uppercase">
+              Pessoal
+            </div>
+            <nav className="mt-0.5 space-y-0.5">
+              <button
+                type="button"
+                onClick={() => handleTabClick('time-entries')}
+                className={cn(
+                  'flex h-7 w-full items-center justify-between rounded px-2 text-left text-xs transition-colors',
+                  activeTab === 'time-entries'
+                    ? 'bg-muted/70 text-foreground font-medium shadow-2xs'
+                    : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
+                )}
+              >
                 <span className="flex items-center gap-2">
-                  <ListTodo className="size-3.5" />
-                  <span>Minhas Tarefas</span>
+                  <Timer className="size-3.5 opacity-70" />
+                  <span className="text-[11px]">Meus Apontamentos</span>
                 </span>
-                <Lock className="size-3 opacity-60" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabClick('metrics')}
+                className={cn(
+                  'flex h-7 w-full items-center justify-between rounded px-2 text-left text-xs transition-colors',
+                  activeTab === 'metrics'
+                    ? 'bg-muted/70 text-foreground font-medium shadow-2xs'
+                    : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground',
+                )}
+              >
+                <span className="flex items-center gap-2">
+                  <ChartColumnBig className="size-3.5 opacity-70" />
+                  <span className="text-[11px]">Métricas</span>
+                </span>
+              </button>
+
+              <div className="text-muted-foreground/40 flex h-7 cursor-not-allowed items-center justify-between rounded px-2">
+                <span className="flex items-center gap-2">
+                  <ListTodo className="size-3.5 opacity-40" />
+                  <span className="text-[11px]">Minhas Tarefas</span>
+                </span>
+                <Lock className="size-3 opacity-50" />
               </div>
 
-              <button
-                onClick={() => handleTabClick('time-entries')}
-                className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-left transition-colors ${
-                  activeTab === 'time-entries'
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
-                    : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                }`}
-              >
+              <div className="text-muted-foreground/40 flex h-7 cursor-not-allowed items-center justify-between rounded px-2">
                 <span className="flex items-center gap-2">
-                  <Timer className="size-3.5" />
-                  <span>Meus Apontamentos</span>
+                  <CalendarDays className="size-3.5 opacity-40" />
+                  <span className="text-[11px]">Calendário</span>
                 </span>
-              </button>
-
-              <button
-                onClick={() => handleTabClick('metrics')}
-                className={`flex w-full items-center justify-between rounded px-2 py-1.5 text-left transition-colors ${
-                  activeTab === 'metrics'
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
-                    : 'text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
-                }`}
-              >
-                <span className="flex items-center gap-2">
-                  <ChartColumnBig className="size-3.5" />
-                  <span>Métricas</span>
-                </span>
-              </button>
-
-              <div className="text-muted-foreground/40 flex cursor-not-allowed items-center justify-between rounded px-2 py-1.5">
-                <span className="flex items-center gap-2">
-                  <CalendarDays className="size-3.5" />
-                  <span>Calendário</span>
-                </span>
-                <Lock className="size-3 opacity-60" />
+                <Lock className="size-3 opacity-50" />
               </div>
             </nav>
           </div>
 
           {/* 2. Gestão de Time (PRO) */}
           <div>
-            <div className="text-muted-foreground/60 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase">
+            <div className="text-muted-foreground/60 px-2 py-0.5 font-mono text-[9px] font-semibold tracking-wider uppercase">
               Gestão de Time
             </div>
-            <nav className="mt-1 space-y-0.5">
-              <div className="text-muted-foreground/50 flex items-center justify-between rounded px-2 py-1.5">
+            <nav className="mt-0.5 space-y-0.5">
+              <div className="text-muted-foreground/50 hover:bg-muted/30 flex h-7 items-center justify-between rounded px-2">
                 <span className="flex items-center gap-2">
-                  <LayoutDashboard className="size-3.5" />
-                  <span>Visão Geral</span>
+                  <LayoutDashboard className="size-3.5 opacity-60" />
+                  <span className="text-[11px]">Visão Geral</span>
                 </span>
-                <span className="rounded border border-amber-500/30 bg-amber-500/10 px-1 text-[8px] font-bold text-amber-500">
+                <span className="rounded border border-amber-500/20 bg-amber-500/10 px-1 font-mono text-[8px] font-bold text-amber-500">
                   PRO
                 </span>
               </div>
 
-              <div className="text-muted-foreground/50 flex items-center justify-between rounded px-2 py-1.5">
+              <div className="text-muted-foreground/50 hover:bg-muted/30 flex h-7 items-center justify-between rounded px-2">
                 <span className="flex items-center gap-2">
-                  <Users className="size-3.5" />
-                  <span>Membros</span>
+                  <Users className="size-3.5 opacity-60" />
+                  <span className="text-[11px]">Membros</span>
                 </span>
-                <span className="rounded border border-amber-500/30 bg-amber-500/10 px-1 text-[8px] font-bold text-amber-500">
+                <span className="rounded border border-amber-500/20 bg-amber-500/10 px-1 font-mono text-[8px] font-bold text-amber-500">
                   PRO
                 </span>
               </div>
 
-              <div className="text-muted-foreground/50 flex items-center justify-between rounded px-2 py-1.5">
+              <div className="text-muted-foreground/50 hover:bg-muted/30 flex h-7 items-center justify-between rounded px-2">
                 <span className="flex items-center gap-2">
-                  <Sparkles className="size-3.5" />
-                  <span>Insights IA</span>
+                  <Sparkles className="size-3.5 opacity-60" />
+                  <span className="text-[11px]">Insights IA</span>
                 </span>
-                <span className="rounded border border-amber-500/30 bg-amber-500/10 px-1 text-[8px] font-bold text-amber-500">
+                <span className="rounded border border-amber-500/20 bg-amber-500/10 px-1 font-mono text-[8px] font-bold text-amber-500">
                   PRO
-                </span>
-              </div>
-            </nav>
-          </div>
-
-          {/* 3. Integrações */}
-          <div>
-            <div className="text-muted-foreground/60 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase">
-              Integrações
-            </div>
-            <nav className="mt-1 space-y-0.5">
-              <div className="text-muted-foreground/70 hover:bg-sidebar-accent/50 flex cursor-pointer items-center justify-between rounded px-2 py-1.5">
-                <span className="flex items-center gap-2">
-                  <Puzzle className="size-3.5" />
-                  <span>Addons</span>
                 </span>
               </div>
             </nav>
@@ -380,12 +583,14 @@ function MockSidebar({
       </div>
 
       {/* Footer */}
-      <div className="border-border/40 text-muted-foreground flex items-center justify-between border-t p-3 font-mono text-[11px]">
-        <span className="flex items-center gap-1.5 truncate">
-          <User className="size-3" />
-          <span>Gustavo</span>
+      <div className="border-border/40 text-muted-foreground hover:bg-muted/50 flex items-center justify-between border-t p-2 transition-colors">
+        <span className="flex items-center gap-1.5 truncate text-xs">
+          <User className="size-3.5 opacity-70" />
+          <span className="text-[11px] font-medium">Gustavo</span>
         </span>
-        <span className="text-[10px] font-bold text-emerald-500">v0.1.1</span>
+        <span className="font-mono text-[9px] font-bold text-emerald-500">
+          v0.1.1
+        </span>
       </div>
     </aside>
   )
@@ -395,6 +600,7 @@ function MockDesktopShell() {
   const [activeTab, setActiveTab] = React.useState<'time-entries' | 'metrics'>(
     'time-entries',
   )
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true)
   const [widgetPosition] = useCurrentWidgetPosition()
 
   const titleInfo =
@@ -416,17 +622,33 @@ function MockDesktopShell() {
         {/* 2. Seção Interna do Workspace com Borda Superior/Esquerda Arredondada */}
         <section className="border-border bg-background relative flex h-full min-h-0 flex-1 overflow-hidden rounded-tl-md border-t border-l">
           {/* Mock Sidebar Exclusiva da Landing Page */}
-          <MockSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+          <MockSidebar
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            isOpen={isSidebarOpen}
+          />
 
           {/* Layout Oficial: Barra Twenty Colada ao Topo + 4 Modos de Ancoragem da Timerbar */}
           <div className="bg-background flex h-full min-h-0 flex-1 flex-col overflow-hidden">
-            {/* Barra Twenty Colada ao Topo (ACIMA de toda a divisão da Timerbar) */}
-            <div className="border-border/60 bg-background/95 z-20 flex h-9 shrink-0 items-center justify-between border-b px-4 backdrop-blur-sm select-none">
+            {/* Barra Superior Twenty com Sidebar Trigger e Breadcrumbs */}
+            <div className="border-border/60 bg-background/95 z-20 flex h-9 shrink-0 items-center justify-between border-b px-3 backdrop-blur-sm select-none">
               <div className="flex items-center gap-2">
-                <TitleIcon className="text-muted-foreground size-3.5" />
-                <span className="text-foreground text-xs font-semibold tracking-tight">
-                  {titleInfo.title}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                  className="hover:bg-muted/70 text-muted-foreground hover:text-foreground flex h-6.5 w-6.5 cursor-pointer items-center justify-center rounded-md transition-colors"
+                  aria-label="Toggle Sidebar"
+                >
+                  <PanelLeft className="size-4" />
+                </button>
+                <div className="bg-border/60 h-3.5 w-px" />
+                <PageHeaderBreadcrumb
+                  items={[
+                    { label: 'Workspace' },
+                    { label: 'Pessoal' },
+                    { label: titleInfo.title, icon: TitleIcon },
+                  ]}
+                />
               </div>
             </div>
 
@@ -502,14 +724,14 @@ export function DesktopAppMockup() {
 
   if (!mounted) {
     return (
-      <div className="border-border bg-card mx-auto mt-12 aspect-[16/9] w-full max-w-5xl animate-pulse rounded-xl border" />
+      <div className="border-border bg-card mx-auto mt-12 aspect-[16/9] w-full max-w-5xl animate-pulse rounded-lg border" />
     )
   }
 
   return (
     <div className="mx-auto mt-12 w-full max-w-5xl text-left">
       {/* Moldura da Janela Desktop com Proporção 16:9 e Scroll Perfeito */}
-      <div className="border-border bg-card text-foreground relative flex aspect-[16/9] w-full flex-col overflow-hidden rounded-xl border shadow-2xl transition-all">
+      <div className="border-border bg-card text-foreground relative flex aspect-[16/9] w-full flex-col overflow-hidden rounded-lg border shadow-2xl transition-all">
         {/* Canvas do App com Proporção Desktop Nativa e Scroll Total */}
         <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden">
           <MemoryRouter initialEntries={['/workspaces/default/time-entries']}>

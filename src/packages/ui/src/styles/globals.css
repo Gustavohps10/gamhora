@@ -15,7 +15,7 @@
   --muted-foreground: oklch(0.4891 0 0);
   --accent: oklch(0.9551 0 0);
   --accent-foreground: oklch(0 0 0);
-  --destructive: oklch(0.6636 0.2231 25.7269);
+  --destructive: oklch(0.4391 0.1802 29.2339);
   --destructive-foreground: oklch(1 0 0);
   --border: oklch(0.9219 0 0);
   --input: oklch(0.9219 0 0);
@@ -36,7 +36,7 @@
   --font-sans: Geist Mono, monospace;
   --font-serif: Geist Mono, monospace;
   --font-mono: Geist Mono, monospace;
-  --radius: 0rem;
+  --radius: 0.3rem;
   --shadow-x: 0px;
   --shadow-y: 4px;
   --shadow-blur: 15px;
@@ -96,7 +96,7 @@
   --font-sans: Geist Mono, monospace;
   --font-serif: Geist Mono, monospace;
   --font-mono: Geist Mono, monospace;
-  --radius: 0rem;
+  --radius: 0.3rem;
   --shadow-x: 0px;
   --shadow-y: 12px;
   --shadow-blur: 30px;
